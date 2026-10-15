@@ -10,10 +10,10 @@ same `wmtm/` tree as its original.
 | Tag | Commit | Content |
 |-----|--------|---------|
 | `v0.1.0` | `64297af` | = old `v0.1.0` (`225947c`) minus memory-derived docs; `wmtm/` tree `c7c1d30` |
-| `v0.2.0-rc2` | tagged commit | = old `v0.2.0-rc1` (`a5cb1e5`) minus memory fixtures/docs, plus synthetic replay fixtures, `WMTM_REPLAY_DATA` opt-in, `.gitignore` guards; `wmtm/` tree `1e3dd64` |
+| `v0.2.0-rc2` | tagged commit | = old `v0.2.0-rc1` (`a5cb1e5`) minus memory fixtures/docs, plus synthetic replay fixtures, `WMTM_REPLAY_DATA` opt-in, `.gitignore` guards, invented ids in comment examples; `wmtm/` tree `fab6bf5` |
 
-`v0.2.0-rc1` is retired: its package code is identical to `v0.2.0-rc2`
-(`wmtm/` tree `1e3dd64`), only tests/docs differ. Deployments pinned to
+`v0.2.0-rc1` is retired: its package code is identical to `v0.2.0-rc2` except for
+comment/docstring examples (rc1 `wmtm/` tree `1e3dd64`, rc2 `fab6bf5`); tests/docs differ. Deployments pinned to
 commit `a5cb1e5` (old rc1) keep working unchanged and can move to
 `v0.2.0-rc2` at the next redeploy without a code change.
 
