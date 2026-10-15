@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wmtm"
+version = "0.1.0"
+description = "Working Medium-Term Memory (WMTM): mutable active memory layer between STM and LTM"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Benjamin Goertzel", email = "ben@singularitynet.io" }]
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+embed = ["sentence-transformers"]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["wmtm*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
