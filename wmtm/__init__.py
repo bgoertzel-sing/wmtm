@@ -11,17 +11,36 @@ Modules:
   writeback:     WritebackManager for LTM promotion
   orchestrator:  WMTMOrchestrator tying it all together
   recall_bridge: Bridge from LTM journal to WMTM
+  api:           WMTM / WMTMConfig public interface
+  context:       generic per-turn logic used by api
+  journal:       default PeTTa journal (read_lines/append)
 """
-from .item import WMTMItem
-from .attention import AttentionValue
-from .store import WMTMStore
-from .forgetting import ForgettingPolicy
-from .inference import WMTMInferenceEngine, InferenceCandidate, ContradictionReport, ContradictionResolution, BeliefTriple, extract_triples
-from .utility import UtilityTracker, UtilityRecord
-from .forgetting_log import ForgettingLog, ForgetRecord
-from .writeback import WritebackManager, WritebackCandidate
-from .orchestrator import WMTMOrchestrator, CycleResult
-from .recall_bridge import RecallBridge, LTMCluster
+# Lazy exports (PEP 562): importing wmtm (e.g. for wmtm.api's automated fast
+# path) must not pull in the inference/PLN engine. Same names as before.
+_EXPORTS = {
+    "WMTMItem": ".item", "AttentionValue": ".attention", "WMTMStore": ".store",
+    "ForgettingPolicy": ".forgetting",
+    "WMTMInferenceEngine": ".inference", "InferenceCandidate": ".inference",
+    "ContradictionReport": ".inference", "ContradictionResolution": ".inference",
+    "BeliefTriple": ".inference", "extract_triples": ".inference",
+    "UtilityTracker": ".utility", "UtilityRecord": ".utility",
+    "ForgettingLog": ".forgetting_log", "ForgetRecord": ".forgetting_log",
+    "WritebackManager": ".writeback", "WritebackCandidate": ".writeback",
+    "WMTMOrchestrator": ".orchestrator", "CycleResult": ".orchestrator",
+    "RecallBridge": ".recall_bridge", "LTMCluster": ".recall_bridge",
+    "WMTM": ".api", "WMTMConfig": ".api",
+}
+
+
+def __getattr__(name):
+    mod = _EXPORTS.get(name)
+    if mod is None:
+        raise AttributeError(f"module 'wmtm' has no attribute {name!r}")
+    import importlib
+    val = getattr(importlib.import_module(mod, __name__), name)
+    globals()[name] = val
+    return val
+
 
 __all__ = [
     "WMTMItem",
@@ -44,4 +63,6 @@ __all__ = [
     "CycleResult",
     "RecallBridge",
     "LTMCluster",
+    "WMTM",
+    "WMTMConfig",
 ]
