@@ -1,0 +1,37 @@
+--- a/pettachainer/pln_validator.py	2026-10-15 14:39:19.369965472 -0700
++++ b/pettachainer/pln_validator.py	2026-10-15 14:39:19.387804853 -0700
+@@ -1,5 +1,7 @@
+ """Shared PLN syntax validation helpers for evaluated PLN expressions."""
+ 
++import re
++
+ from petta import PeTTa
+ 
+ TV_PATTERNS = (
+@@ -32,9 +34,26 @@
+     return _run_check(f"!(if (= {expr} (: $123prf $123stmt $123tv)) {body} 0.0)")
+ 
+ 
++_STV_TAIL = re.compile(r"\(STV\s+([^\s()]+)\s+([^\s()]+)\)\s*\)\s*$")
++
++
++def _stv_in_range(text: str) -> bool:
++    """Numeric (STV s c) must have s and c in [0, 1]; non-numeric (variables) pass."""
++    m = _STV_TAIL.search(text)
++    if not m:
++        return True
++    try:
++        s, c = float(m.group(1)), float(m.group(2))
++    except ValueError:
++        return True
++    return 0.0 <= s <= 1.0 and 0.0 <= c <= 1.0
++
++
+ def check_stmt(text: str) -> float:
+     """Return 1.0 for valid evaluated statement forms, else 0.0."""
+ 
++    if not _stv_in_range(text):
++        return 0.0
+     return _check_shape(
+         text.strip(),
+         "(if (== (get-metatype $123prf) Variable) 0.0 "

@@ -18,3 +18,7 @@ journal*.metta
 *.metta.bak
 .replay-data/
 replay-data/
+.vendor36/
+.semparse-hitl/
+# real memory-derived data (never commit; see docs/pettachainer/SCALING_*.md)
+.local-data/

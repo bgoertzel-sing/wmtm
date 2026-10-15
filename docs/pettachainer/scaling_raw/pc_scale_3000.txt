@@ -1,0 +1,2 @@
+SCALE {"vendor": ".vendor36", "mode": "disjoint", "atoms": 3000, "real": 299, "synthetic": 2701, "copies": 10, "add_fail": 0, "rules": 109, "seed_s": 0.36, "load_s": 10.46, "ms_per_atom": 3.5, "rss_loaded": 55, "q_n": 3, "q_ok": 3, "q_med": 0.06, "q_max": 0.06, "q_first": 0.06, "neg": "[]", "neg_s": 0.06, "peak_rss": 60, "total_s": 12.1, "queries": [{"kind": "real", "s": 0.06, "ok": true}, {"kind": "real", "s": 0.06, "ok": true}, {"kind": "syn", "s": 0.05, "ok": true}]}
+RC=0

@@ -1,0 +1,11 @@
+--- a/pettachainer/metta/context/context_generation.metta	2026-07-01 19:26:16.187748367 -0700
++++ b/pettachainer/metta/context/context_generation.metta	2026-10-12 09:36:23.354744191 -0700
+@@ -13,7 +13,7 @@
+ ; combines by componentwise count addition, the section 8.1 evidence-count
+ ; quantale tensor.
+ 
+-!(import! &self chainer/compile)
++; dedup: compile already imported by petta_chainer
+ 
+ (= (ContextBetween $x $lo $hi) (and (> $x $lo) (< $x $hi)))
+ 
