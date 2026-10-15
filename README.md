@@ -12,7 +12,7 @@ Extracted from the ProtoCosmo2 Iter tree (snapshot `83ea611`, branch
 - Public interface: `wmtm/api.py` (`WMTM`, `WMTMConfig`), see below.
 - Tests: `python3 -m pytest` (no LLM, no network).
 - PeTTa requirement: see `PETTA_PIN.md` (v1.0.5).
-- Design notes and audits: `docs/`.
+- Design notes: `docs/`; release/tag mapping: `docs/RELEASES.md`.
 - `scripts/benchmark_wmtm.py`: micro-benchmark (run with `PYTHONPATH=.`).
 
 Known external coupling: `wmtm/goalchainer_bridge.py` adds a hardcoded
@@ -48,16 +48,39 @@ mem.save(); mem.close()
 
 ## Replay equivalence
 
-`tests/test_replay_equivalence.py` runs the original 83ea611 glue and the
-adapter + `wmtm.api` in scratch Iter-shaped trees (frozen clock,
-`PYTHONHASHSEED=0`) on a real state + journal copy over consecutive turns
-(DMs, group context, attachments, autonomous/check-in prompts, injections,
-derives, multi-day gaps, writeback) and requires byte-identical messages,
-stderr, state file, pending file and journal appends after every step. It
-includes a known-answer canary (journal-only codeword must reach the prompt,
-survive one fast-path tick with exactly one 0.9 decay, and a derived note
-must be admitted). Full live copies: set `WMTM_REPLAY_STATE`,
-`WMTM_REPLAY_JOURNAL` and optionally `WMTM_REPLAY_ORIG_TREE`.
+`tests/test_replay_equivalence.py` runs the original 83ea611 glue
+(`tests/fixtures/iter_83ea611/`, code copies) and the adapter + `wmtm.api` in
+scratch Iter-shaped trees (frozen clock, `PYTHONHASHSEED=0`) over consecutive
+turns (DMs, group context, attachments, autonomous/check-in prompts,
+injections, derives, multi-day gaps, writeback) and requires byte-identical
+messages, stderr, state file, pending file and journal appends after every
+step. It includes a known-answer canary (journal-only codeword must reach the
+prompt, survive one fast-path tick with exactly one 0.9 decay, and a derived
+note must be admitted). By default it runs on the synthetic fixtures in
+`tests/fixtures/synthetic/` (regenerate with
+`python3 tests/fixtures/synthetic/make_fixtures.py`).
+
+## No real memories in this repo
+
+This repository contains no real bot memories: no WMTM state, journal/LTM
+notes, conversation excerpts, chat or message ids, or reports about specific
+conversations. All test data is synthetic (invented people, topics, notes and
+ids). `.gitignore` excludes the usual memory paths (`memory/`, `_journal/`,
+`*_wmtm_state*.json`, `journal*.metta`, `.replay-data/`); do not force-add them.
+
+To replay against real data locally, copy a bot's memory directory (read-only)
+to a scratch directory OUTSIDE the repo and point `WMTM_REPLAY_DATA` at it:
+
+```sh
+mkdir -p /tmp/wmtm-replay/_journal
+cp <bot>/memory/_wmtm_state.json /tmp/wmtm-replay/
+cp <bot>/memory/_journal/journal.metta /tmp/wmtm-replay/_journal/
+WMTM_REPLAY_DATA=/tmp/wmtm-replay python3 -m pytest tests/test_replay_equivalence.py
+```
+
+Without `WMTM_REPLAY_DATA` the real-data cases are skipped with a message;
+the test refuses a directory inside the repo. Optionally set
+`WMTM_REPLAY_ORIG_TREE` to a full snapshot of the original Iter tree.
 
 ## Known quirks (kept for behaviour identity; fix after the switch)
 

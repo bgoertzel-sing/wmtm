@@ -4,3 +4,17 @@ __pycache__/
 build/
 dist/
 .pytest_cache/
+
+# Real bot memories must never be committed (see README "No real memories in this repo")
+memory/
+**/memory/
+_journal/
+*_wmtm_state*.json
+*wmtm_state*.json
+!tests/fixtures/synthetic/wmtm_state.json
+*_wmtm_pending_derives*.jsonl
+journal*.metta
+!tests/fixtures/synthetic/journal.metta
+*.metta.bak
+.replay-data/
+replay-data/
