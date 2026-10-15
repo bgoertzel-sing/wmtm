@@ -283,7 +283,7 @@ class RecallBridge:
             score *= 0.5
 
         # Layer 6: Recency bias (newer = slightly higher)
-        # Extract timestamp from cluster ID format: ep-note-20260918T061756Z
+        # Extract timestamp from cluster ID format: ep-note-20250101T120000Z
         cluster_ts = cluster.opened_at or self._parse_cluster_timestamp(cluster.id)
         if cluster_ts > 0:
             import time as _time
@@ -332,9 +332,9 @@ class RecallBridge:
         """Extract a Unix timestamp from cluster IDs.
 
         F26: Handles multiple date formats found in journal cluster IDs:
-        - ISO compact: ep-note-20260918T061756Z
-        - Date-only: fact-evlink3-2026-09-03, ep-20260903010647219173
-        - Epoch micros: ep-20260903010647219173 (fallback)
+        - ISO compact: ep-note-20250101T120000Z
+        - Date-only: fact-example-2025-01-01, ep-20250101120000000000
+        - Epoch micros: ep-20250101120000000000 (fallback)
         """
         import re
         # Format 1: ISO compact (most precise)
@@ -350,7 +350,7 @@ class RecallBridge:
             except (ValueError, OverflowError):
                 pass
 
-        # Format 2: YYYY-MM-DD anywhere in the ID (e.g. fact-evlink3-2026-09-03)
+        # Format 2: YYYY-MM-DD anywhere in the ID (e.g. fact-example-2025-01-01)
         m = re.search(r'(\d{4})-(\d{2})-(\d{2})', cluster_id)
         if m:
             try:
@@ -366,7 +366,7 @@ class RecallBridge:
                 pass
 
         # Format 3: Compact YYYYMMDD prefix in numeric IDs
-        # e.g. ep-20260903010647219173 → 20260903
+        # e.g. ep-20250101120000000000 → 20250101
         m = re.search(r'(20\d{2})(\d{2})(\d{2})\d{6,}', cluster_id)
         if m:
             try:
@@ -478,9 +478,9 @@ class RecallBridge:
                     break
             if len(word) >= 2 and word not in _STOPWORDS:
                 tokens.add(word)
-            # F28: also index parts of compound tokens (hive-appliance,
+            # F28: also index parts of compound tokens (garden-hose,
             # re-review, bgoertzel-sing/iter) so natural-language queries
-            # ("hive appliance review") match hyphenated journal terms.
+            # ("garden hose review") match hyphenated journal terms.
             if any(sep in word for sep in "-/_"):
                 for part in re.split(r"[-/_]+", word):
                     part = part.strip(".,;:!?()[]{}\"'")

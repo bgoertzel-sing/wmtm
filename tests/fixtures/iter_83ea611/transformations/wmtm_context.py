@@ -174,9 +174,9 @@ def _parse_item_id_timestamp(item_id):
 
     F26b: Mirrors the recall_bridge._parse_cluster_timestamp logic but runs
     in the fast path without importing wmtm. Handles:
-    - ISO compact: ep-note-20260918T061756Z
-    - Date-only: fact-evlink3-2026-09-03
-    - Compact YYYYMMDD: ep-20260903010647219173
+    - ISO compact: ep-note-20250101T120000Z
+    - Date-only: fact-example-2025-01-01
+    - Compact YYYYMMDD: ep-20250101120000000000
     """
     import re
     # Format 1: ISO compact
