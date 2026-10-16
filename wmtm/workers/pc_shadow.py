@@ -34,7 +34,8 @@ a.steps = a.steps if a.steps is not None else int(CFG["shadow_steps"])
 a.timeout = a.timeout if a.timeout is not None else float(CFG["shadow_timeout_s"])
 a.budget = a.budget if a.budget is not None else float(CFG["shadow_budget_s"])
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb")) if not a.inner else None
-PRIO = rc.lower_priority(CFG) if not a.inner else None     # inherited by the PeTTa child
+PRIO_GUARD = rc.PriorityGuard(CFG) if not a.inner else None   # set in the child itself; re-asserted on it + the PeTTa child
+PRIO = PRIO_GUARD.start() if PRIO_GUARD else None
 RULES = [
     "(: mem_inh (Implication (Premises (Member $x $a) (Inheritance $a $b)) (Conclusions (Member $x $b))) (STV 1.0 0.99))",
     "(: inh_trans (Implication (Premises (Inheritance $a $b) (Inheritance $b $c)) (Conclusions (Inheritance $a $c))) (STV 1.0 0.99))",
@@ -130,7 +131,7 @@ if "raw_items" in spec:  # built here, off the cycle path
         spec.update(atoms=[], goals=[], build_error=type(e).__name__ + ": " + str(e)[:160])
     with open(a.spec + ".tmp", "w") as f: json.dump(spec, f)
     os.replace(a.spec + ".tmp", a.spec)
-rec = {"mem_cap_mb": (MEM_CAP or 0) // (1 << 20), "prio": PRIO, "cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
+rec = {"mem_cap_mb": (MEM_CAP or 0) // (1 << 20), "prio": PRIO, "source": spec.get("source"), "cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
        "atoms": len(spec["atoms"]), "goals_n": len(spec["goals"]), "timeout_s": a.timeout, "budget_s": a.budget, "steps": a.steps}
 w = Inner(); rec["warm_s"] = w.warm_s; rec.update(w.info); res = []
 if not w.ok:
@@ -171,6 +172,7 @@ rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)
 pcg = {r["goal"] for r in res if r["ok"]}; asked = {r["goal"] for r in res}
 rec["agree_both"] = len(pcg & set(py)); rec["pc_only"] = len(pcg - set(py)); rec["py_only_asked"] = len((set(py) & asked) - pcg)
+rec["prio_end"] = PRIO_GUARD.stats() if PRIO_GUARD else None
 rec["py_invalid_chain"] = sum(1 for d in spec.get("python_derived", []) if "invalid_chain" in d); rec["py_derived_n"] = len(py); rec["total_s"] = round(time.time() - t0, 3)
 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
 rc.append_jsonl(a.out, rec, CFG.get("jsonl_max_bytes"))

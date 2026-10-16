@@ -62,3 +62,19 @@ pushed.
 - `scripts/vendor_runtime.sh` replaces `scripts/pettachainer/pc_vendor36.sh`; `scripts/fetch_semparse_hitl.sh`
   takes a destination. No machine-specific paths in package code or tests.
 - API unchanged (`WMTM`, `WMTMConfig`); existing Iter adapters work as-is.
+
+## v0.3.0-rc2 (2026-10-16)
+- The Track G/H hooks also run on automated turns. Before, they ran only inside `WMTMOrchestrator.cycle()`
+  (real user turns), so on a mostly autonomous bot they almost never fired. `context.fast_path_automated` now calls
+  `context.automated_hooks` after saving the state: same flags file, single-worker busy guard and parse cap, fed
+  from the state snapshot's top-K item fields (the workers build the snapshot), no engine import. Flag
+  `hooks_on_automated` (default true). Added fast-path latency (fresh process, 50 synthetic items, ~380 KB parse
+  cache): about +0.4 ms with the hooks off, about +2 ms in steady state, about +14 ms when the top-K contents changed (one
+  enqueue), about +11 ms when a worker is spawned.
+- Shadow launches are rate-limited (`shadow_min_interval_s`, default 300 s; cycle and automated paths).
+- Worker CPU priority: workers are launched via `chrt -i 0` when available, set nice + SCHED_IDLE on every thread
+  themselves at startup, and re-assert it on themselves and their children every `worker_prio_refresh_s` (5 s).
+  A host scheduler daemon (system76-scheduler) was seen resetting a live parse worker to SCHED_OTHER / nice 12.
+  Output records carry the actual `prio` and `prio_end` (incl. `resets`).
+- Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
+- Tests: `tests/test_automated_hooks.py`.

@@ -21,10 +21,10 @@ from __future__ import annotations
 
 import json
 import os
-import resource
-import subprocess
 import sys
 import time
+# resource / subprocess are imported where used: this module is on the automated fast path (rc2), where every
+# import is paid once per Iter invocation.
 
 FLAGS_FILENAME = "_wmtm_flags.json"
 RUNTIME_SUBDIR = "_wmtm_shadow"
@@ -49,6 +49,8 @@ SPEC = {
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),
     "shadow_budget_s":     ("WMTM_PC_SHADOW_BUDGET", float, 20.0, None),
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),
+    "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
+    "hooks_on_automated":  ("WMTM_HOOKS_ON_AUTOMATED", bool, True, None),
     "runtime_dir":         ("WMTM_RUNTIME_DIR", str, "", _D),
     "shadow_dir":          ("WMTM_PC_SHADOW_DIR", str, "", _D),
     "semparse_dir":        ("WMTM_SEMPARSE_DIR", str, "", _D),
@@ -61,6 +63,7 @@ SPEC = {
     "python":              ("WMTM_WORKER_PYTHON", str, "", None),
     "worker_nice":         ("WMTM_WORKER_NICE", int, 19, None),
     "worker_sched_idle":   ("WMTM_WORKER_SCHED_IDLE", bool, True, None),
+    "worker_prio_refresh_s": ("WMTM_WORKER_PRIO_REFRESH", float, 5.0, None),
     "worker_mem_mb":       ("WMTM_WORKER_MEM_MB", int, 3072, None),
     "jsonl_max_bytes":     ("WMTM_JSONL_MAX_BYTES", int, 10_000_000, None),
     "cache_max_bytes":     ("WMTM_SEMPARSE_CACHE_MAX_BYTES", int, 20_000_000, None),
@@ -200,6 +203,7 @@ def apply_mem_cap(mb):
     """Worker side: cap this process (and children) to mb MB of address space.  0/None = no cap."""
     if not mb or mb <= 0:
         return None
+    import resource
     lim = int(mb) * 1024 * 1024
     try:
         soft, hard = resource.getrlimit(resource.RLIMIT_AS)
@@ -211,29 +215,132 @@ def apply_mem_cap(mb):
         return None
 
 
-def lower_priority(cfg):
-    """Worker side: make this process (and its children) background-only.  `nice` alone is not enough on hosts
-    whose scheduler daemon rewrites nice values (e.g. system76-scheduler); SCHED_IDLE is kept by such daemons
-    and only gets CPU no other task wants.  -> {"nice": n, "policy": "idle"|"other"}; never raises."""
+def _tids(pid="self"):
+    try:
+        return [int(t) for t in os.listdir("/proc/%s/task" % pid)]
+    except (OSError, ValueError):
+        return [0]
+
+
+def _descendants(pid):
+    """pid's descendant processes (via /proc/<pid>/task/*/children); [] if unknown."""
+    out, todo = [], [pid]
+    while todo:
+        p = todo.pop()
+        for t in _tids(p):
+            try:
+                with open("/proc/%d/task/%d/children" % (p, t)) as fh:
+                    kids = [int(x) for x in fh.read().split()]
+            except (OSError, ValueError):
+                continue
+            for k in kids:
+                if k not in out:
+                    out.append(k); todo.append(k)
+    return out
+
+
+def priority_of(tid=0):
+    """-> {"nice": n, "policy": "idle"|"batch"|"other"|...} for one thread/process (0 = calling thread)."""
     out = {}
     try:
+        out["nice"] = os.getpriority(os.PRIO_PROCESS, tid)
+    except OSError:
+        pass
+    try:
+        pol = os.sched_getscheduler(tid)
+        out["policy"] = {getattr(os, "SCHED_IDLE", -1): "idle", getattr(os, "SCHED_BATCH", -2): "batch",
+                         os.SCHED_OTHER: "other"}.get(pol, str(pol))
+    except OSError:
+        pass
+    return out
+
+
+def _apply_priority(cfg, tid):
+    """Set nice + SCHED_IDLE on one thread/process (Linux: both are per-thread).  -> True if it had drifted."""
+    drift = False
+    try:
         want = int(cfg.get("worker_nice", 19))
-        cur = os.getpriority(os.PRIO_PROCESS, 0)
-        if want > cur:
-            os.setpriority(os.PRIO_PROCESS, 0, want)
-        out["nice"] = os.getpriority(os.PRIO_PROCESS, 0)
+        if os.getpriority(os.PRIO_PROCESS, tid) < want:
+            drift = True
+            os.setpriority(os.PRIO_PROCESS, tid, want)
     except (OSError, ValueError, TypeError):
         pass
     if cfg.get("worker_sched_idle", True) and hasattr(os, "SCHED_IDLE"):
         try:
-            os.sched_setscheduler(0, os.SCHED_IDLE, os.sched_param(0))
+            if os.sched_getscheduler(tid) != os.SCHED_IDLE:
+                drift = True
+                os.sched_setscheduler(tid, os.SCHED_IDLE, os.sched_param(0))
         except OSError:
             pass
+    return drift
+
+
+def lower_priority(cfg, children=False):
+    """Worker side, called in the child itself at startup: make this process (every thread; with children=True
+    also its descendants) background-only.  `nice` alone is not enough on hosts whose scheduler daemon rewrites
+    nice values and policy (system76-scheduler re-assigns e.g. nice 12 / SCHED_OTHER to system.slice processes
+    every refresh); SCHED_IDLE only gets CPU no other task wants.  -> the *actual* {"nice", "policy"} afterwards;
+    never raises."""
     try:
-        out["policy"] = "idle" if os.sched_getscheduler(0) == getattr(os, "SCHED_IDLE", -1) else "other"
-    except OSError:
+        pids = _tids("self") + (_descendants(os.getpid()) if children else [])
+        for t in pids:
+            _apply_priority(cfg, t)
+    except Exception:
         pass
-    return out
+    return priority_of(0)
+
+
+class PriorityGuard:
+    """Re-asserts lower_priority() every cfg["worker_prio_refresh_s"] seconds from a daemon thread (covering the
+    worker's threads and child processes), because a scheduler daemon can reset it mid-run.  Records what it saw:
+    start()/stats() -> {"nice", "policy", "resets", "checks"}; stats() also re-reads the actual values (pass it to
+    the worker's output record).  never raises."""
+
+    def __init__(self, cfg):
+        self.cfg = dict(cfg or {})
+        self.interval = float(self.cfg.get("worker_prio_refresh_s", 5.0) or 0)
+        self.resets = 0
+        self.checks = 0
+        self.start_prio = {}
+        self._stop = None
+
+    def check(self):
+        try:
+            self.checks += 1
+            hit = False
+            for t in _tids("self") + _descendants(os.getpid()):
+                hit = _apply_priority(self.cfg, t) or hit
+            if hit:
+                self.resets += 1
+        except Exception:
+            pass
+
+    def start(self):
+        self.start_prio = lower_priority(self.cfg)
+        if self.interval > 0:
+            import threading
+            self._stop = threading.Event()
+
+            def loop():
+                while not self._stop.wait(self.interval):
+                    self.check()
+            th = threading.Thread(target=loop, name="wmtm-prio-guard", daemon=True)
+            th.start()
+            _apply_priority(self.cfg, getattr(th, "native_id", 0) or 0)
+        return dict(self.start_prio)
+
+    def stats(self):
+        end = priority_of(0)                             # what the scheduler left us with at the end of the run
+        self.check()                                     # (counted as a reset if it had drifted)
+        out = dict(self.start_prio)
+        out["end"] = end
+        out["resets"] = self.resets
+        out["checks"] = self.checks
+        return out
+
+    def stop(self):
+        if self._stop is not None:
+            self._stop.set()
 
 
 def worker_env(cfg, base=None):
@@ -248,8 +355,11 @@ def worker_env(cfg, base=None):
 
 def spawn_worker(cfg, module, args, pidfile):
     """Start `python -m <module> args` detached (new session), niced, from DIST_ROOT.  Returns pid.  Never waits."""
+    import subprocess
     cmd = [cfg.get("python") or sys.executable, "-u", "-m", module] + list(args)
     pre = ["nice", "-n", str(int(cfg.get("worker_nice", 19)))]
+    if cfg.get("worker_sched_idle", True) and os.path.exists("/usr/bin/chrt"):
+        pre = ["/usr/bin/chrt", "-i", "0"] + pre      # idle from exec on; the worker re-asserts it itself
     if os.path.exists("/usr/bin/ionice"):
         pre += ["ionice", "-c", "3"]
     p = subprocess.Popen(pre + cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,

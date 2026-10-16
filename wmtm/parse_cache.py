@@ -18,7 +18,14 @@ Guarantees
   * maybe_feed never raises and never waits; one worker at a time (pidfile guard).
 """
 from __future__ import annotations
-import contextlib, fcntl, hashlib, json, os, time
+import contextlib, fcntl, json, os, time
+try:    # the builtin sha256 avoids importing hashlib/OpenSSL (~3 ms) on the automated fast path (rc2); same digest
+    from _sha256 import sha256 as _sha256
+except ImportError:
+    try:
+        from _sha2 import sha256 as _sha256
+    except ImportError:
+        from hashlib import sha256 as _sha256
 
 from . import runtime_config as rc
 
@@ -31,7 +38,7 @@ def enabled(cfg=None) -> bool:
 
 
 def content_hash(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8", "replace")).hexdigest()[:24]
+    return _sha256(text.encode("utf-8", "replace")).hexdigest()[:24]
 
 
 class ParseCache:
@@ -88,7 +95,7 @@ class ParseCache:
     def _save_queue(self, q):
         tmp = self.queue_path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump(q, fh)
+            fh.write(json.dumps(q))         # same text as json.dump, via the C encoder (~10x faster)
         os.replace(tmp, self.queue_path)
 
     # ------------------------------------------------------------ lookup (shadow side, read-only)
@@ -121,6 +128,7 @@ class ParseCache:
                             "attempts": 0, "chars": len(content)}
                     st["queued_new"] += 1
             self._save_queue(q)
+            st["pending"] = sum(1 for h in q if h not in ent)
         st["queue_len"] = len(q)
         return st
 
@@ -271,9 +279,12 @@ def gateway_llm_usage(timeout=300.0, env_file=None):
 
 
 # ---------------------------------------------------------------- cycle hook
-def launch_worker(cache: ParseCache, cfg=None, module=None, extra=()):
-    """Start the detached niced parse worker if there is work and budget.  Never waits.  -> pid or None."""
-    if rc.busy(cache.pidfile, WORKER_MAX_AGE) or cache.budget() <= 0 or cache.pending() == 0:
+def launch_worker(cache: ParseCache, cfg=None, module=None, extra=(), pending=None):
+    """Start the detached niced parse worker if there is work and budget.  Never waits.  -> pid or None.
+    pending: queue length already known from enqueue() (saves re-reading the cache)."""
+    if rc.busy(cache.pidfile, WORKER_MAX_AGE) or cache.budget() <= 0:
+        return None
+    if (cache.pending() if pending is None else pending) == 0:
         return None
     cfg = dict(cfg or rc.resolve()); cfg["semparse_dir"] = cache.d
     cpath = os.path.join(cache.d, "worker_config.json")
@@ -286,14 +297,49 @@ def top_k_rows(store, k):
     return [(it.id, it.content, it.attention.sti) for it in store.get_active_set()[:int(k)]]
 
 
+FEED_SIG = "last_feed.sig"     # automated fast path: top-K content signature of the last enqueue
+
+
+def feed_rows(rows, cfg=None, state_dir=None, cache=None, skip_unchanged=False):
+    """Enqueue (item_id, content, sti) rows (active-set order) and maybe start the worker.  Shared by the
+    orchestrator hook and the automated fast path.  skip_unchanged=True (fast path): if the top-K contents are the
+    ones enqueued last time, skip the enqueue (it would only re-read the whole cache to find nothing new) and
+    use the queue length as the pending count.  Returns pid or None; swallows every error."""
+    try:
+        cfg = cfg or rc.resolve(state_dir)
+        if not cfg["semparse_feed"]:
+            return None
+        cache = cache or ParseCache(cfg=cfg)
+        rows = list(rows)[:int(cfg["shadow_k"])]
+        if skip_unchanged:
+            sig = _sha256("\n".join(content_hash(c) for _, c, _ in rows if isinstance(c, str)).encode()).hexdigest()
+            sp = os.path.join(cache.d, FEED_SIG)
+            try:
+                with open(sp, encoding="utf-8") as fh:
+                    same = fh.read().strip() == sig
+            except OSError:
+                same = False
+            if same:
+                return launch_worker(cache, cfg, pending=len(cache._queue()))
+            st = cache.enqueue(rows)
+            try:
+                with open(sp, "w", encoding="utf-8") as fh:
+                    fh.write(sig + "\n")
+            except OSError:
+                pass
+        else:
+            st = cache.enqueue(rows)
+        return launch_worker(cache, cfg, pending=st.get("pending"))
+    except Exception:
+        return None
+
+
 def maybe_feed(store, cycle=0, state_dir=None, cache=None, cfg=None):
     """Orchestrator hook: enqueue top-K, maybe start the worker.  Returns pid or None; swallows every error."""
     try:
         cfg = cfg or rc.resolve(state_dir)
         if not cfg["semparse_feed"]:
             return None
-        cache = cache or ParseCache(cfg=cfg)
-        cache.enqueue(top_k_rows(store, cfg["shadow_k"]))
-        return launch_worker(cache, cfg)
+        return feed_rows(top_k_rows(store, cfg["shadow_k"]), cfg, cache=cache)
     except Exception:
         return None

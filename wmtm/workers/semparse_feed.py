@@ -31,7 +31,8 @@ a.petta = a.petta or CFG["petta_dir"]
 a.vendor = a.vendor or CFG["pettachainer_dir"]
 a.prompt = a.prompt or CFG["semparse_prompt"]
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb"))
-PRIO = rc.lower_priority(CFG)
+PRIO_GUARD = rc.PriorityGuard(CFG)          # SCHED_IDLE + nice set here in the child, re-asserted while it runs
+PRIO = PRIO_GUARD.start()
 
 from wmtm.parse_cache import ParseCache, process_queue, gateway_llm_usage  # noqa: E402
 
@@ -42,6 +43,7 @@ status = {"ts": time.time(), "pid": os.getpid(), "mem_cap_mb": (MEM_CAP or 0) //
 
 def finish(code):
     status["end_ts"] = time.time()
+    status["prio_end"] = PRIO_GUARD.stats()     # actual policy/nice at the end + how often it had to be re-asserted
     rc.append_jsonl(os.path.join(a.dir, "worker_runs.jsonl"), status, CFG.get("jsonl_max_bytes"))
     try:
         if open(cache.pidfile).read().strip() == str(os.getpid()):

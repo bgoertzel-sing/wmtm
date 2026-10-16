@@ -440,12 +440,59 @@ def format_active_context(store, cycle):
     return f"{header}\n{body}"
 
 
-def fast_path_automated(state_file):
+def _att_total(item_data):
+    att = item_data.get("attention") or {}
+    return att.get("sti", 0.0) * 1.0 + att.get("ati", 0.0) * 0.5 + att.get("lti", 0.0) * 0.2   # AttentionValue.total
+
+
+def automated_hooks(state_dir, items_dict, cycle):
+    """Track G/H background hooks for automated turns (rc2).
+
+    The orchestrator runs pc_shadow.maybe_launch / parse_cache.maybe_feed only
+    inside cycle(), i.e. on real user turns; most live cycles are automated and
+    take the fast path, so without this the hooks never fire between user
+    messages. Same gates as the cycle hooks (flags file, single-worker busy
+    guard, hourly parse cap, shadow rate limit) plus ``hooks_on_automated``.
+    Only light modules are imported (runtime_config, pc_shadow, parse_cache:
+    stdlib + json); the workers build snapshots from the raw item fields.
+    Never raises. -> {"shadow": pid|None, "feed": pid|None} or None if off.
+    """
+    try:
+        from . import runtime_config as rc
+        cfg = rc.resolve(state_dir)
+        if not cfg.get("hooks_on_automated") or not (cfg.get("pc_shadow") or cfg.get("semparse_feed")):
+            return None
+        k = int(cfg["shadow_k"])
+        top = sorted(items_dict.values(), key=_att_total, reverse=True)[:k]     # active-set order
+        out = {"shadow": None, "feed": None}
+        if cfg.get("pc_shadow"):
+            try:
+                from . import pc_shadow
+                out["shadow"] = pc_shadow.maybe_launch_raw([pc_shadow.raw_item_from_dict(d) for d in top], cycle, cfg,
+                                                           source="automated")
+            except Exception:
+                pass
+        if cfg.get("semparse_feed"):
+            try:
+                from . import parse_cache
+                out["feed"] = parse_cache.feed_rows(
+                    [(d.get("id"), d.get("content", ""), (d.get("attention") or {}).get("sti", 0.0)) for d in top], cfg,
+                    skip_unchanged=True)
+            except Exception:
+                pass
+        return out
+    except Exception as e:
+        print(f"[wmtm_context] WARN automated hooks: {type(e).__name__}: {e}", file=sys.stderr)
+        return None
+
+
+def fast_path_automated(state_file, run_hooks=True):
     """Ultra-lightweight turn for automated prompts (F20).
 
     Reads the persisted state JSON directly (no engine objects), returns the
     formatted context block (or None), applies STI decay + wall-clock stale
     cleanup to the snapshot, increments the cycle and saves it back.
+    rc2: then runs the Track G/H hooks (automated_hooks) unless run_hooks=False.
     """
     context = None
     try:
@@ -564,6 +611,9 @@ def fast_path_automated(state_file):
         # Save updated state
         with open(state_file, "w") as f:
             _json.dump(snapshot, f)
+
+        if run_hooks and items_dict:
+            automated_hooks(_os.path.dirname(_os.path.abspath(state_file)), items_dict, cycle)
 
     except Exception as e:
         print(f"[wmtm_context] WARN fast-path: {type(e).__name__}: {e}", file=sys.stderr)

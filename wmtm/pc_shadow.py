@@ -240,22 +240,75 @@ def launch(spec, cfg=None, out_dir=None, module=None):
                            ["--spec", path, "--out", os.path.join(out_dir, "shadow.jsonl"), "--config", cpath], pidfile)
 
 
-def maybe_launch(store, cycle=0, state_dir=None, cfg=None):
-    """Orchestrator hook.  Returns pid or None; swallows every error."""
+LAST_LAUNCH = "last_launch"    # stamp file in shadow_dir; its mtime is the last launch time (rate limit)
+
+
+def rate_limited(cfg, now=None) -> bool:
+    """True if a shadow worker was launched less than shadow_min_interval_s ago (0 = no limit)."""
+    iv = float(cfg.get("shadow_min_interval_s") or 0)
+    if iv <= 0:
+        return False
+    try:
+        last = os.path.getmtime(os.path.join(cfg["shadow_dir"], LAST_LAUNCH))
+    except OSError:
+        return False
+    now = time.time() if now is None else now
+    return 0 <= now - last < iv
+
+
+def _stamp(cfg):
+    try:
+        p = os.path.join(cfg["shadow_dir"], LAST_LAUNCH)
+        with open(p, "w") as fh:
+            fh.write("%.3f\n" % time.time())
+    except OSError:
+        pass
+
+
+def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle"):
+    """Launch from raw top-K item dicts (raw_item() shape, active-set order).  Shared by the orchestrator hook and
+    the automated fast path (which has only the state JSON, no engine).  Gates, cheapest first: flag, single-worker
+    busy guard, rate limit (shadow_min_interval_s).  Returns pid or None; swallows every error."""
     try:
         cfg = cfg or rc.resolve(state_dir)
         if not cfg["pc_shadow"]:
             return None
         if rc.busy(os.path.join(cfg["shadow_dir"], "worker.pid"), WORKER_MAX_AGE):
             return None  # skip before doing any work
-        # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read, Python PLN)
+        if rate_limited(cfg):
+            return None
         k = int(cfg["shadow_k"])
-        raw = [raw_item(it) for it in store.get_active_set()[:k]]
+        raw = list(raw or [])[:k]
         if not raw:
             return None
-        return launch({"cycle": cycle, "ts": time.time(), "k": k, "raw_items": raw, "atoms": [], "goals": []}, cfg)
+        pid = launch({"cycle": cycle, "ts": time.time(), "k": k, "raw_items": raw, "atoms": [], "goals": [],
+                      "source": source}, cfg)
+        if pid:
+            _stamp(cfg)
+        return pid
     except Exception:
         return None
+
+
+def maybe_launch(store, cycle=0, state_dir=None, cfg=None):
+    """Orchestrator hook.  Returns pid or None; swallows every error."""
+    try:
+        cfg = cfg or rc.resolve(state_dir)
+        if not cfg["pc_shadow"]:
+            return None
+        if rc.busy(os.path.join(cfg["shadow_dir"], "worker.pid"), WORKER_MAX_AGE) or rate_limited(cfg):
+            return None  # skip before doing any work
+        # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read, Python PLN)
+        k = int(cfg["shadow_k"])
+        return maybe_launch_raw([raw_item(it) for it in store.get_active_set()[:k]], cycle, cfg)
+    except Exception:
+        return None
+
+
+def raw_item_from_dict(d):
+    """raw_item() from a persisted item dict (the state JSON the automated fast path reads)."""
+    return {"id": d.get("id"), "content": d.get("content", ""), "sti": (d.get("attention") or {}).get("sti", 0.0),
+            "tv_strength": d.get("tv_strength", 0.0), "tv_confidence": d.get("tv_confidence", 0.0)}
 
 
 def raw_item(it):
@@ -276,5 +329,6 @@ class _RawStore:
 def snapshot_from_raw(spec, cfg=None):
     """Worker side: turn a raw spec (from maybe_launch) into a full spec."""
     full = build_snapshot(_RawStore(spec["raw_items"]), spec.get("cycle", 0), spec.get("k"), cfg)
+    full["source"] = spec.get("source")
     full["ts"] = spec.get("ts", full["ts"]); full["build_s"] = round(time.time() - full["ts"], 3)
     return full
