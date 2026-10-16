@@ -128,12 +128,13 @@ else:
         rec["status"] = "canary_fail"
     else:
         rec["status"] = "ok"; skipped = 0
+        t0q = time.time(); rec["prequery_s"] = round(t0q - t0, 3)  # budget covers queries only (build+warm ate it under load)
         for g in spec["goals"]:
-            left = a.budget - (time.time() - t0)
+            left = a.budget - (time.time() - t0q)
             if left <= 0.05: skipped += 1; continue
             w2, r = ask(w, g, min(a.timeout, left)); res.append(r)
             if w2 is None:
-                if a.budget - (time.time() - t0) <= 0.5: w = None; skipped += len(spec["goals"]) - len(res); break
+                if a.budget - (time.time() - t0q) <= 0.5: w = None; skipped += len(spec["goals"]) - len(res); break
                 w = Inner()
                 if not w.ok: rec["status"] = "rewarm_fail"; w = None; skipped += len(spec["goals"]) - len(res); break
             else: w = w2
