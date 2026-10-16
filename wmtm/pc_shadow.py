@@ -33,6 +33,7 @@ def atom_to_metta(atom, i):
 
 
 MAX_GOALS = 60
+_FACTS_MEMO = {}
 SP_HEADS = ("Inheritance", "Member", "Implies", "Similarity", "Evaluation")
 
 
@@ -150,7 +151,14 @@ def build_snapshot(store, cycle=0, k=None):
     for it in items:
         if it.id in cached:
             n_sp += 1
-            fs = semparse_facts(cached[it.id]); facts.extend(fs)
+            key = (it.id, len(cached[it.id]), hash(tuple(cached[it.id])))
+            fs = _FACTS_MEMO.get(key)
+            if fs is None:  # parsing cached atoms costs ~20 ms/item; cached entries are immutable, so memoise
+                fs = semparse_facts(cached[it.id])
+                if len(_FACTS_MEMO) > 4096:
+                    _FACTS_MEMO.clear()
+                _FACTS_MEMO[key] = fs
+            facts.extend(fs)
             if os.environ.get("WMTM_PC_SHADOW_FULL_KB", "0") == "1":
                 metta.extend(cached[it.id])
             else:  # only the binary facts the goals are built from: a 700-atom KB makes each query ~7-10 s
