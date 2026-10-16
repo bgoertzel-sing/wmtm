@@ -218,9 +218,35 @@ def maybe_launch(store, cycle=0):
     if not enabled():
         return None
     try:
-        spec = build_snapshot(store, cycle)
-        if not spec["atoms"]:
+        if _busy(os.path.join(OUT, "worker.pid")):
+            return None  # skip before doing any work
+        # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read, Python PLN)
+        k = int(os.environ.get("WMTM_PC_SHADOW_K", "200"))
+        raw = [raw_item(it) for it in store.get_active_set()[:k]]
+        if not raw:
             return None
-        return launch(spec)
+        return launch({"cycle": cycle, "ts": time.time(), "k": k, "raw_items": raw, "atoms": [], "goals": []})
     except Exception:
         return None
+
+
+def raw_item(it):
+    return {"id": it.id, "content": it.content, "sti": it.attention.sti,
+            "tv_strength": getattr(it, "tv_strength", 0.0), "tv_confidence": getattr(it, "tv_confidence", 0.0)}
+
+
+class _RawStore:
+    """Minimal store over raw item dicts (already in active-set order), for building a snapshot in the worker."""
+    def __init__(self, raw):
+        from types import SimpleNamespace as NS
+        self._items = [NS(id=r["id"], content=r["content"], attention=NS(sti=r.get("sti", 0.0)),
+                          tv_strength=r.get("tv_strength", 0.0), tv_confidence=r.get("tv_confidence", 0.0)) for r in raw]
+    def get_active_set(self):
+        return list(self._items)
+
+
+def snapshot_from_raw(spec):
+    """Worker side: turn a raw spec (from maybe_launch) into a full spec."""
+    full = build_snapshot(_RawStore(spec["raw_items"]), spec.get("cycle", 0), spec.get("k"))
+    full["ts"] = spec.get("ts", full["ts"]); full["build_s"] = round(time.time() - full["ts"], 3)
+    return full

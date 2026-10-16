@@ -107,6 +107,14 @@ def ask(w, g, tmo):
     return w, rec
 
 t0 = time.time(); spec = json.load(open(a.spec))
+if "raw_items" in spec:  # built here, off the cycle path
+    try:
+        sys.path.insert(0, W); from wmtm.pc_shadow import snapshot_from_raw
+        spec = snapshot_from_raw(spec)
+    except Exception as e:
+        spec.update(atoms=[], goals=[], build_error=type(e).__name__ + ": " + str(e)[:160])
+    with open(a.spec + ".tmp", "w") as f: json.dump(spec, f)
+    os.replace(a.spec + ".tmp", a.spec)
 rec = {"cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
        "atoms": len(spec["atoms"]), "goals_n": len(spec["goals"]), "timeout_s": a.timeout, "budget_s": a.budget, "steps": a.steps}
 w = Inner(); rec["warm_s"] = w.warm_s; rec.update(w.info); res = []
@@ -141,7 +149,7 @@ for r in res:
 if diffs:
     rec["tv_diff_mean"] = [round(sum(d[0] for d in diffs) / len(diffs), 4), round(sum(d[1] for d in diffs) / len(diffs), 4)]
     rec["tv_absdiff_max"] = [round(max(abs(d[0]) for d in diffs), 4), round(max(abs(d[1]) for d in diffs), 4)]
-for key in ("semparse_items", "fallback_atoms", "facts"):
+for key in ("semparse_items", "fallback_atoms", "facts", "build_s", "build_error"):
     rec[key] = spec.get(key)
 rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)

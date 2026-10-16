@@ -46,8 +46,20 @@ def test_snapshot_topk_limits_items():
 def test_maybe_launch_swallows_errors(monkeypatch):
     monkeypatch.setenv("WMTM_PC_SHADOW", "1")
     def boom(*a, **k): raise RuntimeError("x")
-    monkeypatch.setattr(pc_shadow, "build_snapshot", boom)
+    monkeypatch.setattr(pc_shadow, "launch", boom)
     assert pc_shadow.maybe_launch(_store(SYN), 1) is None
+
+
+def test_maybe_launch_is_raw_only_and_worker_builds(monkeypatch, tmp_path):
+    """Cycle side ships raw top-K fields only; snapshot_from_raw (worker side) rebuilds the same goals."""
+    monkeypatch.setenv("WMTM_PC_SHADOW", "1"); monkeypatch.setattr(pc_shadow, "OUT", str(tmp_path))
+    got = []
+    monkeypatch.setattr(pc_shadow, "launch", lambda spec, *a, **k: got.append(spec) or 123)
+    assert pc_shadow.maybe_launch(_store(SYN), 5) == 123
+    spec = got[0]
+    assert spec["atoms"] == [] and len(spec["raw_items"]) == 4 and spec["cycle"] == 5
+    full = pc_shadow.snapshot_from_raw(spec)
+    assert full["goals"] == pc_shadow.build_snapshot(_store(SYN), cycle=5)["goals"] and "build_s" in full
 
 
 def test_launch_never_waits_and_busy_guard(tmp_path):
