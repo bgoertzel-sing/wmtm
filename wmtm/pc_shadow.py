@@ -32,35 +32,134 @@ def atom_to_metta(atom, i):
     return "(: wm%d (%s %s %s) (STV %.4f %.4f))" % (i, HEAD[m.group(1)], m.group(2), m.group(3), s, c)
 
 
+MAX_GOALS = 60
+SP_HEADS = ("Inheritance", "Member", "Implies", "Similarity", "Evaluation")
+
+
+def _cache_lookup(items):
+    """item.id -> validated semparse atom strings (Track H cache), only for items that have a cached parse."""
+    try:
+        from .parse_cache import ParseCache
+        c = ParseCache(); ent = c.entries()
+    except Exception:
+        return {}
+    out = {}
+    for it in items:
+        try:
+            a = c.atoms_for(it.content, ent)
+        except Exception:
+            a = None
+        if a is not None:
+            out[it.id] = a
+    return out
+
+
+def semparse_facts(atom_strs):
+    """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped)."""
+    from .semparse_adapter import split_toplevel
+    out = []
+    for src, node, err in split_toplevel("\n".join(atom_strs)):
+        if err or not isinstance(node, list):
+            continue
+        if node and node[0] == "Interpretation" and len(node) == 3:
+            node = node[2]
+        if len(node) != 4 or node[0] != ":":
+            continue
+        c, tv = node[2], node[3]
+        if (isinstance(c, list) and len(c) == 3 and c[0] in SP_HEADS and all(isinstance(x, str) for x in c[1:])
+                and isinstance(tv, list) and len(tv) == 3):
+            try:
+                out.append((c[0], c[1], c[2], float(tv[1]), float(tv[2])))
+            except ValueError:
+                pass
+    return out
+
+
+def build_goals(rel, max_goals=None):
+    """2-step Inheritance / Implies chains plus Member x Inheritance joins, not already asserted."""
+    max_goals = int(max_goals or os.environ.get("WMTM_PC_SHADOW_MAX_GOALS", MAX_GOALS))
+    have = {(h, a, b) for (h, a, b) in rel}
+    by = {}
+    for (h, a, b) in sorted(rel):
+        by.setdefault((h, a), []).append(b)
+    goals = []
+    def add(t):
+        g = "(%s %s %s)" % t
+        if t not in have and t[1] != t[2] and g not in goals:
+            goals.append(g)
+    for (h, a, b) in sorted(rel):
+        if h in TRANSITIVE:
+            for c in by.get((h, b), []):
+                add((h, a, c))
+        if h == "Member":
+            for c in by.get(("Inheritance", b), []):
+                add(("Member", a, c))
+    return goals[:max_goals]
+
+
+def python_derived(facts, goals):
+    """Run the Python PLN over the same facts.  Member is fed as Inheritance (Python has no Member) and mapped back."""
+    from .pln import pln_inference_over_atoms, PLNAtom, TruthValue
+    sym, back = {}, {}
+    def tok(x):
+        if x not in sym:
+            sym[x] = "s%d" % len(sym); back[sym[x]] = x
+        return sym[x]
+    atoms, members = [], set()
+    for (h, a, b, s, c) in facts:
+        t = {"Inheritance": "Inheritance", "Member": "Inheritance", "Implies": "Implication"}.get(h)
+        if not t:
+            continue
+        if h == "Member":
+            members.add(a)
+        atoms.append(PLNAtom(t, "%s(%s,%s)" % (t, tok(a), tok(b)), TruthValue(strength=s, confidence=c)))
+    gs, py = set(goals), []
+    for d in pln_inference_over_atoms(atoms):
+        m = _NAME.match(d.name)
+        if not m or m.group(2) not in back or m.group(3) not in back:
+            continue
+        a, b = back[m.group(2)], back[m.group(3)]
+        h = "Implies" if m.group(1) == "Implication" else "Inheritance"
+        g = "(%s %s %s)" % (h, a, b)
+        if h == "Inheritance" and a in members and "(Member %s %s)" % (a, b) in gs:
+            g = "(Member %s %s)" % (a, b)
+        py.append({"goal": g, "s": round(d.truth.strength, 4), "c": round(d.truth.confidence, 4)})
+    return py
+
+
 def build_snapshot(store, cycle=0, k=None):
-    """-> dict spec (pure; no I/O).  Goals = 2-step chains over the transitive heads, plus what Python PLN derived."""
-    from .pln_bridge import wmtm_to_pln_atoms
-    from .pln import pln_inference_over_atoms
+    """-> dict spec.  Per item: cached semparse atoms (Track H) when available, else the regex PLN mapping."""
+    from .pln_bridge import wmtm_item_to_pln_atoms
     k = int(k or os.environ.get("WMTM_PC_SHADOW_K", "200"))
     items = store.get_active_set()[:k]
-    atoms = [a for a in wmtm_to_pln_atoms(items) if a.atom_type != "Concept"]
-    metta, rel = [], set()
-    for i, a in enumerate(atoms):
-        s = atom_to_metta(a, i)
-        if s:
-            metta.append(s); m = _NAME.match(a.name); rel.add((HEAD[m.group(1)], m.group(2), m.group(3)))
-    goals = []
-    for h in TRANSITIVE:
-        for (h1, a, b) in sorted(rel):
-            for (h2, b2, c) in sorted(rel):
-                g = "(%s %s %s)" % (h, a, c)
-                if h1 == h2 == h and b == b2 and a != c and (h, a, c) not in rel and g not in goals:
-                    goals.append(g)
-    py = []
+    cached = _cache_lookup(items)
+    metta, facts, n_sp, n_fb, i = [], [], 0, 0, 0
+    for it in items:
+        if it.id in cached:
+            n_sp += 1
+            metta.extend(cached[it.id]); facts.extend(semparse_facts(cached[it.id]))
+            continue
+        for a in wmtm_item_to_pln_atoms(it):
+            if a.atom_type == "Concept":
+                continue
+            st = atom_to_metta(a, i); i += 1
+            if st:
+                n_fb += 1; metta.append(st); m = _NAME.match(a.name)
+                facts.append((HEAD[m.group(1)], m.group(2), m.group(3), a.truth.strength, a.truth.confidence))
+    rel = {(h, a, b) for (h, a, b, _, _) in facts}
+    goals = build_goals(rel)
     try:
-        for d in pln_inference_over_atoms(atoms):
-            m = _NAME.match(d.name)
-            if m and m.group(1) in HEAD:
-                py.append({"goal": "(%s %s %s)" % (HEAD[m.group(1)], m.group(2), m.group(3)),
-                           "s": round(d.truth.strength, 4), "c": round(d.truth.confidence, 4)})
+        py = python_derived(facts, goals)
     except Exception as e:  # Python PLN failure is recorded, not raised
         py = [{"error": type(e).__name__}]
-    return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals, "python_derived": py}
+    # also ask PeTTaChainer about what only Python derived, so one-engine-only conclusions are measured both ways
+    cap = int(os.environ.get("WMTM_PC_SHADOW_MAX_GOALS", MAX_GOALS))
+    for d in py:
+        g = d.get("goal")
+        if g and g not in goals and len(goals) < 2 * cap:
+            goals.append(g)
+    return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
+            "python_derived": py, "semparse_items": n_sp, "fallback_atoms": n_fb, "facts": len(facts)}
 
 
 def _busy(pidfile):

@@ -23,3 +23,5 @@ replay-data/
 # real memory-derived data (never commit; see docs/pettachainer/SCALING_*.md)
 .local-data/
 .vendor-petta106/
+.vendor36
+.vendor-petta106

@@ -318,6 +318,12 @@ class WMTMOrchestrator:
             maybe_launch(self.store, self._cycle)
         except Exception:
             pass
+        # 2b''. Track H: enqueue top-K for background semantic parsing (off unless WMTM_SEMPARSE_FEED=1)
+        try:
+            from .parse_cache import maybe_feed
+            maybe_feed(self.store, self._cycle)
+        except Exception:
+            pass
 
         # 2c. Run GoalChainer feedback loop and admit its decisions
         gc_admitted = self._run_goalchainer_phase()

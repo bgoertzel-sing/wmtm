@@ -132,8 +132,17 @@ else:
         rec["skipped_budget"] = skipped
     if w: w.kill()
 py = {d["goal"]: d for d in spec.get("python_derived", []) if "goal" in d}
+diffs = []
 for r in res:
-    if r["goal"] in py: r["python"] = [py[r["goal"]]["s"], py[r["goal"]]["c"]]
+    if r["goal"] in py:
+        r["python"] = [py[r["goal"]]["s"], py[r["goal"]]["c"]]
+        if r.get("stv"):  # PeTTaChainer is the reference: diff = python - pc
+            r["diff"] = [round(r["python"][0] - r["stv"][0], 4), round(r["python"][1] - r["stv"][1], 4)]; diffs.append(r["diff"])
+if diffs:
+    rec["tv_diff_mean"] = [round(sum(d[0] for d in diffs) / len(diffs), 4), round(sum(d[1] for d in diffs) / len(diffs), 4)]
+    rec["tv_absdiff_max"] = [round(max(abs(d[0]) for d in diffs), 4), round(max(abs(d[1]) for d in diffs), 4)]
+for key in ("semparse_items", "fallback_atoms", "facts"):
+    rec[key] = spec.get(key)
 rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)
 pcg = {r["goal"] for r in res if r["ok"]}; asked = {r["goal"] for r in res}
