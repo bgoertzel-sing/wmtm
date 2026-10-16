@@ -312,6 +312,13 @@ class WMTMOrchestrator:
         pln_admitted = self._run_pln_phase()
         result.pln_admitted = len(pln_admitted)
 
+        # 2b'. Track G: PeTTaChainer shadow (off unless WMTM_PC_SHADOW=1; detached, never admits, never raises)
+        try:
+            from .pc_shadow import maybe_launch
+            maybe_launch(self.store, self._cycle)
+        except Exception:
+            pass
+
         # 2c. Run GoalChainer feedback loop and admit its decisions
         gc_admitted = self._run_goalchainer_phase()
         result.gc_admitted = len(gc_admitted)
