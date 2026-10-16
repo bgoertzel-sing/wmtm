@@ -1,28 +1,40 @@
-#!/usr/bin/env python3
-"""Track G shadow worker (launched detached by wmtm/pc_shadow.py; never waited on).
+"""Track G shadow worker: ``python -m wmtm.workers.pc_shadow --spec S --out O [--config C]``.
 
-Outer process: spawns an inner PeTTaChainer child (PeTTa v1.0.6 from .vendor-petta106 + PeTTaChainer 36b3fe6
-dedup-patched from .vendor36), which loads transitivity rules + mem_inh + snapshot atoms + Grace canary facts
-and answers one goal per stdin line.  Each query has a hard --timeout (default 2 s) enforced by SIGKILL of the
-child's process group; the whole turn has a --budget (default 20 s).  Sanity gate: canary (Member grace person)
-must prove and the negative control (Member grace robot) must not, through this exact path, else the record is
-marked canary_fail and no goal results are trusted.  Each RES is structurally checked.  One JSONL line appended
-to --out per run; the spec file is deleted afterwards.
+Launched detached by wmtm/pc_shadow.py; never waited on.  Outer process: builds the snapshot from the raw spec
+(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa v1.0.6 + PeTTaChainer 36b3fe6 dedup-patched,
+paths from the runtime config), which loads transitivity rules + mem_inh + snapshot atoms + Grace canary facts and
+answers one goal per stdin line.  Each query has a hard timeout (default 2 s) enforced by SIGKILL of the child's
+process group; the queries share a budget (default 20 s).  Address space is capped (worker_mem_mb, inherited by the
+child).  Sanity gate: canary (Member grace person) must prove and the negative control (Member grace robot) must
+not, through this exact path, else the record is marked canary_fail and no goal results are trusted.  Each RES is
+structurally checked.  One JSONL line appended to --out per run (size-capped, rotated to .1); the spec file is
+deleted afterwards.
 """
 import argparse, json, os, sys, time, signal, select, subprocess
-W = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from wmtm import runtime_config as rc
+
 ap = argparse.ArgumentParser()
 ap.add_argument("--spec", required=True)
 ap.add_argument("--out", required=True)
+ap.add_argument("--config", default=None, help="worker_config.json written by the launcher (default: env/defaults)")
 ap.add_argument("--inner", action="store_true", help=argparse.SUPPRESS)
-ap.add_argument("--petta", default=os.environ.get("WMTM_PC_PETTA", os.path.join(W, ".vendor-petta106")))
-ap.add_argument("--vendor", default=os.environ.get("WMTM_PC_VENDOR", os.path.join(W, ".vendor36")))
-ap.add_argument("--steps", type=int, default=30)
-ap.add_argument("--timeout", type=float, default=2.0)
-ap.add_argument("--budget", type=float, default=20.0)
+ap.add_argument("--petta", default=None)
+ap.add_argument("--vendor", default=None, help="PeTTaChainer dir (contains pettachainer/)")
+ap.add_argument("--steps", type=int, default=None)
+ap.add_argument("--timeout", type=float, default=None)
+ap.add_argument("--budget", type=float, default=None)
 ap.add_argument("--warm-timeout", type=float, default=60.0)
 ap.add_argument("--keep-spec", action="store_true")
 a = ap.parse_args()
+CFG = rc.load_worker_config(a.config) if a.config else rc.resolve()
+a.petta = a.petta or CFG["petta_dir"]
+a.vendor = a.vendor or CFG["pettachainer_dir"]
+a.steps = a.steps if a.steps is not None else int(CFG["shadow_steps"])
+a.timeout = a.timeout if a.timeout is not None else float(CFG["shadow_timeout_s"])
+a.budget = a.budget if a.budget is not None else float(CFG["shadow_budget_s"])
+MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb")) if not a.inner else None
+PRIO = rc.lower_priority(CFG) if not a.inner else None     # inherited by the PeTTa child
 RULES = [
     "(: mem_inh (Implication (Premises (Member $x $a) (Inheritance $a $b)) (Conclusions (Member $x $b))) (STV 1.0 0.99))",
     "(: inh_trans (Implication (Premises (Inheritance $a $b) (Inheritance $b $c)) (Conclusions (Inheritance $a $c))) (STV 1.0 0.99))",
@@ -56,9 +68,12 @@ if a.inner:  # ---------------- inner PeTTaChainer child ----------------
 class Inner:
     def __init__(self):
         t = time.time()
-        self.p = subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__), "--inner", "--spec", a.spec, "--out", a.out,
-                                   "--petta", a.petta, "--vendor", a.vendor, "--steps", str(a.steps)],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=W, start_new_session=True)
+        args = ["--inner", "--spec", a.spec, "--out", a.out, "--petta", a.petta, "--vendor", a.vendor, "--steps", str(a.steps)]
+        if a.config:
+            args += ["--config", a.config]
+        self.p = subprocess.Popen([sys.executable, "-u", "-m", "wmtm.workers.pc_shadow"] + args,
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                  cwd=rc.DIST_ROOT, env=rc.worker_env(CFG), start_new_session=True)
         self.buf = b""; line = self.readline(a.warm_timeout); self.warm_s = round(time.time() - t, 3)
         self.ok = bool(line and line.startswith("READY "))
         self.info = json.loads(line[6:]) if self.ok else {"warm_fail": (line or "")[:200]}
@@ -109,13 +124,13 @@ def ask(w, g, tmo):
 t0 = time.time(); spec = json.load(open(a.spec))
 if "raw_items" in spec:  # built here, off the cycle path
     try:
-        sys.path.insert(0, W); from wmtm.pc_shadow import snapshot_from_raw
-        spec = snapshot_from_raw(spec)
+        from wmtm.pc_shadow import snapshot_from_raw
+        spec = snapshot_from_raw(spec, CFG)
     except Exception as e:
         spec.update(atoms=[], goals=[], build_error=type(e).__name__ + ": " + str(e)[:160])
     with open(a.spec + ".tmp", "w") as f: json.dump(spec, f)
     os.replace(a.spec + ".tmp", a.spec)
-rec = {"cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
+rec = {"mem_cap_mb": (MEM_CAP or 0) // (1 << 20), "prio": PRIO, "cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
        "atoms": len(spec["atoms"]), "goals_n": len(spec["goals"]), "timeout_s": a.timeout, "budget_s": a.budget, "steps": a.steps}
 w = Inner(); rec["warm_s"] = w.warm_s; rec.update(w.info); res = []
 if not w.ok:
@@ -150,7 +165,7 @@ for r in res:
 if diffs:
     rec["tv_diff_mean"] = [round(sum(d[0] for d in diffs) / len(diffs), 4), round(sum(d[1] for d in diffs) / len(diffs), 4)]
     rec["tv_absdiff_max"] = [round(max(abs(d[0]) for d in diffs), 4), round(max(abs(d[1]) for d in diffs), 4)]
-for key in ("semparse_items", "fallback_atoms", "facts", "build_s", "build_error"):
+for key in ("semparse_items", "fallback_atoms", "facts", "build_s", "build_error", "skolem_goals", "py_skolem_goals_dropped"):
     rec[key] = spec.get(key)
 rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)
@@ -158,7 +173,7 @@ pcg = {r["goal"] for r in res if r["ok"]}; asked = {r["goal"] for r in res}
 rec["agree_both"] = len(pcg & set(py)); rec["pc_only"] = len(pcg - set(py)); rec["py_only_asked"] = len((set(py) & asked) - pcg)
 rec["py_invalid_chain"] = sum(1 for d in spec.get("python_derived", []) if "invalid_chain" in d); rec["py_derived_n"] = len(py); rec["total_s"] = round(time.time() - t0, 3)
 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
-with open(a.out, "a") as f: f.write(json.dumps(rec) + "\n")
+rc.append_jsonl(a.out, rec, CFG.get("jsonl_max_bytes"))
 if not a.keep_spec:
     try: os.unlink(a.spec)
     except OSError: pass

@@ -1,37 +1,33 @@
 """Track H: background semantic-parse cache that feeds the PeTTaChainer shadow (Track G).
 
-Off by default (env WMTM_SEMPARSE_FEED=1 enables).  Each cycle the orchestrator calls maybe_feed(store, cycle):
-the top-K items (K = WMTM_PC_SHADOW_K, default 200) are *enqueued* by content hash; nothing is parsed in-cycle.
-A detached, niced worker (scripts/pettachainer/semparse_feed_worker.py) drains the queue with the Track C
-SemParseAdapter (LLM via the existing gateway, PeTTa load check) and appends validated atoms to the cache.
+Off by default.  Enabled per bot by ``"semparse_feed": true`` in ``<state_dir>/_wmtm_flags.json`` (or env
+WMTM_SEMPARSE_FEED=1); knobs in wmtm/runtime_config.py.  Each cycle the orchestrator calls
+maybe_feed(store, cycle, state_dir): the top-K items (K = shadow_k, default 200) are *enqueued* by content hash;
+nothing is parsed in-cycle.  A detached, niced worker (``python -m wmtm.workers.semparse_feed``) drains the queue
+with the Track C SemParseAdapter (LLM via the existing gateway, PeTTa load check) and appends validated atoms to
+the cache.
 
 Guarantees
   * keyed by sha256(content): the same content is never parsed twice (an LLM/transport error may be retried,
-    at most WMTM_SEMPARSE_MAX_ATTEMPTS=2 attempts in total, then cached as failed);
-  * cost cap: at most WMTM_SEMPARSE_PER_HOUR (default 20) parse attempts in any rolling hour;
+    at most parse_max_attempts=2 attempts in total, then cached as failed);
+  * cost cap: at most parse_cap_per_hour (default 20) parse attempts in any rolling hour;
   * order: longest-waiting first, then highest STI;
-  * items longer than WMTM_SEMPARSE_MAX_CHARS (default 1500) are skipped, not truncated;
-  * tokens and time are logged per parse (parse_log.jsonl);
-  * everything lives in .local-data/ (gitignored: real memory text never goes to git);
+  * items longer than parse_max_chars (default 1500) are skipped, not truncated;
+  * tokens and time are logged per parse (parse_log.jsonl); logs are size-capped (rotated to .1);
+  * everything lives in the runtime dir (default <state_dir>/_wmtm_shadow/, i.e. inside the bot's memory dir);
   * maybe_feed never raises and never waits; one worker at a time (pidfile guard).
 """
 from __future__ import annotations
-import contextlib, fcntl, hashlib, json, os, subprocess, sys, time
+import contextlib, fcntl, hashlib, json, os, time
 
-W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIR = os.environ.get("WMTM_SEMPARSE_DIR", os.path.join(W, ".local-data", "semparse_cache"))
-WORKER = os.path.join(W, "scripts", "pettachainer", "semparse_feed_worker.py")
+from . import runtime_config as rc
 
-
-def _env_int(name, default):
-    try:
-        return int(os.environ.get(name, default))
-    except ValueError:
-        return default
+WORKER_MODULE = "wmtm.workers.semparse_feed"
+WORKER_MAX_AGE = 3 * 3600     # s; an older worker is presumed hung and killed by the next launch
 
 
-def enabled() -> bool:
-    return os.environ.get("WMTM_SEMPARSE_FEED", "0") == "1"
+def enabled(cfg=None) -> bool:
+    return bool((cfg or rc.resolve())["semparse_feed"])
 
 
 def content_hash(text: str) -> str:
@@ -39,11 +35,15 @@ def content_hash(text: str) -> str:
 
 
 class ParseCache:
-    def __init__(self, d=None, per_hour=None, max_chars=None, max_attempts=None):
-        self.d = d or DIR
-        self.per_hour = per_hour if per_hour is not None else _env_int("WMTM_SEMPARSE_PER_HOUR", 20)
-        self.max_chars = max_chars if max_chars is not None else _env_int("WMTM_SEMPARSE_MAX_CHARS", 1500)
-        self.max_attempts = max_attempts if max_attempts is not None else _env_int("WMTM_SEMPARSE_MAX_ATTEMPTS", 2)
+    def __init__(self, d=None, per_hour=None, max_chars=None, max_attempts=None, cfg=None,
+                 log_max_bytes=None, cache_max_bytes=None):
+        cfg = cfg or rc.resolve()
+        self.d = d or cfg["semparse_dir"]
+        self.per_hour = per_hour if per_hour is not None else cfg["parse_cap_per_hour"]
+        self.max_chars = max_chars if max_chars is not None else cfg["parse_max_chars"]
+        self.max_attempts = max_attempts if max_attempts is not None else cfg["parse_max_attempts"]
+        self.log_max_bytes = log_max_bytes if log_max_bytes is not None else cfg["jsonl_max_bytes"]
+        self.cache_max_bytes = cache_max_bytes if cache_max_bytes is not None else cfg["cache_max_bytes"]
         self.entries_path = os.path.join(self.d, "cache.jsonl")
         self.queue_path = os.path.join(self.d, "queue.json")
         self.log_path = os.path.join(self.d, "parse_log.jsonl")
@@ -128,6 +128,52 @@ class ParseCache:
         now = time.time() if now is None else now
         return sum(1 for r in self._jsonl(self.log_path) if now - r.get("ts", 0) < 3600)
 
+    def _trim_log(self, now):
+        """Size cap for parse_log.jsonl that never loses the rolling hour the cost cap is computed from:
+        records older than 1 h move to parse_log.jsonl.1 (replacing it); recent ones stay.  Caller holds the lock."""
+        try:
+            if not self.log_max_bytes or os.path.getsize(self.log_path) <= self.log_max_bytes:
+                return False
+        except OSError:
+            return False
+        rows = self._jsonl(self.log_path)
+        old = [r for r in rows if now - r.get("ts", 0) >= 3600]
+        new = [r for r in rows if now - r.get("ts", 0) < 3600]
+        for path, rs in ((self.log_path + ".1", old), (self.log_path, new)):
+            tmp = path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                fh.writelines(json.dumps(r) + "\n" for r in rs)
+            os.replace(tmp, path)
+        return True
+
+    def compact(self):
+        """Size cap for cache.jsonl: keep the newest entry per hash; if still over cache_max_bytes, drop the oldest
+        entries (they are re-parsed only if their content comes back, under the hourly cap).  Caller holds the lock."""
+        if not self.cache_max_bytes or self.cache_max_bytes <= 0:
+            return 0
+        try:
+            if os.path.getsize(self.entries_path) <= self.cache_max_bytes:
+                return 0
+        except OSError:
+            return 0
+        latest = {}
+        for e in self._jsonl(self.entries_path):
+            if isinstance(e, dict) and "hash" in e:
+                latest.pop(e["hash"], None); latest[e["hash"]] = e        # dict keeps insertion order: newest last
+        lines = [json.dumps(e) + "\n" for e in latest.values()]
+        total, keep = 0, []
+        for ln in reversed(lines):
+            total += len(ln.encode("utf-8"))
+            if total > self.cache_max_bytes // 2:                         # leave headroom so we do not compact every write
+                break
+            keep.append(ln)
+        keep.reverse()
+        tmp = self.entries_path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.writelines(keep)
+        os.replace(tmp, self.entries_path)
+        return len(lines) - len(keep)
+
     def budget(self, now=None) -> int:
         return max(0, self.per_hour - self.used_last_hour(now))
 
@@ -143,6 +189,7 @@ class ParseCache:
     def record(self, h, q, status, atoms, cost):
         """Log one attempt; cache the result unless it was a retryable LLM error."""
         with self._lock():
+            self._trim_log(cost.get("ts") or time.time())
             with open(self.log_path, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(cost) + "\n")
             qq = self._queue(); cur = qq.get(h, q); cur["attempts"] = cur.get("attempts", 0) + 1
@@ -153,14 +200,17 @@ class ParseCache:
                     fh.write(json.dumps({"hash": h, "item_id": q["item_id"], "status": status, "atoms": atoms,
                                          "ts": cost.get("ts"), "attempts": cur["attempts"]}) + "\n")
                 qq.pop(h, None)
+                self.compact()
             self._save_queue(qq)
 
 
 # ---------------------------------------------------------------- worker body (pure; tests call it directly)
-def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now=time.time):
+def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now=time.time, prompt_path=None):
     """Parse up to min(n, hourly budget) queued items.  Returns the list of per-parse cost records."""
-    from .semparse_adapter import SemParseAdapter
-    ad = adapter or SemParseAdapter(llm, loader=loader, reject_log=cache.reject_log, max_chars=cache.max_chars)
+    from .semparse_adapter import SemParseAdapter, DEFAULT_PROMPT
+    ad = adapter or SemParseAdapter(llm, loader=loader, prompt_path=prompt_path or DEFAULT_PROMPT,
+                                    reject_log=cache.reject_log, max_chars=cache.max_chars,
+                                    reject_log_max_bytes=cache.log_max_bytes)
     n = cache.per_hour if n is None else n
     out = []
     for h, q in cache.next_batch(min(n, cache.budget(now()))):
@@ -202,7 +252,7 @@ def gateway_llm_usage(timeout=300.0, env_file=None):
     if env_file and os.path.exists(os.path.expanduser(env_file)):
         for line in open(os.path.expanduser(env_file), encoding="utf-8"):
             if "=" in line and not line.startswith("#"):
-                k, v = line.rstrip("\n").split("=", 1); env[k] = v.strip()
+                k, v = line.rstrip("\n").split("=", 1); env[k.strip().replace("export ", "", 1).strip()] = v.strip().strip('"').strip("'")
     base = os.environ.get("BASE_URL") or env.get("BASE_URL")
     model = os.environ.get("LLM_MODEL") or env.get("LLM_MODEL")
     key = os.environ.get("AI_API_KEY") or env.get("AI_API_KEY")
@@ -221,38 +271,29 @@ def gateway_llm_usage(timeout=300.0, env_file=None):
 
 
 # ---------------------------------------------------------------- cycle hook
-def _busy(pidfile):
-    try:
-        pid = int(open(pidfile).read().strip()); os.kill(pid, 0); return True
-    except (OSError, ValueError):
-        return False
-
-
-def launch_worker(cache: ParseCache, worker=None, extra=()):
+def launch_worker(cache: ParseCache, cfg=None, module=None, extra=()):
     """Start the detached niced parse worker if there is work and budget.  Never waits.  -> pid or None."""
-    if _busy(cache.pidfile) or cache.budget() <= 0 or cache.pending() == 0:
+    if rc.busy(cache.pidfile, WORKER_MAX_AGE) or cache.budget() <= 0 or cache.pending() == 0:
         return None
-    cmd = [sys.executable, "-u", worker or WORKER, "--dir", cache.d] + list(extra)
-    pre = ["nice", "-n", "19"] + (["ionice", "-c", "3"] if os.path.exists("/usr/bin/ionice") else [])
-    p = subprocess.Popen(pre + cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                         cwd=W, start_new_session=True, close_fds=True)
-    with open(cache.pidfile, "w") as fh:
-        fh.write(str(p.pid))
-    return p.pid
+    cfg = dict(cfg or rc.resolve()); cfg["semparse_dir"] = cache.d
+    cpath = os.path.join(cache.d, "worker_config.json")
+    rc.write_json_atomic(cpath, cfg)
+    return rc.spawn_worker(cfg, module or WORKER_MODULE, ["--dir", cache.d, "--config", cpath] + list(extra),
+                           cache.pidfile)
 
 
-def top_k_rows(store, k=None):
-    k = int(k or os.environ.get("WMTM_PC_SHADOW_K", "200"))
-    return [(it.id, it.content, it.attention.sti) for it in store.get_active_set()[:k]]
+def top_k_rows(store, k):
+    return [(it.id, it.content, it.attention.sti) for it in store.get_active_set()[:int(k)]]
 
 
-def maybe_feed(store, cycle=0, cache=None):
+def maybe_feed(store, cycle=0, state_dir=None, cache=None, cfg=None):
     """Orchestrator hook: enqueue top-K, maybe start the worker.  Returns pid or None; swallows every error."""
-    if not enabled():
-        return None
     try:
-        cache = cache or ParseCache()
-        cache.enqueue(top_k_rows(store))
-        return launch_worker(cache)
+        cfg = cfg or rc.resolve(state_dir)
+        if not cfg["semparse_feed"]:
+            return None
+        cache = cache or ParseCache(cfg=cfg)
+        cache.enqueue(top_k_rows(store, cfg["shadow_k"]))
+        return launch_worker(cache, cfg)
     except Exception:
         return None

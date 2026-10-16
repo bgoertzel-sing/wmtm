@@ -25,3 +25,9 @@ replay-data/
 .vendor-petta106/
 .vendor36
 .vendor-petta106
+# runtime built by scripts/vendor_runtime.sh / worker data / flags (never commit)
+petta-v*/
+pettachainer-*/
+semparse-hitl-*/
+_wmtm_shadow/
+_wmtm_flags.json

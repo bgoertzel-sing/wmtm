@@ -121,6 +121,7 @@ class WMTM:
             store = WMTMStore(capacity=self.config.capacity)
             orch = WMTMOrchestrator(store, use_pln=self.config.use_pln,
                                     use_goalchainer=self.config.use_goalchainer)
+            orch.runtime_state_dir = str(self.state_dir)     # <state_dir>/_wmtm_flags.json gates the shadow hooks
             try:
                 if _os.path.exists(self.state_file):
                     with open(self.state_file) as f:

@@ -80,6 +80,8 @@ class WMTMOrchestrator:
         self.goalchainer_request = goalchainer_request
         self.goal_store = goal_store
         self._cycle = 0
+        # Bot memory dir for the background-hook flags file (set by wmtm.api; None = env-only, dev/tests).
+        self.runtime_state_dir = None
 
 
     def active_goal(self):
@@ -312,18 +314,25 @@ class WMTMOrchestrator:
         pln_admitted = self._run_pln_phase()
         result.pln_admitted = len(pln_admitted)
 
-        # 2b'. Track G: PeTTaChainer shadow (off unless WMTM_PC_SHADOW=1; detached, never admits, never raises)
+        # 2b'. Track G / H background hooks: off unless enabled in <state_dir>/_wmtm_flags.json (or env).
+        # Detached workers; they never admit, never wait and never raise.  One flags read per cycle.
         try:
-            from .pc_shadow import maybe_launch
-            maybe_launch(self.store, self._cycle)
+            from . import runtime_config as _rc
+            _cfg = _rc.resolve(self.runtime_state_dir)
         except Exception:
-            pass
-        # 2b''. Track H: enqueue top-K for background semantic parsing (off unless WMTM_SEMPARSE_FEED=1)
-        try:
-            from .parse_cache import maybe_feed
-            maybe_feed(self.store, self._cycle)
-        except Exception:
-            pass
+            _cfg = {}
+        if _cfg.get("pc_shadow"):
+            try:
+                from .pc_shadow import maybe_launch
+                maybe_launch(self.store, self._cycle, cfg=_cfg)       # Track G: PeTTaChainer shadow
+            except Exception:
+                pass
+        if _cfg.get("semparse_feed"):
+            try:
+                from .parse_cache import maybe_feed
+                maybe_feed(self.store, self._cycle, cfg=_cfg)         # Track H: enqueue top-K for parsing
+            except Exception:
+                pass
 
         # 2c. Run GoalChainer feedback loop and admit its decisions
         gc_admitted = self._run_goalchainer_phase()

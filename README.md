@@ -46,6 +46,15 @@ mem.save(); mem.close()
 - CLI stub: `python -m wmtm context --state-dir DIR [--journal-dir DIR] < turn.json`,
   `python -m wmtm derive --state-dir DIR NOTE [IDS...]`.
 
+## Background reasoner shadow and parse feed (v0.3)
+
+Optional, off by default, enabled per bot through `<state_dir>/_wmtm_flags.json` (re-read every cycle; no
+restart): a PeTTaChainer shadow that compares PeTTaChainer with the Python PLN on the top-K items, and a
+semantic-parse feed that parses items through the bot's LLM gateway (default cap 20 parses/hour). Both run in
+detached, niced, memory-capped workers (`python -m wmtm.workers.*`) and never affect the cycle. See
+`docs/RUNTIME.md`; `scripts/vendor_runtime.sh` builds the PeTTa v1.0.6 / PeTTaChainer 36b3fe6 (+ dedup patch)
+runtime, `scripts/fetch_semparse_hitl.sh` fetches the semantic-parsing prompt (not redistributed: no licence).
+
 ## Replay equivalence
 
 `tests/test_replay_equivalence.py` runs the original 83ea611 glue

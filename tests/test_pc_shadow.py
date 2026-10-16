@@ -1,14 +1,13 @@
 """Track G: PeTTaChainer shadow.  Unit tests are mocked (no PeTTa); integration tests skip without vendored PeTTa."""
 import json, os, subprocess, sys, time
 import pytest
-from wmtm import pc_shadow
+from wmtm import pc_shadow, runtime_config as rc
 from wmtm.store import WMTMStore
-from wmtm.item import WMTMItem
-from wmtm.attention import AttentionValue
 
-W = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORKER = os.path.join(W, "scripts", "pettachainer", "pc_shadow_worker.py")
-HAVE_PC = os.path.isdir(os.path.join(W, ".vendor-petta106", "python")) and os.path.isdir(os.path.join(W, ".vendor36", "pettachainer"))
+# Integration tests need the vendored runtime (scripts/vendor_runtime.sh); point WMTM_PC_PETTA / WMTM_PC_VENDOR
+# (and WMTM_SWIPL_BIN if swipl is not on PATH) at it, or vendor it next to the package (runtime_config defaults).
+_CFG = rc.resolve()
+HAVE_PC = os.path.isdir(os.path.join(_CFG["petta_dir"], "python")) and os.path.isdir(os.path.join(_CFG["pettachainer_dir"], "pettachainer"))
 
 
 def _store(texts):
@@ -26,6 +25,7 @@ def test_disabled_by_default(monkeypatch, tmp_path):
     called = []
     monkeypatch.setattr(pc_shadow, "launch", lambda *a, **k: called.append(1))
     assert pc_shadow.maybe_launch(_store(SYN), 1) is None and not called
+    assert pc_shadow.maybe_launch(_store(SYN), 1, state_dir=str(tmp_path)) is None and not called   # no flags file
 
 
 def test_snapshot_maps_atoms_and_goals():
@@ -52,7 +52,7 @@ def test_maybe_launch_swallows_errors(monkeypatch):
 
 def test_maybe_launch_is_raw_only_and_worker_builds(monkeypatch, tmp_path):
     """Cycle side ships raw top-K fields only; snapshot_from_raw (worker side) rebuilds the same goals."""
-    monkeypatch.setenv("WMTM_PC_SHADOW", "1"); monkeypatch.setattr(pc_shadow, "OUT", str(tmp_path))
+    monkeypatch.setenv("WMTM_PC_SHADOW", "1"); monkeypatch.setenv("WMTM_RUNTIME_DIR", str(tmp_path))
     got = []
     monkeypatch.setattr(pc_shadow, "launch", lambda spec, *a, **k: got.append(spec) or 123)
     assert pc_shadow.maybe_launch(_store(SYN), 5) == 123
@@ -62,12 +62,17 @@ def test_maybe_launch_is_raw_only_and_worker_builds(monkeypatch, tmp_path):
     assert full["goals"] == pc_shadow.build_snapshot(_store(SYN), cycle=5)["goals"] and "build_s" in full
 
 
-def test_launch_never_waits_and_busy_guard(tmp_path):
-    slow = tmp_path / "slow.py"; slow.write_text("import time; time.sleep(5)\n")
-    t = time.time(); pid = pc_shadow.launch({"cycle": 1, "atoms": ["x"]}, out_dir=str(tmp_path), worker=str(slow))
+def test_launch_never_waits_and_busy_guard(tmp_path, monkeypatch):
+    mod = tmp_path / "slowmod"; mod.mkdir(); (mod / "__init__.py").write_text("")
+    (mod / "slow.py").write_text("import time; time.sleep(5)\n")
+    cfg = rc.resolve(str(tmp_path))
+    env0 = rc.worker_env
+    monkeypatch.setattr(rc, "worker_env", lambda c, base=None: dict(env0(c, base), PYTHONPATH=str(tmp_path)))
+    t = time.time(); pid = pc_shadow.launch({"cycle": 1, "atoms": ["x"]}, cfg, out_dir=str(tmp_path), module="slowmod.slow")
     assert pid and time.time() - t < 1.0                     # detached: returns immediately
-    assert pc_shadow.launch({"cycle": 2, "atoms": ["x"]}, out_dir=str(tmp_path), worker=str(slow)) is None  # busy -> skip
+    assert pc_shadow.launch({"cycle": 2, "atoms": ["x"]}, cfg, out_dir=str(tmp_path), module="slowmod.slow") is None  # busy
     os.killpg(os.getpgid(pid), 9)
+    assert json.load(open(tmp_path / "worker_config.json"))["shadow_dir"] == str(tmp_path)
 
 
 def test_orchestrator_cycle_unaffected_when_shadow_raises(monkeypatch):
@@ -82,11 +87,9 @@ def test_orchestrator_cycle_unaffected_when_shadow_raises(monkeypatch):
 
 def _run_worker(tmp_path, spec, *extra):
     sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow.jsonl"
-    env = dict(os.environ)
-    sw = "/home/openclaw/research-agent/projects/petta-memory/toolchains/local/swi-prolog-9.3.36/lib/swipl/bin/x86_64-linux"
-    if os.path.isdir(sw): env["PATH"] = sw + ":" + env.get("PATH", "")
-    rc = subprocess.run([sys.executable, WORKER, "--spec", str(sp), "--out", str(out)] + list(extra), env=env, timeout=120).returncode
-    return rc, json.loads(out.read_text().strip().splitlines()[-1]), sp
+    code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out)] + list(extra),
+                          env=rc.worker_env(_CFG), cwd=rc.DIST_ROOT, timeout=120).returncode
+    return code, json.loads(out.read_text().strip().splitlines()[-1]), sp
 
 
 @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
@@ -94,7 +97,7 @@ def test_integration_synthetic(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     rc, rec, sp = _run_worker(tmp_path, spec)
     assert rc == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
-    assert "vendor-petta106" in rec["petta"]
+    assert rec["petta"].startswith(_CFG["petta_dir"]) and rec["mem_cap_mb"] == _CFG["worker_mem_mb"]
     proved = {q["goal"] for q in rec["queries"] if q["ok"]}
     assert {"(Inheritance cat animal)", "(Implies rain slippery)"} <= proved
     assert not sp.exists()                                    # spec deleted

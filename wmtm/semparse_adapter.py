@@ -22,8 +22,8 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Callable, Iterable, Optional
 
-DEFAULT_PROMPT = os.environ.get(
-    "SEMPARSE_PROMPT", "/tmp/semparse-src/semantic-parsing-hitl/prompt.txt")
+# semantic-parsing-hitl prompt.txt (not redistributed here; see scripts/fetch_semparse_hitl.sh)
+DEFAULT_PROMPT = os.environ.get("SEMPARSE_PROMPT", "")
 
 LLM = Callable[[str, str], str]
 
@@ -254,7 +254,7 @@ class ParseResult:
 class SemParseAdapter:
     def __init__(self, llm: LLM, loader=None, prompt_path: str = DEFAULT_PROMPT,
                  reject_log: Optional[str] = None, system: Optional[str] = None,
-                 max_chars: int = 2000):
+                 max_chars: int = 2000, reject_log_max_bytes: Optional[int] = None):
         self.llm = llm
         self.loader = loader          # object with add_atom(str); None = no PeTTa check
         if system is None:
@@ -264,6 +264,7 @@ class SemParseAdapter:
         self.prompt_sha256 = hashlib.sha256(system.encode()).hexdigest()
         self.reject_log = reject_log
         self.max_chars = max_chars
+        self.reject_log_max_bytes = reject_log_max_bytes
 
     def _log(self, res: ParseResult, atom: str, reason: str, stage: str):
         res.rejected.append((atom, reason))
@@ -271,6 +272,9 @@ class SemParseAdapter:
             rec = {"ts": time.time(), "item_id": res.item_id, "stage": stage,
                    "atom": atom, "reason": reason, "prompt_sha256": self.prompt_sha256,
                    "text": res.text[:500]}
+            if self.reject_log_max_bytes:
+                from .runtime_config import rotate_jsonl
+                rotate_jsonl(self.reject_log, self.reject_log_max_bytes)
             with open(self.reject_log, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(rec) + "\n")
 
@@ -332,7 +336,7 @@ def gateway_llm(base_url=None, model=None, key=None, timeout=300.0,
         for line in open(env_file, encoding="utf-8"):
             if "=" in line and not line.startswith("#"):
                 k, v = line.rstrip("\n").split("=", 1)
-                env[k] = v.strip()
+                env[k.strip().replace("export ", "", 1).strip()] = v.strip().strip('"').strip("'")
     base_url = base_url or os.environ.get("BASE_URL") or env.get("BASE_URL")
     model = model or os.environ.get("LLM_MODEL") or env.get("LLM_MODEL")
     key = key or os.environ.get("AI_API_KEY") or env.get("AI_API_KEY")
