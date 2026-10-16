@@ -147,7 +147,7 @@ rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)
 pcg = {r["goal"] for r in res if r["ok"]}; asked = {r["goal"] for r in res}
 rec["agree_both"] = len(pcg & set(py)); rec["pc_only"] = len(pcg - set(py)); rec["py_only_asked"] = len((set(py) & asked) - pcg)
-rec["py_derived_n"] = len(py); rec["total_s"] = round(time.time() - t0, 3)
+rec["py_invalid_chain"] = sum(1 for d in spec.get("python_derived", []) if "invalid_chain" in d); rec["py_derived_n"] = len(py); rec["total_s"] = round(time.time() - t0, 3)
 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
 with open(a.out, "a") as f: f.write(json.dumps(rec) + "\n")
 if not a.keep_spec:

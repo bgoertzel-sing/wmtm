@@ -113,17 +113,30 @@ def python_derived(facts, goals):
         if h == "Member":
             members.add(a)
         atoms.append(PLNAtom(t, "%s(%s,%s)" % (t, tok(a), tok(b)), TruthValue(strength=s, confidence=c)))
-    gs, py = set(goals), []
+    # Python sees Member as Inheritance, so it can also chain Member x Member (not valid).  Re-type each
+    # derivation by the valid chain that supports it; derivations with no valid chain are marked invalid.
+    rel = {(h, a, b) for (h, a, b, _, _) in facts}
+    succ = {}
+    for (h, a, b) in rel:
+        succ.setdefault((h, a), set()).add(b)
+    def chain(h1, a, c, h2="Inheritance"):
+        return any(c in succ.get((h2, b), ()) for b in succ.get((h1, a), ()))
+    py = []
     for d in pln_inference_over_atoms(atoms):
         m = _NAME.match(d.name)
         if not m or m.group(2) not in back or m.group(3) not in back:
             continue
         a, b = back[m.group(2)], back[m.group(3)]
-        h = "Implies" if m.group(1) == "Implication" else "Inheritance"
-        g = "(%s %s %s)" % (h, a, b)
-        if h == "Inheritance" and a in members and "(Member %s %s)" % (a, b) in gs:
-            g = "(Member %s %s)" % (a, b)
-        py.append({"goal": g, "s": round(d.truth.strength, 4), "c": round(d.truth.confidence, 4)})
+        rec = {"s": round(d.truth.strength, 4), "c": round(d.truth.confidence, 4)}
+        if m.group(1) == "Implication":
+            rec["goal"] = "(Implies %s %s)" % (a, b)
+        elif chain("Inheritance", a, b):
+            rec["goal"] = "(Inheritance %s %s)" % (a, b)
+        elif chain("Member", a, b):
+            rec["goal"] = "(Member %s %s)" % (a, b)
+        else:
+            rec["invalid_chain"] = "(Inheritance %s %s)" % (a, b)
+        py.append(rec)
     return py
 
 
@@ -137,7 +150,12 @@ def build_snapshot(store, cycle=0, k=None):
     for it in items:
         if it.id in cached:
             n_sp += 1
-            metta.extend(cached[it.id]); facts.extend(semparse_facts(cached[it.id]))
+            fs = semparse_facts(cached[it.id]); facts.extend(fs)
+            if os.environ.get("WMTM_PC_SHADOW_FULL_KB", "0") == "1":
+                metta.extend(cached[it.id])
+            else:  # only the binary facts the goals are built from: a 700-atom KB makes each query ~7-10 s
+                for (h, x, y, sv, cv) in fs:
+                    metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); i += 1
             continue
         for a in wmtm_item_to_pln_atoms(it):
             if a.atom_type == "Concept":
