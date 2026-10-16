@@ -45,6 +45,10 @@ _STOPWORDS = frozenset({
     'any', 'can', 'will', 'may', 'should', 'could', 'would', 'might',
     'head', 'set', 'get', 'got', 'one', 'two', 'new', 'old', 'still',
     'see', 'use', 'used', 'using', 'make', 'made', 'run', 'running',
+    # Quantifier/negation pronouns: the regex extractor would treat them as entities
+    # ("nothing has room" -> (nothing, has, room)). Semantic parsing handles them properly.
+    'nothing', 'something', 'anything', 'everything', 'none', 'nobody',
+    'someone', 'anyone', 'everyone', 'noone',
 })
 
 

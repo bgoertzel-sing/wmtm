@@ -39,3 +39,9 @@ via `WMTM_REPLAY_DATA`, see README).
 The pre-rewrite refs exist only in the original local clone
 (`old-main-with-fixtures`, `old-v0.1.0`, `old-v0.2.0-rc1`) and must never be
 pushed.
+
+## v0.2.0-rc3 (2026-10-16)
+- Stopgap: quantifier/negation pronouns (nothing, something, anything, everything, none, nobody, someone, anyone,
+  everyone, noone) are now stopwords for the regex triple extractor. Before, "nothing has room" became the
+  junk belief (nothing, has, room). The semantic-parsing reasoner will replace this extractor.
+- Test: `tests/test_quantifier_stopwords.py`.
