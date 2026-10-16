@@ -135,8 +135,8 @@ def python_derived(facts, goals):
             rec["goal"] = "(Inheritance %s %s)" % (a, b)
         elif chain("Member", a, b):
             rec["goal"] = "(Member %s %s)" % (a, b)
-        else:
-            rec["invalid_chain"] = "(Inheritance %s %s)" % (a, b)
+        else:  # still asked of PeTTaChainer, so a Python-only conclusion is measured, not hidden
+            rec["invalid_chain"] = rec["goal"] = "(Inheritance %s %s)" % (a, b)
         py.append(rec)
     return py
 
