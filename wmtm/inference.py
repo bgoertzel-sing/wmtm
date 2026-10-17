@@ -103,6 +103,7 @@ class InferenceCandidate:
     inference_type: str  # 'deduction', 'induction', 'abduction', 'analogy', 'evidence_aggregation'
     triple: Optional[BeliefTriple] = None
     initial_sti: float = 0.0
+    provenance: Optional[dict] = None   # Track I: reasoner provenance (PeTTaChainer STV + proof term)
 
 
 @dataclass

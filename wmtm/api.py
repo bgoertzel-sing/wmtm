@@ -44,7 +44,7 @@ class WMTMConfig:
     llm: Optional[Callable[..., str]] = None    # llm(prompt, **opts) -> str (unused until semantic parsing lands)
     petta: Any = None                           # PeTTa runtime handle/path (PeTTaChainer backend, not yet used)
     use_goalchainer: bool = False
-    reasoner: str = "python"                    # "python" | "pettachainer" (not yet implemented)
+    reasoner: str = "python"                    # "python" | "pettachainer" (flags file "reasoner" overrides)
     capacity: int = 60
     use_pln: bool = True
     journal_refresh_interval: float = 300.0     # re-parse the journal at most every N s
@@ -90,8 +90,9 @@ def derived_item_id(note):
 
 class WMTM:
     def __init__(self, config: WMTMConfig):
-        if config.reasoner != "python":
-            raise NotImplementedError(f"reasoner={config.reasoner!r} (only 'python' is available)")
+        from .pc_admit import REASONERS
+        if config.reasoner not in REASONERS:
+            raise ValueError(f"reasoner={config.reasoner!r} (expected one of {REASONERS})")
         self.config = config
         self.state_dir = Path(config.state_dir)
         self.state_file = self.state_dir / config.state_filename
@@ -122,6 +123,7 @@ class WMTM:
             orch = WMTMOrchestrator(store, use_pln=self.config.use_pln,
                                     use_goalchainer=self.config.use_goalchainer)
             orch.runtime_state_dir = str(self.state_dir)     # <state_dir>/_wmtm_flags.json gates the shadow hooks
+            orch.default_reasoner = self.config.reasoner
             try:
                 if _os.path.exists(self.state_file):
                     with open(self.state_file) as f:

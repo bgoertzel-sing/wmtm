@@ -115,15 +115,20 @@ def test_fault_worker_with_dead_gateway(tmp_path, monkeypatch):
     assert log[0]["status"] == "llm_error" and c.pending() == 1
 
 
-def test_shadow_uses_cache_then_falls_back(tmp_path, monkeypatch):
+def test_shadow_uses_cache_only_no_regex_fallback(tmp_path, monkeypatch):
+    """Track K: an item without a cached parse adds no facts (no regex fallback); once parsed it joins in."""
     c = _cache(tmp_path); monkeypatch.setenv("WMTM_SEMPARSE_DIR", c.d)
     s1, s2 = "Rex is a dog of ours.", "dog is a mammal"
-    llm = FakeLLM({s1: "(: r1 (Member rex dog) (STV 1.0 0.9))"})
+    llm = FakeLLM({s1: "(: r1 (Member rex dog) (STV 1.0 0.9))", s2: "(: r2 (Inheritance dog mammal) (STV 1.0 0.9))"})
     c.enqueue([("s0", s1, 1.0)]); process_queue(c, llm, adapter=_ad(llm))
     spec = pc_shadow.build_snapshot(_store([s1, s2]), cycle=1)
-    assert spec["semparse_items"] == 1 and spec["fallback_atoms"] >= 1
+    assert spec["semparse_items"] == 1 and spec["unparsed_items"] == 1 and spec["facts"] == 1
+    assert "python_derived" not in spec and "fallback_atoms" not in spec
+    assert "(Member rex mammal)" not in spec["goals"] and not any("mammal" in a for a in spec["atoms"])
+    c.enqueue([("s1", s2, 1.0)]); process_queue(c, llm, adapter=_ad(llm))
+    spec = pc_shadow.build_snapshot(_store([s1, s2]), cycle=2)
+    assert spec["semparse_items"] == 2 and spec["unparsed_items"] == 0
     assert "(Member rex mammal)" in spec["goals"]                    # Member x Inheritance join
-    assert any(d.get("goal") == "(Member rex mammal)" for d in spec["python_derived"])
 
 
 def test_build_goals_chains_and_joins():

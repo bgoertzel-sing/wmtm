@@ -78,3 +78,19 @@ pushed.
   Output records carry the actual `prio` and `prio_end` (incl. `resets`).
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
+
+## v0.4.0-rc1 (2026-10-17)
+- Tracks I-K. Reasoner switch `reasoner` = `python` (default, unchanged behaviour) | `pettachainer` in the flags
+  file. With `pettachainer` the Python PLN phase is replaced by admitting PeTTaChainer conclusions from the shadow
+  worker's `pc_shadow/admit.json`: only from fresh, canary-passed runs, only rule-derived proofs within the
+  timeout and budget, with STV and proof-term provenance on each item. There is no Python fallback: a missing,
+  stale or failed run means nothing is admitted that cycle (`wmtm/pc_admit.py`).
+- Parse-quality gate for the shadow KB (`wmtm/parse_gate.py`, flags `gate_*`). It has per-fact sanity rules
+  (placeholder subjects, low confidence, negative and hedged quantifiers, broad categories), a per-fact cap on
+  admitted conclusions, and a review log.
+- Shadow KB is built from cached semantic-parse atoms only. The regex fallback, the Python PLN comparison and
+  `reasoner=both` were removed.
+- `reasoner_writeback` (default false): PeTTaChainer-admitted conclusions are not written back to the long-term
+  journal. They stay in working memory only.
+- API unchanged. `WMTMConfig.reasoner` accepts `python` | `pettachainer`. Existing Iter adapters work as-is.
+- Tests: `tests/test_pc_admit.py`, `tests/test_parse_gate.py`.

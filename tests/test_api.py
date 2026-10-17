@@ -82,8 +82,11 @@ def test_derive_then_admitted(tmp_path):
 
 
 def test_reasoner_flag(tmp_path):
-    with pytest.raises(NotImplementedError):
-        WMTM(WMTMConfig(state_dir=tmp_path, reasoner="pettachainer"))
+    for m in ("python", "pettachainer"):                # Track K: "both" removed
+        WMTM(WMTMConfig(state_dir=tmp_path, reasoner=m))
+    for bad in ("prolog", "both"):
+        with pytest.raises(ValueError):
+            WMTM(WMTMConfig(state_dir=tmp_path, reasoner=bad))
 
 
 def test_decide_with_injected_solver(tmp_path):

@@ -128,7 +128,11 @@ def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
     llm = LLM(); pcm.process_queue(c, llm, adapter=SemParseAdapter(llm, loader=None, system="SYS"))
     st = WMTMStore(); st.admit("n1", text, source_type="recalled", initial_sti=1.0)
     spec = pc_shadow.build_snapshot(st, cycle=1)
-    assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])      # fact kept
+    # Track J: the parse gate (default on) rejects placeholder-subject facts before the KB, and logs them
+    assert not any("sk_req_1" in a for a in spec["atoms"]) and spec["gate"]["rejected"].get("placeholder_subject") == 1
+    monkeypatch.setenv("WMTM_GATE", "0")
+    spec = pc_shadow.build_snapshot(st, cycle=1)
+    assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])      # fact kept (gate off)
     assert "(Member zed message)" in spec["goals"] and not any("sk_" in x for x in spec["goals"])
     monkeypatch.setenv("WMTM_PC_SHADOW_SKOLEM_GOALS", "1")
     assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_snapshot(st, cycle=1)["goals"]

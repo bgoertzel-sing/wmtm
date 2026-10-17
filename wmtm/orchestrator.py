@@ -33,6 +33,10 @@ class CycleResult:
     admitted_derived: int = 0
     pln_admitted: int = 0
     gc_admitted: int = 0
+    pc_admitted: int = 0                 # Track I: PeTTaChainer conclusions admitted this cycle
+    reasoner: str = "python"             # effective mode this cycle
+    reasoner_skipped: bool = False       # pettachainer mode admitted nothing: no usable worker run (Track K)
+    reasoner_info: dict = field(default_factory=dict)
     evicted: int = 0
     written_back: int = 0
     contradiction_evictions: int = 0
@@ -82,6 +86,7 @@ class WMTMOrchestrator:
         self._cycle = 0
         # Bot memory dir for the background-hook flags file (set by wmtm.api; None = env-only, dev/tests).
         self.runtime_state_dir = None
+        self.default_reasoner = "python"   # Track I: used when the flags file / env does not set "reasoner"
 
 
     def active_goal(self):
@@ -203,18 +208,48 @@ class WMTMOrchestrator:
             source_type='derived',
             derived_from=cand.derived_from,
             initial_sti=cand.initial_sti,
+            provenance=getattr(cand, "provenance", None),
         )
 
-    def _run_pln_phase(self) -> list:
-        """Run PLN inference over the WMTM active set and admit candidates.
+    def _run_pln_phase(self, cfg=None, result=None, mode="python") -> list:
+        """Run the reasoner phase and admit candidates (Track K: python | pettachainer).
 
-        Returns the list of admitted PLN-derived items.
+        pettachainer admits PeTTaChainer conclusions from the shadow worker's admit file (never waits).  Track K: there
+        is NO Python fallback - if no fresh, canary-passed run is available (worker failed, timed out, canary failed,
+        file missing/stale/unreadable) nothing is admitted this cycle and result.reasoner_info["skipped"] says why.
+        Returns the list of admitted derived items.
         """
         if not self.use_pln:
             return []
+        if result is not None:
+            result.reasoner = mode
+        if mode != "pettachainer":
+            return self._run_python_pln()
+        pc_items, info = [], {}
+        try:
+            from .pc_admit import load_candidates
+            cands, info = load_candidates(cfg or {}, self.store)
+        except Exception as e:
+            cands, info = None, {"skipped": "error:" + type(e).__name__}
+        if cands is None:
+            if result is not None:
+                result.reasoner_skipped = True
+        else:
+            try:
+                pc_items = self._admit_derived(cands)
+            except Exception as e:
+                info = dict(info, admit_error=type(e).__name__); pc_items = []
+        if result is not None:
+            result.reasoner_info = info
+            result.pc_admitted = len(pc_items)
+        return pc_items
+
+    def _run_python_pln(self, drop_texts=None) -> list:
         try:
             from .pln_bridge import run_pln_inference_over_wmtm
             pln_candidates = run_pln_inference_over_wmtm(self.store)
+            if drop_texts:
+                pln_candidates = [c for c in pln_candidates if c.content.lower().strip() not in drop_texts]
             if not pln_candidates:
                 return []
             return self._admit_derived(pln_candidates)
@@ -271,11 +306,19 @@ class WMTMOrchestrator:
         self,
         append_fn: Optional[Callable[[str], None]],
         result: CycleResult,
+        cfg: Optional[dict] = None,
     ) -> None:
-        """Write high-utility items back to LTM via append_fn."""
+        """Write high-utility items back to LTM via append_fn.
+
+        v0.4: items admitted from PeTTaChainer (provenance reasoner=pettachainer) are written back only when the
+        ``reasoner_writeback`` flag is on (default off: working memory only).
+        """
         if append_fn is None:
             return
         wb_candidates = self.writeback.select_candidates(self.store)
+        if not (cfg or {}).get("reasoner_writeback"):
+            wb_candidates = [c for c in wb_candidates
+                             if (getattr(c.item, "provenance", None) or {}).get("reasoner") != "pettachainer"]
         written = self.writeback.writeback(wb_candidates, append_fn)
         result.written_back = len(written)
 
@@ -310,21 +353,28 @@ class WMTMOrchestrator:
         admitted = self._admit_derived(candidates)
         result.admitted_derived = len(admitted)
 
-        # 2b. Run PLN inference and admit its candidates
-        pln_admitted = self._run_pln_phase()
-        result.pln_admitted = len(pln_admitted)
-
-        # 2b'. Track G / H background hooks: off unless enabled in <state_dir>/_wmtm_flags.json (or env).
-        # Detached workers; they never admit, never wait and never raise.  One flags read per cycle.
+        # 2a'. One flags read per cycle (Tracks G / H / I).
         try:
             from . import runtime_config as _rc
             _cfg = _rc.resolve(self.runtime_state_dir)
         except Exception:
             _cfg = {}
-        if _cfg.get("pc_shadow"):
+        try:
+            from .pc_admit import mode as _reasoner_mode
+            _mode = _reasoner_mode(_cfg, self.default_reasoner)
+        except Exception:
+            _mode = "python"
+
+        # 2b. Reasoner phase: Python PLN and/or admitted PeTTaChainer conclusions (Track I)
+        pln_admitted = self._run_pln_phase(_cfg, result, _mode)
+        result.pln_admitted = len(pln_admitted)
+
+        # 2b'. Track G / H background hooks: off unless enabled in <state_dir>/_wmtm_flags.json (or env).
+        # Detached workers; they never admit, never wait and never raise.  One flags read per cycle.
+        if _cfg.get("pc_shadow") or _mode != "python":
             try:
                 from .pc_shadow import maybe_launch
-                maybe_launch(self.store, self._cycle, cfg=_cfg)       # Track G: PeTTaChainer shadow
+                maybe_launch(self.store, self._cycle, cfg=_cfg, **({"force": True} if _mode != "python" else {}))       # Track G: PeTTaChainer shadow
             except Exception:
                 pass
         if _cfg.get("semparse_feed"):
@@ -361,7 +411,7 @@ class WMTMOrchestrator:
         result.evicted = len(evicted_by_tick) + len(evicted_by_policy)
 
         # 7. Writeback
-        self._do_writeback(append_fn, result)
+        self._do_writeback(append_fn, result, _cfg)
 
         result.active_count = len(self.store)
         result.forgetting_log_size = len(self.forget_log)

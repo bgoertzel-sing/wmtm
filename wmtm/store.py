@@ -49,6 +49,7 @@ class WMTMStore:
         derived_from: Optional[list[str]] = None,
         initial_sti: float = 1.0,
         origin_timestamp: float = 0.0,
+        provenance: Optional[dict] = None,
     ) -> WMTMItem:
         """Add an item. If at/over capacity, evict lowest-STI first.
 
@@ -76,6 +77,7 @@ class WMTMStore:
             utility=0.0,
             last_used=self._tick,
             origin_timestamp=origin_timestamp,
+            provenance=provenance,
         )
 
         while len(self._items) >= self.capacity:

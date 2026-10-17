@@ -35,6 +35,7 @@ class WMTMItem:
     last_used: int = 0
     created_at: float = field(default_factory=_now)
     origin_timestamp: float = 0.0  # F25: original journal entry timestamp (0 = unknown)
+    provenance: Optional[dict] = None  # Track I: {reasoner, goal, stv, proof, ...} for reasoner-admitted items
 
     @property
     def effective_age_seconds(self) -> float:
@@ -81,6 +82,7 @@ class WMTMItem:
             "last_used": self.last_used,
             "created_at": self.created_at,
             "origin_timestamp": self.origin_timestamp,
+            **({"provenance": self.provenance} if self.provenance is not None else {}),
         }
 
     @classmethod
@@ -99,4 +101,5 @@ class WMTMItem:
             last_used=d.get("last_used", 0),
             created_at=d.get("created_at", 0.0),
             origin_timestamp=d.get("origin_timestamp", 0.0),
+            provenance=d.get("provenance"),
         )

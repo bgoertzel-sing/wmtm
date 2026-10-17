@@ -4,7 +4,7 @@ Off by default.  Enabled per bot by ``"pc_shadow": true`` in ``<state_dir>/_wmtm
 WMTM_PC_SHADOW=1); see wmtm/runtime_config.py for every knob.  The orchestrator calls
 maybe_launch(store, cycle, state_dir) after the Python PLN phase; the cycle side only copies the top-K item fields
 (K = shadow_k, default 200) into a spec under ``<runtime_dir>/pc_shadow/`` and launches a detached, niced worker
-(``python -m wmtm.workers.pc_shadow``) that builds the snapshot (cached semparse atoms, goals, Python PLN reference)
+(``python -m wmtm.workers.pc_shadow``) that builds the snapshot (cached semparse atoms only, goals)
 and asks PeTTaChainer.  It NEVER waits on the worker, never admits anything into WMTM and never raises.
 At most one worker runs at a time (pidfile guard); a busy worker means the cycle is skipped, not queued.
 """
@@ -115,58 +115,18 @@ def build_goals(rel, max_goals=None, skolem_goals=False):
     return goals[:max_goals]
 
 
-def python_derived(facts, goals):
-    """Run the Python PLN over the same facts.  Member is fed as Inheritance (Python has no Member) and mapped back."""
-    from .pln import pln_inference_over_atoms, PLNAtom, TruthValue
-    sym, back = {}, {}
-    def tok(x):
-        if x not in sym:
-            sym[x] = "s%d" % len(sym); back[sym[x]] = x
-        return sym[x]
-    atoms, members = [], set()
-    for (h, a, b, s, c) in facts:
-        t = {"Inheritance": "Inheritance", "Member": "Inheritance", "Implies": "Implication"}.get(h)
-        if not t:
-            continue
-        if h == "Member":
-            members.add(a)
-        atoms.append(PLNAtom(t, "%s(%s,%s)" % (t, tok(a), tok(b)), TruthValue(strength=s, confidence=c)))
-    # Python sees Member as Inheritance, so it can also chain Member x Member (not valid).  Re-type each
-    # derivation by the valid chain that supports it; derivations with no valid chain are marked invalid.
-    rel = {(h, a, b) for (h, a, b, _, _) in facts}
-    succ = {}
-    for (h, a, b) in rel:
-        succ.setdefault((h, a), set()).add(b)
-    def chain(h1, a, c, h2="Inheritance"):
-        return any(c in succ.get((h2, b), ()) for b in succ.get((h1, a), ()))
-    py = []
-    for d in pln_inference_over_atoms(atoms):
-        m = _NAME.match(d.name)
-        if not m or m.group(2) not in back or m.group(3) not in back:
-            continue
-        a, b = back[m.group(2)], back[m.group(3)]
-        rec = {"s": round(d.truth.strength, 4), "c": round(d.truth.confidence, 4)}
-        if m.group(1) == "Implication":
-            rec["goal"] = "(Implies %s %s)" % (a, b)
-        elif chain("Inheritance", a, b):
-            rec["goal"] = "(Inheritance %s %s)" % (a, b)
-        elif chain("Member", a, b):
-            rec["goal"] = "(Member %s %s)" % (a, b)
-        else:  # still asked of PeTTaChainer, so a Python-only conclusion is measured, not hidden
-            rec["invalid_chain"] = rec["goal"] = "(Inheritance %s %s)" % (a, b)
-        py.append(rec)
-    return py
-
-
 def build_snapshot(store, cycle=0, k=None, cfg=None):
-    """-> dict spec.  Per item: cached semparse atoms (Track H) when available, else the regex PLN mapping."""
-    from .pln_bridge import wmtm_item_to_pln_atoms
+    """-> dict spec.  Per item: cached semparse atoms (Track H) only.  Track K: no regex fallback - an item that has
+    not been parsed yet contributes no facts this cycle (counted in unparsed_items)."""
     cfg = cfg or rc.resolve()
     k = int(k or cfg["shadow_k"])
     max_goals = int(cfg["shadow_max_goals"]); skolem_goals = bool(cfg["shadow_skolem_goals"])
     items = store.get_active_set()[:k]
     cached = _cache_lookup(items, cfg["semparse_dir"])
-    metta, facts, n_sp, n_fb, i = [], [], 0, 0, 0
+    metta, facts, n_sp, n_unparsed, i = [], [], 0, 0, 0
+    src, fsrc = {}, []       # Track I provenance: KB label -> item id; (head, a, b, item id) per fact
+    from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB
+    gst = _pg.settings(cfg); gdec, lf = [], {}
     for it in items:
         if it.id in cached:
             n_sp += 1
@@ -177,39 +137,22 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
                 if len(_FACTS_MEMO) > 4096:
                     _FACTS_MEMO.clear()
                 _FACTS_MEMO[key] = fs
-            facts.extend(fs)
+            fs, dec = _pg.gate_facts(fs, _pg.quantifiers(cached[it.id]), gst, it.id); gdec.extend(dec)
+            facts.extend(fs); fsrc.extend([h, x, y, it.id] for (h, x, y, _s, _c) in fs)
             if cfg["shadow_full_kb"]:
                 metta.extend(cached[it.id])
             else:  # only the binary facts the goals are built from: a 700-atom KB makes each query ~7-10 s
                 for (h, x, y, sv, cv) in fs:
-                    metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); i += 1
+                    metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); src["sp%d" % i] = it.id; lf["sp%d" % i] = "(%s %s %s)" % (h, x, y); i += 1
             continue
-        for a in wmtm_item_to_pln_atoms(it):
-            if a.atom_type == "Concept":
-                continue
-            st = atom_to_metta(a, i); i += 1
-            if st:
-                n_fb += 1; metta.append(st); m = _NAME.match(a.name)
-                facts.append((HEAD[m.group(1)], m.group(2), m.group(3), a.truth.strength, a.truth.confidence))
+        n_unparsed += 1   # Track K: no regex fallback; an item without cached semparse atoms adds no facts
     rel = {(h, a, b) for (h, a, b, _, _) in facts}
     goals = build_goals(rel, max_goals, skolem_goals)
-    try:
-        py = python_derived(facts, goals)
-    except Exception as e:  # Python PLN failure is recorded, not raised
-        py = [{"error": type(e).__name__}]
-    # also ask PeTTaChainer about what only Python derived, so one-engine-only conclusions are measured both ways
-    n_sk = 0
-    for d in py:
-        g = d.get("goal")
-        if not g or g in goals:
-            continue
-        if not skolem_goals and goal_has_skolem(g):
-            n_sk += 1; continue
-        if len(goals) < 2 * max_goals:
-            goals.append(g)
     return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
-            "python_derived": py, "semparse_items": n_sp, "fallback_atoms": n_fb, "facts": len(facts),
-            "skolem_goals": skolem_goals, "py_skolem_goals_dropped": n_sk}
+            "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts),
+            "skolem_goals": skolem_goals,
+            "atom_src": src, "fact_src": fsrc, "label_fact": lf,
+            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec)}
 
 
 def _cleanup_specs(out_dir, max_age=3600):
@@ -265,13 +208,13 @@ def _stamp(cfg):
         pass
 
 
-def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle"):
+def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle", force=False):
     """Launch from raw top-K item dicts (raw_item() shape, active-set order).  Shared by the orchestrator hook and
     the automated fast path (which has only the state JSON, no engine).  Gates, cheapest first: flag, single-worker
     busy guard, rate limit (shadow_min_interval_s).  Returns pid or None; swallows every error."""
     try:
         cfg = cfg or rc.resolve(state_dir)
-        if not cfg["pc_shadow"]:
+        if not (cfg["pc_shadow"] or force):     # force: reasoner=pettachainer|both needs the worker (Track I)
             return None
         if rc.busy(os.path.join(cfg["shadow_dir"], "worker.pid"), WORKER_MAX_AGE):
             return None  # skip before doing any work
@@ -290,17 +233,17 @@ def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle"):
         return None
 
 
-def maybe_launch(store, cycle=0, state_dir=None, cfg=None):
+def maybe_launch(store, cycle=0, state_dir=None, cfg=None, force=False):
     """Orchestrator hook.  Returns pid or None; swallows every error."""
     try:
         cfg = cfg or rc.resolve(state_dir)
-        if not cfg["pc_shadow"]:
+        if not (cfg["pc_shadow"] or force):     # force: reasoner=pettachainer needs the worker (Track I)
             return None
         if rc.busy(os.path.join(cfg["shadow_dir"], "worker.pid"), WORKER_MAX_AGE) or rate_limited(cfg):
             return None  # skip before doing any work
         # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read, Python PLN)
         k = int(cfg["shadow_k"])
-        return maybe_launch_raw([raw_item(it) for it in store.get_active_set()[:k]], cycle, cfg)
+        return maybe_launch_raw([raw_item(it) for it in store.get_active_set()[:k]], cycle, cfg, force=force)
     except Exception:
         return None
 

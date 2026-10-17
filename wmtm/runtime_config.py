@@ -39,6 +39,24 @@ _V, _D = "vendor", "data"
 SPEC = {
     "pc_shadow":           ("WMTM_PC_SHADOW", bool, False, None),
     "semparse_feed":       ("WMTM_SEMPARSE_FEED", bool, False, None),
+    "reasoner":            ("WMTM_REASONER", str, "", None),       # python|pettachainer; "" = API default (python)
+    "reasoner_max_age_s":  ("WMTM_REASONER_MAX_AGE", float, 900.0, None),
+    "reasoner_max_admit":  ("WMTM_REASONER_MAX_ADMIT", int, 5, None),
+    # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
+    # live in working memory only.  Python-PLN / tool-derived items are not affected.
+    "reasoner_writeback":  ("WMTM_REASONER_WRITEBACK", bool, False, None),
+    # Track J parse-quality gate (wmtm/parse_gate.py); applies to PeTTaChainer conclusions only
+    "gate_on":             ("WMTM_GATE", bool, True, None),
+    "gate_min_conf":       ("WMTM_GATE_MIN_CONF", float, 0.3, None),
+    "gate_broad_terms":    ("WMTM_GATE_BROAD_TERMS", str, "thing,things,entity,entities,object,objects,something,anything,everything,stuff,item,items,concept,trivial,important,relevant,useful,ok,fine,good,bad", None),
+    "gate_placeholder_terms": ("WMTM_GATE_PLACEHOLDERS", str, "it,this,that,they,them,thing,something,someone,somebody,x,y,z", None),
+    "gate_hedged_quantifiers": ("WMTM_GATE_HEDGED", str, "mostly,most,some,often,usually,sometimes,many,few,several,rarely,partly,generally,typically,maybe,probably", None),
+    "gate_negative_quantifiers": ("WMTM_GATE_NEGATIVE", str, "no,none,nothing,never,not,nobody,neither", None),
+    "gate_broad_action":   ("WMTM_GATE_BROAD_ACTION", str, "reject", None),      # reject | discount | keep
+    "gate_hedged_action":  ("WMTM_GATE_HEDGED_ACTION", str, "reject", None),     # reject | discount | keep
+    "gate_discount":       ("WMTM_GATE_DISCOUNT", float, 0.5, None),             # strength factor for discount
+    "gate_max_per_fact":   ("WMTM_GATE_MAX_PER_FACT", int, 3, None),             # admitted conclusions per KB fact per cycle; 0 = no cap
+    "gate_review_min":     ("WMTM_GATE_REVIEW_MIN", int, 3, None),               # log facts behind >= N proved conclusions
     "parse_cap_per_hour":  ("WMTM_SEMPARSE_PER_HOUR", int, 20, None),
     "parse_max_chars":     ("WMTM_SEMPARSE_MAX_CHARS", int, 1500, None),
     "parse_max_attempts":  ("WMTM_SEMPARSE_MAX_ATTEMPTS", int, 2, None),
@@ -162,6 +180,9 @@ def resolve(state_dir=None, environ=None):
     cfg["semparse_dir"] = cfg["semparse_dir"] or os.path.join(cfg["runtime_dir"], "semparse_cache")
     cfg["python"] = cfg["python"] or sys.executable
     cfg["parse_cap_per_hour"] = max(0, cfg["parse_cap_per_hour"])
+    cfg["reasoner"] = str(cfg["reasoner"] or "").strip().lower()
+    if cfg["reasoner"] and cfg["reasoner"] not in ("python", "pettachainer"):
+        info.setdefault("invalid", []).append("reasoner"); cfg["reasoner"] = "python"
     cfg["state_dir"] = sd
     cfg["_source"] = info
     return cfg

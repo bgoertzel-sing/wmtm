@@ -20,6 +20,11 @@ def _store(texts):
 SYN = ["cat is a mammal", "mammal is a animal", "rain -> wet", "wet -> slippery"]
 
 
+@pytest.fixture(autouse=True)
+def _semparse(monkeypatch):
+    import _fake_semparse; _fake_semparse.install(monkeypatch)   # Track K: reasoner reads semparse atoms only
+
+
 def test_disabled_by_default(monkeypatch, tmp_path):
     monkeypatch.delenv("WMTM_PC_SHADOW", raising=False)
     called = []
@@ -35,7 +40,12 @@ def test_snapshot_maps_atoms_and_goals():
     assert "(Inheritance cat mammal)" in joined and "(Implies rain wet)" in joined
     assert "(Implication " not in joined            # facts must not look like rules
     assert "(Inheritance cat animal)" in spec["goals"] and "(Implies rain slippery)" in spec["goals"]
-    assert any(d.get("goal") == "(Inheritance cat animal)" for d in spec["python_derived"])
+    assert spec["semparse_items"] == 4 and spec["unparsed_items"] == 0 and "python_derived" not in spec
+
+
+def test_snapshot_unparsed_items_add_no_facts():
+    spec = pc_shadow.build_snapshot(_store(SYN + ["the weather looks odd today"]), cycle=1, k=200)
+    assert spec["semparse_items"] == 4 and spec["unparsed_items"] == 1 and spec["facts"] == 4
 
 
 def test_snapshot_topk_limits_items():

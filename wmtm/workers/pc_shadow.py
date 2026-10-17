@@ -120,6 +120,7 @@ def ask(w, g, tmo):
     if ok:
         tv = parse_stv(r)
         if tv: rec["stv"] = [round(tv[0], 4), round(tv[1], 4)]
+        rec["proof"] = next((x for x in r if head in x), "")[:2000]
     return w, rec
 
 t0 = time.time(); spec = json.load(open(a.spec))
@@ -156,26 +157,24 @@ else:
             else: w = w2
         rec["skipped_budget"] = skipped
     if w: w.kill()
-py = {d["goal"]: d for d in spec.get("python_derived", []) if "goal" in d}
-diffs = []
-for r in res:
-    if r["goal"] in py:
-        r["python"] = [py[r["goal"]]["s"], py[r["goal"]]["c"]]
-        if r.get("stv"):  # PeTTaChainer is the reference: diff = python - pc
-            r["diff"] = [round(r["python"][0] - r["stv"][0], 4), round(r["python"][1] - r["stv"][1], 4)]; diffs.append(r["diff"])
-if diffs:
-    rec["tv_diff_mean"] = [round(sum(d[0] for d in diffs) / len(diffs), 4), round(sum(d[1] for d in diffs) / len(diffs), 4)]
-    rec["tv_absdiff_max"] = [round(max(abs(d[0]) for d in diffs), 4), round(max(abs(d[1]) for d in diffs), 4)]
-for key in ("semparse_items", "fallback_atoms", "facts", "build_s", "build_error", "skolem_goals", "py_skolem_goals_dropped"):
+for key in ("semparse_items", "unparsed_items", "facts", "build_s", "build_error", "skolem_goals", "gate"):
     rec[key] = spec.get(key)
 rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)
-pcg = {r["goal"] for r in res if r["ok"]}; asked = {r["goal"] for r in res}
-rec["agree_both"] = len(pcg & set(py)); rec["pc_only"] = len(pcg - set(py)); rec["py_only_asked"] = len((set(py) & asked) - pcg)
 rec["prio_end"] = PRIO_GUARD.stats() if PRIO_GUARD else None
-rec["py_invalid_chain"] = sum(1 for d in spec.get("python_derived", []) if "invalid_chain" in d); rec["py_derived_n"] = len(py); rec["total_s"] = round(time.time() - t0, 3)
+rec["total_s"] = round(time.time() - t0, 3)
 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
 rc.append_jsonl(a.out, rec, CFG.get("jsonl_max_bytes"))
+try:  # Track I: only canary-passed, in-budget, structurally checked proofs; failed runs written too (readers admit nothing)
+    from wmtm.pc_admit import write_admit_file
+    write_admit_file(os.path.dirname(os.path.abspath(a.out)), rec, spec)
+except Exception:
+    pass
+try:  # Track J: review log of gated facts and facts behind many conclusions
+    from wmtm.parse_gate import review
+    review(os.path.dirname(os.path.abspath(a.out)), rec, spec, CFG)
+except Exception:
+    pass
 if not a.keep_spec:
     try: os.unlink(a.spec)
     except OSError: pass
