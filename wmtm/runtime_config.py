@@ -45,6 +45,9 @@ SPEC = {
     # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
     # live in working memory only.  Python-PLN / tool-derived items are not affected.
     "reasoner_writeback":  ("WMTM_REASONER_WRITEBACK", bool, False, None),
+    # v0.4 rc2: also admit PeTTaChainer conclusions on automated (fast-path) turns
+    "reasoner_admit_on_automated": ("WMTM_REASONER_ADMIT_ON_AUTOMATED", bool, True, None),
+    "admit_log_max_bytes": ("WMTM_ADMIT_LOG_MAX_BYTES", int, 1_000_000, None),   # <shadow_dir>/admit_log.jsonl (+ .1)
     # Track J parse-quality gate (wmtm/parse_gate.py); applies to PeTTaChainer conclusions only
     "gate_on":             ("WMTM_GATE", bool, True, None),
     "gate_min_conf":       ("WMTM_GATE_MIN_CONF", float, 0.3, None),

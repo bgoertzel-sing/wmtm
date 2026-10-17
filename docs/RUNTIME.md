@@ -28,19 +28,33 @@ one per `shadow_min_interval_s` (default 300 s) on both paths, so autonomous tic
 
 With `pettachainer`:
 - The Python PLN phase does **not** run. There is no Python fallback.
-- On each real cycle (`WMTMOrchestrator.cycle()`, i.e. real user turns) WMTM reads `<shadow_dir>/admit.json`, which
+- On every turn (rc2; rc1: only inside `WMTMOrchestrator.cycle()`) WMTM reads `<shadow_dir>/admit.json`, which
   the latest shadow worker run wrote. It admits from it only when all of these hold: the file is fresh
   (`reasoner_max_age_s`, measured from the run's spec timestamp), the run status is `ok` and the canary passed
   (negative control not proved). Otherwise it admits nothing that cycle (`CycleResult.reasoner_skipped`,
-  `reasoner_info.skipped` = `no_admit_file` / `bad_admit_file` / `stale` / `run_<status>`).
+  `reasoner_info.skipped` = `no_admit_file` / `bad_admit_file` / `stale` / `run_<status>` / `already_consumed` /
+  `no_candidates`).
+- rc2: admission does not depend on the full cycle. User turns admit inside `cycle()`, or on their own when the cycle
+  is skipped for `cycle_budget` (path `budget-skipped`). Automated turns admit on the fast path straight into the
+  state snapshot (`reasoner_admit_on_automated`, default true; the engine modules are imported only when a new run
+  has candidates). Each run (`run` = `<spec_ts>/<ts>`) is admitted at most once: once it yields gated candidates its
+  id is stored as `pc_admit.consumed_run` in the state file and later turns skip it.
+- rc2: conclusions already in WMTM (same text) or in the forgetting log are dropped before the caps
+  (`dropped.known`), so a run that re-proves admitted conclusions still admits its new ones.
+- rc2: every attempt (reasoner = pettachainer) appends one record (numbers and ids only) to
+  `<shadow_dir>/admit_log.jsonl` (rotated to `.1` above `admit_log_max_bytes`): `ts`, `path`
+  (`user` / `budget-skipped` / `automated`), `run`, `age_s`, `status`, `results`, `candidates`, `admitted`,
+  `skipped`, `dropped`, and `timing` (user turns: `store_s`, `journal_s`, `recall_s`, `relevance_s`,
+  `derives_cleanup_s`, `elapsed_before_cycle_s`, `cycle_s` or `admit_s` + `tick_s`, `total_s`, `cycle_budget`;
+  automated: `admit_s`).
 - Per result it needs a proof that used a derivation rule (`inh_trans`, `imp_trans`, `mem_inh`), so proofs straight
   from asserted facts are dropped. It also needs STV >= (0.1, 0.05), at least one supporting item still active, and
   it applies the per-fact cap (`gate_max_per_fact`) and `reasoner_max_admit`.
-- Admitted items: `source_type="derived"`, id `derived-pc_deduction-<cycle>-<i>`, `derived_from` = the supporting
+- Admitted items: `source_type="derived"`, id `derived-pc_deduction-<cycle>-<content md5[:8]>` (rc1: `-<i>`), `derived_from` = the supporting
   item ids, initial STI = strength x confidence, and `provenance` = `{reasoner, goal, stv, proof, run_ts, query_s}`
   (kept in the state file). The usual novelty and forgotten-item checks apply.
 - The shadow worker is launched on cycles even when `pc_shadow` is false. The automated fast path launches it only
-  when `pc_shadow` is true. Automated turns never admit.
+  when `pc_shadow` is true.
 - **Journal writeback:** derived items normally become writeback candidates (`derived_promotion` to the journal) once
   they reach age >= 15 and utility >= 1.5. PeTTaChainer-admitted items are excluded unless
   `reasoner_writeback` is true (default **false**: working memory only).
@@ -51,6 +65,8 @@ With `pettachainer`:
 | `reasoner_max_age_s` | `WMTM_REASONER_MAX_AGE` | 900 | ignore `admit.json` older than this |
 | `reasoner_max_admit` | `WMTM_REASONER_MAX_ADMIT` | 5 | admitted conclusions per cycle |
 | `reasoner_writeback` | `WMTM_REASONER_WRITEBACK` | false | allow journal writeback of PeTTaChainer-admitted items |
+| `reasoner_admit_on_automated` | `WMTM_REASONER_ADMIT_ON_AUTOMATED` | true | rc2: also admit on automated turns |
+| `admit_log_max_bytes` | `WMTM_ADMIT_LOG_MAX_BYTES` | 1000000 | rc2: rotate `admit_log.jsonl` above this size |
 | `gate_on` | `WMTM_GATE` | true | parse-quality gate on shadow KB facts (`wmtm/parse_gate.py`) |
 | `gate_min_conf` | `WMTM_GATE_MIN_CONF` | 0.3 | reject parsed facts below this confidence |
 | `gate_broad_terms` / `gate_placeholder_terms` | `WMTM_GATE_BROAD_TERMS` / `WMTM_GATE_PLACEHOLDERS` | built-in lists | broad categories; pronoun-like subjects (always rejected) |

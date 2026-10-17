@@ -103,7 +103,7 @@ def test_admission_filters(tmp_path):
             {"goal": "(Inheritance a b)", "stv": "x", "proof": "(inh_trans p)", "sources": ["s0"]}]
     _admit_doc(tmp_path, rows)
     cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path)}, _store())
-    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "below_threshold": 1, "bad": 3, "per_fact_cap": 0}
+    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "below_threshold": 1, "bad": 3, "known": 0, "per_fact_cap": 0}
 
 
 def test_max_admit_cap(tmp_path):

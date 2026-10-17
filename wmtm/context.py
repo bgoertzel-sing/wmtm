@@ -445,7 +445,7 @@ def _att_total(item_data):
     return att.get("sti", 0.0) * 1.0 + att.get("ati", 0.0) * 0.5 + att.get("lti", 0.0) * 0.2   # AttentionValue.total
 
 
-def automated_hooks(state_dir, items_dict, cycle):
+def automated_hooks(state_dir, items_dict, cycle, cfg=None):
     """Track G/H background hooks for automated turns (rc2).
 
     The orchestrator runs pc_shadow.maybe_launch / parse_cache.maybe_feed only
@@ -458,8 +458,9 @@ def automated_hooks(state_dir, items_dict, cycle):
     Never raises. -> {"shadow": pid|None, "feed": pid|None} or None if off.
     """
     try:
-        from . import runtime_config as rc
-        cfg = rc.resolve(state_dir)
+        if cfg is None:
+            from . import runtime_config as rc
+            cfg = rc.resolve(state_dir)
         if not cfg.get("hooks_on_automated") or not (cfg.get("pc_shadow") or cfg.get("semparse_feed")):
             return None
         k = int(cfg["shadow_k"])
@@ -486,13 +487,42 @@ def automated_hooks(state_dir, items_dict, cycle):
         return None
 
 
-def fast_path_automated(state_file, run_hooks=True):
+def automated_admit(state_dir, snapshot, cfg=None, default_reasoner="python"):
+    """v0.4 rc2: admit PeTTaChainer conclusions on an automated turn (in place on the snapshot dict).
+
+    Only with reasoner=pettachainer and flag ``reasoner_admit_on_automated``.  Same guards/caps as the cycle
+    (pc_admit.admit_on_snapshot); every attempt is logged to admit_log.jsonl.  Never raises.  -> info or None."""
+    try:
+        import time as _t
+        t0 = _t.perf_counter()
+        if cfg is None:
+            from . import runtime_config as rc
+            cfg = rc.resolve(state_dir)
+        from . import pc_admit
+        if pc_admit.mode(cfg, default_reasoner) != "pettachainer":
+            return None
+        if not cfg.get("reasoner_admit_on_automated"):
+            info = {"skipped": "automated_off", "admitted": 0}
+        else:
+            try:
+                info = pc_admit.admit_on_snapshot(snapshot, cfg)
+            except Exception as e:
+                info = {"skipped": "error:" + type(e).__name__, "admitted": 0}
+        pc_admit.log_admission(cfg, "automated", info, timing={"admit_s": _t.perf_counter() - t0})
+        return info
+    except Exception as e:
+        print(f"[wmtm_context] WARN automated admit: {type(e).__name__}: {e}", file=sys.stderr)
+        return None
+
+
+def fast_path_automated(state_file, run_hooks=True, default_reasoner="python", admit=True):
     """Ultra-lightweight turn for automated prompts (F20).
 
     Reads the persisted state JSON directly (no engine objects), returns the
     formatted context block (or None), applies STI decay + wall-clock stale
     cleanup to the snapshot, increments the cycle and saves it back.
     rc2: then runs the Track G/H hooks (automated_hooks) unless run_hooks=False.
+    v0.4 rc2: first admits PeTTaChainer conclusions (automated_admit) unless admit=False, so they show this turn.
     """
     context = None
     try:
@@ -506,6 +536,19 @@ def fast_path_automated(state_file, run_hooks=True):
         items_dict = store_data.get("items", {})
         if not items_dict:
             return None
+
+        state_dir = _os.path.dirname(_os.path.abspath(state_file))
+        cfg = None
+        if admit or run_hooks:
+            try:
+                from . import runtime_config as _rc
+                cfg = _rc.resolve(state_dir)
+            except Exception:
+                cfg = None                      # hooks/admit resolve again (and fail safe) themselves
+        if admit:
+            automated_admit(state_dir, snapshot, cfg, default_reasoner)
+            store_data = snapshot.get("store", {})
+            items_dict = store_data.get("items", {})
 
         # Format active context directly from JSON (no wmtm objects needed)
         import time as _t
@@ -613,7 +656,7 @@ def fast_path_automated(state_file, run_hooks=True):
             _json.dump(snapshot, f)
 
         if run_hooks and items_dict:
-            automated_hooks(_os.path.dirname(_os.path.abspath(state_file)), items_dict, cycle)
+            automated_hooks(state_dir, items_dict, cycle, cfg)
 
     except Exception as e:
         print(f"[wmtm_context] WARN fast-path: {type(e).__name__}: {e}", file=sys.stderr)

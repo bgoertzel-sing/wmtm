@@ -79,6 +79,20 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.4.0-rc2 (2026-10-17)
+- Bugfix: with `reasoner=pettachainer`, conclusions were admitted only inside `WMTMOrchestrator.cycle()`. On a
+  busy host the user turn exceeded `cycle_budget` (15 s) before the cycle, and automated turns never admit, so a
+  fresh, canary-passed `admit.json` was never admitted live. Admission (cheap: no PLN) now runs on every user turn,
+  also when the cycle is skipped for budget, and on automated turns via the fast path (flag
+  `reasoner_admit_on_automated`, default true). Same guards and caps; each run is admitted at most once
+  (`pc_admit.consumed_run` in the state file).
+- Conclusions already present or forgotten are dropped before the caps (`dropped.known`); rc1 let them fill
+  `reasoner_max_admit`, so repeat runs admitted nothing new.
+- `<shadow_dir>/admit_log.jsonl` (size-capped): path, run, counts, skip reason, per-phase timing of user turns.
+- PeTTaChainer item ids are `derived-pc_deduction-<cycle>-<md5[:8]>` (no collisions outside the cycle).
+- Fast-path latency: +0.1 ms median steady state; ~25 ms once per new run (engine import) in a fresh process.
+- Tests: `tests/test_pc_admit_rc2.py`.
+
 ## v0.4.0-rc1 (2026-10-17)
 - Tracks I-K. Reasoner switch `reasoner` = `python` (default, unchanged behaviour) | `pettachainer` in the flags
   file. With `pettachainer` the Python PLN phase is replaced by admitting PeTTaChainer conclusions from the shadow

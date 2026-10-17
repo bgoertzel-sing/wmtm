@@ -87,6 +87,7 @@ class WMTMOrchestrator:
         # Bot memory dir for the background-hook flags file (set by wmtm.api; None = env-only, dev/tests).
         self.runtime_state_dir = None
         self.default_reasoner = "python"   # Track I: used when the flags file / env does not set "reasoner"
+        self.pc_admit_state = {}           # rc2: {"consumed_run": id, ...} - each admit.json run is admitted once
 
 
     def active_goal(self):
@@ -109,13 +110,16 @@ class WMTMOrchestrator:
         utility scores reset to 0.0 on every restart, making the forgetting policy
         unable to distinguish useful items from noise (all items show util=0.0).
         """
-        return {
+        snap = {
             "cycle": self._cycle,
             "store": self.store.to_dict(),
             "utility": self.utility.to_dict(),
             "forgetting_log": self.forget_log.to_dict(),
             "goal_store_path": self.goal_store.path if self.goal_store is not None else None,
         }
+        if self.pc_admit_state:
+            snap["pc_admit"] = dict(self.pc_admit_state)      # rc2: consumed admit.json run (absent until one)
+        return snap
 
     def restore_state(self, snapshot: dict) -> None:
         """Restore orchestrator state from a snapshot (F01).
@@ -138,6 +142,8 @@ class WMTMOrchestrator:
         if "forgetting_log" in snapshot:
             from .forgetting_log import ForgettingLog
             self.forget_log = ForgettingLog.from_dict(snapshot["forgetting_log"])
+        if isinstance(snapshot.get("pc_admit"), dict):
+            self.pc_admit_state = dict(snapshot["pc_admit"])
 
     # ── Phase helpers ──────────────────────────────────────────────
 
@@ -202,6 +208,11 @@ class WMTMOrchestrator:
     def _admit_candidate(self, cand, index: int) -> None:
         """Admit a single derived candidate into the store."""
         item_id = f"derived-{cand.inference_type}-{self._cycle}-{index}"
+        if cand.inference_type == "pc_deduction":
+            # rc2: PeTTaChainer items can be admitted outside cycle() (budget-skipped / automated turns), where the
+            # cycle counter may not advance between admissions: key by content so ids never collide.
+            import hashlib
+            item_id = f"derived-pc_deduction-{self._cycle}-{hashlib.md5(cand.content.encode()).hexdigest()[:8]}"
         return self.store.admit(
             item_id=item_id,
             content=cand.content,
@@ -225,24 +236,53 @@ class WMTMOrchestrator:
             result.reasoner = mode
         if mode != "pettachainer":
             return self._run_python_pln()
-        pc_items, info = [], {}
-        try:
-            from .pc_admit import load_candidates
-            cands, info = load_candidates(cfg or {}, self.store)
-        except Exception as e:
-            cands, info = None, {"skipped": "error:" + type(e).__name__}
-        if cands is None:
+        pc_items, info = self.admit_reasoner(cfg)
+        if pc_items is None:
+            pc_items = []
             if result is not None:
                 result.reasoner_skipped = True
-        else:
-            try:
-                pc_items = self._admit_derived(cands)
-            except Exception as e:
-                info = dict(info, admit_error=type(e).__name__); pc_items = []
         if result is not None:
             result.reasoner_info = info
             result.pc_admitted = len(pc_items)
         return pc_items
+
+    def admit_reasoner(self, cfg=None, now=None):
+        """Admit PeTTaChainer conclusions from admit.json (rc2: also called outside cycle()).  Cheap: no PLN.
+
+        -> (items | None, info).  None = nothing may be admitted (missing/stale/failed run, already consumed)."""
+        try:
+            from .pc_admit import load_candidates
+            from .inference import InferenceCandidate
+
+            def known(text):   # same tests as _is_skipworthy (PeTTaChainer STI s*c < forget-log override threshold)
+                c = InferenceCandidate(content=text, confidence=0.0, derived_from=[], inference_type="pc_deduction")
+                return self.forget_log.is_forgotten(text) or not self.engine.is_novel(c, self.store)
+            cands, info = load_candidates(cfg or {}, self.store, now,
+                                          consumed=(self.pc_admit_state or {}).get("consumed_run"), known=known)
+        except Exception as e:
+            return None, {"skipped": "error:" + type(e).__name__, "admitted": 0}
+        if cands is None:
+            info["admitted"] = 0
+            return None, info
+        return self.admit_pc_candidates(cands, info)
+
+    def admit_pc_candidates(self, cands, info):
+        """Admit gated PeTTaChainer candidates; mark the run consumed if it yielded any.  -> (items, info)."""
+        items = []
+        if not cands:
+            info["skipped"] = "no_candidates"
+        else:
+            try:
+                items = self._admit_derived(cands)
+            except Exception as e:
+                info["admit_error"] = type(e).__name__
+                info["admitted"] = 0
+                return items, info
+            import time as _t
+            self.pc_admit_state = {"consumed_run": info.get("run"), "consumed_at": round(_t.time(), 3),
+                                   "admitted": len(items), "cycle": self._cycle}
+        info["admitted"] = len(items)
+        return items, info
 
     def _run_python_pln(self, drop_texts=None) -> list:
         try:

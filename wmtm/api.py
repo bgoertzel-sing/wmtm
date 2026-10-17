@@ -202,27 +202,43 @@ class WMTM:
         tl = self._turn
         if automated:
             tl.t0 = None
-            return _ctx.fast_path_automated(self.state_file)
+            return _ctx.fast_path_automated(self.state_file, default_reasoner=self.config.reasoner,
+                                            admit=self.config.use_pln)
         if getattr(tl, "t0", None) is None:
             tl.t0 = time.time()
         failed = getattr(tl, "failed", False)
         tl.failed = False
         user_msg = prompt_text
         context = None
+        # v0.4 rc2: per-phase timing (seconds since turn start / per phase) + admission outcome -> admit_log.jsonl
+        t_turn = tl.t0
+        timing = {"cycle_budget": self.config.cycle_budget}
+        adm = {"path": "user", "info": None}
+
+        def lap(key, t):
+            now = time.time()
+            timing[key] = round(now - t, 4)
+            return now
         try:
             if failed:
+                adm["info"] = {"skipped": "observe_failed", "admitted": 0}
                 raise _ObserveFailed()
+            t = time.time()
+            timing["pre_s"] = round(t - t_turn, 4)       # observe() (feedback) since turn start
             self._ensure_store_ready()
+            t = lap("store_s", t)
             orch = self._orchestrator
 
             if not self._budget_ok():
                 # Store init alone consumed the budget: inject only, no persist (as in the glue).
+                adm["info"] = {"skipped": "store_init_budget", "admitted": 0}
                 return _ctx.format_active_context(orch.store, orch.cycle_count) if orch else None
 
             store = orch.store
 
             if user_msg and self._budget_ok():
                 self._ensure_journal_ready()
+            t = lap("journal_s", t)
             if user_msg and self._recall_bridge and self._budget_ok():
                 rb = self._recall_bridge
                 candidates = rb.recall(user_msg, store, top_k=15)
@@ -239,7 +255,9 @@ class WMTM:
                             origin_timestamp=origin_ts,
                         )
                         admitted_snippets.append(c.content)
+                t = lap("recall_s", t)
                 _ctx.relevance_stimulus(store, rb, user_msg, orch)
+                t = lap("relevance_s", t)
 
             if self._budget_ok():
                 if self.pending_path.exists():
@@ -261,18 +279,32 @@ class WMTM:
 
             if self._budget_ok():
                 _ctx.cleanup_stale_items(store, orch.cycle_count)
+            t = lap("derives_cleanup_s", t)
+            timing["elapsed_before_cycle_s"] = round(t - t_turn, 4)
 
             if self._budget_ok(limit=self.config.cycle_budget):
                 if self.config.use_goalchainer:
                     orch.goalchainer_request = user_msg
                 journal = self.journal
-                orch.cycle(append_fn=lambda note: journal.append(note))
-            elif self._budget_ok():
+                res = orch.cycle(append_fn=lambda note: journal.append(note))
+                t = lap("cycle_s", t)
+                if res.reasoner == "pettachainer":
+                    adm["info"] = dict(res.reasoner_info or {}, admitted=res.pc_admitted)
+                else:
+                    adm["path"] = None
+            else:
+                # rc2: the full cycle is skipped for budget, but PeTTaChainer admission is cheap (no PLN): run it
+                # anyway, so a fresh admit.json is not lost on a busy host.  Then tick as before.
+                adm["path"] = "budget-skipped"
+                adm["info"] = self._admit_outside_cycle(orch)
+                t = lap("admit_s", t)
+            if adm["path"] == "budget-skipped" and self._budget_ok():
                 evicted = store.tick()
                 for ev in evicted:
                     orch.forget_log.record(ev, orch._cycle)
                 orch.utility.tick(store, orch._cycle)
                 orch._cycle += 1
+                t = lap("tick_s", t)
 
             context = _ctx.format_active_context(orch.store, orch.cycle_count)
             if context:
@@ -284,11 +316,49 @@ class WMTM:
             pass
         except Exception as e:
             print(f"[wmtm_context] WARNING: {type(e).__name__}: {e}", file=sys.stderr)
+            if adm["info"] is None:
+                adm["info"] = {"skipped": "error:" + type(e).__name__, "admitted": 0}
         finally:
             tl.t0 = None
+            timing["total_s"] = round(time.time() - t_turn, 4)
+            self._log_admission(adm, timing)
 
         self.save()
         return context
+
+    def _reasoner_cfg(self):
+        """-> (flags cfg, effective reasoner mode).  Never raises."""
+        try:
+            from . import runtime_config as _rc
+            from .pc_admit import mode
+            cfg = _rc.resolve(str(self.state_dir))
+            return cfg, mode(cfg, self.config.reasoner)
+        except Exception:
+            return {}, "python"
+
+    def _admit_outside_cycle(self, orch):
+        """rc2: PeTTaChainer admission on a user turn whose full cycle was skipped for budget."""
+        cfg, m = self._reasoner_cfg()
+        if m != "pettachainer" or not self.config.use_pln:
+            return None
+        try:
+            items, info = orch.admit_reasoner(cfg)
+            return info
+        except Exception as e:
+            return {"skipped": "error:" + type(e).__name__, "admitted": 0}
+
+    def _log_admission(self, adm, timing):
+        """Append the user-turn record (path, run, counts, skip reason, phase timing) when reasoner=pettachainer."""
+        try:
+            if adm.get("path") is None:
+                return
+            cfg, m = self._reasoner_cfg()
+            if m != "pettachainer":
+                return
+            from .pc_admit import log_admission
+            log_admission(cfg, adm["path"], adm.get("info") or {"skipped": "not_reached", "admitted": 0}, timing)
+        except Exception:
+            pass
 
     # ── explicit tools ─────────────────────────────────────────────
 
