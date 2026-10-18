@@ -79,7 +79,10 @@ def test_fast_path_no_hooks_when_off(tmp_path, spawns, flags):
     elif flags:
         (tmp_path / rc.FLAGS_FILENAME).write_text(flags)
     assert ctx.fast_path_automated(sf)
-    assert spawns == [] and not (tmp_path / "_wmtm_shadow").exists()
+    # v0.5: reasoner defaults to pettachainer, so the fast path logs its (skipped) admission attempt to
+    # _wmtm_shadow/admit_log.jsonl; with the hooks off nothing else is created and no worker is spawned.
+    sh = tmp_path / "_wmtm_shadow"
+    assert spawns == [] and {p.name for p in sh.rglob("*") if p.is_file()} <= {"admit_log.jsonl"}
 
 
 def test_run_hooks_false_and_env_switch(tmp_path, spawns, monkeypatch):
@@ -193,7 +196,7 @@ def test_fast_path_does_not_import_engine(tmp_path):
     sf = _state(tmp_path)
     _flags(tmp_path, pc_shadow=True, semparse_feed=True, python="/bin/true")
     code = ("import sys; from wmtm import context as c; c.fast_path_automated(%r);"
-            "heavy = [m for m in ('wmtm.orchestrator', 'wmtm.inference', 'wmtm.pln', 'wmtm.store', 'wmtm.semparse_adapter',"
+            "heavy = [m for m in ('wmtm.orchestrator', 'wmtm.store', 'wmtm.semparse_adapter',"
             " 'wmtm.recall_bridge', 'numpy') if m in sys.modules]; print(heavy)") % sf
     r = subprocess.run([sys.executable, "-c", code], cwd=rc.DIST_ROOT, capture_output=True, text=True, timeout=60)
     assert r.stdout.strip() == "[]", r.stderr

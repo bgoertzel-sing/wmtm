@@ -241,7 +241,7 @@ def maybe_launch(store, cycle=0, state_dir=None, cfg=None, force=False):
             return None
         if rc.busy(os.path.join(cfg["shadow_dir"], "worker.pid"), WORKER_MAX_AGE) or rate_limited(cfg):
             return None  # skip before doing any work
-        # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read, Python PLN)
+        # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read)
         k = int(cfg["shadow_k"])
         return maybe_launch_raw([raw_item(it) for it in store.get_active_set()[:k]], cycle, cfg, force=force)
     except Exception:

@@ -170,3 +170,60 @@ def test_cache_compaction_bounds_size(tmp_path):
     assert os.path.getsize(c.entries_path) <= 600
     ent = c.entries()
     assert 0 < len(ent) < 20 and c.atoms_for("text 19") is not None   # newest kept, oldest dropped
+
+
+# ------------------------------------------------------------------ v0.5 (Track M preamble) cache behaviour
+def test_v05_pre_preamble_cache_entries_reused_not_reparsed(tmp_path):
+    """Entries written before v0.5 (no prompt_sha) stay valid: the key is the content hash only, no LLM call."""
+    c = _cache(tmp_path); os.makedirs(c.d)
+    with open(c.entries_path, "w") as fh:
+        fh.write(json.dumps({"hash": content_hash("old item text"), "item_id": "a", "status": "ok",
+                             "atoms": ["(: f1 (Inheritance x y) (STV 1.0 0.9))"], "ts": 1.0, "attempts": 1}) + "\n")
+    st = c.enqueue([("a", "old item text", 1.0), ("b", "new item text", 0.5)])
+    assert st["cached"] == 1 and st["queued_new"] == 1
+    llm = FakeLLM()
+    from wmtm.semparse_adapter import SemParseAdapter
+    ad = SemParseAdapter(llm, loader=None, prompt_path=_prompt(tmp_path), preamble=True)
+    recs = process_queue(c, llm, adapter=ad)
+    assert len(llm.calls) == 1 and "new item text" in llm.calls[0]           # only the new content is parsed
+    assert recs[0]["prompt_sha"] == ad.prompt_sha256[:16] != ad.file_sha256[:16]
+    ent = c.entries()
+    assert ent[content_hash("new item text")]["prompt_sha"] == ad.prompt_sha256[:16]
+    assert "prompt_sha" not in ent[content_hash("old item text")] and c.atoms_for("old item text")
+
+
+def _prompt(tmp_path, text="SYS"):
+    p = tmp_path / "prompt.txt"; p.write_text(text); return str(p)
+
+
+@pytest.mark.parametrize("pre", [True, False])
+def test_v05_process_queue_preamble_flag(tmp_path, pre):
+    from wmtm import semparse_preamble as sp
+    c = _cache(tmp_path); c.enqueue([("a", "x is a y", 1.0)])
+    sent = []
+    class L(FakeLLM):
+        def __call__(self, system, user):
+            sent.append(system); return super().__call__(system, user)
+    process_queue(c, L(), prompt_path=_prompt(tmp_path), preamble=pre)
+    assert sent == [(sp.PREAMBLE + "SYS") if pre else "SYS"]
+
+
+@pytest.mark.parametrize("flag", [None, False])
+def test_v05_worker_records_prompt_sha(tmp_path, flag):
+    """The parse worker honours the flags-file semparse_preamble and records what it sends (dead gateway, no loader)."""
+    import hashlib, subprocess, sys
+    from wmtm import semparse_preamble as sp
+    c = _cache(tmp_path); c.enqueue([("a", "x is a y", 1.0)])
+    cfg = rc.resolve(); cfg.update(semparse_prompt=_prompt(tmp_path), semparse_dir=c.d,
+                                   semparse_prompt_sha256=hashlib.sha256(b"SYS").hexdigest())
+    if flag is not None:
+        cfg["semparse_preamble"] = flag
+    rc.write_json_atomic(str(tmp_path / "cfg.json"), cfg)
+    env = dict(rc.worker_env(cfg), BASE_URL="http://127.0.0.1:9/v1", LLM_MODEL="m", AI_API_KEY="k")
+    code = subprocess.run([sys.executable, "-m", pcm.WORKER_MODULE, "--dir", c.d, "--no-loader",
+                           "--config", str(tmp_path / "cfg.json")], env=env, cwd=rc.DIST_ROOT, timeout=60).returncode
+    run = json.loads(open(os.path.join(c.d, "worker_runs.jsonl")).read().splitlines()[-1])
+    want = hashlib.sha256(((sp.PREAMBLE if flag is None else "") + "SYS").encode()).hexdigest()
+    assert code == 0 and run["preamble"] is (flag is None) and run["prompt_sha256"] == want
+    assert run["file_sha256"] == hashlib.sha256(b"SYS").hexdigest()
+    assert json.loads(open(c.log_path).read().splitlines()[0])["prompt_sha"] == want[:16]

@@ -44,7 +44,7 @@ class WMTMConfig:
     llm: Optional[Callable[..., str]] = None    # llm(prompt, **opts) -> str (unused until semantic parsing lands)
     petta: Any = None                           # PeTTa runtime handle/path (PeTTaChainer backend, not yet used)
     use_goalchainer: bool = False
-    reasoner: str = "python"                    # "python" | "pettachainer" (flags file "reasoner" overrides)
+    reasoner: str = "pettachainer"              # "pettachainer" | "off" (flags file "reasoner" overrides; unknown = off)
     capacity: int = 60
     use_pln: bool = True
     journal_refresh_interval: float = 300.0     # re-parse the journal at most every N s
@@ -334,7 +334,7 @@ class WMTM:
             cfg = _rc.resolve(str(self.state_dir))
             return cfg, mode(cfg, self.config.reasoner)
         except Exception:
-            return {}, "python"
+            return {}, "off"
 
     def _admit_outside_cycle(self, orch):
         """rc2: PeTTaChainer admission on a user turn whose full cycle was skipped for budget."""

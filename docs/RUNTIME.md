@@ -1,4 +1,4 @@
-# Background reasoner, shadow and semantic-parse feed (v0.4)
+# Background reasoner, shadow and semantic-parse feed (v0.5)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -8,12 +8,18 @@ niced worker processes, the cycle never waits for them, and every error is swall
   builds a small PLN knowledge base from the cached semantic parses only (v0.4: no regex fallback; unparsed items
   add no facts, counted in `unparsed_items`), applies the parse-quality gate, asks PeTTaChainer 2-step chain goals
   with a hard per-query timeout, and appends one JSON line to `pc_shadow/shadow.jsonl` plus `pc_shadow/admit.json`
-  (the admissible results, see below). v0.4 removed the Python-PLN comparison from the shadow. A Grace canary and a negative control run
+  (the admissible results, see below). v0.4 removed the Python-PLN comparison from the shadow; v0.5 (Track L) removed the Python PLN engine entirely. A Grace canary and a negative control run
   through the same path on every run; if they fail the record is `canary_fail` and no goal result is trusted.
 - **Semantic-parse feed** (Track H, `semparse_feed`): each cycle the top-K items are queued by content hash; a
   worker parses them with the semantic-parsing-hitl prompt through the bot's existing OpenAI-compatible gateway,
   load-checks every atom in PeTTaChainer and caches the accepted atoms (`semparse_cache/cache.jsonl`). The same
   content is never parsed twice. At most `parse_cap_per_hour` (default 20) parse attempts run per rolling hour.
+  v0.5 (Track M): the worker prepends an instruction block (`wmtm/semparse_preamble.py`, flag `semparse_preamble`,
+  default on) to the pinned prompt; the pin is still checked against the unedited file. The cache key stays the
+  content hash, so entries parsed with an earlier prompt are reused, not re-parsed; `worker_runs.jsonl` records
+  `preamble`, `file_sha256`, `prompt_sha256`, and each parse attempt records `prompt_sha` (16 hex) in
+  `parse_log.jsonl` / `cache.jsonl` (absent on pre-v0.5 entries). To re-parse under the new prompt, delete the
+  matching `cache.jsonl` lines (costs one LLM call each, within the hourly cap).
 
 Both hooks run on every WMTM cycle *and* (since v0.3.0-rc2) on automated turns: the automated fast path
 (`WMTM.context_for` with no real user message) feeds them the top-K items from the state JSON without loading the
@@ -21,13 +27,16 @@ engine (`hooks_on_automated`, default true). Steady-state cost on that path is a
 checks; the parse feed skips the enqueue when the top-K contents are unchanged). Shadow launches are rate-limited to
 one per `shadow_min_interval_s` (default 300 s) on both paths, so autonomous ticks cannot spawn back-to-back runs.
 
-## Reasoner switch (v0.4)
+## Reasoner switch (v0.5)
 
-`reasoner` = `python` (default; the in-process Python PLN phase, as in v0.3) or `pettachainer`. Unset or invalid
-= `python` (`WMTMConfig.reasoner`, itself `python` by default). Re-read every cycle, so it flips without a restart.
+`reasoner` = `pettachainer` (default) or `off`. Unset = `WMTMConfig.reasoner` (itself `pettachainer`). Any other
+value, including `python` (the Python PLN engine was removed in v0.5), means **off**: nothing is admitted on any path
+(`reasoner_info.skipped` = `reasoner_off`; the flags-file key is listed under `_source.invalid`). Re-read every cycle,
+so it flips without a restart. Orchestrators without a state dir (scratch orchestrators such as `decide()`) always
+run with the reasoner off.
 
 With `pettachainer`:
-- The Python PLN phase does **not** run. There is no Python fallback.
+- There is no Python PLN engine (removed in v0.5) and no fallback.
 - On every turn (rc2; rc1: only inside `WMTMOrchestrator.cycle()`) WMTM reads `<shadow_dir>/admit.json`, which
   the latest shadow worker run wrote. It admits from it only when all of these hold: the file is fresh
   (`reasoner_max_age_s`, measured from the run's spec timestamp), the run status is `ok` and the canary passed
@@ -61,7 +70,7 @@ With `pettachainer`:
 
 | key | env | default | meaning |
 |---|---|---|---|
-| `reasoner` | `WMTM_REASONER` | (`python`) | `python` or `pettachainer` |
+| `reasoner` | `WMTM_REASONER` | (`pettachainer`) | `pettachainer` or `off` (anything else = off) |
 | `reasoner_max_age_s` | `WMTM_REASONER_MAX_AGE` | 900 | ignore `admit.json` older than this |
 | `reasoner_max_admit` | `WMTM_REASONER_MAX_ADMIT` | 5 | admitted conclusions per cycle |
 | `reasoner_writeback` | `WMTM_REASONER_WRITEBACK` | false | allow journal writeback of PeTTaChainer-admitted items |
@@ -72,6 +81,8 @@ With `pettachainer`:
 | `gate_broad_terms` / `gate_placeholder_terms` | `WMTM_GATE_BROAD_TERMS` / `WMTM_GATE_PLACEHOLDERS` | built-in lists | broad categories; pronoun-like subjects (always rejected) |
 | `gate_hedged_quantifiers` / `gate_negative_quantifiers` | `WMTM_GATE_HEDGED` / `WMTM_GATE_NEGATIVE` | built-in lists | quantifier words (negative = rejected) |
 | `gate_broad_action` / `gate_hedged_action` | `WMTM_GATE_BROAD_ACTION` / `WMTM_GATE_HEDGED_ACTION` | reject / reject | `reject`, `discount` or `keep` |
+| `gate_identifier_action` | `WMTM_GATE_IDENTIFIER_ACTION` | reject | v0.5: Member/Inheritance with an identifier (hash, hex id, pid, uuid) as category, or an identifier subject typed as `gate_identifier_bad_categories`: `reject`, `discount` or `keep` |
+| `gate_identifier_bad_categories` | `WMTM_GATE_IDENTIFIER_BAD` | branch, dir, path, file, repo, ... | kinds an identifier subject may not be typed as (also `*_<kind>`) |
 | `gate_discount` | `WMTM_GATE_DISCOUNT` | 0.5 | strength factor for `discount` |
 | `gate_max_per_fact` | `WMTM_GATE_MAX_PER_FACT` | 3 | admitted conclusions per KB fact per cycle (0 = no cap) |
 | `gate_review_min` | `WMTM_GATE_REVIEW_MIN` | 3 | log facts behind >= N proved conclusions to `pc_shadow/parse_review.jsonl` |
@@ -97,6 +108,7 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `pc_shadow` | `WMTM_PC_SHADOW` | false | run the PeTTaChainer shadow |
 | `semparse_feed` | `WMTM_SEMPARSE_FEED` | false | queue + parse top-K items |
 | `parse_cap_per_hour` | `WMTM_SEMPARSE_PER_HOUR` | 20 | parse attempts per rolling hour |
+| `semparse_preamble` | `WMTM_SEMPARSE_PREAMBLE` | true | v0.5: prepend `wmtm/semparse_preamble.py` to the (pinned, unedited) prompt |
 | `parse_max_chars` / `parse_max_attempts` | `WMTM_SEMPARSE_MAX_CHARS` / `..._MAX_ATTEMPTS` | 1500 / 2 | skip longer items; retries on gateway errors |
 | `shadow_k` / `shadow_max_goals` | `WMTM_PC_SHADOW_K` / `..._MAX_GOALS` | 200 / 60 | items per snapshot; chain goals per run |
 | `shadow_timeout_s` / `shadow_budget_s` / `shadow_steps` | `WMTM_PC_SHADOW_TIMEOUT` / `_BUDGET` / `_STEPS` | 2 / 20 / 30 | per-query SIGKILL timeout; query budget per run; chainer steps |
@@ -123,7 +135,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.4.0-rc1/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.5.0-rc1/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence

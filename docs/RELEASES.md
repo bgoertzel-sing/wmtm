@@ -5,6 +5,7 @@ memories (WMTM state, journal notes, conversation-derived reports or ids).
 The `wmtm/` package code was not changed: every rewritten commit has the
 same `wmtm/` tree as its original.
 
+
 ## Tags
 
 | Tag | Commit | Content |
@@ -78,6 +79,33 @@ pushed.
   Output records carry the actual `prio` and `prio_end` (incl. `resets`).
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
+
+## v0.5.0-rc1 (2026-10-18)
+Tracks L and M on top of v0.4.0-rc2 (rc2 admission behaviour kept unchanged).
+- Track L: the Python PLN engine is removed (`wmtm/inference.py`, `wmtm/pln.py`, `wmtm/pln_bridge.py` and their
+  tests). PeTTaChainer is the only reasoner. The candidate type moved to `wmtm/candidate.py`. No code path
+  (cycle, budget-skipped user turn, automated fast path, `wmtm.api`) imports a removed module.
+- `reasoner` = `pettachainer` (default: `WMTMConfig.reasoner`, the orchestrator, `context.fast_path_automated`) |
+  `off`. Any other value, including the removed `python`, means **off**: the reasoner phase admits nothing
+  (`reasoner_info.skipped = reasoner_off`, flags-file value recorded as invalid), on every path.
+  `WMTMConfig(reasoner="python")` raises `ValueError`.
+- Orchestrators without a state dir (scratch orchestrators, e.g. `decide()`) force the reasoner off: they never
+  launch or admit from the shadow worker.
+- With the Python engine gone, the cycle no longer runs the basic inference / contradiction phases;
+  `CycleResult.contradictions` / `resolutions` / `contradiction_evictions` are removed.
+- Track M: parse-gate rule `identifier_category`: rejects Member/Inheritance whose category is an identifier (git
+  hash, hex id, pid, uuid; optional `c_`/`id_`/`sha_`... prefix), or whose identifier subject is typed as
+  branch/dir/path/file/repo/... (also `*_branch` etc.). Flags `gate_identifier_action` (reject|discount|keep,
+  default reject) and `gate_identifier_bad_categories`.
+- Track M: `wmtm/semparse_preamble.py`: an instruction block prepended to the pinned semparse prompt by
+  `SemParseAdapter` (flag `semparse_preamble`, default on; the parse worker passes the flags-file value). The
+  prompt file is not edited and the worker still checks its sha256 pin. The worker records `preamble`,
+  `file_sha256` and `prompt_sha256` (what is actually sent) in `worker_runs.jsonl`; each parse attempt records
+  `prompt_sha` (16 hex) in `parse_log.jsonl` and `cache.jsonl`.
+- Parse cache: still keyed by content hash only. Entries parsed under the v0.4 prompt are **reused, not
+  re-parsed** (no extra LLM cost on upgrade); only new content is parsed with the preamble.
+- Design note for goal steering: `docs/TRACK_M_GOALS.md`.
+- Flags-file keys of v0.4 are all still valid. API unchanged except the `reasoner` values above.
 
 ## v0.4.0-rc2 (2026-10-17)
 - Bugfix: with `reasoner=pettachainer`, conclusions were admitted only inside `WMTMOrchestrator.cycle()`. On a

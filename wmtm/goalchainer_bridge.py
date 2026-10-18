@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from .store import WMTMStore
-from .inference import InferenceCandidate
+from .candidate import InferenceCandidate
 
 
 @dataclass

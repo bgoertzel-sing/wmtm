@@ -1,4 +1,5 @@
 """Tests for PLN integration into the WMTM orchestrator cycle."""
+from _pc_helpers import chain, enable_pc   # Track L: PeTTaChainer admit file replaces Python PLN
 from wmtm.orchestrator import WMTMOrchestrator, CycleResult
 from wmtm.store import WMTMStore
 
@@ -26,14 +27,15 @@ def test_cycle_result_has_pln_field():
     assert isinstance(result.pln_admitted, int)
 
 
-def test_pln_derives_from_implication_chain():
+def test_pln_derives_from_implication_chain(tmp_path, monkeypatch):
     """PLN should derive A->C from A->B, B->C in the active set."""
     store = WMTMStore(capacity=30)
     store.admit('s1', 'dogs implies animals', initial_sti=15.0)
     store.admit('s2', 'animals implies living', initial_sti=15.0)
-    orch = WMTMOrchestrator(store, use_pln=True)
+    orch = enable_pc(WMTMOrchestrator(store, use_pln=True, use_goalchainer=False), tmp_path, monkeypatch,
+                     [chain('dogs', 'animals', 'living', 's1', 's2')])
     result = orch.cycle()
-    # PLN deduction should produce at least one derived candidate
+    # PeTTaChainer deduction should produce at least one derived candidate
     # (either from basic inference or PLN or both)
     total_derived = result.admitted_derived + result.pln_admitted
     assert total_derived >= 1

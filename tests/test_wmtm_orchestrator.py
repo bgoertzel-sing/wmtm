@@ -1,4 +1,5 @@
 """Tests for WMTM Orchestrator."""
+from _pc_helpers import chain, enable_pc   # Track L: PeTTaChainer admit file replaces Python PLN
 from wmtm.orchestrator import WMTMOrchestrator, CycleResult
 from wmtm.store import WMTMStore
 from wmtm.writeback import WritebackManager
@@ -26,12 +27,13 @@ def test_cycle_with_recall():
     assert store.get("r1") is not None
 
 
-def test_cycle_derives_and_admits():
+def test_cycle_derives_and_admits(tmp_path, monkeypatch):
     """Inference should produce derived items."""
     store = WMTMStore(capacity=20)
     store.admit("i1", "fire implies smoke", initial_sti=8.0)
     store.admit("i2", "smoke implies danger", initial_sti=8.0)
-    orch = WMTMOrchestrator(store)
+    orch = enable_pc(WMTMOrchestrator(store, use_goalchainer=False), tmp_path, monkeypatch,
+                     [chain("fire", "smoke", "danger", "i1", "i2")])
     result = orch.cycle()
     assert result.admitted_derived >= 1
 
@@ -82,12 +84,13 @@ def test_multiple_cycles_stable():
     assert len(store) > 0  # Something survived
 
 
-def test_forget_log_prevents_re_derivation():
+def test_forget_log_prevents_re_derivation(tmp_path, monkeypatch):
     """Once forgotten, a derived item should not be re-admitted."""
     store = WMTMStore(capacity=5)  # small to force eviction
     store.admit("i1", "fire implies smoke", initial_sti=10.0)
     store.admit("i2", "smoke implies danger", initial_sti=10.0)
-    orch = WMTMOrchestrator(store)
+    orch = enable_pc(WMTMOrchestrator(store, use_goalchainer=False), tmp_path, monkeypatch,
+                     [chain("fire", "smoke", "danger", "i1", "i2")])
     # First cycle: derive + admit
     r1 = orch.cycle()
     assert r1.admitted_derived >= 1

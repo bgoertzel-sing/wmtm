@@ -3,6 +3,10 @@ ARCHITECTURE DESIGN DOCUMENT
 Ben Goertzel / ProtoCosmo2
 September 5, 2026
 
+NOTE (Track L, Oct 16 2026): the Python WMTMInferenceEngine / PLN described
+below was removed. PeTTaChainer (background shadow worker + pc_admit) is the
+only reasoner. Sections 3.4 and 5.3 are historical.
+
 1. PROBLEM STATEMENT
 
 The current petta-memory system is a fixed, append-only archive. It stores

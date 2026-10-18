@@ -206,19 +206,26 @@ class ParseCache:
             else:
                 with open(self.entries_path, "a", encoding="utf-8") as fh:
                     fh.write(json.dumps({"hash": h, "item_id": q["item_id"], "status": status, "atoms": atoms,
-                                         "ts": cost.get("ts"), "attempts": cur["attempts"]}) + "\n")
+                                         "ts": cost.get("ts"), "attempts": cur["attempts"],
+                                         "prompt_sha": cost.get("prompt_sha")}) + "\n")
                 qq.pop(h, None)
                 self.compact()
             self._save_queue(qq)
 
 
 # ---------------------------------------------------------------- worker body (pure; tests call it directly)
-def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now=time.time, prompt_path=None):
-    """Parse up to min(n, hourly budget) queued items.  Returns the list of per-parse cost records."""
+def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now=time.time, prompt_path=None,
+                  preamble=None):
+    """Parse up to min(n, hourly budget) queued items.  Returns the list of per-parse cost records.
+
+    preamble: v0.5 (Track M) flag ``semparse_preamble`` (None = adapter default: on).  The cache stays keyed by
+    content hash only, so entries parsed with an older prompt are reused, never re-parsed; each new attempt records
+    the short sha of the prompt actually sent (``prompt_sha``) in parse_log.jsonl and cache.jsonl."""
     from .semparse_adapter import SemParseAdapter, DEFAULT_PROMPT
     ad = adapter or SemParseAdapter(llm, loader=loader, prompt_path=prompt_path or DEFAULT_PROMPT,
                                     reject_log=cache.reject_log, max_chars=cache.max_chars,
-                                    reject_log_max_bytes=cache.log_max_bytes)
+                                    reject_log_max_bytes=cache.log_max_bytes, preamble=preamble)
+    psha = (getattr(ad, "prompt_sha256", None) or "")[:16] or None
     n = cache.per_hour if n is None else n
     out = []
     for h, q in cache.next_batch(min(n, cache.budget(now()))):
@@ -244,7 +251,8 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
                 "wait_s": round(now() - q.get("first_seen", now()), 1),
                 "prompt_tokens": u.get("prompt_tokens"), "completion_tokens": u.get("completion_tokens"),
                 "total_tokens": u.get("total_tokens"),
-                "accepted": len(res.accepted) if res else 0, "rejected": len(res.rejected) if res else 0}
+                "accepted": len(res.accepted) if res else 0, "rejected": len(res.rejected) if res else 0,
+                "prompt_sha": psha}
         if err:
             cost["error"] = err[:160]
         cache.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)

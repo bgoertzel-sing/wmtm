@@ -202,3 +202,19 @@ def test_skolems_scoped_per_item(tmp_path):
     r1 = ad.parse_item("n1", "t"); r2 = ad.parse_item("n2", "t")
     assert r1.accepted == ["(: i_n1__a (Member sk_request_1__i_n1 request) (STV 1.0 0.99))"]
     assert r1.accepted[0].split()[3] != r2.accepted[0].split()[3]
+
+
+def test_preamble_prepended_file_untouched(tmp_path, monkeypatch):
+    """Track M: pre-instruction block goes before the pinned prompt; the file itself is not modified."""
+    from wmtm import semparse_preamble as pre
+    import hashlib
+    p = tmp_path / "prompt.txt"; p.write_text("SYS")
+    seen = []
+    monkeypatch.delenv("WMTM_SEMPARSE_PREAMBLE", raising=False)
+    ad = sp.SemParseAdapter(lambda s, u: seen.append(s) or "(: a (Member x y) (STV 1.0 0.9))", prompt_path=str(p))
+    ad.parse_item("i1", "x is a y")
+    assert seen[0] == pre.PREAMBLE + "SYS" and seen[0].endswith("SYS") and p.read_text() == "SYS"
+    assert ad.preamble and ad.file_sha256 == hashlib.sha256(b"SYS").hexdigest() != ad.prompt_sha256
+    monkeypatch.setenv("WMTM_SEMPARSE_PREAMBLE", "0")
+    assert sp.SemParseAdapter(lambda s, u: "", prompt_path=str(p)).system == "SYS"
+    assert sp.SemParseAdapter(lambda s, u: "", system="RAW").system == "RAW"     # explicit system: no preamble

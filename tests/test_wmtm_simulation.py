@@ -1,4 +1,5 @@
 """Simulation tests: long-run stability and stress scenarios for WMTM."""
+from _pc_helpers import chain, enable_pc   # Track L: PeTTaChainer admit file replaces Python PLN
 import random
 from wmtm import (
     WMTMStore, WMTMOrchestrator,
@@ -62,10 +63,10 @@ def test_randomized_stress_test():
         assert len(store) <= 20
     # Should still have items
     assert len(store) >= 0  # Could be 0 if all decayed
-def test_derived_items_eventually_forget():
+def test_derived_items_eventually_forget(tmp_path, monkeypatch):
     """Derived items should eventually be forgotten (they have stricter limits)."""
     store = WMTMStore(capacity=30)
-    orch = WMTMOrchestrator(store)
+    orch = enable_pc(WMTMOrchestrator(store, use_goalchainer=False), tmp_path, monkeypatch, [chain('alpha', 'beta', 'gamma', 'r1', 'r2')])
     # Admit items for deduction
     recalled = [
         ('r1', 'alpha implies beta', 100.0),
@@ -114,10 +115,10 @@ def test_writeback_accumulates_over_cycles():
         orch.cycle(append_fn=lambda c: append_calls.append(c))
     # Should have written back at least once
     assert len(append_calls) >= 1
-def test_forgetting_log_prevents_rederivation():
+def test_forgetting_log_prevents_rederivation(tmp_path, monkeypatch):
     """Items in forgetting log should not be re-derived unless high attention."""
     store = WMTMStore(capacity=30)
-    orch = WMTMOrchestrator(store)
+    orch = enable_pc(WMTMOrchestrator(store, use_goalchainer=False), tmp_path, monkeypatch, [chain('alpha', 'beta', 'gamma', 'r1', 'r2')])
     # First cycle: derive items
     recalled = [
         ('r1', 'alpha implies beta', 200.0),

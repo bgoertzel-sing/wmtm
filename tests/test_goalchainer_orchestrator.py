@@ -170,7 +170,7 @@ class TestOrchestratorGoalChainerIntegration:
         store.admit("i1", "A fact")
         orch = WMTMOrchestrator(store, use_goalchainer=True, goalchainer_request="test")
 
-        from wmtm.inference import InferenceCandidate
+        from wmtm.candidate import InferenceCandidate
         def mock_run(store, request, max_evidence=20):
             return [InferenceCandidate(
                 content="Mocked GC decision: investigate",
@@ -198,7 +198,7 @@ class TestOrchestratorGoalChainerIntegration:
 
         # Mock run_goalchainer_over_wmtm to return a fake candidate
         def mock_run(store, request, max_evidence=20):
-            from wmtm.inference import InferenceCandidate
+            from wmtm.candidate import InferenceCandidate
             return [InferenceCandidate(
                 content="Mocked GC decision",
                 confidence=0.8,
@@ -222,7 +222,7 @@ class TestOrchestratorGoalChainerIntegration:
             store, use_pln=True, use_goalchainer=True, goalchainer_request="test"
         )
 
-        from wmtm.inference import InferenceCandidate
+        from wmtm.candidate import InferenceCandidate
         def mock_run(store, request, max_evidence=20):
             return [InferenceCandidate(
                 content="Mocked GC decision",

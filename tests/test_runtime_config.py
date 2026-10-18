@@ -81,10 +81,10 @@ def test_api_cycle_follows_flags_file_without_restart(tmp_path, monkeypatch):
     """One long-lived WMTM instance: flipping the flags file switches the hooks on the next cycle."""
     from wmtm.api import WMTM, WMTMConfig
     calls = []
-    monkeypatch.setattr(pc_shadow, "maybe_launch", lambda store, cycle=0, state_dir=None, cfg=None: calls.append(("g", cfg["shadow_dir"])))
+    monkeypatch.setattr(pc_shadow, "maybe_launch", lambda store, cycle=0, state_dir=None, cfg=None, **k: calls.append(("g", cfg["shadow_dir"])))
     monkeypatch.setattr(pcm, "maybe_feed", lambda store, cycle=0, state_dir=None, cache=None, cfg=None: calls.append(("h", cfg["parse_cap_per_hour"])))
     (tmp_path / "_journal").mkdir()
-    mem = WMTM(WMTMConfig(state_dir=tmp_path))
+    mem = WMTM(WMTMConfig(state_dir=tmp_path, reasoner="off"))     # Track L: default is pettachainer (always launches)
     mem.observe({"user": "tell me about cats and mammals please"})
     mem.context_for("tell me about cats and mammals please")
     assert calls == []                                             # no flags file: off

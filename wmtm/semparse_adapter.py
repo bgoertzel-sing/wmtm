@@ -254,12 +254,22 @@ class ParseResult:
 class SemParseAdapter:
     def __init__(self, llm: LLM, loader=None, prompt_path: str = DEFAULT_PROMPT,
                  reject_log: Optional[str] = None, system: Optional[str] = None,
-                 max_chars: int = 2000, reject_log_max_bytes: Optional[int] = None):
+                 max_chars: int = 2000, reject_log_max_bytes: Optional[int] = None,
+                 preamble: Optional[bool] = None):
         self.llm = llm
         self.loader = loader          # object with add_atom(str); None = no PeTTa check
         if system is None:
             with open(prompt_path, encoding="utf-8") as fh:
                 system = fh.read()
+            if preamble is None:      # Track M: file-based prompts get the pre-instruction block by default
+                from .runtime_config import SPEC
+                preamble = bool(SPEC["semparse_preamble"][2]) if os.environ.get("WMTM_SEMPARSE_PREAMBLE") is None \
+                    else os.environ["WMTM_SEMPARSE_PREAMBLE"].strip().lower() in ("1", "true", "yes", "on")
+        self.file_sha256 = hashlib.sha256(system.encode()).hexdigest()   # = pinned sha of the unedited prompt file
+        if preamble:
+            from .semparse_preamble import apply
+            system = apply(system, True)
+        self.preamble = bool(preamble)
         self.system = system
         self.prompt_sha256 = hashlib.sha256(system.encode()).hexdigest()
         self.reject_log = reject_log

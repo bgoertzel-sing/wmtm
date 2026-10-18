@@ -2,9 +2,8 @@
 
 One orchestration cycle:
 1. Recall from LTM (via recall_bridge) into WMTM
-2. Run inference engine over active set
-2b. Run PLN inference over active set (optional, default on)
-3. Admit derived candidates (if novel)
+2. Reasoner phase: admit PeTTaChainer conclusions from the shadow worker (Track L: the only reasoner)
+3. GoalChainer feedback (optional)
 4. Tick: decay attention, age items
 5. Track utility (use/miss)
 6. Apply forgetting policy (evict low-attention/low-utility)
@@ -18,7 +17,6 @@ from dataclasses import dataclass, field
 from typing import Callable, Optional
 
 from .store import WMTMStore
-from .inference import WMTMInferenceEngine
 from .utility import UtilityTracker
 from .forgetting_log import ForgettingLog
 from .forgetting import ForgettingPolicy
@@ -34,15 +32,12 @@ class CycleResult:
     pln_admitted: int = 0
     gc_admitted: int = 0
     pc_admitted: int = 0                 # Track I: PeTTaChainer conclusions admitted this cycle
-    reasoner: str = "python"             # effective mode this cycle
-    reasoner_skipped: bool = False       # pettachainer mode admitted nothing: no usable worker run (Track K)
+    reasoner: str = "pettachainer"       # effective mode this cycle: pettachainer | off (Track L)
+    reasoner_skipped: bool = False       # nothing admitted: reasoner off or no usable worker run (Track K/L)
     reasoner_info: dict = field(default_factory=dict)
     evicted: int = 0
     written_back: int = 0
-    contradiction_evictions: int = 0
     active_count: int = 0
-    contradictions: list = field(default_factory=list)
-    resolutions: list = field(default_factory=list)
     forgetting_log_size: int = 0
 
 
@@ -57,7 +52,6 @@ class WMTMOrchestrator:
     def __init__(
         self,
         store: WMTMStore,
-        inference_engine: Optional[WMTMInferenceEngine] = None,
         utility_tracker: Optional[UtilityTracker] = None,
         forgetting_policy: Optional[ForgettingPolicy] = None,
         forgetting_log: Optional[ForgettingLog] = None,
@@ -70,10 +64,9 @@ class WMTMOrchestrator:
         """Initialize the WMTM orchestrator with a store and default forgetting policy.
 
         Args:
-            use_pln: if True, run PLN inference (via pln_bridge) in each cycle.
+            use_pln: if True, run the reasoner phase (PeTTaChainer admission) each cycle.
         """
         self.store = store
-        self.engine = inference_engine or WMTMInferenceEngine()
         self.utility = utility_tracker or UtilityTracker()
         self.forgetting = forgetting_policy or ForgettingPolicy()
         self.forget_log = forgetting_log or ForgettingLog()
@@ -86,7 +79,7 @@ class WMTMOrchestrator:
         self._cycle = 0
         # Bot memory dir for the background-hook flags file (set by wmtm.api; None = env-only, dev/tests).
         self.runtime_state_dir = None
-        self.default_reasoner = "python"   # Track I: used when the flags file / env does not set "reasoner"
+        self.default_reasoner = "pettachainer"   # used when the flags file / env does not set "reasoner"
         self.pc_admit_state = {}           # rc2: {"consumed_run": id, ...} - each admit.json run is admitted once
 
 
@@ -201,9 +194,12 @@ class WMTMOrchestrator:
         if self.forget_log.is_forgotten(cand.content):
             if cand.initial_sti < self.forget_log_override_threshold:
                 return True
-        if not self.engine.is_novel(cand, self.store):
-            return True
-        return False
+        return not self._is_novel(cand)
+
+    def _is_novel(self, cand) -> bool:
+        """Exact (case-insensitive, stripped) content match against the active set."""
+        c = cand.content.lower().strip()
+        return all(item.content.lower().strip() != c for item in self.store.get_active_set())
 
     def _admit_candidate(self, cand, index: int) -> None:
         """Admit a single derived candidate into the store."""
@@ -222,20 +218,22 @@ class WMTMOrchestrator:
             provenance=getattr(cand, "provenance", None),
         )
 
-    def _run_pln_phase(self, cfg=None, result=None, mode="python") -> list:
-        """Run the reasoner phase and admit candidates (Track K: python | pettachainer).
+    def _run_pln_phase(self, cfg=None, result=None, mode="pettachainer") -> list:
+        """Reasoner phase (Track L: PeTTaChainer only; the Python PLN engine is gone).
 
-        pettachainer admits PeTTaChainer conclusions from the shadow worker's admit file (never waits).  Track K: there
-        is NO Python fallback - if no fresh, canary-passed run is available (worker failed, timed out, canary failed,
-        file missing/stale/unreadable) nothing is admitted this cycle and result.reasoner_info["skipped"] says why.
-        Returns the list of admitted derived items.
+        Admits PeTTaChainer conclusions from the shadow worker's admit file (never waits).  If the reasoner is off
+        (mode "off": invalid/unknown flag value) or no fresh, canary-passed run is available, nothing is admitted
+        this cycle and result.reasoner_info["skipped"] says why.  Returns the list of admitted derived items.
         """
         if not self.use_pln:
             return []
         if result is not None:
             result.reasoner = mode
         if mode != "pettachainer":
-            return self._run_python_pln()
+            if result is not None:
+                result.reasoner_skipped = True
+                result.reasoner_info = {"skipped": "reasoner_off"}
+            return []
         pc_items, info = self.admit_reasoner(cfg)
         if pc_items is None:
             pc_items = []
@@ -252,11 +250,11 @@ class WMTMOrchestrator:
         -> (items | None, info).  None = nothing may be admitted (missing/stale/failed run, already consumed)."""
         try:
             from .pc_admit import load_candidates
-            from .inference import InferenceCandidate
+            from .candidate import InferenceCandidate
 
             def known(text):   # same tests as _is_skipworthy (PeTTaChainer STI s*c < forget-log override threshold)
                 c = InferenceCandidate(content=text, confidence=0.0, derived_from=[], inference_type="pc_deduction")
-                return self.forget_log.is_forgotten(text) or not self.engine.is_novel(c, self.store)
+                return self.forget_log.is_forgotten(text) or not self._is_novel(c)
             cands, info = load_candidates(cfg or {}, self.store, now,
                                           consumed=(self.pc_admit_state or {}).get("consumed_run"), known=known)
         except Exception as e:
@@ -284,18 +282,6 @@ class WMTMOrchestrator:
         info["admitted"] = len(items)
         return items, info
 
-    def _run_python_pln(self, drop_texts=None) -> list:
-        try:
-            from .pln_bridge import run_pln_inference_over_wmtm
-            pln_candidates = run_pln_inference_over_wmtm(self.store)
-            if drop_texts:
-                pln_candidates = [c for c in pln_candidates if c.content.lower().strip() not in drop_texts]
-            if not pln_candidates:
-                return []
-            return self._admit_derived(pln_candidates)
-        except Exception:
-            return []
-
     def _run_goalchainer_phase(self) -> list:
         """Run GoalChainer over the WMTM active set and admit decisions.
 
@@ -321,19 +307,6 @@ class WMTMOrchestrator:
             return self._admit_derived(gc_candidates)
         except Exception:
             return []
-
-    def _resolve_contradictions_phase(self, result: CycleResult) -> None:
-        """Detect and resolve contradictions in the active set."""
-        contradictions = self.engine.detect_contradictions(self.store)
-        result.contradictions = contradictions
-        if not contradictions:
-            return
-        resolutions = self.engine.resolve_contradictions(self.store, contradictions)
-        result.resolutions = resolutions
-        for res in resolutions:
-            for ev_item in res.evicted_items:
-                self.forget_log.record(ev_item, self._cycle)
-                self.utility.remove(ev_item.id)
 
     def _reinforce(self) -> None:
         """Boost STI for items that were actually used this cycle."""
@@ -385,14 +358,6 @@ class WMTMOrchestrator:
         # 1b. Goal-driven context boost
         self._goal_context_boost()
 
-        # 2. Run basic inference
-        active = self.store.get_active_set()
-        candidates = self.engine.infer(active)
-
-        # 3. Admit novel derived candidates
-        admitted = self._admit_derived(candidates)
-        result.admitted_derived = len(admitted)
-
         # 2a'. One flags read per cycle (Tracks G / H / I).
         try:
             from . import runtime_config as _rc
@@ -403,18 +368,21 @@ class WMTMOrchestrator:
             from .pc_admit import mode as _reasoner_mode
             _mode = _reasoner_mode(_cfg, self.default_reasoner)
         except Exception:
-            _mode = "python"
+            _mode = "off"
+        if not self.runtime_state_dir:
+            _mode = "off"   # Track L: scratch orchestrators (no state dir, e.g. decide()) never launch or admit from the shadow worker
 
-        # 2b. Reasoner phase: Python PLN and/or admitted PeTTaChainer conclusions (Track I)
+        # 2b. Reasoner phase: admitted PeTTaChainer conclusions (Track L: no Python PLN)
         pln_admitted = self._run_pln_phase(_cfg, result, _mode)
         result.pln_admitted = len(pln_admitted)
+        result.admitted_derived = len(pln_admitted)
 
         # 2b'. Track G / H background hooks: off unless enabled in <state_dir>/_wmtm_flags.json (or env).
         # Detached workers; they never admit, never wait and never raise.  One flags read per cycle.
-        if _cfg.get("pc_shadow") or _mode != "python":
+        if _cfg.get("pc_shadow") or _mode == "pettachainer":
             try:
                 from .pc_shadow import maybe_launch
-                maybe_launch(self.store, self._cycle, cfg=_cfg, **({"force": True} if _mode != "python" else {}))       # Track G: PeTTaChainer shadow
+                maybe_launch(self.store, self._cycle, cfg=_cfg, **({"force": True} if _mode == "pettachainer" else {}))       # Track G: PeTTaChainer shadow
             except Exception:
                 pass
         if _cfg.get("semparse_feed"):
@@ -427,9 +395,6 @@ class WMTMOrchestrator:
         # 2c. Run GoalChainer feedback loop and admit its decisions
         gc_admitted = self._run_goalchainer_phase()
         result.gc_admitted = len(gc_admitted)
-
-        # 3c/3d. Detect and resolve contradictions
-        self._resolve_contradictions_phase(result)
 
         # 4. Tick: decay + age
         evicted_by_tick = self.store.tick()

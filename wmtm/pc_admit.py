@@ -1,8 +1,8 @@
 """Track I/K: admit PeTTaChainer conclusions into WMTM.
 
-Flag ``reasoner`` (flags file / env WMTM_REASONER; API default WMTMConfig.reasoner) = python | pettachainer.
-  * python (default, legacy; to be removed): Python PLN derivations are admitted.
-  * pettachainer: only PeTTaChainer conclusions are admitted.  Track K: there is no Python reference or fallback.
+Flag ``reasoner`` (flags file / env WMTM_REASONER; API default WMTMConfig.reasoner) = pettachainer (default) | off.
+  * pettachainer: only PeTTaChainer conclusions are admitted.  Track L: the Python PLN engine is removed.
+  * off (also any unknown/invalid value): the reasoner is off and nothing is admitted.
 The cycle never waits on PeTTaChainer.  The detached shadow worker (wmtm/workers/pc_shadow.py: canary, negative
 control, per-query timeout and run budget) writes ``<shadow_dir>/admit.json`` with ONLY the results that passed: run
 status ok, canary proved and negative control not proved, query proved within its timeout and the run budget,
@@ -22,18 +22,19 @@ import json, os, re, time
 
 ADMIT_FILE = "admit.json"
 ADMIT_LOG = "admit_log.jsonl"
-REASONERS = ("python", "pettachainer")
-MIN_STRENGTH, MIN_CONFIDENCE = 0.1, 0.05      # same admission threshold as the Python PLN engine
+REASONERS = ("pettachainer", "off")
+MIN_STRENGTH, MIN_CONFIDENCE = 0.1, 0.05      # admission threshold (same as the removed Python PLN engine)
 _RULE = re.compile(r"\b(?:inh_trans|imp_trans|mem_inh)\b")   # proof used a derivation rule
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
 _GOAL = re.compile(r"^\((Inheritance|Member|Implies|Similarity|Evaluation) (\S+) (\S+)\)$")
 _TEXT = {"Inheritance": "{} is a {}", "Member": "{} is a {}", "Implies": "{} implies {}",
-         "Similarity": "{} is similar to {}", "Evaluation": "{} has {}"}   # same rendering as pln_bridge
+         "Similarity": "{} is similar to {}", "Evaluation": "{} has {}"}   # same rendering as the removed pln_bridge (Track L)
 
 
-def mode(cfg=None, default="python") -> str:
-    m = str((cfg or {}).get("reasoner") or default or "python").strip().lower()
-    return m if m in REASONERS else "python"
+def mode(cfg=None, default="pettachainer") -> str:
+    """Effective reasoner mode. Unknown/invalid values (incl. the removed "python") mean "off": nothing admitted."""
+    m = str((cfg or {}).get("reasoner") or default or "pettachainer").strip().lower()
+    return m if m in REASONERS else "off"
 
 
 def render(goal):
@@ -100,7 +101,7 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
     known: optional predicate(text) -> True if the conclusion is already in WMTM or forgotten (rc2).  Such results are
     dropped BEFORE the caps (drop["known"]), so a later run that re-proves admitted conclusions still admits its new
     ones instead of filling the cap with duplicates."""
-    from .inference import InferenceCandidate
+    from .candidate import InferenceCandidate
     path = os.path.join(cfg.get("shadow_dir") or "", ADMIT_FILE)
     try:
         with open(path, encoding="utf-8") as fh:

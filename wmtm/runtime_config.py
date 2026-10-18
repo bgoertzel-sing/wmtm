@@ -39,7 +39,7 @@ _V, _D = "vendor", "data"
 SPEC = {
     "pc_shadow":           ("WMTM_PC_SHADOW", bool, False, None),
     "semparse_feed":       ("WMTM_SEMPARSE_FEED", bool, False, None),
-    "reasoner":            ("WMTM_REASONER", str, "", None),       # python|pettachainer; "" = API default (python)
+    "reasoner":            ("WMTM_REASONER", str, "", None),       # pettachainer|off; "" = API default (pettachainer); anything else = off
     "reasoner_max_age_s":  ("WMTM_REASONER_MAX_AGE", float, 900.0, None),
     "reasoner_max_admit":  ("WMTM_REASONER_MAX_ADMIT", int, 5, None),
     # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
@@ -58,9 +58,12 @@ SPEC = {
     "gate_broad_action":   ("WMTM_GATE_BROAD_ACTION", str, "reject", None),      # reject | discount | keep
     "gate_hedged_action":  ("WMTM_GATE_HEDGED_ACTION", str, "reject", None),     # reject | discount | keep
     "gate_discount":       ("WMTM_GATE_DISCOUNT", float, 0.5, None),             # strength factor for discount
+    "gate_identifier_action": ("WMTM_GATE_IDENTIFIER_ACTION", str, "reject", None),  # reject | discount | keep (Track M)
+    "gate_identifier_bad_categories": ("WMTM_GATE_IDENTIFIER_BAD", str, "branch,dir,directory,folder,path,file,repo,repository,worktree,tree,remote,fork", None),  # an id subject may not be typed as these (also *_<term>)
     "gate_max_per_fact":   ("WMTM_GATE_MAX_PER_FACT", int, 3, None),             # admitted conclusions per KB fact per cycle; 0 = no cap
     "gate_review_min":     ("WMTM_GATE_REVIEW_MIN", int, 3, None),               # log facts behind >= N proved conclusions
     "parse_cap_per_hour":  ("WMTM_SEMPARSE_PER_HOUR", int, 20, None),
+    "semparse_preamble":   ("WMTM_SEMPARSE_PREAMBLE", bool, True, None),          # Track M: prepend semparse_preamble.PREAMBLE to the (pinned, unedited) prompt
     "parse_max_chars":     ("WMTM_SEMPARSE_MAX_CHARS", int, 1500, None),
     "parse_max_attempts":  ("WMTM_SEMPARSE_MAX_ATTEMPTS", int, 2, None),
     "shadow_k":            ("WMTM_PC_SHADOW_K", int, 200, None),
@@ -184,8 +187,8 @@ def resolve(state_dir=None, environ=None):
     cfg["python"] = cfg["python"] or sys.executable
     cfg["parse_cap_per_hour"] = max(0, cfg["parse_cap_per_hour"])
     cfg["reasoner"] = str(cfg["reasoner"] or "").strip().lower()
-    if cfg["reasoner"] and cfg["reasoner"] not in ("python", "pettachainer"):
-        info.setdefault("invalid", []).append("reasoner"); cfg["reasoner"] = "python"
+    if cfg["reasoner"] and cfg["reasoner"] not in ("pettachainer", "off"):
+        info.setdefault("invalid", []).append("reasoner"); cfg["reasoner"] = "off"
     cfg["state_dir"] = sd
     cfg["_source"] = info
     return cfg

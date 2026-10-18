@@ -69,12 +69,30 @@ def _inputs(dataset):
 
 
 def _replay(tmp_path, orig_src, steps, state, journal, mode):
+    prev = os.environ.get("WMTM_REASONER")
+    os.environ["WMTM_REASONER"] = "off"   # Track L: see orig-tree note below (restored on return)
+    try:
+        return _replay_body(tmp_path, orig_src, steps, state, journal, mode)
+    finally:
+        if prev is None:
+            os.environ.pop("WMTM_REASONER", None)
+        else:
+            os.environ["WMTM_REASONER"] = prev
+
+
+def _replay_body(tmp_path, orig_src, steps, state, journal, mode):
     strict = mode == "fresh"
     res = {}
     for kind in ("orig", "new"):
         root = tmp_path / f"{kind}_{mode}"
         if kind == "orig":
             driver.build_original_tree(root, orig_src); extra = ""
+            # Track L: v0.1.0 ran Python PLN by default; the new tree has no Python PLN.
+            # Compare both with the reasoner off (orig: use_pln=False; new: WMTM_REASONER=off below).
+            o = root / "wmtm" / "orchestrator.py"
+            o.write_text(o.read_text(encoding="utf-8").replace("use_pln: bool = True", "use_pln: bool = False", 1)
+                           .replace("candidates = self.engine.infer(active)", "candidates = []  # Track L: Python engine removed", 1)
+                           .replace("        contradictions = self.engine.detect_contradictions(self.store)", "        return  # Track L: Python contradiction engine removed\n        contradictions = None", 1), encoding="utf-8")
         else:
             driver.build_new_tree(root); extra = str(driver.REPO)
         base = driver.seed_memory(root, state, journal)

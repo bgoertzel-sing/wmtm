@@ -1,4 +1,4 @@
-"""Track I/K: reasoner switch (python | pettachainer; Track K: no "both", no Python fallback).  Mocked/synthetic; integration skips without vendored PeTTa."""
+"""Track I/K/L: reasoner switch (pettachainer | off; Track L: Python PLN removed, unknown values = off).  Mocked/synthetic; integration skips without vendored PeTTa."""
 import json, os, time
 import pytest
 from wmtm import pc_admit, pc_shadow, runtime_config as rc
@@ -44,8 +44,9 @@ def _derived(o):
 
 # ------------------------------------------------------------------ flag
 def test_mode_parsing():
-    assert pc_admit.mode({}) == "python" and pc_admit.mode({"reasoner": "PettaChainer"}) == "pettachainer"
-    assert pc_admit.mode({"reasoner": "both"}) == "python" and pc_admit.mode({"reasoner": "junk"}) == "python"   # Track K: "both" removed
+    assert pc_admit.mode({}) == "pettachainer" and pc_admit.mode({"reasoner": "PettaChainer"}) == "pettachainer"
+    assert pc_admit.mode({"reasoner": "both"}) == "off" and pc_admit.mode({"reasoner": "junk"}) == "off"
+    assert pc_admit.mode({"reasoner": "python"}) == "off" and pc_admit.mode({"reasoner": "OFF"}) == "off"   # Track L
     assert pc_admit.mode({"reasoner": ""}, default="pettachainer") == "pettachainer"
 
 
@@ -53,23 +54,26 @@ def test_runtime_config_reasoner(tmp_path):
     (tmp_path / rc.FLAGS_FILENAME).write_text(json.dumps({"reasoner": "pettachainer"}))
     assert rc.resolve(str(tmp_path), environ={})["reasoner"] == "pettachainer"
     (tmp_path / rc.FLAGS_FILENAME).write_text(json.dumps({"reasoner": "both"}))
-    assert rc.resolve(str(tmp_path), environ={})["reasoner"] == "python"     # Track K: "both" is invalid
+    assert rc.resolve(str(tmp_path), environ={})["reasoner"] == "off"        # invalid -> off
     (tmp_path / rc.FLAGS_FILENAME).write_text(json.dumps({"reasoner": "nope"}))
     cfg = rc.resolve(str(tmp_path), environ={})
-    assert cfg["reasoner"] == "python" and "reasoner" in cfg["_source"]["invalid"]
+    assert cfg["reasoner"] == "off" and "reasoner" in cfg["_source"]["invalid"]
+    (tmp_path / rc.FLAGS_FILENAME).write_text(json.dumps({"reasoner": "python"}))
+    cfg = rc.resolve(str(tmp_path), environ={})
+    assert cfg["reasoner"] == "off" and "reasoner" in cfg["_source"]["invalid"]   # Track L: python removed
     assert rc.resolve(None, environ={})["reasoner"] == ""          # unset -> API default
 
 
 # ------------------------------------------------------------------ admission
-def test_python_mode_unchanged_ignores_admit_file(tmp_path, monkeypatch):
+@pytest.mark.parametrize("mode", ["off", "python", "junk"])
+def test_off_mode_admits_nothing_ignores_admit_file(tmp_path, monkeypatch, mode):
     launches = []
-    o = _orch(tmp_path, "python", monkeypatch, launches)
-    _admit_doc(tmp_path, [dict(R_CAT, goal="(Inheritance cat robot)")])
+    o = _orch(tmp_path, mode, monkeypatch, launches)
+    _admit_doc(tmp_path, [R_CAT, R_RAIN])
     r = o.cycle()
-    d = _derived(o)
-    assert r.reasoner == "python" and r.pc_admitted == 0 and "cat is a robot" not in d
-    # Python PLN items were admitted (they may be evicted the same cycle by contradiction resolution + tick)
-    assert r.pln_admitted > 0 and all(it.provenance is None for it in d.values()) and launches == []
+    assert r.reasoner == "off" and r.reasoner_skipped and r.reasoner_info["skipped"] == "reasoner_off"
+    assert r.pc_admitted == 0 and r.pln_admitted == 0 and r.admitted_derived == 0
+    assert _derived(o) == {} and launches == [] and r.active_count > 0
 
 
 def test_pettachainer_mode_admits_with_provenance_and_replaces_python(tmp_path, monkeypatch):
@@ -250,6 +254,9 @@ def test_cycle_does_not_write_back_pc_conclusion_by_default(tmp_path, monkeypatc
     o.cycle()
     assert "cat is a animal" in _derived(o)
     _aged_for_writeback(o)
+    pc_id = _derived(o)["cat is a animal"].id
+    # v0.5: no Python-derived items any more, so check that the PeTTaChainer item WAS a writeback candidate
+    assert pc_id in [c.item.id for c in o.writeback.select_candidates(o.store)]
     notes = []
     o.cycle(append_fn=lambda n: notes.append(n))
-    assert notes and not any("DerivedBelief" in n and "cat is a animal" in n for n in notes)
+    assert not any(("wmtm-derived-" + pc_id) in n or ("DerivedBelief" in n and "cat is a animal" in n) for n in notes)

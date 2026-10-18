@@ -5,7 +5,7 @@ Modules:
   attention:     ECAN AttentionValue with decay
   store:         WMTMStore bounded-capacity mutable store
   forgetting:    ForgettingPolicy for eviction decisions
-  inference:     WMTMInferenceEngine (PLN deduction/induction/abduction)
+  candidate:     InferenceCandidate (reasoner output admitted into WMTM)
   utility:       UtilityTracker for use/miss tracking
   forgetting_log: ForgettingLog to prevent re-derivation
   writeback:     WritebackManager for LTM promotion
@@ -16,13 +16,11 @@ Modules:
   journal:       default PeTTa journal (read_lines/append)
 """
 # Lazy exports (PEP 562): importing wmtm (e.g. for wmtm.api's automated fast
-# path) must not pull in the inference/PLN engine. Same names as before.
+# path) must not pull in heavy modules. Track L: the Python PLN engine is removed.
 _EXPORTS = {
     "WMTMItem": ".item", "AttentionValue": ".attention", "WMTMStore": ".store",
     "ForgettingPolicy": ".forgetting",
-    "WMTMInferenceEngine": ".inference", "InferenceCandidate": ".inference",
-    "ContradictionReport": ".inference", "ContradictionResolution": ".inference",
-    "BeliefTriple": ".inference", "extract_triples": ".inference",
+    "InferenceCandidate": ".candidate",
     "UtilityTracker": ".utility", "UtilityRecord": ".utility",
     "ForgettingLog": ".forgetting_log", "ForgetRecord": ".forgetting_log",
     "WritebackManager": ".writeback", "WritebackCandidate": ".writeback",
@@ -47,12 +45,7 @@ __all__ = [
     "AttentionValue",
     "WMTMStore",
     "ForgettingPolicy",
-    "WMTMInferenceEngine",
     "InferenceCandidate",
-    "ContradictionReport",
-    "ContradictionResolution",
-    "BeliefTriple",
-    "extract_triples",
     "UtilityTracker",
     "UtilityRecord",
     "ForgettingLog",

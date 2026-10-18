@@ -487,7 +487,7 @@ def automated_hooks(state_dir, items_dict, cycle, cfg=None):
         return None
 
 
-def automated_admit(state_dir, snapshot, cfg=None, default_reasoner="python"):
+def automated_admit(state_dir, snapshot, cfg=None, default_reasoner="pettachainer"):
     """v0.4 rc2: admit PeTTaChainer conclusions on an automated turn (in place on the snapshot dict).
 
     Only with reasoner=pettachainer and flag ``reasoner_admit_on_automated``.  Same guards/caps as the cycle
@@ -515,7 +515,7 @@ def automated_admit(state_dir, snapshot, cfg=None, default_reasoner="python"):
         return None
 
 
-def fast_path_automated(state_file, run_hooks=True, default_reasoner="python", admit=True):
+def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachainer", admit=True):
     """Ultra-lightweight turn for automated prompts (F20).
 
     Reads the persisted state JSON directly (no engine objects), returns the

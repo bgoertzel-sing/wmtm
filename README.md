@@ -33,7 +33,8 @@ mem.save(); mem.close()
 
 `WMTMConfig` injects `state_dir`, `journal` (any object with `read_lines()` /
 `append(note, supersedes, about)`), `llm` (unused yet), `petta` (unused yet),
-`use_goalchainer`, `reasoner` (`"python"` only), `capacity` (60), time budgets.
+`use_goalchainer`, `reasoner` (`"pettachainer"` default, or `"off"`; v0.5 removed `"python"`), `capacity` (60),
+time budgets.
 
 - `wmtm/context.py`: generic per-turn logic moved verbatim from Iter's
   `transformations/wmtm_context.py` (noise/duplicate filtering, stale cleanup,
@@ -49,7 +50,8 @@ mem.save(); mem.close()
 ## Background reasoner shadow and parse feed (v0.3)
 
 Optional, off by default, enabled per bot through `<state_dir>/_wmtm_flags.json` (re-read every cycle; no
-restart): a PeTTaChainer shadow that compares PeTTaChainer with the Python PLN on the top-K items, and a
+restart): a PeTTaChainer shadow that runs PeTTaChainer on the top-K items (since Track L the only reasoner; the
+Python PLN engine was removed), and a
 semantic-parse feed that parses items through the bot's LLM gateway (default cap 20 parses/hour). Both run in
 detached, niced, memory-capped workers (`python -m wmtm.workers.*`) and never affect the cycle. See
 `docs/RUNTIME.md`; `scripts/vendor_runtime.sh` builds the PeTTa v1.0.6 / PeTTaChainer 36b3fe6 (+ dedup patch)

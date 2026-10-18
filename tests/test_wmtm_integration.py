@@ -2,15 +2,16 @@
 Tests the full cycle: recall -> infer -> use -> decay -> forget -> writeback.
 Also tests multi-cycle behavior, promotion, and forgetting log persistence.
 """
+from _pc_helpers import chain, enable_pc   # Track L: PeTTaChainer admit file replaces Python PLN
 from wmtm import (
     WMTMStore, WMTMOrchestrator,
     UtilityTracker, ForgettingPolicy,
     WritebackManager, CycleResult,
 )
-def test_full_cycle_recall_infer_forget():
+def test_full_cycle_recall_infer_forget(tmp_path, monkeypatch):
     """Full cycle: recall items, run inference, decay, forget."""
     store = WMTMStore(capacity=50)
-    orch = WMTMOrchestrator(store)
+    orch = enable_pc(WMTMOrchestrator(store, use_goalchainer=False), tmp_path, monkeypatch, [chain('alpha', 'beta', 'gamma', 'r1', 'r2')])
     # Simulate recall from LTM
     recalled = [
         ('r1', 'alpha implies beta', 50.0),
@@ -43,11 +44,11 @@ def test_multi_cycle_forgetting_log_prevents_rederivation():
     # (unless attention is high enough to override)
     # At minimum, the system should be stable
     assert r2.active_count <= 10  # never exceeds capacity
-def test_promotion_survival():
+def test_promotion_survival(tmp_path, monkeypatch):
     """A derived belief that is used repeatedly should survive and get written back."""
     store = WMTMStore(capacity=20)
     ut = UtilityTracker()
-    orch = WMTMOrchestrator(store, utility_tracker=ut)
+    orch = enable_pc(WMTMOrchestrator(store, utility_tracker=ut, use_goalchainer=False), tmp_path, monkeypatch, [chain('alpha', 'beta', 'gamma', 'r1', 'r2')])
     # Admit items for deduction
     recalled = [
         ('r1', 'alpha implies beta', 200.0),

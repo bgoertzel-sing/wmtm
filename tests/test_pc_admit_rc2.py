@@ -176,11 +176,55 @@ def test_flag_off_no_automated_admission(tmp_path):
     assert len(_pc_items(tmp_path)) == 2
 
 
-def test_python_mode_no_admission_no_log(tmp_path):
-    _setup(tmp_path, flags={"reasoner": "python"}); _admit_doc(tmp_path)
+@pytest.mark.parametrize("val", ["python", "off", "junk"])
+def test_python_mode_no_admission_no_log(tmp_path, val):
+    """v0.5: "python" (removed), "off" and unknown values all mean reasoner off on both paths."""
+    _setup(tmp_path, flags={"reasoner": val}); _admit_doc(tmp_path)
     _mem(tmp_path).context_for("", automated=True)
     _mem(tmp_path, cycle_budget=0.0).context_for("tell me about cats and the rain please")
     assert _pc_items(tmp_path) == {} and _log(tmp_path) == []
+
+
+def test_v05_unset_reasoner_defaults_to_pettachainer(tmp_path):
+    """v0.5: no "reasoner" key -> pettachainer on the automated fast path (also called without default_reasoner)
+    and on user turns."""
+    sf = _setup(tmp_path); _admit_doc(tmp_path)
+    fl = os.path.join(str(tmp_path), rc.FLAGS_FILENAME); f = json.load(open(fl)); f.pop("reasoner")
+    json.dump(f, open(fl, "w"))
+    ctx.fast_path_automated(sf)
+    assert len(_pc_items(tmp_path)) == 2 and _log(tmp_path)[-1]["path"] == "automated"
+    _admit_doc(tmp_path, results=[dict(R_CAT, goal="(Inheritance housecat vertebrate)")], spec_ts=time.time() + 1)
+    _mem(tmp_path, cycle_budget=0.0).context_for("tell me about cats and the rain please")
+    assert _log(tmp_path)[-1]["path"] == "budget-skipped"
+
+
+def test_v05_no_removed_module_on_any_path(tmp_path):
+    """Track L: user turn (full + budget-skipped), automated fast path and api never import the Python PLN modules."""
+    import subprocess, sys
+    _setup(tmp_path); _admit_doc(tmp_path)
+    code = """
+import sys, json
+sys.path.insert(0, sys.argv[2])
+from wmtm.api import WMTM, WMTMConfig
+from wmtm import context as ctx
+class J:
+    def read_lines(self): return []
+    def append(self, *a, **k): return {"ok": True}
+d = sys.argv[1]
+ctx.fast_path_automated(d + "/_wmtm_state.json")
+WMTM(WMTMConfig(state_dir=d, journal=J(), cycle_budget=0.0)).context_for("tell me about cats please")
+WMTM(WMTMConfig(state_dir=d, journal=J())).context_for("tell me about the rain please")
+bad = [m for m in sys.modules if m in ("wmtm.inference", "wmtm.pln", "wmtm.pln_bridge")]
+print(json.dumps(bad))
+"""
+    import pathlib
+    repo = str(pathlib.Path(__file__).resolve().parents[1])
+    r = subprocess.run([sys.executable, "-c", code, str(tmp_path), repo], capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, r.stderr
+    assert json.loads(r.stdout.strip().splitlines()[-1]) == [] and "ImportError" not in r.stderr
+    assert not any(str(l.get("skipped") or "").startswith("error") or l.get("admit_error") for l in _log(tmp_path))
+    for m in ("inference", "pln", "pln_bridge"):
+        assert not (pathlib.Path(repo) / "wmtm" / (m + ".py")).exists()
 
 
 def test_admit_log_rotates(tmp_path):

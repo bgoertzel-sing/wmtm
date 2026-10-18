@@ -15,6 +15,12 @@ flags file (<state_dir>/_wmtm_flags.json) or env, see runtime_config.SPEC "gate_
                            (gate_broad_terms: thing, entity, trivial, ...)                          -> gate_broad_action
      hedged_quantifier     QuantifierPhrase "mostly"/"some"/"often"...: not universal, so
                            transitivity over it is unsound                                          -> gate_hedged_action
+     identifier_category   (Track M) Member/Inheritance where the CATEGORY is an identifier (commit
+                           hash, hex id, pid, uuid), or where an identifier SUBJECT is typed as a
+                           named-thing kind it cannot be (gate_identifier_bad_categories: branch,
+                           dir, path, file, repo, ... and *_branch etc.).  "c_7c8d9e0 is merged"
+                           and "c_5e6f7a8 is a commit" stay.  Track K: "0a1b2c3 is a topic_branch",
+                           "id_4d5e6f7 is a release_branch" (commit hashes typed as branches)        -> gate_identifier_action
    action = reject (fact dropped) | discount (strength x gate_discount; the fact stays).
 2. Cap per source fact per cycle (cycle side, pc_admit.load_candidates): at most gate_max_per_fact admitted
    conclusions whose proof uses any one KB fact (highest initial STI first).
@@ -28,6 +34,12 @@ REVIEW_FILE = "parse_review.jsonl"
 ACTIONS = ("reject", "discount", "keep")
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
 _GOAL = re.compile(r"^\((\w+) (\S+) (\S+)\)$")
+# Track M: whole-token identifiers.  Optional short prefix (c_, id_, sha_, commit_, rev_, proc_, pid_), then a hex
+# run of 7-40 chars with at least one digit (git short/long hashes), a >= 5 digit number after a prefix (pids), or a uuid.
+_ID_PREFIX = r"(?:c|id|sha|commit|rev|hash|proc|pid|h)_"
+_IDENT = re.compile(r"^(?:%s)?(?=[0-9a-f]*[0-9])[0-9a-f]{7,40}$|^%s[0-9]{5,}$|"
+                    r"^(?:%s)?[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}$"
+                    % (_ID_PREFIX, _ID_PREFIX, _ID_PREFIX))
 
 
 def _csv(v):
@@ -47,6 +59,7 @@ def settings(cfg=None) -> dict:
             "broad": _csv(g("gate_broad_terms")), "placeholders": _csv(g("gate_placeholder_terms")),
             "hedged": _csv(g("gate_hedged_quantifiers")), "negative": _csv(g("gate_negative_quantifiers")),
             "broad_action": act("gate_broad_action"), "hedged_action": act("gate_hedged_action"),
+            "identifier_action": act("gate_identifier_action"), "id_bad": _csv(g("gate_identifier_bad_categories")),
             "discount": min(1.0, max(0.0, float(g("gate_discount")))),
             "max_per_fact": max(0, int(g("gate_max_per_fact"))), "review_min": max(1, int(g("gate_review_min")))}
 
@@ -71,6 +84,22 @@ def is_placeholder(term, st) -> bool:
     return t.startswith("sk_") or t in st["placeholders"]
 
 
+def is_identifier(term) -> bool:
+    """Commit hash / hex id / pid / uuid token (whole token; 'pettachainer_36b3fe6_dedup' is a name, not an id)."""
+    return bool(_IDENT.match(str(term).lower()))
+
+
+def identifier_category(h, a, b, st) -> bool:
+    if h not in ("Inheritance", "Member"):
+        return False
+    if is_identifier(b):
+        return True                                   # an identifier used as a category
+    if not is_identifier(a):
+        return False
+    cat = str(b).lower()
+    return any(cat == t or cat.endswith("_" + t) for t in st.get("id_bad", ()))
+
+
 def check_fact(fact, quant, st):
     """-> (fact_or_None, reason_or_None, action).  fact = (head, a, b, s, c)."""
     h, a, b, s, c = fact
@@ -85,7 +114,9 @@ def check_fact(fact, quant, st):
     reasons, out = [], fact
     for reason, hit, action in (("broad_category", h in ("Inheritance", "Member") and str(b).lower() in st["broad"],
                                  st["broad_action"]),
-                                ("hedged_quantifier", bool(quant) and quant in st["hedged"], st["hedged_action"])):
+                                ("hedged_quantifier", bool(quant) and quant in st["hedged"], st["hedged_action"]),
+                                ("identifier_category", identifier_category(h, a, b, st),
+                                 st.get("identifier_action", "reject"))):
         if not hit or action == "keep":
             continue
         if action == "reject":

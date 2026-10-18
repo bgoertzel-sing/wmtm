@@ -86,3 +86,22 @@ def test_review_log(tmp_path):
     assert doc["many_conclusions"]["(Inheritance b hub)"]["n"] == 3
     assert "disagreements" not in doc                                # Track K: no Python comparison
     assert len((tmp_path / pg.REVIEW_FILE).read_text().splitlines()) == 1
+
+
+def test_identifier_category_track_m():
+    """Track M: commit hashes / hex ids typed as categories (Track K: 0a1b2c3 / id_4d5e6f7 'is a branch')."""
+    rej = [("Member", "0a1b2c3", "topic_branch"), ("Member", "id_4d5e6f7", "release_branch"),
+           ("Inheritance", "pin", "c_2b3c4d5"), ("Member", "deadbeef1234", "branch"),
+           ("Member", "c_5e6f7a8", "repo"), ("Inheritance", "cat", "0f1e2d3c")]
+    for f in rej:
+        assert pg.check_fact(f + (0.9, 0.9), None, ST)[1:] == ("identifier_category", "reject"), f
+    keep = [("Member", "c_5e6f7a8", "commit"), ("Member", "c_7c8d9e0", "merged"),
+            ("Member", "pettachainer_36b3fe6_dedup", "vendor"), ("Member", "module_build_20260101", "branch"),
+            ("Member", "agent_demo_live_20260101", "fork_branch"), ("Member", "ltm_path", "dir"),
+            ("Implies", "0a1b2c3", "topic_branch"), ("Member", "decade", "branch")]
+    for f in keep:
+        assert pg.check_fact(f + (0.9, 0.9), None, ST)[1] is None, f
+    assert pg.is_identifier("0a1b2c3") and pg.is_identifier("id_4d5e6f7") and not pg.is_identifier("abcdefa")
+    d = pg.check_fact(("Member", "0a1b2c3", "branch", 0.9, 0.9), None, dict(ST, identifier_action="discount"))
+    assert d[1:] == ("identifier_category", "discount") and d[0][3] == 0.45
+    assert pg.check_fact(("Member", "0a1b2c3", "branch", 0.9, 0.9), None, dict(ST, identifier_action="keep"))[1] is None

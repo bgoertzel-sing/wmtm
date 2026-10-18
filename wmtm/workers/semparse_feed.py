@@ -78,9 +78,10 @@ try:
             status["status"] = "canary_fail"; finish(3)
     llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None)
     status["model"] = getattr(llm, "model", None)
+    from wmtm.semparse_adapter import SemParseAdapter
     if a.llm_canary:
-        from wmtm.semparse_adapter import SemParseAdapter
-        r = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt).parse_item("canary1", "Grace is a pilot. Pilots are people.")
+        r = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt,
+                           preamble=bool(CFG.get("semparse_preamble", True))).parse_item("canary1", "Grace is a pilot. Pilots are people.")
         u = llm.last_usage or {}
         with cache._lock():   # canary spend counts against the hourly cap
             rc.append_jsonl(cache.log_path, {"ts": time.time(), "item_id": "canary1", "status": "canary",
@@ -91,7 +92,11 @@ try:
         status["llm_canary"] = {"ok": ok, "accepted": len(r.accepted), "error": r.error}
         if not ok:
             status["status"] = "llm_canary_fail"; finish(3)
-    recs = process_queue(cache, llm, loader=loader, n=a.n, prompt_path=a.prompt)
+    pre = CFG.get("semparse_preamble", True)
+    ad = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, reject_log=cache.reject_log,
+                         max_chars=cache.max_chars, reject_log_max_bytes=cache.log_max_bytes, preamble=bool(pre))
+    status.update(preamble=ad.preamble, file_sha256=ad.file_sha256, prompt_sha256=ad.prompt_sha256)   # v0.5: what is sent
+    recs = process_queue(cache, llm, loader=loader, n=a.n, prompt_path=a.prompt, adapter=ad)
     status.update(status="ok", parsed=len(recs), by_status={s: sum(r["status"] == s for r in recs) for s in {r["status"] for r in recs}})
     finish(0)
 except SystemExit:

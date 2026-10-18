@@ -82,9 +82,9 @@ def test_derive_then_admitted(tmp_path):
 
 
 def test_reasoner_flag(tmp_path):
-    for m in ("python", "pettachainer"):                # Track K: "both" removed
+    for m in ("pettachainer", "off"):                   # Track L: "python" removed
         WMTM(WMTMConfig(state_dir=tmp_path, reasoner=m))
-    for bad in ("prolog", "both"):
+    for bad in ("prolog", "both", "python"):
         with pytest.raises(ValueError):
             WMTM(WMTMConfig(state_dir=tmp_path, reasoner=bad))
 
