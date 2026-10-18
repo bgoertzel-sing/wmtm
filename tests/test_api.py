@@ -10,6 +10,22 @@ from replay import scenarios
 
 REPO = Path(__file__).resolve().parents[1]
 
+# The canary cluster is dated; recall drops clusters older than its stale cutoff, so re-date the
+# fixtures to one hour ago instead of depending on the wall clock.
+import time as _time
+_T = _time.gmtime(_time.time() - 3600)
+_OLD_ID, _OLD_ISO = "20261015T180000Z", "2026-10-15T18:00:00Z"
+_NEW_ID, _NEW_ISO = _time.strftime("%Y%m%dT%H%M%SZ", _T), _time.strftime("%Y-%m-%dT%H:%M:%SZ", _T)
+
+
+def _fresh(text):
+    return text.replace(_OLD_ID, _NEW_ID).replace(_OLD_ISO, _NEW_ISO)
+
+
+CANARY = _fresh(scenarios.CANARY_CLUSTER)
+DECOY = _fresh(scenarios.DECOY_CLUSTER)
+CANARY_ID = "ep-note-" + _NEW_ID
+
 
 class ListJournal:
     """Non-PeTTa journal adapter: only read_lines()/append() are required."""
@@ -25,7 +41,7 @@ class ListJournal:
         return {"ok": True}
 
 
-def _mem(tmp_path, journal_text=scenarios.CANARY_CLUSTER + scenarios.DECOY_CLUSTER, **kw):
+def _mem(tmp_path, journal_text=CANARY + DECOY, **kw):
     return WMTM(WMTMConfig(state_dir=tmp_path, journal=ListJournal(journal_text), **kw))
 
 
@@ -35,11 +51,11 @@ def test_context_for_recalls_from_injected_journal(tmp_path):
     ctx = m.context_for("what is the canary codeword in the kestrel archive?")
     assert "zebra-quartz-41" in ctx and "tomato" not in ctx
     st = json.loads((tmp_path / "_wmtm_state.json").read_text())
-    assert "ep-note-20261015T180000Z" in st["store"]["items"]
+    assert CANARY_ID in st["store"]["items"]
 
 
 def test_negative_control_without_canary(tmp_path):
-    m = _mem(tmp_path, journal_text=scenarios.DECOY_CLUSTER)
+    m = _mem(tmp_path, journal_text=DECOY)
     ctx = m.context_for("what is the canary codeword in the kestrel archive?")
     assert ctx is None or "zebra-quartz-41" not in ctx
 
@@ -100,12 +116,12 @@ def test_decide_with_injected_solver(tmp_path):
 
     out = m.decide("should I do it?", solve_incident=solve)
     assert out.startswith("Decision: a1 - Do it") and "WMTM evidence: 2 items" in out
-    assert {i["id"] for i in seen["items"]} >= {"ep-note-20261015T180000Z"}
+    assert {i["id"] for i in seen["items"]} >= {CANARY_ID}
 
 
 def test_cli_context(tmp_path):
     jd = tmp_path / "j"; jd.mkdir()
-    (jd / "journal.metta").write_text(scenarios.CANARY_CLUSTER)
+    (jd / "journal.metta").write_text(CANARY)
     p = subprocess.run([sys.executable, "-m", "wmtm", "context", "--state-dir", str(tmp_path), "--journal-dir", str(jd)],
                        input=json.dumps({"user": "kestrel archive canary codeword?"}), capture_output=True, text=True, cwd=REPO)
     assert p.returncode == 0 and "zebra-quartz-41" in p.stdout
