@@ -36,10 +36,14 @@ _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
 _GOAL = re.compile(r"^\((\w+) (\S+) (\S+)\)$")
 # Track M: whole-token identifiers.  Optional short prefix (c_, id_, sha_, commit_, rev_, proc_, pid_), then a hex
 # run of 7-40 chars with at least one digit (git short/long hashes), a >= 5 digit number after a prefix (pids), or a uuid.
-_ID_PREFIX = r"(?:c|id|sha|commit|rev|hash|proc|pid|h)_"
+# Track P: also ANY short alphabetic prefix (1-8 letters + _ or -: ref_, tag_, build_, ...) before a hex run that has
+# both a digit and a letter a-f (an all-digit run after an unknown prefix may be a date, e.g. release_20250307).
+_ID_PREFIX = r"(?:c|id|sha|commit|rev|ref|hash|proc|pid|h)[_-]"
+_ANY_PREFIX = r"[a-z]{1,8}[_-]"
 _IDENT = re.compile(r"^(?:%s)?(?=[0-9a-f]*[0-9])[0-9a-f]{7,40}$|^%s[0-9]{5,}$|"
+                    r"^%s(?=[0-9a-f]*[0-9])(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}$|"
                     r"^(?:%s)?[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}$"
-                    % (_ID_PREFIX, _ID_PREFIX, _ID_PREFIX))
+                    % (_ID_PREFIX, _ID_PREFIX, _ANY_PREFIX, _ANY_PREFIX))
 
 
 def _csv(v):

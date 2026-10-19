@@ -80,6 +80,38 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.5.0-rc3 (2026-10-19)
+Track P on top of v0.5.0-rc2: recall/context plumbing, so the memories recalled for a request reach the prompt.
+Flags-file keys of rc2 are all still valid; API and adapters unchanged. Every change has its own switch (defaults
+on); all off = rc2 behaviour.
+- (a) `cleanup_protect_recent` (default true; `cleanup_grace_turns` 10, `cleanup_grace_s` 1800): stale cleanup
+  (user path and automated fast path) spares items recalled for, or matching, a real request within the grace
+  window (`recalled_at` / `recalled_cycle` on the item). rc2 evicted every freshly recalled journal note in the same
+  turn, before the block was rendered (journal age >= 48 h, utility 0), so the block showed what earlier turns had
+  kept, not the request's recall. Operational-noise eviction still applies.
+- (b) `context_rank` (default true): the block is ranked by `w_rel`*relevance + `w_sti`*STI (`context_rank_weights`
+  `0.7,0.3`). Relevance = recall / relevance-stimulus score (recalled items) or IDF-weighted request-term overlap
+  (other items), normalised; the `context_min_request_items` (5) best matches come first; once a request is known,
+  items scoring below `context_min_score` (0.2) are left out. Items share
+  `context_total_chars` (6000; at most `context_item_chars` 600 each, floor 250); a long item shows its opening plus
+  its most request-relevant window instead of the first 200 chars. Lines carry `rel=`. The relevance
+  (`context_rel`: scores, request terms) is persisted in the state, so automated turns rank the same way and also
+  score conclusions admitted after the request. F17 passive utility goes to the items actually shown.
+- (c) `request_item` (default true): the current request is stored as one `source_type=user` item (replaced by
+  the next request; never shown, never written back), so Track N's request-overlap goal ranking has request terms
+  (`goal_rank.user_items` was always 0 on live). Derived conclusions that overlap the request get relevance and rank
+  into the block through (b).
+- (d) parse gate `identifier_category`: an identifier may follow any short alphabetic prefix (`ref_`, `tag_`,
+  `build_`, ...; `[a-z]{1,8}[_-]`) when the hex run has both a digit and a letter; `ref` added to the known
+  prefixes (which also allow all-digit runs). `ref_<hash>` typed as a branch is now rejected; dated names such as
+  `release_20250307` are not identifiers.
+- (e) `worker_prio_refresh_s` default 1 s (was 5 s): short worker runs ended at nice 12 because the host scheduler
+  reset them before the first re-assert.
+- State additions (ignored by rc2): `recalled_at` / `recalled_cycle` on items, `context_rel` in the snapshot,
+  `source_type=user` items (rc2 would display them: remove them on a pin rollback).
+- Replay equivalence runs with the Track P switches off (the original glue has none of them).
+- Tests: `tests/test_track_p.py`.
+
 ## v0.5.0-rc2 (2026-10-19)
 Tracks N and O on top of v0.5.0-rc1. Flags-file keys of rc1 are all still valid; API unchanged.
 - Track N: ranked shadow goals (Design A, `docs/TRACK_M_GOALS.md`), on by default (`shadow_goal_rank`). The goal

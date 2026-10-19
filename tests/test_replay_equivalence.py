@@ -68,16 +68,23 @@ def _inputs(dataset):
     return st.read_text(encoding="utf-8"), jr.read_text(encoding="utf-8")
 
 
+# Track L: reasoner off (see orig-tree note below).  Track P: the rc2 recall/context behaviour (the original glue
+# has no fresh-recall protection, relevance ranking or request item); tests/test_track_p.py covers the new one.
+_REPLAY_ENV = {"WMTM_REASONER": "off", "WMTM_CLEANUP_PROTECT_RECENT": "0", "WMTM_CONTEXT_RANK": "0",
+               "WMTM_REQUEST_ITEM": "0"}
+
+
 def _replay(tmp_path, orig_src, steps, state, journal, mode):
-    prev = os.environ.get("WMTM_REASONER")
-    os.environ["WMTM_REASONER"] = "off"   # Track L: see orig-tree note below (restored on return)
+    prev = {k: os.environ.get(k) for k in _REPLAY_ENV}
+    os.environ.update(_REPLAY_ENV)   # restored on return
     try:
         return _replay_body(tmp_path, orig_src, steps, state, journal, mode)
     finally:
-        if prev is None:
-            os.environ.pop("WMTM_REASONER", None)
-        else:
-            os.environ["WMTM_REASONER"] = prev
+        for k, v in prev.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
 
 
 def _replay_body(tmp_path, orig_src, steps, state, journal, mode):

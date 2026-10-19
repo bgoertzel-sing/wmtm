@@ -87,6 +87,19 @@ SPEC = {
     "shadow_budget_s":     ("WMTM_PC_SHADOW_BUDGET", float, 20.0, None),
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),
     "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
+    # Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour.
+    "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
+    "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
+    "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds
+    "context_rank":        ("WMTM_CONTEXT_RANK", bool, True, None),       # block ranked by request relevance + STI
+    "context_rank_weights": ("WMTM_CONTEXT_RANK_WEIGHTS", str, "0.7,0.3", None),  # w_rel, w_sti (both normalised 0-1)
+    "context_item_chars":  ("WMTM_CONTEXT_ITEM_CHARS", int, 600, None),   # per item cap (rc2: 200); share = total/items
+    "context_total_chars": ("WMTM_CONTEXT_TOTAL_CHARS", int, 6000, None), # all item texts together (rc2: <= 3000)
+    "context_max_items":   ("WMTM_CONTEXT_MAX_ITEMS", int, 15, None),
+    "context_min_request_items": ("WMTM_CONTEXT_MIN_REQUEST_ITEMS", int, 5, None),  # best-matching items always shown
+    "context_min_score":   ("WMTM_CONTEXT_MIN_SCORE", float, 0.2, None),  # with a known request: hide weaker filler
+    "request_item":        ("WMTM_REQUEST_ITEM", bool, True, None),       # admit the request as a source_type=user item
+    "request_item_chars":  ("WMTM_REQUEST_ITEM_CHARS", int, 600, None),
     "hooks_on_automated":  ("WMTM_HOOKS_ON_AUTOMATED", bool, True, None),
     "runtime_dir":         ("WMTM_RUNTIME_DIR", str, "", _D),
     "shadow_dir":          ("WMTM_PC_SHADOW_DIR", str, "", _D),
@@ -100,7 +113,7 @@ SPEC = {
     "python":              ("WMTM_WORKER_PYTHON", str, "", None),
     "worker_nice":         ("WMTM_WORKER_NICE", int, 19, None),
     "worker_sched_idle":   ("WMTM_WORKER_SCHED_IDLE", bool, True, None),
-    "worker_prio_refresh_s": ("WMTM_WORKER_PRIO_REFRESH", float, 5.0, None),
+    "worker_prio_refresh_s": ("WMTM_WORKER_PRIO_REFRESH", float, 1.0, None),   # Track P: 1 s (was 5 s; the host scheduler resets it)
     "worker_mem_mb":       ("WMTM_WORKER_MEM_MB", int, 3072, None),
     "jsonl_max_bytes":     ("WMTM_JSONL_MAX_BYTES", int, 10_000_000, None),
     "cache_max_bytes":     ("WMTM_SEMPARSE_CACHE_MAX_BYTES", int, 20_000_000, None),
@@ -338,7 +351,7 @@ class PriorityGuard:
 
     def __init__(self, cfg):
         self.cfg = dict(cfg or {})
-        self.interval = float(self.cfg.get("worker_prio_refresh_s", 5.0) or 0)
+        self.interval = float(self.cfg.get("worker_prio_refresh_s", 1.0) or 0)
         self.resets = 0
         self.checks = 0
         self.start_prio = {}

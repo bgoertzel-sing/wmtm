@@ -36,6 +36,10 @@ class WMTMItem:
     created_at: float = field(default_factory=_now)
     origin_timestamp: float = 0.0  # F25: original journal entry timestamp (0 = unknown)
     provenance: Optional[dict] = None  # Track I: {reasoner, goal, stv, proof, ...} for reasoner-admitted items
+    # Track P: last time this item was recalled for / matched a real user request (0 = never).  Stale cleanup
+    # spares it for cleanup_grace_turns cycles / cleanup_grace_s seconds afterwards.
+    recalled_at: float = 0.0
+    recalled_cycle: int = -1
 
     @property
     def effective_age_seconds(self) -> float:
@@ -54,6 +58,11 @@ class WMTMItem:
         if self.origin_timestamp > 0:
             return now - min(self.origin_timestamp, self.created_at)
         return now - self.created_at
+
+    def mark_recalled(self, cycle: int, now: Optional[float] = None) -> None:
+        """Track P: this item was recalled for (or matched) the current user request."""
+        self.recalled_at = _now() if now is None else now
+        self.recalled_cycle = int(cycle)
 
     def touch(self, tick: int) -> None:
         """Record access at the given tick."""
@@ -83,6 +92,7 @@ class WMTMItem:
             "created_at": self.created_at,
             "origin_timestamp": self.origin_timestamp,
             **({"provenance": self.provenance} if self.provenance is not None else {}),
+            **({"recalled_at": self.recalled_at, "recalled_cycle": self.recalled_cycle} if self.recalled_at > 0 else {}),
         }
 
     @classmethod
@@ -102,4 +112,6 @@ class WMTMItem:
             created_at=d.get("created_at", 0.0),
             origin_timestamp=d.get("origin_timestamp", 0.0),
             provenance=d.get("provenance"),
+            recalled_at=d.get("recalled_at", 0.0) or 0.0,
+            recalled_cycle=d.get("recalled_cycle", -1),
         )

@@ -65,7 +65,7 @@ def run(root, steps, mode, extra_path="", journal_base=0):
 
 
 _HDR = re.compile(r"^\[WMTM Active Working Memory \((\d+) items, showing top (\d+), cycle (\d+)\)\]$")
-_LINE = re.compile(r"^  \[(recalled|derived|unknown) sti=-?\d+\.\d util=-?\d+\.\d age=(\d+m|\d+\.\dh|\d+\.\dd|\?)\] ")
+_LINE = re.compile(r"^  \[(recalled|derived|unknown) sti=-?\d+\.\d util=-?\d+\.\d age=(\d+m|\d+\.\dh|\d+\.\dd|\?)( rel=\d\.\d\d)?\] ")
 
 
 def structural_check(steps, results, seed_state, strict_cycle=True):

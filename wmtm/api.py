@@ -235,6 +235,9 @@ class WMTM:
                 return _ctx.format_active_context(orch.store, orch.cycle_count) if orch else None
 
             store = orch.store
+            pcfg = self._flags()                          # Track P switches (cheap JSON read; {} -> SPEC defaults)
+            recall_scores, stim_scores, recalled_now = {}, {}, False
+            protect = _ctx.protect_settings(pcfg)
 
             if user_msg and self._budget_ok():
                 self._ensure_journal_ready()
@@ -248,16 +251,26 @@ class WMTM:
                         if _ctx.is_duplicate_topic(c.content, admitted_snippets):
                             continue
                         origin_ts = rb.get_cluster_timestamp(c.cluster_id)
-                        store.admit(
+                        it = store.admit(
                             c.cluster_id, c.content,
                             source_type='recalled',
                             initial_sti=max(c.score * 10, 1.0),
                             origin_timestamp=origin_ts,
                         )
+                        if protect:
+                            it.mark_recalled(orch.cycle_count)
+                        recall_scores[c.cluster_id] = c.score
                         admitted_snippets.append(c.content)
                 t = lap("recall_s", t)
-                _ctx.relevance_stimulus(store, rb, user_msg, orch)
+                stim_scores = _ctx.relevance_stimulus(store, rb, user_msg, orch) or {}
+                for iid, sc in stim_scores.items():   # Track P: residents matching this request count as recalled now
+                    it = store.get(iid)
+                    if protect and sc > 0 and it is not None:
+                        it.mark_recalled(orch.cycle_count)
+                recalled_now = True
                 t = lap("relevance_s", t)
+            if user_msg and self._budget_ok():
+                _ctx.admit_request_item(store, user_msg, orch.cycle_count, pcfg)   # Track P (c)
 
             if self._budget_ok():
                 if self.pending_path.exists():
@@ -278,7 +291,10 @@ class WMTM:
                         pass
 
             if self._budget_ok():
-                _ctx.cleanup_stale_items(store, orch.cycle_count)
+                _ctx.cleanup_stale_items(store, orch.cycle_count, protect=protect)
+            if recalled_now and _ctx.setting(pcfg, "context_rank"):
+                orch.context_rel = _ctx.request_relevance(store, self._recall_bridge, user_msg, recall_scores,
+                                                          stim_scores, orch.cycle_count)
             t = lap("derives_cleanup_s", t)
             timing["elapsed_before_cycle_s"] = round(t - t_turn, 4)
 
@@ -306,11 +322,11 @@ class WMTM:
                 orch._cycle += 1
                 t = lap("tick_s", t)
 
-            context = _ctx.format_active_context(orch.store, orch.cycle_count)
+            context, shown = _ctx.format_context(orch.store, orch.cycle_count, pcfg, orch.context_rel)
             if context:
-                # F17: passive utility for displayed items.
-                for item in orch.store.get_active_set()[:15]:
-                    orch.utility.record_use(item.id, orch._cycle)
+                # F17: passive utility for displayed items (Track P: the items actually shown).
+                for iid in shown:
+                    orch.utility.record_use(iid, orch._cycle)
 
         except _ObserveFailed:
             pass
@@ -325,6 +341,14 @@ class WMTM:
 
         self.save()
         return context
+
+    def _flags(self):
+        """Resolved flags file (Track P switches).  Never raises; {} means SPEC defaults."""
+        try:
+            from . import runtime_config as _rc
+            return _rc.resolve(str(self.state_dir))
+        except Exception:
+            return {}
 
     def _reasoner_cfg(self):
         """-> (flags cfg, effective reasoner mode).  Never raises."""

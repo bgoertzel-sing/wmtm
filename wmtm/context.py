@@ -92,7 +92,7 @@ def is_duplicate_topic(content, existing_snippets, threshold=0.6):
             return True
     return False
 
-def cleanup_stale_items(store, cycle_count, max_zero_utility_cycles=10):
+def cleanup_stale_items(store, cycle_count, max_zero_utility_cycles=10, protect=None):
     """Evict stale items based on utility, wall-clock age, and content quality.
     
     F14b+F15+F16: Multi-tier cleanup using WALL-CLOCK TIME, not cycle count.
@@ -124,6 +124,11 @@ def cleanup_stale_items(store, cycle_count, max_zero_utility_cycles=10):
     
     BOTH:
       - Legacy items with created_at=0 and zero utility → evict
+
+    Track P: ``protect`` = {"turns": N, "s": S} (from protect_settings(cfg)) spares items recalled for / matching a
+    real user request within the last N cycles or S seconds (item.recalled_cycle / recalled_at) from every
+    age/utility tier; only the operational-noise tier still applies.  rc2 (protect=None) evicted freshly recalled
+    journal notes in the same turn, before the block was rendered: their journal age is >= 48 h and utility 0.
     """
     import time as _t
     now = _t.time()
@@ -145,7 +150,11 @@ def cleanup_stale_items(store, cycle_count, max_zero_utility_cycles=10):
         if item.utility <= 0.0 and is_operational_noise(item.content):
             to_evict.append(item.id)
             continue
-        
+
+        if protect and is_recent_recall(getattr(item, "recalled_at", 0.0), getattr(item, "recalled_cycle", -1),
+                                        cycle_count, now, protect):
+            continue
+
         # Tier 1: Legacy items with no timestamp (created_at=0) and zero utility
         if item.created_at == 0.0 and item.utility <= 0.0:
             to_evict.append(item.id)
@@ -554,43 +563,20 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
         import time as _t
         now = _t.time()
         cycle = snapshot.get("cycle", 0)
+        if cfg is None:
+            try:
+                from . import runtime_config as _rc
+                cfg = _rc.resolve(state_dir)
+            except Exception:
+                cfg = {}
+        protect = protect_settings(cfg)
 
-        # Sort by STI descending, cap at 15
-        sorted_items = sorted(
-            items_dict.values(),
-            key=lambda it: it.get("attention", {}).get("sti", 0),
-            reverse=True,
-        )[:15]
-
-        lines = []
-        for item in sorted_items:
-            src = item.get("source_type", "unknown")
-            att = item.get("attention", {})
-            sti = att.get("sti", 0)
-            util = item.get("utility", 0)
-            created = item.get("created_at", 0)
-            # F25: Use origin_timestamp for age display when available
-            origin_ts = item.get("origin_timestamp", 0)
-            display_ts = created
-            if origin_ts > 0:
-                display_ts = min(origin_ts, created) if created > 0 else origin_ts
-            if display_ts > 0:
-                age_secs = now - display_ts
-                if age_secs < 3600:
-                    age_str = f"{age_secs/60:.0f}m"
-                elif age_secs < 86400:
-                    age_str = f"{age_secs/3600:.1f}h"
-                else:
-                    age_str = f"{age_secs/86400:.1f}d"
-            else:
-                age_str = "?"
-            content = item.get("content", "")[:200]
-            lines.append(f"  [{src} sti={sti:.1f} util={util:.1f} age={age_str}] {content}")
-
-        total = len(items_dict)
-        shown = len(sorted_items)
-        header = f"[WMTM Active Working Memory ({total} items, showing top {shown}, cycle {cycle})]"
-        context = header + "\n" + "\n".join(lines)
+        if setting(cfg, "context_rank"):
+            # Track P: same ranking/rendering as the user path, relevance = the last real request's (persisted).
+            context, _shown = render_ranked(_entries_from_dicts(items_dict, now), snapshot.get("context_rel"),
+                                            cycle, cfg)
+        else:
+            context = _render_rc2_from_dicts(items_dict, now, cycle)
 
         # Minimal state update: decay STI, increment cycle, cleanup stale items
         # F23: Wall-clock cleanup in fast path. Without this, stale items
@@ -626,6 +612,11 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
             else:
                 age_hours = float('inf')
 
+            # Track P: spare items recalled for / matching a recent real request (not noise: see cleanup_stale_items)
+            if protect and is_recent_recall(item_data.get("recalled_at", 0.0), item_data.get("recalled_cycle", -1),
+                                            cycle, now, protect):
+                continue
+
             # Same thresholds as _cleanup_stale_items:
             if is_recalled:
                 # 14-day hard cap for recalled items with utility < 5.0
@@ -648,6 +639,10 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
 
         for eid in evict_ids:
             del items_dict[eid]
+        crel = snapshot.get("context_rel")
+        if evict_ids and isinstance(crel, dict) and isinstance(crel.get("scores"), dict):
+            for eid in evict_ids:
+                crel["scores"].pop(eid, None)
 
         snapshot["cycle"] = cycle + 1
 
@@ -662,3 +657,294 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
         print(f"[wmtm_context] WARN fast-path: {type(e).__name__}: {e}", file=sys.stderr)
 
     return context
+
+
+# ── Track P: recall/context plumbing ─────────────────────────────────
+
+def setting(cfg, key):
+    """Flags value with the runtime_config SPEC default when cfg lacks it (cfg may be {} after a failed resolve)."""
+    if cfg and key in cfg:
+        return cfg[key]
+    from .runtime_config import SPEC
+    return SPEC[key][2]
+
+
+def protect_settings(cfg):
+    """-> {"turns", "s"} for cleanup_stale_items / the fast path, or None (rc2 behaviour) when the flag is off."""
+    try:
+        if not setting(cfg, "cleanup_protect_recent"):
+            return None
+        return {"turns": max(0, int(setting(cfg, "cleanup_grace_turns"))),
+                "s": max(0.0, float(setting(cfg, "cleanup_grace_s")))}
+    except (TypeError, ValueError):
+        return None
+
+
+def is_recent_recall(recalled_at, recalled_cycle, cycle, now, protect):
+    """True if an item recalled at (recalled_at, recalled_cycle) is still within the grace window.  The current
+    cycle always counts (grace_turns 0 still protects the turn that recalled it)."""
+    if not protect or not recalled_at or recalled_at <= 0:
+        return False
+    try:
+        if recalled_cycle is not None and int(recalled_cycle) >= 0 and cycle - int(recalled_cycle) <= protect["turns"]:
+            return True
+    except (TypeError, ValueError):
+        pass
+    return (now - float(recalled_at)) <= protect["s"]
+
+
+def _weights(cfg):
+    try:
+        w = [float(x) for x in str(setting(cfg, "context_rank_weights")).split(",")]
+        if len(w) == 2 and all(x >= 0 for x in w) and sum(w) > 0:
+            return w[0], w[1]
+    except (TypeError, ValueError):
+        pass
+    return 0.7, 0.3
+
+
+def _age_str(age_secs):
+    if age_secs is None or age_secs < 0:
+        return "?"
+    if age_secs < 3600:
+        return f"{age_secs/60:.0f}m"
+    if age_secs < 86400:
+        return f"{age_secs/3600:.1f}h"
+    return f"{age_secs/86400:.1f}d"
+
+
+def _entries_from_items(items, now):
+    """Plain display entries from WMTMItem objects (active-set order)."""
+    out = []
+    for it in items:
+        if hasattr(it, "effective_age_seconds"):
+            age = it.effective_age_seconds
+        elif it.created_at > 0:
+            age = now - it.created_at
+        else:
+            age = -1
+        out.append({"id": it.id, "src": it.source_type, "sti": float(it.attention.sti), "util": float(it.utility),
+                    "age": age, "content": it.content or "", "total": float(it.attention.total)})
+    return out
+
+
+def _display_ts(d):
+    created = d.get("created_at", 0)
+    origin_ts = d.get("origin_timestamp", 0)
+    display_ts = created
+    if origin_ts > 0:
+        display_ts = min(origin_ts, created) if created > 0 else origin_ts
+    return display_ts
+
+
+def _entries_from_dicts(items_dict, now):
+    """Plain display entries from persisted item dicts (fast path)."""
+    out = []
+    for d in items_dict.values():
+        ts = _display_ts(d)
+        att = d.get("attention", {}) or {}
+        out.append({"id": d.get("id"), "src": d.get("source_type", "unknown"), "sti": float(att.get("sti", 0) or 0),
+                    "util": float(d.get("utility", 0) or 0), "age": (now - ts) if ts > 0 else -1,
+                    "content": d.get("content", "") or "", "total": _att_total(d)})
+    return out
+
+
+def _render_rc2_from_dicts(items_dict, now, cycle):
+    """rc2 fast-path block (context_rank off): top 15 by STI, 200 chars each."""
+    sorted_items = sorted(items_dict.values(), key=lambda it: it.get("attention", {}).get("sti", 0),
+                          reverse=True)[:15]
+    lines = []
+    for item in sorted_items:
+        src = item.get("source_type", "unknown")
+        att = item.get("attention", {})
+        sti = att.get("sti", 0)
+        util = item.get("utility", 0)
+        ts = _display_ts(item)
+        age_str = _age_str(now - ts) if ts > 0 else "?"
+        content = item.get("content", "")[:200]
+        lines.append(f"  [{src} sti={sti:.1f} util={util:.1f} age={age_str}] {content}")
+    header = f"[WMTM Active Working Memory ({len(items_dict)} items, showing top {len(sorted_items)}, cycle {cycle})]"
+    return header + "\n" + "\n".join(lines)
+
+
+_REQ_TERMS_MAX = 60
+
+
+def lexical_relevance(text, terms, tokenize=None):
+    """Request relevance of a text without a journal cluster (derived conclusions): sum of the request terms'
+    weights it contains (terms = {term: idf}).  Compound tokens (a_b_c) also match by part."""
+    if not terms or not text:
+        return 0.0
+    if tokenize is None:
+        from .recall_bridge import RecallBridge
+        tokenize = RecallBridge._tokenize
+    toks = tokenize(text.replace("_", " ")) | tokenize(text)
+    return float(sum(w for t, w in terms.items() if t in toks))
+
+
+def request_relevance(store, bridge, user_msg, recall_scores=None, stim_scores=None, cycle=0):
+    """Track P: per-item relevance (0-1) to the current request.
+
+    Recalled items: their recall / relevance-stimulus score (RecallBridge._score_cluster; the higher of the two).
+    Other items (derived conclusions, tool derives): IDF-weighted overlap of their text with the request terms,
+    on the same scale.  Normalised by the best score.  -> the dict persisted as snapshot["context_rel"], also read
+    by the automated fast path: {"cycle", "scores": {id: rel}, "terms": {term: idf}, "smax"}."""
+    try:
+        qterms = bridge._tokenize(user_msg) if bridge is not None else set()
+    except Exception:
+        qterms = set()
+    if not qterms:
+        return {"cycle": cycle, "scores": {}, "terms": {}, "smax": 0.0}
+    terms = {}
+    for t in qterms:
+        try:
+            terms[t] = float(bridge._idf(t))
+        except Exception:
+            terms[t] = 1.0
+    terms = dict(sorted(terms.items(), key=lambda kv: -kv[1])[:_REQ_TERMS_MAX])
+    raw = {}
+    for src in (recall_scores or {}), (stim_scores or {}):
+        for k, v in src.items():
+            if v and v > 0:
+                raw[k] = max(raw.get(k, 0.0), float(v))
+    for it in store.get_active_set():
+        if it.id in raw or it.source_type in ("recalled", "user"):
+            continue
+        s = lexical_relevance(it.content, terms, bridge._tokenize)
+        if s > 0:
+            raw[it.id] = s
+    smax = max(raw.values(), default=0.0)
+    scores = {k: round(v / smax, 4) for k, v in raw.items()} if smax > 0 else {}
+    return {"cycle": cycle, "scores": scores, "terms": {k: round(v, 3) for k, v in terms.items()},
+            "smax": round(smax, 4)}
+
+
+def rank_entries(entries, context_rel, cfg):
+    """Track P: order display entries by w_rel*relevance + w_sti*STI/max STI (source_type=user items, the request
+    itself, are never shown).  The best context_min_request_items entries by relevance come first; when a request
+    is known, other entries scoring below context_min_score are dropped."""
+    rel = dict(((context_rel or {}).get("scores") or {}))
+    terms = (context_rel or {}).get("terms") or {}
+    smax = float((context_rel or {}).get("smax") or 0.0)
+    ents = [e for e in entries if e["src"] != "user"]
+    if terms and smax > 0:                       # derived items admitted after the request (automated admit)
+        for e in ents:
+            if e["id"] not in rel and e["src"] not in ("recalled", "user"):
+                try:
+                    s = lexical_relevance(e["content"], terms)
+                except Exception:
+                    s = 0.0
+                if s > 0:
+                    rel[e["id"]] = min(1.0, s / smax)
+    w_rel, w_sti = _weights(cfg)
+    top_sti = max((e["sti"] for e in ents), default=0.0) or 1.0
+    for e in ents:
+        e["rel"] = float(rel.get(e["id"], 0.0))
+        e["score"] = w_rel * e["rel"] + w_sti * max(0.0, e["sti"]) / top_sti
+    n_req = max(0, int(setting(cfg, "context_min_request_items")))
+    by_rel = sorted((e for e in ents if e["rel"] > 0), key=lambda e: (-e["rel"], -e["score"]))[:n_req]
+    pinned = {e["id"] for e in by_rel}
+    rest = sorted((e for e in ents if e["id"] not in pinned), key=lambda e: (-e["score"], -e["total"]))
+    if by_rel:                                   # a request is known: drop weak, irrelevant filler (frees budget)
+        floor = float(setting(cfg, "context_min_score"))
+        rest = [e for e in rest if e["score"] >= floor]
+    return by_rel + rest
+
+
+def _clip(text, n, terms=None):
+    """Whitespace-collapsed text cut to n chars.  With request terms ({term: weight}), a long text shows its opening
+    (date/kind) plus the window that holds the most request-term weight, so the fact the request needs is not lost
+    past the cut."""
+    text = " ".join(str(text).split())
+    if len(text) <= n:
+        return text
+    plain = text[:max(0, n - 1)].rstrip() + "…"
+    if not terms or n < 160:
+        return plain
+    low = text.lower()
+
+    def weight(a, b):
+        seg = low[a:b]
+        return sum(w for t, w in terms.items() if t in seg)
+    cut = low.find(". ", 0, 90)
+    head = text[:cut + 1] if 20 <= cut else text[:60].rsplit(" ", 1)[0]
+    span = n - len(head) - 4                       # head + " … " + window + "…" <= n
+    best, best_w = 0, weight(0, n - 1)
+    starts = [0] + [i + 1 for i in range(len(head), len(text) - 40) if text[i] == " "]
+    for a in starts[::3]:
+        w = weight(a, a + span)
+        if w > best_w + 1e-9:
+            best, best_w = a, w
+    if best < n // 3:
+        return plain
+    # the first window with the best weight ends at a term: start it shortly before the first term instead
+    hits = [low.find(t, best, best + span) for t in terms]
+    first = min((h for h in hits if h >= 0), default=best)
+    for a in starts:
+        if a >= max(best, first - 60):
+            if weight(a, a + span) >= best_w - 1e-9:
+                best = a
+            break
+    window = text[best:best + span].rstrip()
+    return head + " … " + window + ("…" if best + span < len(text) else "")
+
+
+def render_ranked(entries, context_rel, cycle, cfg):
+    """Track P block: ranked entries, at most context_max_items, context_total_chars of item text in all; each item
+    gets an equal share of the budget, capped at context_item_chars (floor 250).  Long items show their
+    request-relevant window (_clip).  Same header as rc2 (adapters key on "[WMTM Active Working Memory").
+    -> (text | None, shown ids)."""
+    ranked = rank_entries(entries, context_rel, cfg)
+    if not ranked:
+        return None, []
+    max_items = max(1, int(setting(cfg, "context_max_items")))
+    budget = max(250, int(setting(cfg, "context_total_chars")))
+    n = min(max_items, len(ranked))
+    per = max(250, min(int(setting(cfg, "context_item_chars")), budget // n))
+    terms = (context_rel or {}).get("terms") or None
+    lines, shown, used = [], [], 0
+    for e in ranked:
+        if len(shown) >= max_items:
+            break
+        room = budget - used
+        if room < 120 and shown:
+            break
+        text = _clip(e["content"], min(per, room), terms if e.get("rel") else None)
+        used += len(text)
+        rel_tag = f" rel={e['rel']:.2f}" if e.get("rel") else ""
+        lines.append(f"  [{e['src']} sti={e['sti']:.1f} util={e['util']:.1f} age={_age_str(e['age'])}{rel_tag}] {text}")
+        shown.append(e["id"])
+    total = sum(1 for e in entries if e["src"] != "user")
+    header = f"[WMTM Active Working Memory ({total} items, showing top {len(shown)}, cycle {cycle})]"
+    return header + "\n" + "\n".join(lines), shown
+
+
+def format_context(store, cycle, cfg=None, context_rel=None):
+    """User-path block: Track P ranking when context_rank is on, else rc2 format_active_context.
+    -> (text | None, shown ids) (shown ids get F17 passive utility)."""
+    if not setting(cfg, "context_rank"):
+        text = format_active_context(store, cycle)
+        return text, [it.id for it in store.get_active_set()[:15]] if text else []
+    import time as _t
+    items = store.get_active_set()
+    if not items:
+        return None, []
+    return render_ranked(_entries_from_items(items, _t.time()), context_rel, cycle, cfg)
+
+
+def admit_request_item(store, user_msg, cycle, cfg):
+    """Track P: the current real request as a source_type=user item (feeds request-overlap goal ranking in the
+    shadow worker; never displayed, never written back).  Earlier request items are evicted.  -> item or None."""
+    if not setting(cfg, "request_item") or not user_msg:
+        return None
+    import hashlib
+    text = " ".join(user_msg.split())[:max(20, int(setting(cfg, "request_item_chars")))]
+    if not text:
+        return None
+    iid = "user-" + hashlib.md5(text.encode("utf-8")).hexdigest()[:12]
+    for it in list(store.get_active_set()):
+        if it.source_type == "user" and it.id != iid:
+            store.evict(it.id)
+    item = store.admit(iid, text, source_type="user", initial_sti=5.0)
+    item.mark_recalled(cycle)
+    return item

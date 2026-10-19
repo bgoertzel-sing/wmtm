@@ -81,6 +81,7 @@ class WMTMOrchestrator:
         self.runtime_state_dir = None
         self.default_reasoner = "pettachainer"   # used when the flags file / env does not set "reasoner"
         self.pc_admit_state = {}           # rc2: {"consumed_run": id, ...} - each admit.json run is admitted once
+        self.context_rel = None            # Track P: relevance of items to the last real request (context.request_relevance)
 
 
     def active_goal(self):
@@ -112,6 +113,11 @@ class WMTMOrchestrator:
         }
         if self.pc_admit_state:
             snap["pc_admit"] = dict(self.pc_admit_state)      # rc2: consumed admit.json run (absent until one)
+        if self.context_rel:
+            live = set(self.store._items)
+            rel = dict(self.context_rel)
+            rel["scores"] = {k: v for k, v in (rel.get("scores") or {}).items() if k in live}
+            snap["context_rel"] = rel                          # Track P: read by the automated fast path
         return snap
 
     def restore_state(self, snapshot: dict) -> None:
@@ -137,6 +143,8 @@ class WMTMOrchestrator:
             self.forget_log = ForgettingLog.from_dict(snapshot["forgetting_log"])
         if isinstance(snapshot.get("pc_admit"), dict):
             self.pc_admit_state = dict(snapshot["pc_admit"])
+        if isinstance(snapshot.get("context_rel"), dict):
+            self.context_rel = dict(snapshot["context_rel"])
 
     # ── Phase helpers ──────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-# Background reasoner, shadow and semantic-parse feed (v0.5.0-rc2)
+# Background reasoner, shadow and semantic-parse feed (v0.5.0-rc3)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -103,6 +103,21 @@ items' text tokens (an unparsed request still anchors by name). `shadow.jsonl` r
 (`pool`, `user_items`, `req_entities`, `req_tokens`, `hops` histogram) and each entry of `queries` its
 `hops`, `score` and `overlap`.
 
+## Context block (rc3, Track P)
+
+On a real user turn: recall admits the best journal clusters, the relevance stimulus scores resident items, and
+both mark matching items as recalled now (`recalled_at` / `recalled_cycle` in the state). Stale cleanup then spares
+them (`cleanup_protect_recent`); rc2 evicted them in the same turn because a recalled note's journal age is >= 48 h
+with utility 0. The block ranks items by `w_rel`*relevance + `w_sti`*STI/max STI. Relevance = the recall /
+stimulus score for recalled items, IDF-weighted overlap with the request terms for others (derived conclusions),
+normalised by the best score; the `context_min_request_items` best matches come first and, once a request is
+known, other items scoring below `context_min_score` are left out. Items share
+`context_total_chars` (at most `context_item_chars` each); a long item shows its opening plus the window with the
+most request-term weight. Lines carry `rel=` when relevant. `context_rel` (scores, request terms, normaliser) is
+persisted in the state, so automated turns rank the same way and score conclusions admitted after the request.
+The request itself is a `source_type=user` item: the shadow's request-overlap goal ranking reads it
+(`goal_rank.user_items` > 0).
+
 ## Context parsing (rc2, Track O, off by default)
 
 `semparse_context=true` routes the feed to `<semparse_dir>/ctx1` (separate queue, cache, hourly cap and worker
@@ -155,7 +170,15 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `worker_mem_mb` | `WMTM_WORKER_MEM_MB` | 3072 | RLIMIT_AS for each worker (and its PeTTa child) |
 | `worker_nice` | `WMTM_WORKER_NICE` | 19 | plus `ionice -c 3` when available |
 | `worker_sched_idle` | `WMTM_WORKER_SCHED_IDLE` | true | SCHED_IDLE for workers and their children: launched via `chrt -i 0` when available and set again by the worker itself on every thread at startup |
-| `worker_prio_refresh_s` | `WMTM_WORKER_PRIO_REFRESH` | 5 | the worker re-asserts nice + SCHED_IDLE on itself and its children every N s (scheduler daemons such as system76-scheduler reset them, e.g. to nice 12 / SCHED_OTHER); 0 = startup only |
+| `worker_prio_refresh_s` | `WMTM_WORKER_PRIO_REFRESH` | 1 (rc3; was 5) | the worker re-asserts nice + SCHED_IDLE on itself and its children every N s (scheduler daemons such as system76-scheduler reset them, e.g. to nice 12 / SCHED_OTHER); 0 = startup only |
+| `cleanup_protect_recent` | `WMTM_CLEANUP_PROTECT_RECENT` | true | rc3: stale cleanup (user path and fast path) spares items recalled for / matching a real request within `cleanup_grace_turns` cycles or `cleanup_grace_s` s (operational noise is still evicted); false = rc2 |
+| `cleanup_grace_turns` / `cleanup_grace_s` | `WMTM_CLEANUP_GRACE_TURNS` / `..._S` | 10 / 1800 | rc3: grace window (either one keeps an item) |
+| `context_rank` | `WMTM_CONTEXT_RANK` | true | rc3: block ranked by request relevance + STI, longer request-focused item text (see "Context block"); false = rc2 block (top 15 by attention, 200 chars) |
+| `context_rank_weights` | `WMTM_CONTEXT_RANK_WEIGHTS` | `0.7,0.3` | rc3: `w_rel,w_sti` (both normalised to 0-1) |
+| `context_item_chars` / `context_total_chars` / `context_max_items` | `WMTM_CONTEXT_ITEM_CHARS` / `..._TOTAL_CHARS` / `..._MAX_ITEMS` | 600 / 6000 / 15 | rc3: per-item cap, item-text budget of the whole block (shared equally, floor 250), item count |
+| `context_min_request_items` | `WMTM_CONTEXT_MIN_REQUEST_ITEMS` | 5 | rc3: the N best-matching items are always shown first |
+| `context_min_score` | `WMTM_CONTEXT_MIN_SCORE` | 0.2 | rc3: once a request is known, other items scoring below this are not shown (their budget goes to the rest) |
+| `request_item` / `request_item_chars` | `WMTM_REQUEST_ITEM` / `..._CHARS` | true / 600 | rc3: store the current request as one `source_type=user` item (never shown, never written back; replaced by the next request) |
 | `jsonl_max_bytes` / `cache_max_bytes` | `WMTM_JSONL_MAX_BYTES` / `WMTM_SEMPARSE_CACHE_MAX_BYTES` | 10 MB / 20 MB | logs rotate to `.1`; the parse cache is compacted (newest entries kept) |
 
 Relative paths: vendor paths resolve against `<vendor>` = the directory holding the package's distribution dir
@@ -165,7 +188,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.5.0-rc2/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.5.0-rc3/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence
