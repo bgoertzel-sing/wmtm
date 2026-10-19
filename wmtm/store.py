@@ -130,10 +130,15 @@ class WMTMStore:
     # -- internal helpers -----------------------------------------------
 
     def _evict_lowest_sti(self) -> Optional[WMTMItem]:
-        """Remove and return the item with the lowest STI."""
+        """Remove and return the item with the lowest STI.
+
+        rc4: the current request item (source_type=user, at most one) goes last, so capacity overflow from
+        same-turn admissions cannot drop the request (and its metadata) before the parse feed and the shadow
+        read it.  Explicit evictions and the forgetting policy are unchanged."""
         if not self._items:
             return None
-        lowest = min(self._items.values(), key=lambda it: it.attention.sti)
+        pool = [it for it in self._items.values() if it.source_type != "user"] or list(self._items.values())
+        lowest = min(pool, key=lambda it: it.attention.sti)
         evicted = self._items.pop(lowest.id)
         self._pending_evicted.append(evicted)
         return evicted

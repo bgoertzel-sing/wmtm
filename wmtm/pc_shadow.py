@@ -39,7 +39,7 @@ _FACTS_MEMO = {}
 SP_HEADS = ("Inheritance", "Member", "Implies", "Similarity", "Evaluation")
 
 
-def _cache_lookup(items, cache_dir=None, context=False):
+def _cache_lookup(items, cache_dir=None, context=False, speaker=False):
     """item.id -> validated semparse atom strings (Track H cache), only for items that have a cached parse.
     context=True (Track O, flags key semparse_context): context parses in <cache_dir>/ctx1 win over the base cache."""
     try:
@@ -49,6 +49,11 @@ def _cache_lookup(items, cache_dir=None, context=False):
             cd = os.path.join(c.d, CTX_VERSION)
             if os.path.isdir(cd):
                 ent.update(ParseCache(cd).entries())
+        if speaker:                       # Track Q: speaker-linked parses (spk1) win over base and ctx1
+            from .parse_cache import SPK_VERSION
+            sd = os.path.join(c.d, SPK_VERSION)
+            if os.path.isdir(sd):
+                ent.update(ParseCache(sd).entries())
     except Exception:
         return {}
     out = {}
@@ -243,8 +248,12 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     k = int(k or cfg["shadow_k"])
     max_goals = int(cfg["shadow_max_goals"]); skolem_goals = bool(cfg["shadow_skolem_goals"])
     items = store.get_active_set()[:k]
-    cached = (_cache_lookup(items, cfg["semparse_dir"], context=True) if cfg.get("semparse_context")
-              else _cache_lookup(items, cfg["semparse_dir"]))
+    if cfg.get("speaker_link"):
+        cached = _cache_lookup(items, cfg["semparse_dir"], context=bool(cfg.get("semparse_context")), speaker=True)
+    elif cfg.get("semparse_context"):
+        cached = _cache_lookup(items, cfg["semparse_dir"], context=True)
+    else:
+        cached = _cache_lookup(items, cfg["semparse_dir"])
     metta, facts, n_sp, n_unparsed, i = [], [], 0, 0, 0
     src, fsrc = {}, []       # Track I provenance: KB label -> item id; (head, a, b, item id) per fact
     from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB

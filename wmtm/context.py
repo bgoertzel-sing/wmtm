@@ -486,7 +486,8 @@ def automated_hooks(state_dir, items_dict, cycle, cfg=None):
             try:
                 from . import parse_cache
                 out["feed"] = parse_cache.feed_rows(
-                    [(d.get("id"), d.get("content", ""), (d.get("attention") or {}).get("sti", 0.0)) for d in top], cfg,
+                    [(d.get("id"), d.get("content", ""), (d.get("attention") or {}).get("sti", 0.0))
+                     + ((dict(d["source_meta"]),) if isinstance(d.get("source_meta"), dict) else ()) for d in top], cfg,
                     skip_unchanged=True)
             except Exception:
                 pass
@@ -932,9 +933,11 @@ def format_context(store, cycle, cfg=None, context_rel=None):
     return render_ranked(_entries_from_items(items, _t.time()), context_rel, cycle, cfg)
 
 
-def admit_request_item(store, user_msg, cycle, cfg):
+def admit_request_item(store, user_msg, cycle, cfg, source=None):
     """Track P: the current real request as a source_type=user item (feeds request-overlap goal ranking in the
-    shadow worker; never displayed, never written back).  Earlier request items are evicted.  -> item or None."""
+    shadow worker; never displayed, never written back).  Earlier request items are evicted.  -> item or None.
+    Track Q: the item carries source_meta = the normalised request source (wmtm.request_source.normalise) plus
+    first_person="speaker" (it is the human's own text: I/me/my = the requester, never the bot)."""
     if not setting(cfg, "request_item") or not user_msg:
         return None
     import hashlib
@@ -947,4 +950,7 @@ def admit_request_item(store, user_msg, cycle, cfg):
             store.evict(it.id)
     item = store.admit(iid, text, source_type="user", initial_sti=5.0)
     item.mark_recalled(cycle)
+    meta = dict(source) if isinstance(source, dict) else {}
+    meta["first_person"] = "speaker"
+    item.source_meta = meta
     return item

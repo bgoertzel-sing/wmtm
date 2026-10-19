@@ -51,6 +51,11 @@ SPEC = {
     "context_max_atoms":   ("WMTM_CONTEXT_MAX_ATOMS", int, 40, None),
     "context_max_chars":   ("WMTM_CONTEXT_MAX_CHARS", int, 4000, None),
     "context_passage_chars": ("WMTM_CONTEXT_PASSAGE_CHARS", int, 600, None),
+    # Track Q: speaker linking (off by default; new parses go to <semparse_dir>/spk1, old caches are kept).
+    # speaker_map: Telegram user id / username -> canonical name; speaker_self: the bot's own name.  Flags file only.
+    "speaker_link":        ("WMTM_SPEAKER_LINK", bool, False, None),
+    "speaker_map":         ("WMTM_SPEAKER_MAP", dict, {}, None),
+    "speaker_self":        ("WMTM_SPEAKER_SELF", str, "", None),
     # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
     # live in working memory only.  Python-PLN / tool-derived items are not affected.
     "reasoner_writeback":  ("WMTM_REASONER_WRITEBACK", bool, False, None),
@@ -140,6 +145,12 @@ def _coerce(typ, v):
         if isinstance(v, bool):
             raise ValueError(v)
         return float(v)
+    if typ is dict:
+        if isinstance(v, str):
+            v = json.loads(v)
+        if not isinstance(v, dict):
+            raise ValueError(v)
+        return dict(v)
     if not isinstance(v, str):
         raise ValueError(v)
     return v
@@ -173,7 +184,7 @@ def resolve(state_dir=None, environ=None):
     raw, info = read_flags_file(state_dir)
     cfg, bad = {}, []
     for key, (ename, typ, default, _) in SPEC.items():
-        val = default
+        val = dict(default) if isinstance(default, dict) else default
         if key in raw:
             try:
                 val = _coerce(typ, raw[key])

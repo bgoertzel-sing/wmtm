@@ -189,13 +189,19 @@ class WMTM:
             return True
         return (time.time() - t0) < (self.config.time_budget if limit is None else limit)
 
-    def context_for(self, prompt_text, automated=None):
+    def context_for(self, prompt_text, automated=None, source=None):
         """Recall + reason + rank, persist state, and return the context block.
 
         Empty prompt_text (or automated=True) takes the automated fast path:
         no engine import, the block is rendered from the state file, which
         gets STI decay + stale cleanup. Returns None when there is nothing
         to show.
+
+        source (Track Q, optional): the request's source envelope (e.g. the
+        Telegram {"chat_id", ...} or sender fields). Stored, normalised, on
+        the source_type=user request item for speaker linking. When omitted
+        and the flags key speaker_link is on, it is read from the Iter
+        request binding (wmtm.request_source.from_iter_env).
         """
         if automated is None:
             automated = not prompt_text
@@ -270,7 +276,8 @@ class WMTM:
                 recalled_now = True
                 t = lap("relevance_s", t)
             if user_msg and self._budget_ok():
-                _ctx.admit_request_item(store, user_msg, orch.cycle_count, pcfg)   # Track P (c)
+                _ctx.admit_request_item(store, user_msg, orch.cycle_count, pcfg,
+                                        source=self._request_source(source, user_msg, pcfg))   # Track P (c) + Q
 
             if self._budget_ok():
                 if self.pending_path.exists():
@@ -341,6 +348,18 @@ class WMTM:
 
         self.save()
         return context
+
+    def _request_source(self, source, user_msg, pcfg):
+        """Track Q: normalised request source for the request item, or None.  Never raises."""
+        try:
+            from . import request_source as _rs
+            if source is not None:
+                return _rs.normalise(source) or None
+            if (pcfg or {}).get("speaker_link"):
+                return _rs.from_iter_env(user_msg)
+        except Exception:
+            pass
+        return None
 
     def _flags(self):
         """Resolved flags file (Track P switches).  Never raises; {} means SPEC defaults."""

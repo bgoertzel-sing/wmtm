@@ -40,6 +40,9 @@ class WMTMItem:
     # spares it for cleanup_grace_turns cycles / cleanup_grace_s seconds afterwards.
     recalled_at: float = 0.0
     recalled_cycle: int = -1
+    # Track Q: request metadata of a source_type=user item (normalised Telegram source: user_id for a private
+    # chat, chat_type, first_person="speaker").  Read by the semparse feed for speaker linking; None = none.
+    source_meta: Optional[dict] = None
 
     @property
     def effective_age_seconds(self) -> float:
@@ -93,6 +96,7 @@ class WMTMItem:
             "origin_timestamp": self.origin_timestamp,
             **({"provenance": self.provenance} if self.provenance is not None else {}),
             **({"recalled_at": self.recalled_at, "recalled_cycle": self.recalled_cycle} if self.recalled_at > 0 else {}),
+            **({"source_meta": dict(self.source_meta)} if self.source_meta else {}),
         }
 
     @classmethod
@@ -114,4 +118,5 @@ class WMTMItem:
             provenance=d.get("provenance"),
             recalled_at=d.get("recalled_at", 0.0) or 0.0,
             recalled_cycle=d.get("recalled_cycle", -1),
+            source_meta=d.get("source_meta") if isinstance(d.get("source_meta"), dict) else None,
         )

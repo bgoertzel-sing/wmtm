@@ -1,4 +1,4 @@
-# Background reasoner, shadow and semantic-parse feed (v0.5.0-rc3)
+# Background reasoner, shadow and semantic-parse feed (v0.5.0-rc4)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -21,6 +21,7 @@ niced worker processes, the cycle never waits for them, and every error is swall
   `parse_log.jsonl` / `cache.jsonl` (absent on pre-v0.5 entries). To re-parse under the new prompt, delete the
   matching `cache.jsonl` lines (costs one LLM call each, within the hourly cap).
   rc2 (Track O): optional CONTEXT coreference parsing, **off by default** (`semparse_context`, see below).
+  rc4 (Track Q): optional speaker linking, **off by default** (`speaker_link`, see below).
 
 Both hooks run on every WMTM cycle *and* (since v0.3.0-rc2) on automated turns: the automated fast path
 (`WMTM.context_for` with no real user message) feeds them the top-K items from the state JSON without loading the
@@ -127,6 +128,20 @@ their scope. Entries record `cache_version=ctx1` and `context_ids`. The shadow t
 base cache. Cost: every note is parsed again in ctx1 (one call per passage), within `parse_cap_per_hour`. The base
 cache is never rewritten; with the flag off nothing reads or creates `ctx1`.
 
+## Speaker linking (rc4, Track Q, off by default)
+
+`speaker_link=true` routes the feed to `<semparse_dir>/spk1` (separate queue, cache, hourly cap and worker pid).
+Before parsing, each note's text is rewritten (`wmtm/semparse_speaker.py`): mapped usernames -> the canonical name,
+"the user"/"the requester" -> the resolved speaker, "I"/"me"/"my" -> `speaker_self` (bot notes) or the speaker
+(request items, `first_person="speaker"`), prefixed `Speaker: <Name>.` when resolved. Resolution order:
+request metadata (`source:user_id` / `source:sender_username`), Telegram metadata in the text (`text:meta`), a
+request phrase naming one mapped person (`text:request`); else unresolved. The request item gets its metadata from
+`context_for(source=)` or, when omitted, the Iter request binding (see `wmtm/request_source.py`); a private chat's
+chat id is the sender, a group chat names no sender (text routes only). Entries record `cache_version=spk1`,
+`speaker`, `speaker_source`; `worker_runs.jsonl` records `speaker_stats`. The shadow prefers spk1 entries. Old
+caches are kept and not backfilled; with the flag off nothing reads or creates `spk1`. Ids and names belong in the
+deployed flags file only.
+
 ## Enabling: the flags file
 
 `<state_dir>/_wmtm_flags.json` (the bot's memory dir, the same `state_dir` given to `WMTMConfig`). It is re-read
@@ -179,6 +194,8 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `context_min_request_items` | `WMTM_CONTEXT_MIN_REQUEST_ITEMS` | 5 | rc3: the N best-matching items are always shown first |
 | `context_min_score` | `WMTM_CONTEXT_MIN_SCORE` | 0.2 | rc3: once a request is known, other items scoring below this are not shown (their budget goes to the rest) |
 | `request_item` / `request_item_chars` | `WMTM_REQUEST_ITEM` / `..._CHARS` | true / 600 | rc3: store the current request as one `source_type=user` item (never shown, never written back; replaced by the next request) |
+| `speaker_link` | `WMTM_SPEAKER_LINK` | false | rc4: speaker-linked parsing into `<semparse_dir>/spk1` (see "Speaker linking") |
+| `speaker_map` / `speaker_self` | `WMTM_SPEAKER_MAP` (JSON) / `WMTM_SPEAKER_SELF` | `{}` / `""` | rc4: Telegram user id or username -> canonical name; the bot's own name |
 | `jsonl_max_bytes` / `cache_max_bytes` | `WMTM_JSONL_MAX_BYTES` / `WMTM_SEMPARSE_CACHE_MAX_BYTES` | 10 MB / 20 MB | logs rotate to `.1`; the parse cache is compacted (newest entries kept) |
 
 Relative paths: vendor paths resolve against `<vendor>` = the directory holding the package's distribution dir

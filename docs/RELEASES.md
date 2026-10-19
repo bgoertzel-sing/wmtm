@@ -80,6 +80,37 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.5.0-rc4 (2026-10-20)
+Track Q on top of v0.5.0-rc3: speaker linking for the semantic parser, **off by default** (`speaker_link`).
+Flags-file keys of rc3 are all still valid; adapters unchanged (`WMTM.context_for` gained an optional `source=`).
+- Problem: in parsed notes "the user", "the requester" and "I" become fresh per-note `sk_*` witnesses, so facts about
+  one person never accumulate across notes. Names are rigid in the parser, so the text handed to the parser names
+  the speaker (`wmtm/semparse_speaker.py`); the prompt file is never edited.
+- Flags (flags file only, never in code): `speaker_link` (bool, false), `speaker_map` (object: Telegram user id or
+  username -> canonical lower-case name), `speaker_self` (the bot's own name: "I"/"my"/the bot name -> it).
+- Speaker resolution, most to least reliable (`speaker_source`): `source:<key>` = request metadata stored with the
+  queued item; `text:meta` = Telegram metadata quoted in the text, one person only; `text:request` = a request
+  phrase naming exactly one mapped person; otherwise unresolved (no guessing). A known but unmapped sender
+  (`source_unmapped`) is never resolved from the text.
+- Request metadata (rc4 wiring): the rc3 `source_type=user` request item carries `source_meta` (normalised by
+  `wmtm/request_source.py`: a private chat's `chat_id` is the sender's user id; a group `chat_id` names no person;
+  sender fields of a richer envelope pass through) and `first_person="speaker"` (I/me/my in a request = the
+  requester, never the bot). Source: `context_for(..., source=)`, else (with `speaker_link` on) the Iter request
+  binding (`ITER_REQUEST_IDS` / `ITER_OUTER_CHANNEL_ROOT/processing/<id>.json`, read only; ignored when its prompt
+  does not contain the start of the user message). Both feed paths (cycle hook and automated fast path) hand the
+  metadata to the parse queue.
+- Limitation: Telegram group requests carry no sender id in the channel envelope (`source` = chat_id, message_id,
+  update_id), so group requests fall back to the text routes. Minimal fix (outside this package): the transport adds
+  the sender (`user_id`, `sender_username`) to `source`; `normalise` already passes those through.
+- Cache: speaker-linked parses live in `<semparse_dir>/spk1` (`cache_version=spk1`, `speaker`, `speaker_source` per
+  entry, keyed by the original content hash); base and ctx1 caches are never rewritten and old notes are not
+  backfilled. The shadow prefers spk1 over ctx1 over base when `speaker_link` is on. `worker_runs.jsonl` records
+  `speaker_link` and `speaker_stats` (resolved count, counts per `speaker_source`).
+- State addition (ignored by rc3): `source_meta` on the request item.
+- Capacity overflow (store full, same-turn admissions) evicts the request item last: rc3 could drop it in the
+  same turn when PeTTaChainer admissions filled the store, so neither the feed nor the shadow saw the request.
+- Tests: `tests/test_semparse_speaker.py`, `tests/test_request_source.py`.
+
 ## v0.5.0-rc3 (2026-10-19)
 Track P on top of v0.5.0-rc2: recall/context plumbing, so the memories recalled for a request reach the prompt.
 Flags-file keys of rc2 are all still valid; API and adapters unchanged. Every change has its own switch (defaults

@@ -96,8 +96,16 @@ try:
     ad = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, reject_log=cache.reject_log,
                          max_chars=cache.max_chars, reject_log_max_bytes=cache.log_max_bytes, preamble=bool(pre))
     status.update(preamble=ad.preamble, file_sha256=ad.file_sha256, prompt_sha256=ad.prompt_sha256)   # v0.5: what is sent
-    from wmtm.parse_cache import CTX_VERSION, process_queue_ctx
-    if CFG.get("semparse_context") and os.path.basename(os.path.normpath(a.dir)) == CTX_VERSION:
+    from wmtm.parse_cache import CTX_VERSION, SPK_VERSION, process_queue_ctx, process_queue_spk
+    if CFG.get("speaker_link") and os.path.basename(os.path.normpath(a.dir)) == SPK_VERSION:
+        # Track Q (opt-in, flags key speaker_link): speaker-linked text; old caches untouched, no backfill
+        status["speaker_link"] = True
+        base = ParseCache(os.path.dirname(os.path.normpath(a.dir)), cfg=CFG)
+        recs = process_queue_spk(cache, llm, ad, n=a.n, cfg=CFG, base=base)
+        status["speaker_stats"] = {"resolved": sum(1 for r in recs if r.get("speaker")),
+                                   "by_source": {k: sum(r.get("speaker_source") == k for r in recs)
+                                                 for k in sorted({str(r.get("speaker_source")) for r in recs})}}
+    elif CFG.get("semparse_context") and os.path.basename(os.path.normpath(a.dir)) == CTX_VERSION:
         # Track O (opt-in, flags key semparse_context): parse with CONTEXT from the base cache + earlier ctx1 parses
         status["context"] = True
         base = ParseCache(os.path.dirname(os.path.normpath(a.dir)), cfg=CFG)

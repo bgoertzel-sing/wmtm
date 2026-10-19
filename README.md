@@ -62,7 +62,9 @@ default on), treats derived strength as a probability (`reasoner_min_strength` 0
 skip|unlikely, default skip) and an optional CONTEXT coreference parse path (`semparse_context`, default off).
 v0.5.0-rc3 fixes the recall/context plumbing: freshly recalled notes survive stale cleanup, the context block is
 ranked by relevance to the current request (longer, request-focused item text under a character budget), and the
-request is stored as a `source_type=user` item so request-anchored goal ranking works. See `docs/RELEASES.md`.
+request is stored as a `source_type=user` item so request-anchored goal ranking works. v0.5.0-rc4 adds optional
+speaker linking for the semantic parser (`speaker_link`, default off; the request item carries its request
+metadata). See `docs/RELEASES.md`.
 
 ## Replay equivalence
 

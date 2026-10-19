@@ -113,7 +113,9 @@ class ParseCache:
         st = {"cached": 0, "queued_new": 0, "queued_known": 0, "skipped_long": 0}
         with self._lock():
             ent, q = self.entries(), self._queue()
-            for iid, content, sti in items:
+            for row in items:
+                iid, content, sti = row[0], row[1], row[2]
+                src = row[3] if len(row) > 3 and isinstance(row[3], dict) else None   # Track Q: request source
                 if not isinstance(content, str) or not content.strip():
                     continue
                 h = content_hash(content)
@@ -126,6 +128,8 @@ class ParseCache:
                 else:
                     q[h] = {"item_id": str(iid), "content": content, "sti": float(sti), "first_seen": now,
                             "attempts": 0, "chars": len(content)}
+                    if src:
+                        q[h]["source"] = src
                     st["queued_new"] += 1
             self._save_queue(q)
             st["pending"] = sum(1 for h in q if h not in ent)
@@ -208,7 +212,8 @@ class ParseCache:
                     fh.write(json.dumps({"hash": h, "item_id": q["item_id"], "status": status, "atoms": atoms,
                                          "ts": cost.get("ts"), "attempts": cur["attempts"],
                                          "prompt_sha": cost.get("prompt_sha"),
-                                         **{k: cost[k] for k in ("cache_version", "context_ids") if k in cost}}) + "\n")
+                                         **{k: cost[k] for k in ("cache_version", "context_ids", "speaker", "speaker_source")
+                                            if k in cost}}) + "\n")
                 qq.pop(h, None)
                 self.compact()
             self._save_queue(qq)
@@ -303,7 +308,13 @@ def launch_worker(cache: ParseCache, cfg=None, module=None, extra=(), pending=No
 
 
 def top_k_rows(store, k):
-    return [(it.id, it.content, it.attention.sti) for it in store.get_active_set()[:int(k)]]
+    """(id, content, sti[, source_meta]) rows in active-set order; the 4th element (Track Q) only for items that
+    carry request metadata (the source_type=user request item)."""
+    out = []
+    for it in store.get_active_set()[:int(k)]:
+        sm = getattr(it, "source_meta", None)
+        out.append((it.id, it.content, it.attention.sti, dict(sm)) if sm else (it.id, it.content, it.attention.sti))
+    return out
 
 
 FEED_SIG = "last_feed.sig"     # automated fast path: top-K content signature of the last enqueue
@@ -319,11 +330,15 @@ def feed_rows(rows, cfg=None, state_dir=None, cache=None, skip_unchanged=False):
         if not cfg["semparse_feed"]:
             return None
         cache = cache or ParseCache(cfg=cfg)
-        if cfg.get("semparse_context") and os.path.basename(os.path.normpath(cache.d)) != CTX_VERSION:
+        if cfg.get("speaker_link") and os.path.basename(os.path.normpath(cache.d)) != SPK_VERSION:
+            base_c = cache
+            cache = speaker_cache(cfg, cache)   # Track Q (opt-in): new parses live in <semparse_dir>/spk1
+            rows = _spk_rows_worth_parsing(rows, cfg, base_c)
+        elif cfg.get("semparse_context") and os.path.basename(os.path.normpath(cache.d)) != CTX_VERSION:
             cache = context_cache(cfg, cache)   # Track O (opt-in): queue, budget and worker live in <semparse_dir>/ctx1
         rows = list(rows)[:int(cfg["shadow_k"])]
         if skip_unchanged:
-            sig = _sha256("\n".join(content_hash(c) for _, c, _ in rows if isinstance(c, str)).encode()).hexdigest()
+            sig = _sha256("\n".join(content_hash(r[1]) for r in rows if isinstance(r[1], str)).encode()).hexdigest()
             sp = os.path.join(cache.d, FEED_SIG)
             try:
                 with open(sp, encoding="utf-8") as fh:
@@ -417,5 +432,99 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
         if err:
             cost["error"] = err[:160]
         ctx.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
+        out.append(cost)
+    return out
+
+
+# ---------------------------------------------------------------- Track Q: speaker-linked cache version
+
+def _spk_rows_worth_parsing(rows, cfg, base):
+    """Avoid re-parsing content the base cache already has unless linking resolves a human speaker for it.
+    Re-parsing costs a full parse (~100k tokens); when no speaker resolves the only change would be the agent's
+    own first person (I -> speaker_self), which is not worth a re-parse, and the shadow falls back to the base
+    entry.  Unparsed content is always kept (it needs a parse anyway, and gets full linking)."""
+    try:
+        from .semparse_speaker import linker
+        link = linker(cfg)
+        ent = base.entries()
+    except Exception:
+        return list(rows)
+    out = []
+    for row in rows:
+        try:
+            content = row[1]
+            src = row[3] if len(row) > 3 and isinstance(row[3], dict) else None
+            if isinstance(content, str) and content_hash(content) in ent:
+                _text, info = link(content, src)
+                if not (info or {}).get("speaker"):
+                    continue
+        except Exception:
+            pass
+        out.append(row)
+    return out
+
+
+SPK_VERSION = "spk1"
+
+
+def speaker_cache(cfg=None, base: "ParseCache" = None) -> "ParseCache":
+    """Speaker-linked parses live in ``<semparse_dir>/spk1``; the base and ctx1 caches are never rewritten and old
+    notes are not backfilled (only content enqueued after the flag is on is parsed here).  Keyed by the hash of the
+    ORIGINAL content, so lookups by item content keep working; entries carry cache_version=spk1, speaker and
+    speaker_source."""
+    cfg = cfg or rc.resolve()
+    base = base or ParseCache(cfg=cfg)
+    return ParseCache(os.path.join(base.d, SPK_VERSION), cfg=cfg)
+
+
+def process_queue_spk(spk: ParseCache, llm, adapter, n=None, now=time.time, cfg=None, base: ParseCache = None,
+                      contents=None):
+    """Like process_queue, but the text sent to the parser is speaker-linked (wmtm.semparse_speaker.link, map from
+    the flags file).  With semparse_context also on, CONTEXT comes from base, ctx1 and earlier spk1 parses."""
+    from .semparse_speaker import linker
+    from .semparse_context import select_context
+    cfg = cfg or rc.resolve()
+    link = linker(cfg)
+    use_ctx = bool(cfg.get("semparse_context")) and base is not None
+    ctx_c = ParseCache(os.path.join(base.d, CTX_VERSION), cfg=cfg) if use_ctx else None
+    psha = (getattr(adapter, "prompt_sha256", None) or "")[:16] or None
+    n = spk.per_hour if n is None else n
+    out = []
+    for h, q in spk.next_batch(min(n, spk.budget(now()))):
+        if spk.budget(now()) <= 0:
+            break
+        text, info = link(q["content"], q.get("source"))
+        if hasattr(llm, "last_usage"):
+            llm.last_usage = {}
+        t = time.time()
+        ids = []
+        try:
+            if use_ctx:
+                early = [e for e in earlier_notes(base, ctx_c, spk, contents=contents) if e["item_id"] != q["item_id"]]
+                atoms, ids, _ = select_context(text, early, max_notes=int(cfg["context_max_notes"]),
+                                               max_atoms=int(cfg["context_max_atoms"]),
+                                               max_chars=int(cfg["context_max_chars"]))
+                res = adapter.parse_item_ctx(q["item_id"], text, context_atoms=atoms,
+                                             passage_chars=int(cfg["context_passage_chars"]))
+            else:
+                res = adapter.parse_item(q["item_id"], text)
+            err = res.error
+        except Exception as e:                      # noqa: BLE001
+            res, err = None, "adapter error: %s" % type(e).__name__
+        status = ("llm_error" if err and err.startswith(("llm error", "adapter error")) else "failed" if err
+                  else "ok" if res.accepted else "empty")
+        u = dict(getattr(llm, "last_usage", None) or {})
+        cost = {"ts": now(), "hash": h, "item_id": q["item_id"], "chars": q.get("chars"),
+                "secs": round(time.time() - t, 3), "status": status,
+                "prompt_tokens": u.get("prompt_tokens"), "completion_tokens": u.get("completion_tokens"),
+                "total_tokens": u.get("total_tokens"),
+                "accepted": len(res.accepted) if res else 0, "rejected": len(res.rejected) if res else 0,
+                "prompt_sha": psha, "cache_version": SPK_VERSION, "speaker": info["speaker"],
+                "speaker_source": info["speaker_source"], "speaker_subs": info["subs"]}
+        if use_ctx:
+            cost["context_ids"] = ids
+        if err:
+            cost["error"] = err[:160]
+        spk.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
         out.append(cost)
     return out
