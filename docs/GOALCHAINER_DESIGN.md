@@ -101,3 +101,28 @@ Each phase needs Ben's explicit go-ahead before the next starts.
   - A timeout means "no suggestion", never a retry inside the turn.
 - **Stack overflow.** GoalChainer's own `compileadd` overflowed the stack. It must use the vendored, shared chainer
   (36b3fe6 + dedup), not its own instance.
+
+## 7. Update after Ben's review (2026-10-19)
+
+Ben's answers: (1) where the generic code goes is our call or MesTTo's, so we start with an **adapter in wmtm** and offer
+MesTTo the generic scenario provider later; (3) **the bot may propose goals**, and humans approve them; (4) **MetaMo adds
+value**: it's in the design and gets phased in after the basics. Ben pointed to Mikeda & Goertzel, *A Motivational
+Architecture for Conversational AGI* (arXiv 2606.05411): OpenPsi-style **homeostatic needs** (regulate toward a target band,
+urge u_i = ω_i·φ_i(target − level)), a 10-stage pipeline, a fast/slow decision blend, and multi-goal scoring with a veto
+(a product over discouragements). Its ResearchAgent goal vector fits ProtoCosmo2.
+
+**Phase 1 (log only) uses a subset of 3 needs:**
+| Need | Level estimated from | Candidate actions |
+|---|---|---|
+| Uncertainty reduction (g_unc) | open questions / unresolved decisions in WMTM + parse queries (count, age, salience) | ClarifyQuestion (ask Andy/Ben), FlagUncertainty, LookUp (read-only) |
+| Competence (g_comp) | unfinished requests/tracks, failed checks, promised-but-undelivered items | SummarizeStatus, RemindPending |
+| Legitimacy (g_legit) | authority rules (no live changes without approval; no memories in git; never act in autonomous turns; read-only for now) | **veto only**: discouragement product → blocks or discounts candidates |
+
+**Pipeline subset:** need estimation → candidate generation (PeTTaChainer backward chaining over the shared KB, plus
+action templates) → scoring (Eq. 6 style: weighted urges × geometric mean of positive considerations × product of
+discouragements) → **log only** (`<runtime_dir>/goalchainer/proposals.jsonl`; nothing goes into the prompt, no action).
+Feelings, the governor and the fast/slow blend are out of scope for phase 1. **MetaMo comes in phase 2.**
+
+**Evaluation (shortened):** instead of a week of live logs, (a) an offline replay over the last ~2 weeks of real turns
+produces proposals in one batch, and Andy rates ~30 of them in one sitting (useful / plausible / wrong / harmful);
+(b) then 2–3 days of live log-only. Gate to phase 2 (suggestions in the prompt): ≥ 70% useful-or-plausible, 0 harmful.
