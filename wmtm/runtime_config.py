@@ -42,6 +42,15 @@ SPEC = {
     "reasoner":            ("WMTM_REASONER", str, "", None),       # pettachainer|off; "" = API default (pettachainer); anything else = off
     "reasoner_max_age_s":  ("WMTM_REASONER_MAX_AGE", float, 900.0, None),
     "reasoner_max_admit":  ("WMTM_REASONER_MAX_ADMIT", int, 5, None),
+    # Track O: derived strength is a probability; below reasoner_min_strength it means "probably not"
+    "reasoner_min_strength": ("WMTM_REASONER_MIN_STRENGTH", float, 0.5, None),
+    "reasoner_negation":   ("WMTM_REASONER_NEGATION", str, "skip", None),        # skip | unlikely ("unlikely: <text>")
+    # Track O: CONTEXT coreference (off by default; results go to <semparse_dir>/ctx1, the old cache is kept)
+    "semparse_context":    ("WMTM_SEMPARSE_CONTEXT", bool, False, None),
+    "context_max_notes":   ("WMTM_CONTEXT_MAX_NOTES", int, 3, None),
+    "context_max_atoms":   ("WMTM_CONTEXT_MAX_ATOMS", int, 40, None),
+    "context_max_chars":   ("WMTM_CONTEXT_MAX_CHARS", int, 4000, None),
+    "context_passage_chars": ("WMTM_CONTEXT_PASSAGE_CHARS", int, 600, None),
     # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
     # live in working memory only.  Python-PLN / tool-derived items are not affected.
     "reasoner_writeback":  ("WMTM_REASONER_WRITEBACK", bool, False, None),
@@ -70,6 +79,10 @@ SPEC = {
     "shadow_max_goals":    ("WMTM_PC_SHADOW_MAX_GOALS", int, 60, None),
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),
     "shadow_skolem_goals": ("WMTM_PC_SHADOW_SKOLEM_GOALS", bool, False, None),
+    "shadow_goal_rank":    ("WMTM_PC_SHADOW_GOAL_RANK", bool, True, None),       # Track N: Design A ranked goal pool (off = Track M 2-step goals)
+    "shadow_max_hops":     ("WMTM_PC_SHADOW_MAX_HOPS", int, 3, None),            # Track N: longest chain in the pool (derivation steps)
+    "shadow_min_hops":     ("WMTM_PC_SHADOW_MIN_HOPS", int, 1, None),            # Track N: only ask goals needing >= N steps
+    "shadow_goal_weights": ("WMTM_PC_SHADOW_GOAL_WEIGHTS", str, "2,1,1,0.5", None),  # Track N: w_req,w_depth,w_info,w_sti
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),
     "shadow_budget_s":     ("WMTM_PC_SHADOW_BUDGET", float, 20.0, None),
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),

@@ -207,7 +207,8 @@ class ParseCache:
                 with open(self.entries_path, "a", encoding="utf-8") as fh:
                     fh.write(json.dumps({"hash": h, "item_id": q["item_id"], "status": status, "atoms": atoms,
                                          "ts": cost.get("ts"), "attempts": cur["attempts"],
-                                         "prompt_sha": cost.get("prompt_sha")}) + "\n")
+                                         "prompt_sha": cost.get("prompt_sha"),
+                                         **{k: cost[k] for k in ("cache_version", "context_ids") if k in cost}}) + "\n")
                 qq.pop(h, None)
                 self.compact()
             self._save_queue(qq)
@@ -318,6 +319,8 @@ def feed_rows(rows, cfg=None, state_dir=None, cache=None, skip_unchanged=False):
         if not cfg["semparse_feed"]:
             return None
         cache = cache or ParseCache(cfg=cfg)
+        if cfg.get("semparse_context") and os.path.basename(os.path.normpath(cache.d)) != CTX_VERSION:
+            cache = context_cache(cfg, cache)   # Track O (opt-in): queue, budget and worker live in <semparse_dir>/ctx1
         rows = list(rows)[:int(cfg["shadow_k"])]
         if skip_unchanged:
             sig = _sha256("\n".join(content_hash(c) for _, c, _ in rows if isinstance(c, str)).encode()).hexdigest()
@@ -351,3 +354,68 @@ def maybe_feed(store, cycle=0, state_dir=None, cache=None, cfg=None):
         return feed_rows(top_k_rows(store, cfg["shadow_k"]), cfg, cache=cache)
     except Exception:
         return None
+
+
+# ---------------------------------------------------------------- Track O: context-parsed cache version
+CTX_VERSION = "ctx1"
+
+
+def context_cache(cfg=None, base: "ParseCache" = None) -> "ParseCache":
+    """The context-parsed results live in their own cache (``<semparse_dir>/ctx1``); the existing cache is never
+    rewritten.  Entries carry cache_version=ctx1 plus the context note ids they were parsed against."""
+    cfg = cfg or rc.resolve()
+    base = base or ParseCache(cfg=cfg)
+    return ParseCache(os.path.join(base.d, CTX_VERSION), cfg=cfg)
+
+
+def earlier_notes(*caches, before_ts=None, contents=None):
+    """[{item_id, atoms, ts, content}] from the given caches (later caches win per item_id), ok entries only."""
+    by = {}
+    for c in caches:
+        for e in c.entries().values():
+            if e.get("status") == "ok" and e.get("atoms") and (before_ts is None or (e.get("ts") or 0) < before_ts):
+                by[e["item_id"]] = {"item_id": e["item_id"], "atoms": e["atoms"], "ts": e.get("ts") or 0,
+                                    "content": (contents or {}).get(e["item_id"], "")}
+    return list(by.values())
+
+
+def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, now=time.time, cfg=None,
+                      contents=None, order=None):
+    """Like process_queue, but each queued note is parsed with CONTEXT = atoms of related earlier notes (from the
+    base cache and earlier context parses) and long notes per passage.  Records go to ``ctx`` only."""
+    from .semparse_context import select_context
+    cfg = cfg or rc.resolve()
+    psha = (getattr(adapter, "prompt_sha256", None) or "")[:16] or None
+    n = ctx.per_hour if n is None else n
+    out = []
+    for h, q in ctx.next_batch(min(n, ctx.budget(now()))):
+        if ctx.budget(now()) <= 0:
+            break
+        early = [e for e in earlier_notes(base, ctx, contents=contents) if e["item_id"] != q["item_id"]]
+        if order is not None:          # strictly earlier notes only (e.g. order=str for time-stamped note ids)
+            early = [e for e in early if order(e["item_id"]) < order(q["item_id"])]
+        atoms, ids, shared = select_context(q["content"], early, max_notes=int(cfg["context_max_notes"]),
+                                            max_atoms=int(cfg["context_max_atoms"]),
+                                            max_chars=int(cfg["context_max_chars"]))
+        if hasattr(llm, "last_usage"):
+            llm.last_usage = {}
+        t = time.time()
+        try:
+            res = adapter.parse_item_ctx(q["item_id"], q["content"], context_atoms=atoms,
+                                         passage_chars=int(cfg["context_passage_chars"]))
+            err = res.error
+        except Exception as e:                      # noqa: BLE001
+            res, err = None, "adapter error: %s" % type(e).__name__
+        status = ("llm_error" if err and err.startswith(("llm error", "adapter error")) else "failed" if err
+                  else "ok" if res.accepted else "empty")
+        u = dict(getattr(llm, "last_usage", None) or {})
+        cost = {"ts": now(), "hash": h, "item_id": q["item_id"], "chars": q.get("chars"),
+                "secs": round(time.time() - t, 3), "status": status, "total_tokens": u.get("total_tokens"),
+                "accepted": len(res.accepted) if res else 0, "rejected": len(res.rejected) if res else 0,
+                "prompt_sha": psha, "cache_version": CTX_VERSION, "context_ids": ids, "context_atoms": len(atoms),
+                "shared_terms": shared[:20]}
+        if err:
+            cost["error"] = err[:160]
+        ctx.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
+        out.append(cost)
+    return out

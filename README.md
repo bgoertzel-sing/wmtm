@@ -57,6 +57,11 @@ detached, niced, memory-capped workers (`python -m wmtm.workers.*`) and never af
 `docs/RUNTIME.md`; `scripts/vendor_runtime.sh` builds the PeTTa v1.0.6 / PeTTaChainer 36b3fe6 (+ dedup patch)
 runtime, `scripts/fetch_semparse_hitl.sh` fetches the semantic-parsing prompt (not redistributed: no licence).
 
+v0.5.0-rc2 adds ranked shadow goals (chains up to 3 steps, anchored on the current request; `shadow_goal_rank`,
+default on), treats derived strength as a probability (`reasoner_min_strength` 0.5, `reasoner_negation`
+skip|unlikely, default skip) and an optional CONTEXT coreference parse path (`semparse_context`, default off).
+See `docs/RELEASES.md`.
+
 ## Replay equivalence
 
 `tests/test_replay_equivalence.py` runs the original 83ea611 glue

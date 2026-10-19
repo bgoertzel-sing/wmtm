@@ -1,4 +1,4 @@
-# Background reasoner, shadow and semantic-parse feed (v0.5)
+# Background reasoner, shadow and semantic-parse feed (v0.5.0-rc2)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -6,8 +6,8 @@ niced worker processes, the cycle never waits for them, and every error is swall
 
 - **PeTTaChainer shadow** (Track G, `pc_shadow`): each cycle the top-K active items are handed to a worker that
   builds a small PLN knowledge base from the cached semantic parses only (v0.4: no regex fallback; unparsed items
-  add no facts, counted in `unparsed_items`), applies the parse-quality gate, asks PeTTaChainer 2-step chain goals
-  with a hard per-query timeout, and appends one JSON line to `pc_shadow/shadow.jsonl` plus `pc_shadow/admit.json`
+  add no facts, counted in `unparsed_items`), applies the parse-quality gate, asks PeTTaChainer ranked chain goals
+  (rc2, Track N: see "Goal ranking") with a hard per-query timeout, and appends one JSON line to `pc_shadow/shadow.jsonl` plus `pc_shadow/admit.json`
   (the admissible results, see below). v0.4 removed the Python-PLN comparison from the shadow; v0.5 (Track L) removed the Python PLN engine entirely. A Grace canary and a negative control run
   through the same path on every run; if they fail the record is `canary_fail` and no goal result is trusted.
 - **Semantic-parse feed** (Track H, `semparse_feed`): each cycle the top-K items are queued by content hash; a
@@ -20,6 +20,7 @@ niced worker processes, the cycle never waits for them, and every error is swall
   `preamble`, `file_sha256`, `prompt_sha256`, and each parse attempt records `prompt_sha` (16 hex) in
   `parse_log.jsonl` / `cache.jsonl` (absent on pre-v0.5 entries). To re-parse under the new prompt, delete the
   matching `cache.jsonl` lines (costs one LLM call each, within the hourly cap).
+  rc2 (Track O): optional CONTEXT coreference parsing, **off by default** (`semparse_context`, see below).
 
 Both hooks run on every WMTM cycle *and* (since v0.3.0-rc2) on automated turns: the automated fast path
 (`WMTM.context_for` with no real user message) feeds them the top-K items from the state JSON without loading the
@@ -57,7 +58,9 @@ With `pettachainer`:
   `derives_cleanup_s`, `elapsed_before_cycle_s`, `cycle_s` or `admit_s` + `tick_s`, `total_s`, `cycle_budget`;
   automated: `admit_s`).
 - Per result it needs a proof that used a derivation rule (`inh_trans`, `imp_trans`, `mem_inh`), so proofs straight
-  from asserted facts are dropped. It also needs STV >= (0.1, 0.05), at least one supporting item still active, and
+  from asserted facts are dropped. It also needs confidence >= 0.05 and (rc2) strength >= `reasoner_min_strength`
+  (0.5; below it the conclusion means "probably not": `reasoner_negation` `skip` drops it, `unlikely` admits it
+  as `unlikely: <text>`), at least one supporting item still active, and
   it applies the per-fact cap (`gate_max_per_fact`) and `reasoner_max_admit`.
 - Admitted items: `source_type="derived"`, id `derived-pc_deduction-<cycle>-<content md5[:8]>` (rc1: `-<i>`), `derived_from` = the supporting
   item ids, initial STI = strength x confidence, and `provenance` = `{reasoner, goal, stv, proof, run_ts, query_s}`
@@ -73,6 +76,8 @@ With `pettachainer`:
 | `reasoner` | `WMTM_REASONER` | (`pettachainer`) | `pettachainer` or `off` (anything else = off) |
 | `reasoner_max_age_s` | `WMTM_REASONER_MAX_AGE` | 900 | ignore `admit.json` older than this |
 | `reasoner_max_admit` | `WMTM_REASONER_MAX_ADMIT` | 5 | admitted conclusions per cycle |
+| `reasoner_min_strength` | `WMTM_REASONER_MIN_STRENGTH` | 0.5 | rc2: strength is a probability; below this a conclusion is negative |
+| `reasoner_negation` | `WMTM_REASONER_NEGATION` | skip | rc2: negative conclusions `skip` (dropped, `dropped.negative`) or `unlikely` (admitted as `unlikely: ...`) |
 | `reasoner_writeback` | `WMTM_REASONER_WRITEBACK` | false | allow journal writeback of PeTTaChainer-admitted items |
 | `reasoner_admit_on_automated` | `WMTM_REASONER_ADMIT_ON_AUTOMATED` | true | rc2: also admit on automated turns |
 | `admit_log_max_bytes` | `WMTM_ADMIT_LOG_MAX_BYTES` | 1000000 | rc2: rotate `admit_log.jsonl` above this size |
@@ -86,6 +91,26 @@ With `pettachainer`:
 | `gate_discount` | `WMTM_GATE_DISCOUNT` | 0.5 | strength factor for `discount` |
 | `gate_max_per_fact` | `WMTM_GATE_MAX_PER_FACT` | 3 | admitted conclusions per KB fact per cycle (0 = no cap) |
 | `gate_review_min` | `WMTM_GATE_REVIEW_MIN` | 3 | log facts behind >= N proved conclusions to `pc_shadow/parse_review.jsonl` |
+
+## Goal ranking (rc2, Track N)
+
+The shadow builds a pool of goals derivable by Inheritance/Implies transitivity and Member+Inheritance chains of up
+to `shadow_max_hops` derivation steps (not already asserted, no `sk_*` placeholders unless `shadow_skolem_goals`),
+scores each as `w_req`*overlap with the current request + `w_depth`*(hops-1) + `w_info`*category informativeness
+(0 when the category echoes the subject name) + `w_sti`*max source STI, and asks the best `shadow_max_goals`.
+Request terms: entities parsed from the current `source_type=user` items plus their 1-hop KB neighbours, and the
+items' text tokens (an unparsed request still anchors by name). `shadow.jsonl` records `goal_rank`
+(`pool`, `user_items`, `req_entities`, `req_tokens`, `hops` histogram) and each entry of `queries` its
+`hops`, `score` and `overlap`.
+
+## Context parsing (rc2, Track O, off by default)
+
+`semparse_context=true` routes the feed to `<semparse_dir>/ctx1` (separate queue, cache, hourly cap and worker
+pid). Each queued note is parsed with CONTEXT = atoms of up to `context_max_notes` related earlier notes (shared
+terms, then recency), long notes per passage; re-emitted context atoms are dropped and context `sk_*` witnesses keep
+their scope. Entries record `cache_version=ctx1` and `context_ids`. The shadow then prefers ctx1 entries over the
+base cache. Cost: every note is parsed again in ctx1 (one call per passage), within `parse_cap_per_hour`. The base
+cache is never rewritten; with the flag off nothing reads or creates `ctx1`.
 
 ## Enabling: the flags file
 
@@ -115,6 +140,11 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `shadow_min_interval_s` | `WMTM_PC_SHADOW_MIN_INTERVAL` | 300 | at most one shadow launch per N s (stamp `pc_shadow/last_launch`); 0 = no limit |
 | `hooks_on_automated` | `WMTM_HOOKS_ON_AUTOMATED` | true | also run the hooks on automated (fast-path) turns |
 | `shadow_full_kb` | `WMTM_PC_SHADOW_FULL_KB` | false | load all cached atoms, not just binary facts |
+| `shadow_goal_rank` | `WMTM_PC_SHADOW_GOAL_RANK` | true | rc2: ranked goal pool (false = rc1 2-step goals) |
+| `shadow_max_hops` / `shadow_min_hops` | `WMTM_PC_SHADOW_MAX_HOPS` / `..._MIN_HOPS` | 3 / 1 | rc2: longest chain in the pool; only ask goals needing >= N derivation steps |
+| `shadow_goal_weights` | `WMTM_PC_SHADOW_GOAL_WEIGHTS` | `2,1,1,0.5` | rc2: `w_req,w_depth,w_info,w_sti` |
+| `semparse_context` | `WMTM_SEMPARSE_CONTEXT` | false | rc2: CONTEXT coreference parsing into `<semparse_dir>/ctx1` (more LLM calls; see below) |
+| `context_max_notes` / `context_max_atoms` / `context_max_chars` / `context_passage_chars` | `WMTM_CONTEXT_*` | 3 / 40 / 4000 / 600 | rc2: context selection and passage size |
 | `shadow_skolem_goals` | `WMTM_PC_SHADOW_SKOLEM_GOALS` | false | also ask goals about parser-invented `sk_*` placeholder entities (their facts are always kept) |
 | `runtime_dir` | `WMTM_RUNTIME_DIR` | `<state_dir>/_wmtm_shadow` | worker data (`pc_shadow/`, `semparse_cache/`) |
 | `petta_dir` | `WMTM_PC_PETTA` | `<vendor>/petta-v1.0.6` | PeTTa checkout (has `python/`) |
@@ -135,7 +165,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.5.0-rc1/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.5.0-rc2/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence

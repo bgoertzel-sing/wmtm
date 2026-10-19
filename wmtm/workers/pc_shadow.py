@@ -157,8 +157,13 @@ else:
             else: w = w2
         rec["skipped_budget"] = skipped
     if w: w.kill()
-for key in ("semparse_items", "unparsed_items", "facts", "build_s", "build_error", "skolem_goals", "gate"):
+for key in ("semparse_items", "unparsed_items", "facts", "build_s", "build_error", "skolem_goals", "gate", "goal_rank"):
     rec[key] = spec.get(key)
+gm = spec.get("goal_meta") or {}             # rc2 (Track N): rank info per asked goal
+for r in res:
+    m = gm.get(r.get("goal"))
+    if m:
+        r.update(hops=m.get("hops"), score=m.get("score"), overlap=m.get("overlap"))
 rec["queries"] = res
 rec["pc_proved"] = sum(r["ok"] for r in res); rec["timeouts"] = sum(r["timeout"] for r in res)
 rec["prio_end"] = PRIO_GUARD.stats() if PRIO_GUARD else None

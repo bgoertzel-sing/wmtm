@@ -213,7 +213,18 @@ def _scope_skolems(node, prefix: str):
     if isinstance(node, list):
         return [_scope_skolems(x, prefix) for x in node]
     if isinstance(node, str) and node.startswith("sk_"):
+        if "__i_" in node:                 # Track O: a context witness (already scoped by its own note) is reused
+            return node
         return f"{node}__{prefix}"
+    return node
+
+
+def _rescope(node, prefix: str, sprefix: str):
+    """Passage parses: witnesses are scoped to the note so passages share them."""
+    if isinstance(node, list):
+        return [_rescope(x, prefix, sprefix) for x in node]
+    if isinstance(node, str) and node.startswith("sk_") and node.endswith("__" + prefix):
+        return node[: -len(prefix)] + sprefix
     return node
 
 
@@ -288,11 +299,32 @@ class SemParseAdapter:
             with open(self.reject_log, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(rec) + "\n")
 
-    def parse_item(self, item_id, item) -> ParseResult:
+    def parse_item_ctx(self, item_id, item, context_atoms=(), passage_chars=600, max_context_atoms=60):
+        """Track O: parse with CONTEXT (atoms of related earlier notes, verbatim) and TEXT; long notes are parsed
+        per short passage, each passage seeing the context plus the atoms accepted from earlier passages."""
+        from .semparse_context import split_passages
+        text = item_text(item)[: self.max_chars]
+        total = ParseResult(str(item_id), text)
+        own = []
+        for k, p in enumerate(split_passages(text, passage_chars) or [text]):
+            ctx = (list(context_atoms) + own)[-max_context_atoms:] if (context_atoms or own) else []
+            pid = item_id if k == 0 else f"{item_id}_p{k}"
+            r = self.parse_item(pid, p, context_atoms=ctx, scope_id=item_id)
+            own += r.accepted
+            total.accepted += r.accepted; total.queries += r.queries; total.rejected += r.rejected
+            if r.error and not total.error:
+                total.error = r.error
+        if total.accepted and total.error == "empty reply":
+            total.error = None
+        return total
+
+    def parse_item(self, item_id, item, context_atoms=(), scope_id=None) -> ParseResult:
+        from .semparse_context import user_message, atom_body
         text = item_text(item)[: self.max_chars]
         res = ParseResult(str(item_id), text)
+        ctx_bodies = {atom_body(a) for a in context_atoms}
         try:
-            reply = self.llm(self.system, f"TEXT: {text}")
+            reply = self.llm(self.system, user_message(text, list(context_atoms)))
         except Exception as e:                       # noqa: BLE001
             res.error = f"llm error: {e}"
             self._log(res, "", res.error, "llm")
@@ -302,6 +334,7 @@ class SemParseAdapter:
             self._log(res, "", res.error, "llm")
             return res
         prefix = safe_id(item_id)
+        sprefix = safe_id(scope_id if scope_id is not None else item_id)   # sk_* scope = the note, not the passage
         for src, node, err in split_toplevel(reply):
             if err:
                 self._log(res, src, f"syntax: {err}", "syntax")
@@ -314,7 +347,13 @@ class SemParseAdapter:
                 self._log(res, src, f"structure: {reason}", "structure")
                 continue
             for n in normalise(node):
-                atom = to_str(prefix_names(n, prefix))
+                pn = prefix_names(n, prefix)
+                if sprefix != prefix:
+                    pn = _rescope(pn, prefix, sprefix)
+                atom = to_str(pn)
+                if ctx_bodies and atom_body(atom) in ctx_bodies:
+                    self._log(res, atom, "context atom re-emitted", "context")
+                    continue
                 if self.loader is not None:
                     try:
                         out = self.loader.add_atom(atom)

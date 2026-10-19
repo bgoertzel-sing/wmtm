@@ -80,6 +80,31 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.5.0-rc2 (2026-10-19)
+Tracks N and O on top of v0.5.0-rc1. Flags-file keys of rc1 are all still valid; API unchanged.
+- Track N: ranked shadow goals (Design A, `docs/TRACK_M_GOALS.md`), on by default (`shadow_goal_rank`). The goal
+  pool holds every goal derivable by chains of up to `shadow_max_hops` (3) derivation steps that is not already
+  asserted; goals needing fewer than `shadow_min_hops` (1) steps are skipped. Score = `w_req`*request overlap +
+  `w_depth`*(hops-1) + `w_info`*category informativeness + `w_sti`*source STI (`shadow_goal_weights`, default
+  `2,1,1,0.5`); the best `shadow_max_goals` are asked. Request terms come from the current request items
+  (`source_type=user`, now passed through to the shadow worker on both paths): their parsed entities plus 1-hop KB
+  neighbours, and their text tokens. `shadow.jsonl` records `goal_rank` (pool size, request terms, hops histogram)
+  and each query carries its `hops`, `score` and `overlap`. `shadow_goal_rank=false` restores the rc1 (Track M) 2-step goals.
+- Track O (1): derived strength is a probability. A conclusion with strength below `reasoner_min_strength`
+  (default 0.5; rc1 admitted from 0.1) means "probably not" and is never admitted as a weak positive.
+  `reasoner_negation` = `skip` (default: dropped, counted in `dropped.negative`) or `unlikely` (admitted as
+  `unlikely: <text>` when 1-strength >= `reasoner_min_strength`, STI from 1-strength). Admitted items carry
+  `provenance.polarity`.
+- Track O (2): CONTEXT coreference parsing (`wmtm/semparse_context.py`, `SemParseAdapter.parse_item_ctx`,
+  `parse_cache.process_queue_ctx`). **Off by default** (flags key `semparse_context`, env `WMTM_SEMPARSE_CONTEXT`):
+  it did not improve the replay results and multiplies parse cost (one LLM call per passage). When on, the feed
+  queues into a separate cache version `<semparse_dir>/ctx1` (own queue, hourly cap, worker pid), each note is
+  parsed with the atoms of up to `context_max_notes` related earlier notes as CONTEXT (long notes per
+  `context_passage_chars` passage), and the shadow prefers ctx1 entries over the base cache. The base cache is never
+  rewritten; switching it off again falls back to the base cache. With it off nothing reads or creates `ctx1`.
+- Parse cache unchanged: content-hash key; existing entries are reused, not re-parsed.
+- Tests: `tests/test_goal_rank.py`, `tests/test_semparse_context.py`, additions in `tests/test_pc_admit.py`.
+
 ## v0.5.0-rc1 (2026-10-18)
 Tracks L and M on top of v0.4.0-rc2 (rc2 admission behaviour kept unchanged).
 - Track L: the Python PLN engine is removed (`wmtm/inference.py`, `wmtm/pln.py`, `wmtm/pln_bridge.py` and their

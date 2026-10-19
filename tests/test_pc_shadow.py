@@ -110,6 +110,7 @@ def test_integration_synthetic(tmp_path):
     assert rec["petta"].startswith(_CFG["petta_dir"]) and rec["mem_cap_mb"] == _CFG["worker_mem_mb"]
     proved = {q["goal"] for q in rec["queries"] if q["ok"]}
     assert {"(Inheritance cat animal)", "(Implies rain slippery)"} <= proved
+    assert rec["goal_rank"]["pool"] >= 2 and all(q.get("hops", 0) >= 1 for q in rec["queries"])   # rc2: Track N
     assert not sp.exists()                                    # spec deleted
 
 

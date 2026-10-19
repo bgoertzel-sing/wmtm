@@ -96,7 +96,14 @@ try:
     ad = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, reject_log=cache.reject_log,
                          max_chars=cache.max_chars, reject_log_max_bytes=cache.log_max_bytes, preamble=bool(pre))
     status.update(preamble=ad.preamble, file_sha256=ad.file_sha256, prompt_sha256=ad.prompt_sha256)   # v0.5: what is sent
-    recs = process_queue(cache, llm, loader=loader, n=a.n, prompt_path=a.prompt, adapter=ad)
+    from wmtm.parse_cache import CTX_VERSION, process_queue_ctx
+    if CFG.get("semparse_context") and os.path.basename(os.path.normpath(a.dir)) == CTX_VERSION:
+        # Track O (opt-in, flags key semparse_context): parse with CONTEXT from the base cache + earlier ctx1 parses
+        status["context"] = True
+        base = ParseCache(os.path.dirname(os.path.normpath(a.dir)), cfg=CFG)
+        recs = process_queue_ctx(cache, base, llm, ad, n=a.n, cfg=CFG)
+    else:
+        recs = process_queue(cache, llm, loader=loader, n=a.n, prompt_path=a.prompt, adapter=ad)
     status.update(status="ok", parsed=len(recs), by_status={s: sum(r["status"] == s for r in recs) for s in {r["status"] for r in recs}})
     finish(0)
 except SystemExit:

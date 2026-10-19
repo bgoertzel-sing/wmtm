@@ -37,6 +37,21 @@ def mode(cfg=None, default="pettachainer") -> str:
     return m if m in REASONERS else "off"
 
 
+def min_strength(cfg) -> float:
+    """Track O: admit as a positive statement only when strength >= this (default 0.5)."""
+    try:
+        v = float((cfg or {}).get("reasoner_min_strength", 0.5))
+    except (TypeError, ValueError):
+        return 0.5
+    return v if 0.0 <= v <= 1.0 else 0.5
+
+
+def negation_mode(cfg) -> str:
+    """Track O: conclusions below reasoner_min_strength are "skip"ped (default) or admitted as "unlikely: ..."."""
+    m = str((cfg or {}).get("reasoner_negation") or "skip").strip().lower()
+    return m if m in ("skip", "unlikely") else "skip"
+
+
 def render(goal):
     m = _GOAL.match(goal or "")
     return _TEXT[m.group(1)].format(m.group(2), m.group(3)) if m else None
@@ -124,7 +139,9 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
     if doc.get("status") != "ok" or not doc.get("canary_ok"):
         return None, dict(info, skipped="run_" + str(doc.get("status") or "unknown"))
     live = set(live_ids) if live_ids is not None else {it.id for it in store.get_active_set()}
-    cands, cand_facts, drop = [], [], {"asserted": 0, "no_live_source": 0, "below_threshold": 0, "bad": 0, "known": 0}
+    cands, cand_facts, drop = [], [], {"asserted": 0, "no_live_source": 0, "below_threshold": 0, "bad": 0, "known": 0,
+                                       "negative": 0}
+    min_s, neg_mode = min_strength(cfg), negation_mode(cfg)
     for r in doc["results"]:
         try:
             g = r["goal"]; s, c = float(r["stv"][0]), float(r["stv"][1]); text = render(g)
@@ -136,8 +153,14 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
             # proved straight from asserted facts (or their revision): already in WMTM, not a new conclusion
             drop["asserted"] += 1; continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))
-        if s < MIN_STRENGTH or c < MIN_CONFIDENCE:
+        if c < MIN_CONFIDENCE:
             drop["below_threshold"] += 1; continue
+        # Track O: strength is a probability.  s < reasoner_min_strength means "probably not", never a weak yes.
+        neg = s < min_s
+        if neg:
+            if neg_mode != "unlikely" or (1.0 - s) < min_s:
+                drop["negative"] += 1; continue
+            text = "unlikely: " + text
         srcs = [x for x in r.get("sources") or [] if x in live]
         if not srcs:
             drop["no_live_source"] += 1; continue
@@ -145,8 +168,9 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
             drop["known"] += 1; continue
         cand_facts.append(list(r.get("facts") or _LABEL.findall(str(r.get("proof")))))
         cands.append(InferenceCandidate(
-            content=text, confidence=c, derived_from=srcs, inference_type="pc_deduction", initial_sti=s * c,
-            provenance={"reasoner": "pettachainer", "goal": g, "stv": [s, c], "proof": str(r["proof"])[:2000],
+            content=text, confidence=c, derived_from=srcs, inference_type="pc_deduction",
+            initial_sti=((1.0 - s) if neg else s) * c,
+            provenance={"reasoner": "pettachainer", "goal": g, "stv": [s, c], "polarity": "negative" if neg else "positive", "proof": str(r["proof"])[:2000],
                         "run_ts": doc.get("spec_ts"), "query_s": r.get("s")}))
     # Track J: cap admitted conclusions per KB fact per cycle (best first)
     from . import parse_gate as _pg

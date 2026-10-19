@@ -101,13 +101,13 @@ def test_provenance_survives_snapshot_roundtrip(tmp_path, monkeypatch):
 
 def test_admission_filters(tmp_path):
     rows = [dict(R_CAT, sources=["gone"]),                                          # source evicted
-            dict(R_RAIN, stv=[0.05, 0.9]),                                         # below threshold
+            dict(R_RAIN, stv=[0.05, 0.9]),                                         # s<0.5: "probably not", dropped as negative (Track O)
             {"goal": "(Inheritance a b)", "stv": [0.9, 0.9], "proof": "", "sources": ["s0"]},  # no proof term
             {"goal": "garbage", "stv": [0.9, 0.9], "proof": "(inh_trans p)", "sources": ["s0"]},
             {"goal": "(Inheritance a b)", "stv": "x", "proof": "(inh_trans p)", "sources": ["s0"]}]
     _admit_doc(tmp_path, rows)
     cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path)}, _store())
-    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "below_threshold": 1, "bad": 3, "known": 0, "per_fact_cap": 0}
+    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "below_threshold": 0, "bad": 3, "known": 0, "negative": 1, "per_fact_cap": 0}
 
 
 def test_max_admit_cap(tmp_path):
@@ -260,3 +260,47 @@ def test_cycle_does_not_write_back_pc_conclusion_by_default(tmp_path, monkeypatc
     notes = []
     o.cycle(append_fn=lambda n: notes.append(n))
     assert not any(("wmtm-derived-" + pc_id) in n or ("DerivedBelief" in n and "cat is a animal" in n) for n in notes)
+
+
+# ---- Track O: strength is a probability (s < reasoner_min_strength = "probably not")
+def _neg_rows():
+    return [dict(R_CAT, stv=[0.2, 0.6]), dict(R_RAIN, stv=[0.8, 0.5]), dict(R_CAT, goal="(Inheritance dog animal)", stv=[0.5, 0.6])]
+
+
+def test_negation_skip_by_default(tmp_path):
+    _admit_doc(tmp_path, _neg_rows())
+    cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 10}, _store())
+    texts = sorted(c.content for c in cands)
+    assert texts == ["dog is a animal", "rain implies slippery"] and info["dropped"]["negative"] == 1
+    assert all(c.provenance["polarity"] == "positive" for c in cands)
+
+
+def test_negation_unlikely_mode(tmp_path):
+    _admit_doc(tmp_path, _neg_rows())
+    cfg = {"shadow_dir": str(tmp_path), "reasoner_max_admit": 10, "reasoner_negation": "unlikely"}
+    cands, info = pc_admit.load_candidates(cfg, _store())
+    by = {c.content: c for c in cands}
+    assert "unlikely: cat is a animal" in by and "cat is a animal" not in by and info["dropped"]["negative"] == 0
+    u = by["unlikely: cat is a animal"]
+    assert u.provenance["polarity"] == "negative" and u.provenance["stv"] == [0.2, 0.6]
+    assert abs(u.initial_sti - 0.8 * 0.6) < 1e-9          # STI from the probability of "not"
+
+
+def test_negation_threshold_configurable(tmp_path):
+    _admit_doc(tmp_path, _neg_rows())
+    cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 10,
+                                            "reasoner_min_strength": 0.9}, _store())
+    assert cands == [] and info["dropped"]["negative"] == 3
+    cands, _ = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 10,
+                                         "reasoner_min_strength": 0.1}, _store())
+    assert len(cands) == 3
+
+
+def test_negation_unlikely_needs_confident_no(tmp_path):
+    # min_strength 0.3: s=0.2 is "probably not" (1-s=0.8 >= 0.3) -> unlikely; bad config values fall back to defaults
+    assert pc_admit.min_strength({"reasoner_min_strength": "x"}) == 0.5 and pc_admit.min_strength({"reasoner_min_strength": 7}) == 0.5
+    assert pc_admit.negation_mode({"reasoner_negation": "bogus"}) == "skip"
+    _admit_doc(tmp_path, [dict(R_CAT, stv=[0.2, 0.6])])
+    cands, _ = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_negation": "unlikely",
+                                         "reasoner_min_strength": 0.3}, _store())
+    assert [c.content for c in cands] == ["unlikely: cat is a animal"]
