@@ -124,6 +124,7 @@ def ask(w, g, tmo):
     return w, rec
 
 t0 = time.time(); spec = json.load(open(a.spec))
+RAW = list(spec.get("raw_items") or [])   # Track R: kept for the goal hook (the snapshot replaces the spec)
 if "raw_items" in spec:  # built here, off the cycle path
     try:
         from wmtm.pc_shadow import snapshot_from_raw
@@ -180,6 +181,18 @@ try:  # Track J: review log of gated facts and facts behind many conclusions
     review(os.path.dirname(os.path.abspath(a.out)), rec, spec, CFG)
 except Exception:
     pass
+try:  # Track R: GoalChainer phase 1, log only (flags key goalchainer, off by default); gated by the canary above
+    if CFG.get("goalchainer"):
+        from wmtm.goals import run_shadow
+        run_shadow(RAW, rec, CFG, source=spec.get("source"))   # catches, times and logs its own errors
+except Exception as e:   # import / setup failure: log it, never disturb the worker
+    try:
+        os.makedirs(os.path.join(CFG.get("runtime_dir") or ".", "goalchainer"), exist_ok=True)
+        rc.append_jsonl(os.path.join(CFG.get("runtime_dir") or ".", "goalchainer", "runs.jsonl"),
+                        {"ts": time.time(), "status": "hook_error", "error": type(e).__name__ + ": " + str(e)[:160]},
+                        CFG.get("jsonl_max_bytes"))
+    except Exception:
+        pass
 if not a.keep_spec:
     try: os.unlink(a.spec)
     except OSError: pass

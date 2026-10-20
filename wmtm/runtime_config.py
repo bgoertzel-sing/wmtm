@@ -56,6 +56,26 @@ SPEC = {
     "speaker_link":        ("WMTM_SPEAKER_LINK", bool, False, None),
     "speaker_map":         ("WMTM_SPEAKER_MAP", dict, {}, None),
     "speaker_self":        ("WMTM_SPEAKER_SELF", str, "", None),
+    # Track R: GoalChainer phase 1 (log only; wmtm/goals).  Runs inside the PeTTaChainer shadow worker, after its
+    # canary; writes <runtime_dir>/goalchainer/proposals.jsonl only.  Nothing reaches the prompt, no action is taken.
+    "goalchainer":         ("WMTM_GOALCHAINER", bool, False, None),
+    "goalchainer_src":     ("WMTM_GOALCHAINER_SRC", str, "", _V),          # OmegaClaw-GoalChainer/src (optional; local fallback)
+    "goal_weights":        ("WMTM_GOAL_WEIGHTS", str, "1,1", None),        # w_unc, w_comp
+    "goal_targets":        ("WMTM_GOAL_TARGETS", str, "0.8,0.8", None),    # target level per need (1 = nothing open)
+    "goal_scale":          ("WMTM_GOAL_SCALE", float, 1.0, None),          # load at which level = 0.5
+    "goal_age_cap_d":      ("WMTM_GOAL_AGE_CAP_D", float, 7.0, None),
+    "goal_max_proposals":  ("WMTM_GOAL_MAX_PROPOSALS", int, 5, None),      # per run
+    "goal_min_score":      ("WMTM_GOAL_MIN_SCORE", float, 0.05, None),
+    "goal_repeat_s":       ("WMTM_GOAL_REPEAT_S", float, 21600.0, None),   # same proposal not re-logged within 6 h
+    "goal_remind_after_s": ("WMTM_GOAL_REMIND_AFTER_S", float, 86400.0, None),  # RemindPending only after 1 d w/o reply
+    "goal_reask_s":        ("WMTM_GOAL_REASK_S", float, 259200.0, None),   # same person+topic not re-proposed within 3 d
+    "goal_budget_s":       ("WMTM_GOAL_BUDGET_S", float, 10.0, None),      # wall-clock cap per goal run (SIGALRM)
+    # v0.6: request history for the "addressee replied" check: the channel's completed request files (read-only;
+    # deploy-time path in the flags file, relative = against state_dir; "" = no history).  Indexed in
+    # <runtime_dir>/goalchainer/requests_index.json (digests only, no raw text); see wmtm/goals/requests.py.
+    "goal_requests_dir":   ("WMTM_GOAL_REQUESTS_DIR", str, "", _D),
+    "goal_requests_days":  ("WMTM_GOAL_REQUESTS_DAYS", float, 14.0, None),
+    "goal_requests_max":   ("WMTM_GOAL_REQUESTS_MAX", int, 500, None),
     # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
     # live in working memory only.  Python-PLN / tool-derived items are not affected.
     "reasoner_writeback":  ("WMTM_REASONER_WRITEBACK", bool, False, None),

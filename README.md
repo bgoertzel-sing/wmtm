@@ -64,7 +64,10 @@ v0.5.0-rc3 fixes the recall/context plumbing: freshly recalled notes survive sta
 ranked by relevance to the current request (longer, request-focused item text under a character budget), and the
 request is stored as a `source_type=user` item so request-anchored goal ranking works. v0.5.0-rc4 adds optional
 speaker linking for the semantic parser (`speaker_link`, default off; the request item carries its request
-metadata). See `docs/RELEASES.md`.
+metadata). v0.6.0-rc1 adds the GoalChainer phase-1 goal engine (`goalchainer`, default off): needs, candidate
+actions and a legitimacy veto computed in the shadow worker; proposals are only logged to
+`<runtime_dir>/goalchainer/proposals.jsonl`, never shown or acted on; reply detection reads the channel's completed
+request files (`goal_requests_dir`). See `docs/RELEASES.md`.
 
 ## Replay equivalence
 

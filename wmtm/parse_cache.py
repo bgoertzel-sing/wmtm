@@ -212,7 +212,7 @@ class ParseCache:
                     fh.write(json.dumps({"hash": h, "item_id": q["item_id"], "status": status, "atoms": atoms,
                                          "ts": cost.get("ts"), "attempts": cur["attempts"],
                                          "prompt_sha": cost.get("prompt_sha"),
-                                         **{k: cost[k] for k in ("cache_version", "context_ids", "speaker", "speaker_source")
+                                         **{k: cost[k] for k in ("cache_version", "context_ids", "speaker", "speaker_source", "queries")
                                             if k in cost}}) + "\n")
                 qq.pop(h, None)
                 self.compact()
@@ -259,6 +259,8 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
                 "total_tokens": u.get("total_tokens"),
                 "accepted": len(res.accepted) if res else 0, "rejected": len(res.rejected) if res else 0,
                 "prompt_sha": psha}
+        if res is not None and getattr(res, "queries", None):   # Track R: parser queries feed the uncertainty need
+            cost["queries"] = [str(x)[:300] for x in list(res.queries)[:20]]
         if err:
             cost["error"] = err[:160]
         cache.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
@@ -429,6 +431,8 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
                 "accepted": len(res.accepted) if res else 0, "rejected": len(res.rejected) if res else 0,
                 "prompt_sha": psha, "cache_version": CTX_VERSION, "context_ids": ids, "context_atoms": len(atoms),
                 "shared_terms": shared[:20]}
+        if res is not None and getattr(res, "queries", None):   # Track R: parser queries feed the uncertainty need
+            cost["queries"] = [str(x)[:300] for x in list(res.queries)[:20]]
         if err:
             cost["error"] = err[:160]
         ctx.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
@@ -523,6 +527,8 @@ def process_queue_spk(spk: ParseCache, llm, adapter, n=None, now=time.time, cfg=
                 "speaker_source": info["speaker_source"], "speaker_subs": info["subs"]}
         if use_ctx:
             cost["context_ids"] = ids
+        if res is not None and getattr(res, "queries", None):   # Track R: parser queries feed the uncertainty need
+            cost["queries"] = [str(x)[:300] for x in list(res.queries)[:20]]
         if err:
             cost["error"] = err[:160]
         spk.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)

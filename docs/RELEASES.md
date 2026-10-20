@@ -80,6 +80,43 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.6.0-rc1 (2026-10-20)
+GoalChainer phase 1 on top of v0.5.0-rc4 (tracks R, R2, R2.1): a homeostatic goal engine that **only logs**
+proposals. **Off by default** (`goalchainer`); flags-file keys of rc4 are all still valid; API, adapters, state and
+block unchanged. Design: `docs/GOALCHAINER_DESIGN.md`.
+- Needs (`wmtm/goals/needs.py`): uncertainty (open questions, blocked-on, parser queries cached by the semantic
+  parser) and competence (pending / waiting-on items, the bot's undelivered promises) estimated from the WMTM active
+  set; level from the count, age and salience of open signals; urge `u = w * phi(target - level)`. A signal closes
+  when a later note resolves it, reports it moot / answered, or the addressee replied on the topic (request history,
+  below). "The user" resolves to the person whose request came last; the bot's own to-dos become self-tasks.
+- Actions (`wmtm/goals/actions.py`): ClarifyQuestion, FlagUncertainty, LookUp (factual gaps only, read-only),
+  SummarizeStatus (<= 3 whole-sentence items), RemindPending (only after `goal_remind_after_s` without a reply),
+  SelfTask (log only). Messages go to a person resolved through `speaker_map` only (never "user", nobody, or the
+  bot). One proposal per (person, topic) across Ask/Flag/Remind/LookUp; no re-proposal to the same person on the
+  same topic within `goal_reask_s` unless the topic gained new content (history = logged proposals).
+- Legitimacy (`wmtm/goals/legitimacy.py`) is a veto only: live changes, pushes, memories in git and writes are
+  forbidden; in autonomous (automated) turns every message/write action is vetoed. GoalChainer's deontic resolver is
+  used when `goalchainer_src` points at its `src/`, else an identical local one. A repeat inside `goal_repeat_s` is
+  discounted and not re-logged. score = urge * geometric mean(considerations) * discouragements.
+- Log only: the engine runs inside the PeTTaChainer shadow worker (detached, niced, SCHED_IDLE) after the shadow
+  canary, gated by its own known-answer goal canary and a structural check per proposal, under `goal_budget_s`
+  (SIGALRM). Output: `<runtime_dir>/goalchainer/proposals.jsonl` + `runs.jsonl` only. Nothing reaches the context
+  block, the state, the journal or any channel; every exception is caught and recorded in `runs.jsonl`
+  (`status` error / budget_exceeded / hook_error).
+- Request history (new in rc1, for the "addressee replied" check): `goal_requests_dir` (flags file; relative =
+  against `state_dir`) = the channel's completed request files, read-only. Sender = `speaker_map` lookup of the
+  envelope's `user_id` / `sender_username` (or a private chat's chat id), never guessed from the text; the request
+  text excludes the quoted group-context / document / authority blocks. Indexed once per file in
+  `<runtime_dir>/goalchainer/requests_index.json` (mode 600; topic-key digests only, no raw text); bounded by
+  `goal_requests_days` (14) and `goal_requests_max` (500). Group requests written before the transport added the
+  sender cannot close anything.
+- Parser queries are now kept in the semparse cache entries (`queries`, <= 20 x 300 chars) for the uncertainty
+  need; raw items handed to the shadow worker carry `origin_ts`.
+- Offline replay: `scripts/goals_replay.py` (copies of a journal / cache / request history only; output gitignored).
+- Tests: `tests/test_goals_track_r.py`, `tests/test_goals_track_r2.py`, `tests/test_goals_v060.py` (log-only:
+  nothing in the block, state or journal with `goalchainer` on; request index; budget/errors; names from
+  `speaker_map` only).
+
 ## v0.5.0-rc4 (2026-10-20)
 Track Q on top of v0.5.0-rc3: speaker linking for the semantic parser, **off by default** (`speaker_link`).
 Flags-file keys of rc3 are all still valid; adapters unchanged (`WMTM.context_for` gained an optional `source=`).

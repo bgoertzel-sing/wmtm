@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wmtm"
-version = "0.5.0rc4"
+version = "0.6.0rc1"
 description = "Working Medium-Term Memory (WMTM): mutable active memory layer between STM and LTM"
 readme = "README.md"
 requires-python = ">=3.10"

@@ -402,13 +402,15 @@ def raw_item_from_dict(d):
     """raw_item() from a persisted item dict (the state JSON the automated fast path reads)."""
     return {"id": d.get("id"), "content": d.get("content", ""), "sti": (d.get("attention") or {}).get("sti", 0.0),
             "tv_strength": d.get("tv_strength", 0.0), "tv_confidence": d.get("tv_confidence", 0.0),
-            "source_type": d.get("source_type", "recalled")}
+            "source_type": d.get("source_type", "recalled"),
+            "origin_ts": float(d.get("origin_timestamp") or 0.0) or float(d.get("created_at") or 0.0)}   # Track R: age
 
 
 def raw_item(it):
     return {"id": it.id, "content": it.content, "sti": it.attention.sti,
             "tv_strength": getattr(it, "tv_strength", 0.0), "tv_confidence": getattr(it, "tv_confidence", 0.0),
-            "source_type": getattr(it, "source_type", "recalled")}
+            "source_type": getattr(it, "source_type", "recalled"),
+            "origin_ts": float(getattr(it, "origin_timestamp", 0.0) or 0.0) or float(getattr(it, "created_at", 0.0) or 0.0)}
 
 
 class _RawStore:
