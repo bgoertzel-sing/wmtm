@@ -329,7 +329,8 @@ class WMTM:
                 orch._cycle += 1
                 t = lap("tick_s", t)
 
-            context, shown = _ctx.format_context(orch.store, orch.cycle_count, pcfg, orch.context_rel)
+            context, shown = _ctx.format_context(orch.store, orch.cycle_count, pcfg, orch.context_rel,
+                                                 request=user_msg)
             if context:
                 # F17: passive utility for displayed items (Track P: the items actually shown).
                 for iid in shown:

@@ -70,6 +70,10 @@ SPEC = {
     "goal_remind_after_s": ("WMTM_GOAL_REMIND_AFTER_S", float, 86400.0, None),  # RemindPending only after 1 d w/o reply
     "goal_reask_s":        ("WMTM_GOAL_REASK_S", float, 259200.0, None),   # same person+topic not re-proposed within 3 d
     "goal_budget_s":       ("WMTM_GOAL_BUDGET_S", float, 10.0, None),      # wall-clock cap per goal run (SIGALRM)
+    # Track S (phase b): "Goal suggestions (not instructions)" block on the user path, from goalchainer/latest.json.
+    "goal_prompt":         ("WMTM_GOAL_PROMPT", bool, False, None),
+    "goal_prompt_max_age_s": ("WMTM_GOAL_PROMPT_MAX_AGE_S", float, 900.0, None),  # only runs <= 15 min old
+    "goal_prompt_max_lines": ("WMTM_GOAL_PROMPT_MAX_LINES", int, 3, None),        # hard cap 3 in wmtm/goal_prompt.py
     # v0.6: request history for the "addressee replied" check: the channel's completed request files (read-only;
     # deploy-time path in the flags file, relative = against state_dir; "" = no history).  Indexed in
     # <runtime_dir>/goalchainer/requests_index.json (digests only, no raw text); see wmtm/goals/requests.py.

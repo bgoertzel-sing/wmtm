@@ -920,9 +920,23 @@ def render_ranked(entries, context_rel, cycle, cfg):
     return header + "\n" + "\n".join(lines), shown
 
 
-def format_context(store, cycle, cfg=None, context_rel=None):
+def format_context(store, cycle, cfg=None, context_rel=None, request=None):
     """User-path block: Track P ranking when context_rank is on, else rc2 format_active_context.
-    -> (text | None, shown ids) (shown ids get F17 passive utility)."""
+    -> (text | None, shown ids) (shown ids get F17 passive utility).
+    Track S: `request` = the real user message of this turn; without it (automated turn) no goal block."""
+    text, shown = _format_context_core(store, cycle, cfg, context_rel)
+    if setting(cfg, "goal_prompt") and request:      # Track S: optional suggestions block, real user turns only
+        try:
+            from . import goal_prompt as _gp
+            g = _gp.render(cfg, speaker=_gp.speaker_of(store, cfg, request), automated=False)
+        except Exception:   # noqa: BLE001
+            g = None
+        if g:
+            text = (text + "\n" + g) if text else g
+    return text, shown
+
+
+def _format_context_core(store, cycle, cfg, context_rel):
     if not setting(cfg, "context_rank"):
         text = format_active_context(store, cycle)
         return text, [it.id for it in store.get_active_set()[:15]] if text else []

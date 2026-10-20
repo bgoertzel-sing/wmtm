@@ -268,7 +268,7 @@ def test_goalchainer_on_never_reaches_block_state_or_journal(tmp_path, monkeypat
     assert any("widget7" in b for b in blocks)        # the note itself is recalled as usual
     assert all("goalchainer" not in b.lower() for b in blocks)
     assert j.appended == []                            # nothing written to the journal
-    assert sorted(os.listdir(gdir)) == ["proposals.jsonl", "requests_index.json", "runs.jsonl"]
+    assert sorted(os.listdir(gdir)) == ["latest.json", "proposals.jsonl", "requests_index.json", "runs.jsonl"]
     assert os.listdir(chan) == []
 
 

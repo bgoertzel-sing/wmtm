@@ -123,7 +123,7 @@ def test_run_shadow_logs_only_when_on(tmp_path):
     assert lines[0]["action"] == "ClarifyQuestion" and all(engine.check_proposal(l) is None for l in lines)
     run2 = engine.run_shadow(items, {"status": "ok", "queries": []}, cfg, source="cycle", now=NOW + 60)
     assert run2["logged"] == 0                     # repeat window
-    assert sorted(os.listdir(tmp_path / "goalchainer")) == ["proposals.jsonl", "runs.jsonl"]
+    assert sorted(os.listdir(tmp_path / "goalchainer")) == ["latest.json", "proposals.jsonl", "runs.jsonl"]
 
 
 def test_run_shadow_respects_shadow_canary(tmp_path):

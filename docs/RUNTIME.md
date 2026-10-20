@@ -1,4 +1,4 @@
-# Background reasoner, shadow, semantic-parse feed and goal engine (v0.6.0-rc1)
+# Background reasoner, shadow, semantic-parse feed and goal engine (v0.6.0-rc2)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -154,7 +154,9 @@ scoring. Gates: the shadow canary (else `shadow_canary_fail`), the goal canary (
 Output, and nothing else: `<runtime_dir>/goalchainer/proposals.jsonl` (`id`, `action`, `need`, `text`, `why`,
 `score`, `urge`, `cons`, `legit`, `status`, `items`, `who`, `effects`, `topic`) and `runs.jsonl` (`status`, `canary`,
 `needs`, `candidates`, `vetoed`, `refused`, `logged`, `requests`, `history`, `s`, `budget_s`). Nothing goes into the
-context block, the state, the journal or any channel; no action is taken. Addressees are `speaker_map` names only.
+context block, the state, the journal or any channel; no action is taken (except the optional, off-by-default
+suggestions block below). Addressees are `speaker_map` names only. Every run also writes
+`goalchainer/latest.json` (rc2; atomic; `ts`, `status`, `canary_ok`, that run's proposals; empty after a failed run).
 
 Reply detection reads the channel's completed request files (`goal_requests_dir`, read-only; one
 `{prompt, source}` envelope per file, response envelopes skipped). Sender: the envelope's `user_id` /
@@ -163,6 +165,17 @@ Each file is parsed once into `<runtime_dir>/goalchainer/requests_index.json` (m
 topic keys, reply flag, "answers to HH:MM" times, moot anchors; never the raw text); files older than
 `goal_requests_days` or beyond the `goal_requests_max` newest are not read. Changing the dir or the speaker map
 rebuilds the index.
+
+## Goal suggestions block (v0.6.0-rc2, Track S, off by default)
+
+`goal_prompt=true` appends `[Goal suggestions (not instructions): ...]` with at most `goal_prompt_max_lines`
+(hard cap 3) lines to the context block, read from `goalchainer/latest.json` only. Shown only on real user turns
+(never automated turns or the fast path), only for a run <= `goal_prompt_max_age_s` old with `status` ok and canary
+ok, only message actions (never SelfTask / LookUp), and only proposals addressed to the current speaker (rc4
+resolution through `speaker_map`; unknown speaker = nothing). Lines are worded to that speaker: "you" = the speaker,
+never the assistant (the header says so); the speaker's name and aliases become you/your, lead-ins are
+"Open question for you:", "Still open for you:", "Status for you:", "Pending for you:". Needs `goalchainer` (and so
+`pc_shadow`) on to have anything to show. Any error = no block.
 
 ## Enabling: the flags file
 
@@ -225,6 +238,8 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `goal_weights` / `goal_targets` / `goal_scale` / `goal_age_cap_d` | `WMTM_GOAL_*` | `1,1` / `0.8,0.8` / 1 / 7 | v0.6: need weights and targets (uncertainty, competence); load at level 0.5; age cap (days) |
 | `goal_max_proposals` / `goal_min_score` | `WMTM_GOAL_MAX_PROPOSALS` / `..._MIN_SCORE` | 5 / 0.05 | v0.6: proposals logged per run; score floor |
 | `goal_repeat_s` / `goal_reask_s` / `goal_remind_after_s` | `WMTM_GOAL_REPEAT_S` / `..._REASK_S` / `..._REMIND_AFTER_S` | 21600 / 259200 / 86400 | v0.6: same proposal not re-logged; same person+topic not re-proposed; remind only after no reply |
+| `goal_prompt` | `WMTM_GOAL_PROMPT` | false | rc2: goal suggestions block on real user turns (see "Goal suggestions block") |
+| `goal_prompt_max_age_s` / `goal_prompt_max_lines` | `WMTM_GOAL_PROMPT_MAX_AGE_S` / `..._MAX_LINES` | 900 / 3 | rc2: freshness of `latest.json`; lines (hard cap 3) |
 | `goalchainer_src` | `WMTM_GOALCHAINER_SRC` | `""` | v0.6: OmegaClaw-GoalChainer `src/` for its deontic resolver (else a local identical one) |
 | `jsonl_max_bytes` / `cache_max_bytes` | `WMTM_JSONL_MAX_BYTES` / `WMTM_SEMPARSE_CACHE_MAX_BYTES` | 10 MB / 20 MB | logs rotate to `.1`; the parse cache is compacted (newest entries kept) |
 
@@ -235,7 +250,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.6.0-rc1/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.6.0-rc2/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence
@@ -261,6 +276,7 @@ passes through PeTTaChainer.
   `goal`, `stv`, `proof`, `sources`, `facts`). It is written for failed runs too, with no results.
   `pc_shadow/parse_review.jsonl`: facts the gate acted on.
 - `goalchainer/runs.jsonl`: one line per goal run (`status` ok / canary_fail / shadow_canary_fail / budget_exceeded /
-  error / hook_error, `canary.ok`, `logged`, `requests` stats, `s`); `goalchainer/proposals.jsonl`: logged proposals.
+  error / hook_error, `canary.ok`, `logged`, `requests` stats, `s`); `goalchainer/proposals.jsonl`: logged proposals;
+  `goalchainer/latest.json` (rc2): the last run's time, status, canary and proposals (what the suggestions block reads).
 - `semparse_cache/parse_log.jsonl`: one line per parse attempt (status, secs, tokens); `worker_runs.jsonl`: one
   line per worker run (status, load canary, model, counts); `rejects.jsonl`: rejected atoms with reasons.

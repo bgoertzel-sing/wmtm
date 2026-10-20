@@ -80,6 +80,28 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.6.0-rc2 (2026-10-20)
+GoalChainer phase b, step 1 (Track S) on top of v0.6.0-rc1: an optional, read-only "Goal suggestions (not
+instructions)" block on the user path. **Off by default** (`goal_prompt`); with the flag off the block, state,
+journal and API behave exactly as rc1. All rc1 flags-file keys are still valid.
+- The engine now also writes `<runtime_dir>/goalchainer/latest.json` after every goal run (atomic; `ts`, `run_id`,
+  `status`, `canary_ok`, and that run's proposals incl. repeats; a failed run writes an empty list so older
+  suggestions never survive it). Written whenever `goalchainer` is on, also with `goal_prompt` off.
+- `wmtm/goal_prompt.py` (never imports the goal engine) renders at most `goal_prompt_max_lines` (hard cap 3) lines
+  when: `goal_prompt` is on; the turn is a real user turn (`format_context(..., request=user_msg)`; automated turns
+  and the automated fast path never get it); the run is fresh (`goal_prompt_max_age_s`, 900 s), `status` ok and
+  canary ok; the proposal is a message action (ClarifyQuestion, FlagUncertainty, SummarizeStatus, RemindPending;
+  never SelfTask / LookUp) addressed to the current speaker (resolved like rc4: the request item's source metadata
+  via `speaker_map`; unknown speaker = no block). Any error = no block.
+- Wording convention: lines are worded *to the current speaker* so the bot can relay them; the header says
+  `"you" = the speaker, not the assistant`. The speaker's canonical name and its `speaker_map` aliases become
+  you / your (case-insensitive, whole word, possessive 's -> your, is/was/has/does -> are/were/have/do), command verbs
+  ("Ask X", "Remind X about") are dropped, redundant item markers ("Still pending:", "Open question for you:") are
+  removed, and each line starts with "Open question for you:", "Still open for you:", "Status for you:" or
+  "Pending for you:". Example (made-up names): engine "Remind quill about: Still pending: quill's choice on the gear
+  order" -> "Pending for you: your choice on the gear order".
+- Tests: `tests/test_goals_track_s.py`.
+
 ## v0.6.0-rc1 (2026-10-20)
 GoalChainer phase 1 on top of v0.5.0-rc4 (tracks R, R2, R2.1): a homeostatic goal engine that **only logs**
 proposals. **Off by default** (`goalchainer`); flags-file keys of rc4 are all still valid; API, adapters, state and

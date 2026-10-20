@@ -231,11 +231,36 @@ def run_shadow(raw, rec, cfg, source=None, now=None):
             signal.signal(signal.SIGALRM, old if old is not None else signal.SIG_DFL)
     run["budget_s"] = budget
     run["s"] = round(time.time() - t0, 3)
+    latest = run.pop("_latest", None)
     try:
         rc.append_jsonl(os.path.join(d, "runs.jsonl"), run, mx)
     except Exception:   # noqa: BLE001
         pass
+    write_latest(d, run, latest if run.get("status") == "ok" else [])
     return run
+
+
+LATEST = "latest.json"
+LATEST_FIELDS = ("id", "action", "need", "text", "who", "score", "status")
+
+
+def write_latest(d, run, proposals):
+    """Track S: <d>/latest.json = this run's time, status, canary result and ALL its proposals (repeats included;
+    proposals.jsonl holds new ones only).  A failed run writes an empty list, so an older run's suggestions never
+    survive it.  Atomic (tmp + os.replace).  Never raises."""
+    try:
+        can = run.get("canary") or {}
+        if run.get("status") != "ok":
+            proposals = []
+        rec = {"ts": run.get("ts"), "run_id": run.get("run_id"), "status": run.get("status"),
+               "canary_ok": bool(can.get("ok")) and run.get("status") == "ok",
+               "proposals": [{k: p.get(k) for k in LATEST_FIELDS} for p in (proposals or [])]}
+        tmp = os.path.join(d, LATEST + ".%d.tmp" % os.getpid())
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(rec, fh)
+        os.replace(tmp, os.path.join(d, LATEST))
+    except Exception:   # noqa: BLE001
+        pass
 
 
 def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
@@ -261,6 +286,7 @@ def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
     ctx = {"autonomous": source == "automated", "recent": recent, "history": hist}
     res = propose(raw, cfg, ctx, now=now, kb=kb)
     logged = 0
+    run["_latest"] = [p for p in res["proposals"] if p.get("status") == "proposed" and p["legit"].get("d", 0) > 0]
     for p in res["proposals"]:
         if p["legit"]["discounts"].get("repeat"):
             continue                       # already logged inside the repeat window
