@@ -1,4 +1,4 @@
-# Background reasoner, shadow, semantic-parse feed and goal engine (v0.6.0-rc3)
+# Background reasoner, shadow, semantic-parse feed and goal engine (v0.7.0-rc1)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -146,6 +146,12 @@ deployed flags file only.
 
 ## Goal engine (v0.6, GoalChainer phase 1, off by default, log only)
 
+v0.7: the core (need regulation, deontic legitimacy, ranking) is GoalChainer v2, run as a separate process in its
+own environment (`goal_engine` `v2`, default; `native` = the v0.6 core below, rollback switch for one release).
+Extraction, addressees, timing, gates and every output file stay as described here; proposal records gain
+`engine`, `decision`, `action_id`, `v2` (review id, fingerprint, rank, proof, steps, plan); hold / escalate /
+blocked decisions go to `runs.jsonl` (`v2`) only. Runtime, flags, licensing: `docs/GOALS_V2.md`.
+
 `goalchainer=true` makes the PeTTaChainer shadow worker (so `pc_shadow` must be on too) run `wmtm.goals.run_shadow`
 after its own run: needs (uncertainty, competence) from the snapshot's raw items + cached parser queries, candidate
 actions (ClarifyQuestion, FlagUncertainty, LookUp, SummarizeStatus, RemindPending, SelfTask), legitimacy veto,
@@ -239,7 +245,10 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `goalchainer` | `WMTM_GOALCHAINER` | false | v0.6: goal engine in the shadow worker, log only (see "Goal engine") |
 | `goal_requests_dir` | `WMTM_GOAL_REQUESTS_DIR` | `""` (no history) | v0.6: channel's completed request files for reply detection (read-only; relative = against `state_dir`) |
 | `goal_requests_days` / `goal_requests_max` | `WMTM_GOAL_REQUESTS_DAYS` / `..._MAX` | 14 / 500 | v0.6: request-history window and file cap |
-| `goal_budget_s` | `WMTM_GOAL_BUDGET_S` | 10 | v0.6: wall-clock cap per goal run |
+| `goal_budget_s` | `WMTM_GOAL_BUDGET_S` | 90 | v0.6: wall-clock cap per goal run (v0.7: 10 -> 90 for v2) |
+| `goal_engine` | `WMTM_GOAL_ENGINE` | `v2` | v0.7: `v2` (GoalChainer v2 core, separate process) or `native` (v0.6 core; rollback) |
+| `goal_v2_python` / `goal_v2_release` | `WMTM_GOAL_V2_PYTHON` / `..._RELEASE` | `""` / `""` | v0.7: v2 environment interpreter (absolute, deploy-time); release tag recorded per run |
+| `goal_v2_timeout_s` / `goal_v2_mem_mb` / `goal_v2_inferences` | `WMTM_GOAL_V2_TIMEOUT_S` / `..._MEM_MB` / `..._INFERENCES` | 60 / 1536 / 5e7 | v0.7: runner hard kill, address-space cap, v2 inference budget per request |
 | `goal_weights` / `goal_targets` / `goal_scale` / `goal_age_cap_d` | `WMTM_GOAL_*` | `1,1` / `0.8,0.8` / 1 / 7 | v0.6: need weights and targets (uncertainty, competence); load at level 0.5; age cap (days) |
 | `goal_max_proposals` / `goal_min_score` | `WMTM_GOAL_MAX_PROPOSALS` / `..._MIN_SCORE` | 5 / 0.05 | v0.6: proposals logged per run; score floor |
 | `goal_repeat_s` / `goal_reask_s` / `goal_remind_after_s` | `WMTM_GOAL_REPEAT_S` / `..._REASK_S` / `..._REMIND_AFTER_S` | 21600 / 259200 / 86400 | v0.6: same proposal not re-logged; same person+topic not re-proposed; remind only after no reply |
@@ -255,11 +264,12 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.6.0-rc3/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.7.0-rc1/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence
 <bot>/memory/_wmtm_flags.json          flags (deploy-time, machine-specific)
+<runtimes>/goalchainer-v2-<tag>/       v0.7: GoalChainer v2 environment, OUTSIDE the bot tree (docs/GOALS_V2.md)
 <bot>/memory/_wmtm_shadow/{pc_shadow,semparse_cache,goalchainer}/   worker data (real memory text: stays in memory/)
 ```
 
@@ -281,7 +291,9 @@ passes through PeTTaChainer.
   `goal`, `stv`, `proof`, `sources`, `facts`). It is written for failed runs too, with no results.
   `pc_shadow/parse_review.jsonl`: facts the gate acted on.
 - `goalchainer/runs.jsonl`: one line per goal run (`status` ok / canary_fail / shadow_canary_fail / budget_exceeded /
-  error / hook_error, `canary.ok`, `logged`, `requests` stats, `s`); `goalchainer/proposals.jsonl`: logged proposals;
+  error / hook_error, v0.7: v2_timeout / v2_crash / v2_error / v2_bad_output / v2_unconfigured / v2_review_error;
+  `engine`, `canary.ok`, `logged`, `requests` stats, `s`; v0.7 `v2`: `status`, `s`, `runner_s`, `maxrss_mb`,
+  `versions`, `release`, `decisions` (disposition counts), `reviews`, `display_decisions`); `goalchainer/proposals.jsonl`: logged proposals;
   `goalchainer/latest.json` (rc2): the last run's time, status, canary and proposals (what the suggestions block reads).
   `goalchainer/display.jsonl` (rc3): display-only suggestions of automated runs (review log, deduped 6 h);
   `goalchainer/asked.jsonl` (rc3): suggestion lines actually shown on user turns (empty/absent with `goal_prompt` off).

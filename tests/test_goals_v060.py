@@ -190,7 +190,9 @@ def test_addressees_come_from_speaker_map():
 def test_runtime_spec_defaults():
     cfg = rc.resolve(None, environ={})
     assert cfg["goalchainer"] is False and cfg["goal_requests_dir"] == ""
-    assert cfg["goal_budget_s"] == 10.0 and cfg["goal_requests_days"] == 14.0 and cfg["goal_requests_max"] == 500
+    # v0.7: 10 -> 90 s, so a GoalChainer v2 run (separate process, ~6 s, hard-killed after goal_v2_timeout_s) fits
+    assert cfg["goal_budget_s"] == 90.0 and cfg["goal_v2_timeout_s"] < cfg["goal_budget_s"]
+    assert cfg["goal_requests_days"] == 14.0 and cfg["goal_requests_max"] == 500
     assert cfg["goal_reask_s"] == 259200.0 and cfg["goal_remind_after_s"] == 86400.0
 
 
@@ -301,7 +303,14 @@ def test_only_the_worker_imports_the_goal_engine():
             src = open(os.path.join(root, "goals", f)).read()
             for bad in ("socket", "urllib", "http", "subprocess", "telegram", "journal.", "writeback", "outbox",
                         "send(", "context_for", "_wmtm_state"):
+                if bad == "subprocess" and f == "v2.py":
+                    continue          # v0.7: v2.py starts exactly one process, the GoalChainer v2 runner (checked below)
+                if bad == "subprocess" and f == "engine.py":
+                    assert "import subprocess" not in src, f
+                    continue
                 assert bad not in src.lower(), (f, bad)
+    v2src = open(os.path.join(root, "goals", "v2.py")).read()
+    assert v2src.count("subprocess.Popen(") == 1 and "shell=True" not in v2src and "start_new_session=True" in v2src
 
 
 # ── real worker (needs the vendored PeTTa runtime; skipped otherwise) ──

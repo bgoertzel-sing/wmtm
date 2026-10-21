@@ -69,7 +69,17 @@ SPEC = {
     "goal_repeat_s":       ("WMTM_GOAL_REPEAT_S", float, 21600.0, None),   # same proposal not re-logged within 6 h
     "goal_remind_after_s": ("WMTM_GOAL_REMIND_AFTER_S", float, 86400.0, None),  # RemindPending only after 1 d w/o reply
     "goal_reask_s":        ("WMTM_GOAL_REASK_S", float, 259200.0, None),   # same person+topic not re-proposed within 3 d
-    "goal_budget_s":       ("WMTM_GOAL_BUDGET_S", float, 10.0, None),      # wall-clock cap per goal run (SIGALRM)
+    "goal_budget_s":       ("WMTM_GOAL_BUDGET_S", float, 90.0, None),      # wall-clock cap per goal run (SIGALRM; v0.7: 10 -> 90 for v2)
+    # v0.7: GoalChainer v2 core (wmtm/goals/v2.py), run as a separate process in its own environment (deploy-time
+    # path in the flags file; GPL-3.0 code is never imported into WMTM's process).  goal_engine "native" = the v0.6
+    # scoring core (rollback switch, kept for one release).  Without goal_v2_python a v2 run logs v2_unconfigured.
+    "goal_engine":         ("WMTM_GOAL_ENGINE", str, "v2", None),          # v2 | native
+    "goal_v2_python":      ("WMTM_GOAL_V2_PYTHON", str, "", None),         # <v2 env>/bin/python (absolute; flags file)
+    "goal_v2_runner":      ("WMTM_GOAL_V2_RUNNER", str, "", None),         # dev/test override of wmtm/goals/v2_runner.py
+    "goal_v2_release":     ("WMTM_GOAL_V2_RELEASE", str, "", None),        # release tag of the runtime (recorded per run)
+    "goal_v2_timeout_s":   ("WMTM_GOAL_V2_TIMEOUT_S", float, 60.0, None),  # hard kill of the runner process group
+    "goal_v2_mem_mb":      ("WMTM_GOAL_V2_MEM_MB", int, 1536, None),       # runner address-space cap
+    "goal_v2_inferences":  ("WMTM_GOAL_V2_INFERENCES", int, 50_000_000, None),  # v2 inference budget per request
     # Track S (phase b): "Goal suggestions (not instructions)" block on the user path, from goalchainer/latest.json.
     "goal_prompt":         ("WMTM_GOAL_PROMPT", bool, False, None),
     "goal_prompt_max_age_s": ("WMTM_GOAL_PROMPT_MAX_AGE_S", float, 900.0, None),  # only runs <= 15 min old

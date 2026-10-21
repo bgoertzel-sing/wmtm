@@ -6,11 +6,34 @@ import math
 import os
 import time
 
-from . import actions, legitimacy, needs
+from . import actions, legitimacy, needs, v2
 
 SUBDIR = "goalchainer"
 NEEDS = ("unc", "comp")
 FIELDS = ("id", "action", "need", "text", "why", "score", "urge", "cons", "legit", "status", "items")
+V2_FIELDS = ("engine", "decision", "v2")      # v0.7: added to proposal / display records by the v2 engine
+ENGINES = ("v2", "native")
+
+
+def cfg_value(cfg, key):
+    """cfg[key], else the runtime_config default (callers that pass a plain dict instead of rc.resolve())."""
+    if cfg and key in cfg:
+        return cfg[key]
+    from .. import runtime_config as rc
+    spec = rc.SPEC.get(key)
+    return spec[2] if spec else None
+
+
+def engine_name(cfg=None):
+    """goal_engine flag: "v2" (GoalChainer v2 core, default from v0.7) or "native" (the v0.6 scoring core, kept as
+    the rollback switch for one release).  Anything else -> "v2"."""
+    e = str(cfg_value(cfg, "goal_engine") or "v2").strip().lower()
+    return e if e in ENGINES else "v2"
+
+
+def v2_cfg(cfg=None):
+    return {k: cfg_value(cfg, k) for k in ("goal_v2_python", "goal_v2_runner", "goal_v2_timeout_s", "goal_v2_mem_mb",
+                                          "goal_v2_inferences", "goal_v2_release")}
 
 
 def _floats(v, n, dflt):
@@ -148,6 +171,150 @@ def goal_canary(cfg=None):
         return {"ok": False, "error": type(e).__name__ + ": " + str(e)[:160]}
 
 
+# ------------------------------------------------------------------ v0.7: GoalChainer v2 core
+def _dedupe_recent(cands, ctx, supp, trace=None):
+    """R2.1 against the log: a recently logged proposal still owns its (person, topic); other candidates on it are
+    dropped before v2 sees them (within one run, v2's withdrawal groups apply the same rule)."""
+    rec = set(ctx.get("recent") or ())
+    kept = [c for c in cands if c["key"] in rec and c["action"] in actions.DEDUPE_ACTIONS]
+    keep, dups = [], []
+    for c in cands:
+        if c["action"] in actions.DEDUPE_ACTIONS and c["key"] not in rec:
+            ks = set(c.get("topic") or ())
+            dup = next((k for k in kept if k["who"] == c.get("who") and needs.topic_match(ks, set(k.get("topic") or ()))),
+                       None)
+            if dup:
+                c["status"] = "dup"; c["id"] = c["key"]; c.setdefault("score", 0.0)
+                supp.append((c["text"], "r21_same_topic_as_" + dup["action"]))
+                if trace is not None:
+                    trace.append((None, c["text"], "r21_same_topic_as_" + dup["action"]))
+                dups.append(c)
+                continue
+        keep.append(c)
+    return keep, dups
+
+
+def prepare_v2(raw_items, cfg=None, ctx=None, now=None, kb=None, extra_candidates=(), trace=None, label="main",
+               passes=("human",)):
+    """WMTM layers (needs.estimate, actions.candidates, R2.1 dedupe) -> one v2 series job + what finish_v2 needs."""
+    now = time.time() if now is None else now
+    st = settings(cfg); ctx = dict(ctx or {})
+    if "requester" not in ctx:
+        ctx["requester"] = needs.requester_at([r for r in st["requests"] if float(r.get("ts", 0)) <= now], now)
+    est = needs.estimate(raw_items, now, st, trace=trace)
+    cl, supp = actions.candidates(est, kb, now, st["age_cap_d"], st, ctx)
+    if trace is not None:
+        trace.extend((None, t, r) for t, r in supp)
+    cands, seen = [], set()
+    for c in cl + [dict(c) for c in extra_candidates]:
+        if c["key"] in seen:            # the same self-task can come from two rules (remind + summary own promises)
+            continue
+        seen.add(c["key"]); cands.append(c)
+        c["why"] = _why(c, est, now) if c.get("signals") else c.get("why", "")
+    keep, dups = _dedupe_recent(cands, ctx, supp, trace)
+    job, amap = v2.build_series(label, keep, est, st, now, ctx, passes, v2.dedupe_groups(keep))
+    return {"st": st, "est": est, "ctx": ctx, "now": now, "supp": supp, "dups": dups, "job": job, "amap": amap,
+            "label": label}
+
+
+def finish_v2(prep, sres, pass_label="human"):
+    """v2's reviews for one pass -> the same result dict as propose() (+ "decisions": compact review log).
+    Raises v2.V2Error when the series or a review reported an error."""
+    st, est = prep["st"], prep["est"]
+    dec, props, cands = [], [], []
+    if prep["amap"]:
+        if not isinstance(sres, dict):
+            raise v2.V2Error("v2_error", "series %s missing from the runner result" % prep["label"])
+        if sres.get("error") or sres.get("observe_error"):
+            raise v2.V2Error("v2_error", str(sres.get("error") or sres.get("observe_error"))[:300])
+        pr = next((p for p in sres.get("passes") or () if p.get("label") == pass_label), None)
+        if pr is None:
+            raise v2.V2Error("v2_error", "pass %s missing" % pass_label)
+        bad = [r.get("error") for r in pr.get("reviews") or () if r.get("error")]
+        if bad:
+            raise v2.V2Error("v2_review_error", str(bad[0])[:300])
+        props, cands, dec = v2.map_pass(pr, prep["amap"], est, prep["now"], prep["ctx"], prep["job"].get("remove"))
+        for c in cands:
+            c["why"] = (c.get("why") or "") + ("; v2 %s" % c["decision"] + (
+                " (%s, %s urgency reduction %.3f)" % (c["v2"]["decided_at"], c["need"],
+                                                      float((c["v2"]["reduction"] or {}).get("low") or 0.0))
+                if c.get("v2") else ""))
+    else:
+        dec = [{"disposition": "no-candidates", "review_id": None}]
+    ok, refused = [], []
+    for p in props:
+        r = check_proposal(p)
+        if r:
+            refused.append((p["id"], r)); p["status"] = "refused"
+        else:
+            ok.append(p)
+    return {"needs": {n: {k: est[n][k] for k in ("level", "target", "weight", "urge")} | {"signals": len(est[n]["signals"])}
+                      for n in NEEDS},
+            "candidates": cands + prep["dups"], "proposals": ok[:st["max_proposals"]], "all_proposed": ok,
+            "vetoed": [c for c in cands if c["status"] == "vetoed"], "refused": refused, "deontic_impl": v2.ENGINE,
+            "suppressed": prep["supp"], "decisions": dec}
+
+
+def propose_v2(raw_items, cfg=None, ctx=None, now=None, kb=None, extra_candidates=(), trace=None, workdir=None,
+               passes=("human",)):
+    """One-shot v2 proposal (replay, tests): prepare -> runner subprocess -> finish.  -> {pass label: result}."""
+    import tempfile
+    prep = prepare_v2(raw_items, cfg, ctx, now, kb, extra_candidates, trace, "main", passes)
+    wd = workdir or tempfile.mkdtemp(prefix="wmtm-gc2-")
+    try:
+        res = v2.client({"series": [prep["job"]]}, v2_cfg(cfg), wd) if prep["amap"] else {"series": []}
+    finally:
+        v2.cleanup(wd)
+    s = next((x for x in res["series"] if x.get("label") == "main"), None)
+    out = {p: finish_v2(prep, s, p) for p in passes}
+    out["_runner"] = {k: res.get(k) for k in ("s", "maxrss_mb", "versions")}
+    return out
+
+
+def canary_v2_prepare(cfg=None):
+    c = dict(cfg or {}, speaker_map={"quill": "quill"}, goal_requests=[])   # made-up person; no live history
+    pos = prepare_v2(CANARY_ITEMS, c, {"autonomous": False}, now=CANARY_NOW, extra_candidates=[CANARY_FORBIDDEN],
+                     label="canary", passes=("human", "automated"))
+    neg = prepare_v2(CANARY_NEG, c, {"autonomous": False}, now=CANARY_NOW, label="canary_neg")
+    return pos, neg
+
+
+def canary_v2_check(pos, neg, by_label):
+    """Known answer through the real v2 runtime: the open question -> ClarifyQuestion to quill is v2's first proposal
+    (human pass); the live-change action is vetoed by v2's deontic norms; on an automated turn v2 proposes no
+    message action; a note with no open question yields no uncertainty candidate/proposal."""
+    try:
+        h = finish_v2(pos, by_label.get("canary"), "human")
+        a = finish_v2(pos, by_label.get("canary"), "automated")
+        n = finish_v2(neg, by_label.get("canary_neg"), "human")
+        top = h["proposals"][0] if h["proposals"] else {}
+        forb = [c for c in h["candidates"] if c["key"] == "canary-forbidden"]
+        res = {"top": top.get("action"), "who": top.get("who"), "decision": (h["decisions"] or [{}])[0].get("disposition"),
+               "forbidden": forb[0]["status"] if forb else None,
+               "auto_msgs": sum(1 for p in a["proposals"] if p["action"] in actions.MESSAGE_ACTIONS),
+               "neg_unc": sum(1 for c in n["proposals"] if c["need"] == "unc"), "engine": v2.ENGINE}
+        res["ok"] = (res["top"] == "ClarifyQuestion" and res["who"] == "quill" and "widget7" in top.get("text", "")
+                     and res["decision"] == "propose" and res["forbidden"] == "vetoed" and res["auto_msgs"] == 0
+                     and res["neg_unc"] == 0)
+        return res
+    except Exception as e:   # noqa: BLE001
+        return {"ok": False, "engine": v2.ENGINE, "error": type(e).__name__ + ": " + str(e)[:160]}
+
+
+def goal_canary_v2(cfg=None):
+    """Standalone v2 goal canary (one runner process).  -> canary record."""
+    import tempfile
+    pos, neg = canary_v2_prepare(cfg)
+    wd = tempfile.mkdtemp(prefix="wmtm-gc2-canary-")
+    try:
+        res = v2.client({"series": [j["job"] for j in (pos, neg) if j["amap"]]}, v2_cfg(cfg), wd)
+    except v2.V2Error as e:
+        return {"ok": False, "engine": v2.ENGINE, "error": e.status + ": " + str(e)[:160]}
+    finally:
+        v2.cleanup(wd)
+    return canary_v2_check(pos, neg, {s.get("label"): s for s in res["series"]})
+
+
 def cached_queries(cfg, ids):
     """item id -> parser queries stored in the semparse caches (base, ctx1, spk1); empty for pre-Track-R entries."""
     out = {}
@@ -227,7 +394,8 @@ def run_shadow(raw, rec, cfg, source=None, now=None):
     ppath = os.path.join(d, "proposals.jsonl"); mx = cfg.get("jsonl_max_bytes")
     run = {"ts": now, "run_id": "%d-%d" % (int(now), os.getpid()), "cycle": rec.get("cycle"), "source": source,
            "shadow_status": rec.get("status")}
-    budget = float(cfg.get("goal_budget_s", 10.0) or 0)
+    budget = float(cfg_value(cfg, "goal_budget_s") or 0)
+    run["engine"] = engine_name(cfg)
     timer = budget > 0 and threading.current_thread() is threading.main_thread() and hasattr(signal, "setitimer")
     old = None
     try:
@@ -255,7 +423,7 @@ def run_shadow(raw, rec, cfg, source=None, now=None):
 
 LATEST = "latest.json"
 ASKED = "asked.jsonl"     # Track T: written by wmtm/goal_prompt.py when it renders a line (shown_at per proposal)
-LATEST_FIELDS = ("id", "action", "need", "text", "who", "score", "status", "topic", "display_only")
+LATEST_FIELDS = ("id", "action", "need", "text", "who", "score", "status", "topic", "display_only", "engine", "decision")
 
 
 DISPLAY = "display.jsonl"  # rc3: review log of display-only suggestions; never read by re-ask or anything actionable
@@ -288,7 +456,7 @@ def log_display(d, run, source, now, shown, dedupe_s, mx, rc):
         seen.add(k)
         rc.append_jsonl(path, {"ts": now, "run_id": run["run_id"], "source": source, **{f: p.get(f) for f in FIELDS},
                                "who": p.get("who"), "effects": p.get("effects"), "topic": p.get("topic") or [],
-                               "display_only": True}, mx)
+                               **{f: p[f] for f in V2_FIELDS if f in p}, "display_only": True}, mx)
         n += 1
     return n
 
@@ -313,6 +481,8 @@ def write_latest(d, run, proposals):
 
 
 def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
+    if engine_name(cfg) == "v2":
+        return _run_v2(raw, rec, cfg, source, now, run, d, ppath, mx, rc)
     can = goal_canary(cfg); run["canary"] = can
     if rec.get("status") != "ok":
         run["status"] = "shadow_canary_fail"      # the shared sanity gate failed: trust nothing this run
@@ -358,3 +528,95 @@ def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
                deontic_impl=res["deontic_impl"], parser_queries=sum(len(v) for v in q.values()),
                requests=rq or {"dir": "inline" if cfg.get("goal_requests") else "unset"},
                history=len(hist), suppressed=len(res.get("suppressed") or ()))
+
+
+def _inputs(raw, rec, cfg, now):
+    raw = [dict(r) for r in raw or []]
+    q = cached_queries(cfg, {r.get("id") for r in raw})
+    for r in raw:
+        if r.get("id") in q:
+            r["queries"] = q[r["id"]]
+    kb = [x.get("proof") for x in rec.get("queries") or [] if x.get("ok") and x.get("proof")]
+    rq = {}
+    if not cfg.get("goal_requests") and cfg.get("goal_requests_dir"):
+        from . import requests as _rq
+        cfg = dict(cfg, goal_requests=_rq.load(cfg, now, rq))
+    return raw, q, kb, rq, cfg
+
+
+def _log_proposals(res, ppath, run, source, now, mx, rc):
+    logged = 0
+    for p in res["proposals"]:
+        if p["legit"]["discounts"].get("repeat"):
+            continue                       # already logged inside the repeat window
+        rc.append_jsonl(ppath, {"ts": now, "run_id": run["run_id"], "source": source, **{k: p[k] for k in FIELDS},
+                                "who": p.get("who"), "effects": p.get("effects"), "topic": p.get("topic") or [],
+                                **{f: p[f] for f in V2_FIELDS if f in p}}, mx)
+        logged += 1
+    return logged
+
+
+def _run_v2(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
+    """v0.7 run: the WMTM layers prepare the canary series and the main series; ONE runner process (the v2
+    interpreter) answers all of them; the canary must pass before anything is trusted; hold / escalate / blocked
+    reviews go to runs.jsonl only.  An automated run asks v2 for two passes over the same domain: "automated"
+    (automated_turn detected: v2's norms forbid every message action) for the log, and "human" for the
+    display-only message suggestions (Track T)."""
+    if rec.get("status") != "ok":
+        run["status"] = "shadow_canary_fail"      # the shared sanity gate failed: trust nothing, do not start v2
+        run["canary"] = {"ok": False, "skipped": "shadow_canary_fail", "engine": v2.ENGINE}
+        return
+    raw, q, kb, rq, cfg = _inputs(raw, rec, cfg, now)
+    st = settings(cfg)
+    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"], os.path.join(d, ASKED))
+    auto = source == "automated"
+    ctx = {"autonomous": auto, "recent": recent, "history": hist}
+    main_pass = "automated" if auto else "human"
+    main = prepare_v2(raw, cfg, ctx, now=now, kb=kb, label="main", passes=("automated", "human") if auto else ("human",))
+    pos, neg = canary_v2_prepare(cfg)
+    vc = v2_cfg(cfg)
+    wd = os.path.join(d, ".v2work-" + run["run_id"])     # per-run scratch (domain, motivation stream); removed after
+    t0 = time.time()
+    jobs = [j["job"] for j in (pos, neg, main) if j["amap"]]
+    run["v2"] = {"release": vc.get("goal_v2_release"), "series": len(jobs), "actions": len(main["amap"])}
+    try:
+        res = v2.client({"series": jobs}, vc, wd)
+    except v2.V2Error as e:
+        run["v2"].update(status=e.status, s=round(time.time() - t0, 3))
+        run["status"] = e.status; run["error"] = str(e)[:300]
+        run["canary"] = {"ok": False, "engine": v2.ENGINE, "error": e.status}
+        return
+    finally:
+        v2.cleanup(wd)
+    by = {s.get("label"): s for s in res["series"]}
+    run["v2"].update(status="ok", s=round(time.time() - t0, 3), runner_s=res.get("s"), maxrss_mb=res.get("maxrss_mb"),
+                     versions=res.get("versions"))
+    can = canary_v2_check(pos, neg, by); run["canary"] = can
+    if not can.get("ok"):
+        run["status"] = "canary_fail"
+        return
+    try:
+        r = finish_v2(main, by.get("main"), main_pass)
+    except v2.V2Error as e:
+        run["v2"]["status"] = e.status
+        run["status"] = e.status; run["error"] = str(e)[:300]
+        return
+    dmix = {}
+    for x in r["decisions"]:
+        dmix[x.get("disposition")] = dmix.get(x.get("disposition"), 0) + 1
+    run["v2"].update(decisions=dmix, reviews=r["decisions"][-6:])
+    run["_latest"] = [p for p in r["proposals"] if p.get("status") == "proposed" and p["legit"].get("d", 0) > 0]
+    if auto:
+        dh = finish_v2(main, by.get("main"), "human")
+        shown = [dict(p, display_only=True) for p in dh["proposals"] if p["action"] in actions.MESSAGE_ACTIONS
+                 and p.get("status") == "proposed" and p["legit"].get("d", 0) > 0 and not check_proposal(p)]
+        run["_latest"] += shown
+        run["display_only"] = len(shown)
+        run["display_logged"] = log_display(d, run, source, now, shown, st["repeat_s"], mx, rc)
+        run["v2"]["display_decisions"] = [x.get("disposition") for x in dh["decisions"]]
+    logged = _log_proposals(r, ppath, run, source, now, mx, rc)
+    run.update(status="ok", needs=r["needs"], candidates=len(r["candidates"]), vetoed=len(r["vetoed"]),
+               refused=r["refused"], logged=logged, kb_proofs=len(kb), autonomous=auto,
+               deontic_impl=r["deontic_impl"], parser_queries=sum(len(v) for v in q.values()),
+               requests=rq or {"dir": "inline" if cfg.get("goal_requests") else "unset"},
+               history=len(hist), suppressed=len(r.get("suppressed") or ()))

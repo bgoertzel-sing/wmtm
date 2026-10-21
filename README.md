@@ -67,7 +67,10 @@ speaker linking for the semantic parser (`speaker_link`, default off; the reques
 metadata). v0.6.0-rc1 adds the GoalChainer phase-1 goal engine (`goalchainer`, default off): needs, candidate
 actions and a legitimacy veto computed in the shadow worker; proposals are only logged to
 `<runtime_dir>/goalchainer/proposals.jsonl`, never shown or acted on; reply detection reads the channel's completed
-request files (`goal_requests_dir`). See `docs/RELEASES.md`.
+request files (`goal_requests_dir`). See `docs/RELEASES.md`. v0.7.0-rc1 moves the goal engine's core (need
+regulation, deontic legitimacy, ranking) to MesTTo's GoalChainer v2, run as a separate process from its own,
+separately installed environment (GPL-3.0 code is never vendored or imported); `goal_engine: native` rolls back to
+the v0.6 core. See `docs/GOALS_V2.md`.
 
 ## Replay equivalence
 

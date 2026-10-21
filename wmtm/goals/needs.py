@@ -254,7 +254,22 @@ def _req_moot_or_answered(sig, v):
     return None
 
 
+_STAMP = re.compile(r"^\s*([A-Z][a-z]{2}\d{1,2} \d{1,2}:\d{2})\b")
+
+
+def stamp(content):
+    """v0.7: the note's own leading time stamp ("Mar03 14:05 ..."), else None."""
+    m = _STAMP.match(content or "")
+    return m.group(1) if m else None
+
+
 def _moot_or_answered(sig, s):
+    for st in sig.get("stamps") or ():          # v0.7: "the cleanup from Mar03 14:05 is done" closes that note's items
+        if re.search(r"\b" + re.escape(st) + r"\b", s or ""):
+            p = res_hit(s)
+            mk = marker(s)
+            if p >= 0 and not (mk and mk[2].start() <= p):
+                return "closed_by_stamp_reference"
     for m in _ANS_TIME.finditer(s or ""):
         if re.search(r"\b" + re.escape(m.group(1)) + r"\b", sig["text"]):
             return "closed_answers_to_time"
@@ -332,13 +347,15 @@ def extract(raw_items, now=None, people=(), requests=(), self_name="", trace=Non
             if cur is None:
                 sigs.append({"kind": c["kind"], "need": need, "text": c["text"], "body": c["body"], "keys": k, "ts": ts,
                              "ts_last": ts, "sal": sal, "items": [r.get("id")], "who": c["who"], "origin": origin,
-                             "req": req})
+                             "req": req, "stamps": [x for x in (stamp(r["content"]),) if x]})
             else:                                  # newest note on the topic supersedes the older wording
                 if trace is not None:
                     trace.append((r.get("id"), cur["text"], "superseded"))
                 cur.update(kind=c["kind"], text=c["text"], body=c["body"], keys=k, ts_last=max(cur["ts_last"], ts),
                            who=c["who"] or cur["who"], req=req or cur.get("req"))
                 cur["ts"] = min(cur["ts"], ts); cur["sal"] = max(cur["sal"], sal)
+                if stamp(r["content"]) and stamp(r["content"]) not in cur.setdefault("stamps", []):
+                    cur["stamps"].append(stamp(r["content"]))
                 if r.get("id") not in cur["items"]:
                     cur["items"].append(r.get("id"))
     out = []

@@ -80,6 +80,42 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.7.0-rc1 (2026-10-21)
+The goal engine's core moves to MesTTo's GoalChainer v2 (release `pymetta-native.2`, commit 5c6ecda), run as a
+separate process from its own environment. WMTM keeps extraction, addressees, timing and the log-only harness. Still
+log only; `goal_prompt` still off by default. All rc3 flags-file keys are still valid. Details: `docs/GOALS_V2.md`.
+- New flags: `goal_engine` (`v2` default, `native` = the v0.6 core, kept for one release as the rollback switch),
+  `goal_v2_python` (required for v2; without it every run logs `v2_unconfigured` and proposes nothing),
+  `goal_v2_release`, `goal_v2_timeout_s` (60), `goal_v2_mem_mb` (1536), `goal_v2_inferences`, `goal_v2_runner`
+  (dev/test). `goal_budget_s` default 10 -> 90.
+- `wmtm/goals/v2.py`:
+  - generates a per-run v2 domain: needs unc/comp with target bands, one `gc-action` per WMTM candidate, WMTM's
+    legitimacy rules as defeasible deontic norms, and need expectations;
+  - builds the readings, attributed to item ids, and the need observations;
+  - runs the runner, `wmtm/goals/v2_runner.py`, in the v2 interpreter (`-I`, own session, hard timeout, SIGKILL of
+    the group, RLIMIT_AS);
+  - maps v2's review records back onto the proposal records.
+- v2 picks one action per review. WMTM asks again with that action and its (person, topic) group withdrawn, up to
+  `goal_max_proposals` times. hold / escalate / blocked are logged in `runs.jsonl` (`v2.decisions`, `v2.reviews`) and never shown.
+- Record additions: `engine`, `decision`, `action_id` and `v2` (`review_id`, `fingerprint`, `rank`, `decided_at`,
+  `reduction`, `level`, `predicted_level`, `expected_change`, `proof`, `steps`, `plan`) in `proposals.jsonl` and
+  `display.jsonl`. `latest.json` proposals gain `engine` and `decision`.
+- Goal canary through the real v2 runtime, in the same runner process. It checks four things:
+  - ClarifyQuestion to the made-up person is v2's first `propose`;
+  - the live-change action is vetoed by v2;
+  - the automated pass proposes no message;
+  - a negative note gives no uncertainty proposal.
+  The shadow-canary gate is unchanged, and v2 is not started when that gate failed.
+- needs.py: a later note with a resolution word that names an earlier note's own time stamp ("the cleanup from
+  Mar03 14:05 is done") closes that note's items (`closed_by_stamp_reference_note`). The same self-task coming from
+  two rules reaches v2 once.
+- Licensing: v2 is GPL-3.0-only AND MIT AND Apache-2.0. WMTM neither vendors nor imports it. It runs as a separate
+  program over a JSON stdin/stdout protocol, and the runtime is installed separately, pinned by tag and sha256.
+- Replay (the Track R/R2 window) with `scripts/goals_replay.py --engine v2 --v2-python ...`.
+- Tests: `tests/test_goals_v2.py`. Unit tests use a protocol-compatible test double through the real subprocess
+  client; the `test_real_*` tests need `WMTM_TEST_GC2_PYTHON`. `tests/conftest.py` points the v2 defaults at the
+  double.
+
 ## v0.6.0-rc3 (2026-10-21)
 GoalChainer fixes (Track T) plus two review/hygiene additions on top of v0.6.0-rc2. No new flags; `goal_prompt`
 still off by default; with it off the block, state, journal and API behave exactly as rc2. All rc2 flags-file keys
