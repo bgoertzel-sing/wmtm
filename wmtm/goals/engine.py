@@ -166,28 +166,41 @@ def cached_queries(cfg, ids):
     return out
 
 
-def _recent(path, now, window, hist_window=0.0):
-    """Proposal ids logged within window (repeat discount) and the logged proposals within hist_window as
-    {ts, who, topic, action} (R2 re-ask rule).  Reads the tail of proposals.jsonl only."""
-    keys, hist = set(), []
+def _tail(path):
     try:
         with open(path, "rb") as fh:
             fh.seek(0, 2); n = fh.tell(); fh.seek(max(0, n - 262144))
-            for line in fh.read().decode("utf-8", "replace").splitlines():
-                try:
-                    e = json.loads(line)
-                except ValueError:
-                    continue
-                if not isinstance(e, dict):
-                    continue
-                age = now - float(e.get("ts") or 0)
-                if age <= window:
-                    keys.add(e.get("id"))
-                if age < hist_window and e.get("who"):
-                    hist.append({"ts": float(e["ts"]), "who": e["who"], "topic": list(e.get("topic") or ()),
-                                 "action": e.get("action")})
+            lines = fh.read().decode("utf-8", "replace").splitlines()
     except OSError:
-        pass
+        return
+    for line in lines:
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(e, dict):
+            yield e
+
+
+def _recent(path, now, window, hist_window=0.0, asked_path=None):
+    """Proposal ids logged within window (repeat discount; from proposals.jsonl) and the proposals that were really
+    ASKED within hist_window as {ts, who, topic, action} (R2 re-ask rule).  Track T: "asked" = rendered into a goal
+    prompt block (asked.jsonl, written by wmtm/goal_prompt.py) -- logging alone no longer counts, so with
+    goal_prompt off nothing is ever asked.  Reads file tails only."""
+    keys, hist = set(), []
+    for e in _tail(path):
+        try:
+            if now - float(e.get("ts") or 0) <= window:
+                keys.add(e.get("id"))
+        except (TypeError, ValueError):
+            continue
+    for e in _tail(asked_path) if asked_path else ():
+        try:
+            ts = float(e.get("ts"))
+        except (TypeError, ValueError):
+            continue
+        if 0 <= now - ts < hist_window and e.get("who"):
+            hist.append({"ts": ts, "who": e["who"], "topic": list(e.get("topic") or ()), "action": e.get("action")})
     return keys, hist
 
 
@@ -241,7 +254,43 @@ def run_shadow(raw, rec, cfg, source=None, now=None):
 
 
 LATEST = "latest.json"
-LATEST_FIELDS = ("id", "action", "need", "text", "who", "score", "status")
+ASKED = "asked.jsonl"     # Track T: written by wmtm/goal_prompt.py when it renders a line (shown_at per proposal)
+LATEST_FIELDS = ("id", "action", "need", "text", "who", "score", "status", "topic", "display_only")
+
+
+DISPLAY = "display.jsonl"  # rc3: review log of display-only suggestions; never read by re-ask or anything actionable
+
+
+def _display_key(p):
+    return (str(p.get("who") or ""), tuple(str(t) for t in (p.get("topic") or ())), str(p.get("text") or ""))
+
+
+def log_display(d, run, source, now, shown, dedupe_s, mx, rc):
+    """rc3: append the display-only suggestions of an automated run to <d>/display.jsonl (same record structure as
+    proposals.jsonl + display_only: true, run_id, ts) so they can be reviewed / rated before phase 2.  A suggestion
+    identical to one logged within dedupe_s (same who + topic + text) is not logged again.  Size-rotated like the
+    other JSONL logs.  Nothing reads this file back except this dedupe.  -> number of lines written."""
+    if not shown:
+        return 0
+    path = os.path.join(d, DISPLAY)
+    seen = set()
+    for e in _tail(path):
+        try:
+            if 0 <= now - float(e.get("ts") or 0) < dedupe_s:
+                seen.add(_display_key(e))
+        except (TypeError, ValueError):
+            continue
+    n = 0
+    for p in shown:
+        k = _display_key(p)
+        if k in seen:
+            continue
+        seen.add(k)
+        rc.append_jsonl(path, {"ts": now, "run_id": run["run_id"], "source": source, **{f: p.get(f) for f in FIELDS},
+                               "who": p.get("who"), "effects": p.get("effects"), "topic": p.get("topic") or [],
+                               "display_only": True}, mx)
+        n += 1
+    return n
 
 
 def write_latest(d, run, proposals):
@@ -282,11 +331,22 @@ def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
     if not cfg.get("goal_requests") and cfg.get("goal_requests_dir"):
         from . import requests as _rq
         cfg = dict(cfg, goal_requests=_rq.load(cfg, now, rq))
-    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"])
+    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"], os.path.join(d, ASKED))
     ctx = {"autonomous": source == "automated", "recent": recent, "history": hist}
     res = propose(raw, cfg, ctx, now=now, kb=kb)
     logged = 0
     run["_latest"] = [p for p in res["proposals"] if p.get("status") == "proposed" and p["legit"].get("d", 0) > 0]
+    if ctx["autonomous"]:
+        # Track T fix 1: an automated run vetoes message actions (never acted on, never logged).  For the optional
+        # prompt block only, compute them again on the SAME items without the autonomous norm (every other norm
+        # still applies) and put them in latest.json marked display_only.  Not logged, not actionable; their
+        # freshness is this run's ts, i.e. the data they come from.
+        disp = propose(raw, cfg, dict(ctx, autonomous=False), now=now, kb=kb)
+        shown = [dict(p, display_only=True) for p in disp["proposals"] if p["action"] in actions.MESSAGE_ACTIONS
+                 and p.get("status") == "proposed" and p["legit"].get("d", 0) > 0 and not check_proposal(p)]
+        run["_latest"] += shown
+        run["display_only"] = len(shown)
+        run["display_logged"] = log_display(d, run, source, now, shown, st["repeat_s"], mx, rc)
     for p in res["proposals"]:
         if p["legit"]["discounts"].get("repeat"):
             continue                       # already logged inside the repeat window

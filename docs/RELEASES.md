@@ -80,6 +80,27 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.6.0-rc3 (2026-10-21)
+GoalChainer fixes (Track T) plus two review/hygiene additions on top of v0.6.0-rc2. No new flags; `goal_prompt`
+still off by default; with it off the block, state, journal and API behave exactly as rc2. All rc2 flags-file keys
+are still valid.
+- Track T fix 1: an automated goal run still vetoes message actions (never acted on, never in `proposals.jsonl`),
+  but recomputes them on the same items with every other norm applied and puts them in `latest.json` marked
+  `display_only: true` (fields now include `topic`, `display_only`). Their freshness is that run's `ts`.
+  `runs.jsonl` records `display_only` (count) for automated runs.
+- Track T fix 2: re-ask suppression (`goal_reask_s`) counts a proposal as asked only when a line was actually
+  rendered on a real user turn: `goal_prompt.render(record=True)` (the live `format_context` path only) appends
+  `{ts, shown_at, id, who, topic, action, display_only}` per shown line to `goalchainer/asked.jsonl`. Logging a
+  proposal no longer counts; with `goal_prompt` off nothing is ever asked and the file is not created.
+- rc3 (a): display-only suggestions are also appended to `goalchainer/display.jsonl` (same record as
+  `proposals.jsonl` + `display_only: true`, `run_id`, `ts`, `source`) for review / rating before phase 2. An
+  identical suggestion (same `who` + `topic` + `text`) is not re-logged within `goal_repeat_s` (6 h). Size-rotated
+  (`jsonl_max_bytes`, `.1`). Read by nothing except that dedupe (never by re-ask or anything actionable).
+  `runs.jsonl` records `display_logged`.
+- rc3 (b): `asked.jsonl` is size-rotated (`jsonl_max_bytes`): the file moves to `.1` and the entries still within
+  `goal_reask_s` are written back, so the re-ask window survives rotation.
+- Tests: `tests/test_goals_track_t.py`, `tests/test_goals_rc3.py`.
+
 ## v0.6.0-rc2 (2026-10-20)
 GoalChainer phase b, step 1 (Track S) on top of v0.6.0-rc1: an optional, read-only "Goal suggestions (not
 instructions)" block on the user path. **Off by default** (`goal_prompt`); with the flag off the block, state,

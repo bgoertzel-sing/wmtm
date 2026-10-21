@@ -12,6 +12,7 @@ import time
 # never import the goal engine (only workers/pc_shadow.py does); this module only reads one JSON file.
 SUBDIR = "goalchainer"
 LATEST = "latest.json"
+ASKED = "asked.jsonl"   # Track T: one line per rendered suggestion (shown_at); the engine's re-ask rule reads it
 
 # Wording convention (rc2): the block is read by the bot about the person it is talking to now (the "speaker").
 # Every line is worded TO that speaker, so the bot can relay it as is: "you"/"your" always mean the speaker, never
@@ -167,8 +168,52 @@ def eligible(rec, cfg, now=None, speaker=None, automated=False):
     return True, ""
 
 
-def render(cfg, now=None, rec=None, speaker=None, automated=False):
-    """-> block text or None.  Needs a real user turn (automated=False) and a resolved speaker."""
+def rotate_asked(path, max_bytes, keep_s, now):
+    """rc3: size cap for asked.jsonl that keeps the re-ask window.  When the file is over max_bytes it moves to
+    path.1 (replacing the previous .1) and the entries still inside keep_s (goal_reask_s) are written back to a fresh
+    path, so suppression never loses a recent ask.  -> True if rotated.  Never raises."""
+    try:
+        if not max_bytes or max_bytes <= 0 or os.path.getsize(path) <= max_bytes:
+            return False
+        keep = []
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                try:
+                    e = json.loads(line)
+                    if 0 <= now - float(e.get("ts")) < keep_s:
+                        keep.append(line if line.endswith("\n") else line + "\n")
+                except (ValueError, TypeError, AttributeError):
+                    continue
+        tmp = path + ".%d.tmp" % os.getpid()
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.writelines(keep)
+        os.replace(path, path + ".1")
+        os.replace(tmp, path)
+        return True
+    except Exception:   # noqa: BLE001
+        return False
+
+
+def record_shown(cfg, props, speaker, now=None):
+    """Track T fix 2: a proposal counts as ASKED only once it was rendered into a prompt block.  Appends
+    {ts, shown_at, id, who, topic, action} per shown line to <runtime_dir>/goalchainer/asked.jsonl (rc3: size-capped
+    by jsonl_max_bytes, keeping the goal_reask_s window on rotation).  Never raises."""
+    try:
+        now = time.time() if now is None else now
+        path = os.path.join((cfg or {}).get("runtime_dir") or ".", SUBDIR, ASKED)
+        rotate_asked(path, int(_setting(cfg, "jsonl_max_bytes") or 0), float(_setting(cfg, "goal_reask_s")), now)
+        with open(path, "a", encoding="utf-8") as fh:
+            for p in props:
+                fh.write(json.dumps({"ts": now, "shown_at": now, "id": p.get("id"), "who": _who(p) or speaker,
+                                     "topic": list(p.get("topic") or ()), "action": p.get("action"),
+                                     "display_only": bool(p.get("display_only"))}) + "\n")
+    except Exception:   # noqa: BLE001
+        pass
+
+
+def render(cfg, now=None, rec=None, speaker=None, automated=False, record=False):
+    """-> block text or None.  Needs a real user turn (automated=False) and a resolved speaker.
+    record=True (the live user path only) logs the shown lines as asked (Track T)."""
     try:
         if automated or not _setting(cfg, "goal_prompt"):
             return None
@@ -180,6 +225,9 @@ def render(cfg, now=None, rec=None, speaker=None, automated=False):
         props = sorted(candidates(rec, speaker), key=lambda p: -float(p.get("score") or 0))[:n]
         if not props:
             return None
-        return HEADER + "\n" + "\n".join("  - " + phrase(p, speaker, _setting(cfg, "speaker_map")) for p in props)
+        out = HEADER + "\n" + "\n".join("  - " + phrase(p, speaker, _setting(cfg, "speaker_map")) for p in props)
+        if record:
+            record_shown(cfg, props, speaker, now)
+        return out
     except Exception:   # noqa: BLE001
         return None

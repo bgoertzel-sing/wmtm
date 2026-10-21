@@ -131,8 +131,15 @@ def test_history_blocks_reask_after_repeat_window(tmp_path):
     (tmp_path / "completed").mkdir()
     r1 = engine.run_shadow([_it(1, QUESTION)], {"status": "ok", "queries": []}, cfg, now=NOW)
     assert r1["logged"] >= 1
+    # Track T: logging alone is not asking -> no history yet, the proposal is logged again after repeat_s
     r2 = engine.run_shadow([_it(1, QUESTION)], {"status": "ok", "queries": []}, cfg, now=NOW + 3600)
-    assert r2["status"] == "ok" and r2["logged"] == 0 and r2["history"] >= 1     # same person+topic within reask_s
+    assert r2["status"] == "ok" and r2["history"] == 0 and r2["logged"] >= 1
+    # once it was rendered into a prompt block it counts as asked: same person+topic blocked within reask_s
+    from wmtm import goal_prompt as gp
+    shown = [json.loads(l) for l in open(tmp_path / "rt" / "goalchainer" / "proposals.jsonl")][:1]
+    gp.record_shown(cfg, shown, "quill", now=NOW + 3700)
+    r3 = engine.run_shadow([_it(1, QUESTION)], {"status": "ok", "queries": []}, cfg, now=NOW + 7200 + 3600)
+    assert r3["status"] == "ok" and r3["logged"] == 0 and r3["history"] >= 1
     lines = [json.loads(l) for l in open(tmp_path / "rt" / "goalchainer" / "proposals.jsonl")]
     assert all(l["topic"] for l in lines)
 
@@ -268,7 +275,14 @@ def test_goalchainer_on_never_reaches_block_state_or_journal(tmp_path, monkeypat
     assert any("widget7" in b for b in blocks)        # the note itself is recalled as usual
     assert all("goalchainer" not in b.lower() for b in blocks)
     assert j.appended == []                            # nothing written to the journal
-    assert sorted(os.listdir(gdir)) == ["latest.json", "proposals.jsonl", "requests_index.json", "runs.jsonl"]
+    disp = [json.loads(l) for l in (gdir / "display.jsonl").read_text().splitlines()]   # rc3 review log
+    assert disp and all(d["display_only"] is True for d in disp)
+    for d in disp:
+        assert d["text"] not in state                 # (same id may be logged by a user-turn run: ids are content-based)
+        assert all(d["text"] not in b for b in blocks)
+    assert not any(p.get("display_only") for p in props)
+    assert sorted(os.listdir(gdir)) == ["display.jsonl", "latest.json", "proposals.jsonl", "requests_index.json",
+                                        "runs.jsonl"]                 # no asked.jsonl: goal_prompt is off
     assert os.listdir(chan) == []
 
 

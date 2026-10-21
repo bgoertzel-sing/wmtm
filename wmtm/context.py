@@ -928,7 +928,7 @@ def format_context(store, cycle, cfg=None, context_rel=None, request=None):
     if setting(cfg, "goal_prompt") and request:      # Track S: optional suggestions block, real user turns only
         try:
             from . import goal_prompt as _gp
-            g = _gp.render(cfg, speaker=_gp.speaker_of(store, cfg, request), automated=False)
+            g = _gp.render(cfg, speaker=_gp.speaker_of(store, cfg, request), automated=False, record=True)
         except Exception:   # noqa: BLE001
             g = None
         if g:

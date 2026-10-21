@@ -1,4 +1,4 @@
-# Background reasoner, shadow, semantic-parse feed and goal engine (v0.6.0-rc2)
+# Background reasoner, shadow, semantic-parse feed and goal engine (v0.6.0-rc3)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -157,6 +157,11 @@ Output, and nothing else: `<runtime_dir>/goalchainer/proposals.jsonl` (`id`, `ac
 context block, the state, the journal or any channel; no action is taken (except the optional, off-by-default
 suggestions block below). Addressees are `speaker_map` names only. Every run also writes
 `goalchainer/latest.json` (rc2; atomic; `ts`, `status`, `canary_ok`, that run's proposals; empty after a failed run).
+Automated runs (rc3, Track T) also put the message suggestions they veto into `latest.json` marked `display_only`
+(never logged to `proposals.jsonl`, never actionable) and append them, deduped per `who` + `topic` + `text` within
+`goal_repeat_s`, to `goalchainer/display.jsonl` for review. Re-ask suppression (`goal_reask_s`) reads only
+`goalchainer/asked.jsonl`, written when a suggestion line is actually rendered on a real user turn (so nothing with
+`goal_prompt` off); its rotation keeps the entries inside `goal_reask_s`. Neither file is read by anything else.
 
 Reply detection reads the channel's completed request files (`goal_requests_dir`, read-only; one
 `{prompt, source}` envelope per file, response envelopes skipped). Sender: the envelope's `user_id` /
@@ -250,7 +255,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.6.0-rc2/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.6.0-rc3/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence
@@ -278,5 +283,7 @@ passes through PeTTaChainer.
 - `goalchainer/runs.jsonl`: one line per goal run (`status` ok / canary_fail / shadow_canary_fail / budget_exceeded /
   error / hook_error, `canary.ok`, `logged`, `requests` stats, `s`); `goalchainer/proposals.jsonl`: logged proposals;
   `goalchainer/latest.json` (rc2): the last run's time, status, canary and proposals (what the suggestions block reads).
+  `goalchainer/display.jsonl` (rc3): display-only suggestions of automated runs (review log, deduped 6 h);
+  `goalchainer/asked.jsonl` (rc3): suggestion lines actually shown on user turns (empty/absent with `goal_prompt` off).
 - `semparse_cache/parse_log.jsonl`: one line per parse attempt (status, secs, tokens); `worker_runs.jsonl`: one
   line per worker run (status, load canary, model, counts); `rejects.jsonl`: rejected atoms with reasons.
