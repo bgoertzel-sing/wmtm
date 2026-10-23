@@ -200,15 +200,16 @@ def build_series(label, cands, est, st, now, ctx=None, passes=("human",), groups
     return job, dict(zip(ids, cands))
 
 
-def dedupe_groups(cands):
-    """WMTM's R2.1 rule as withdrawal groups: one proposal per (person, topic) across Ask/Flag/Remind/LookUp."""
+def dedupe_groups(cands, thr=None):
+    """WMTM's R2.1 rule as withdrawal groups: one proposal per (person, topic cluster; rc2) across
+    Ask/Flag/Remind/LookUp."""
     out = {}
     for c in cands:
         if c["action"] not in actions.DEDUPE_ACTIONS:
             continue
         ks = set(c.get("topic") or ())
         out[c["key"]] = [d["key"] for d in cands if d is not c and d["action"] in actions.DEDUPE_ACTIONS
-                         and d.get("who") == c.get("who") and needs.topic_match(ks, set(d.get("topic") or ()))]
+                         and d.get("who") == c.get("who") and needs.cluster_match(ks, set(d.get("topic") or ()), thr)]
     return out
 
 
@@ -228,7 +229,8 @@ def client(job, cfg, workdir):
     if not py or not os.path.exists(py):
         raise V2Error("v2_unconfigured", "goal_v2_python not set or missing")
     tmo = float(cfg.get("goal_v2_timeout_s") or 60.0)
-    os.makedirs(workdir, exist_ok=True)
+    os.makedirs(workdir, mode=0o700, exist_ok=True)
+    os.chmod(workdir, 0o700)    # rc2: per-run scratch is private whatever the umask (v2 refuses world-writable dirs)
     env = {"PATH": "/usr/bin:/bin", "HOME": workdir, "TMPDIR": workdir, "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8",
            "PYTHONDONTWRITEBYTECODE": "1"}
     job = dict(job, protocol=JOB_PROTOCOL, workdir=workdir,

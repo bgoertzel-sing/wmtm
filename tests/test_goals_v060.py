@@ -71,7 +71,9 @@ def test_index_is_bounded_cached_and_holds_no_raw_text(tmp_path):
     reqs = greq.load(cfg, NOW, st)
     assert [r["who"] for r in reqs] == ["quill"] and reqs[0]["reply"] is True
     assert "widget7" in reqs[0]["keys"] and abs(reqs[0]["ts"] - (NOW - D)) < 1e-3
-    assert st["files"] == 4 and st["parsed"] == 4 and st["with_sender"] == 1 and st["read_errors"] == 1
+    # rc2: the index keeps every file within goal_history_max_days (45 d; the 30-day-old one too), the window is 14 d
+    assert st["files"] == 4 and st["indexed"] == 5 and st["parsed"] == 5 and st["with_sender"] == 1
+    assert st["read_errors"] == 1 and st["unattributed"] == 0      # the sender-less group request is not a reply
     ip = tmp_path / "rt" / "goalchainer" / greq.INDEX
     raw = ip.read_text()
     assert secret not in raw and "reply to your message" not in raw and "without a sender" not in raw
@@ -80,7 +82,7 @@ def test_index_is_bounded_cached_and_holds_no_raw_text(tmp_path):
     assert greq.load(cfg, NOW, st2) == reqs and st2["parsed"] == 0              # cached: nothing re-read
     st3 = {}
     greq.load(dict(cfg, speaker_map={}), NOW, st3)
-    assert st3["parsed"] == st3["files"] and st3["with_sender"] == 0            # map changed -> rebuilt
+    assert st3["parsed"] == st3["indexed"] and st3["with_sender"] == 0          # map changed -> rebuilt
     assert sorted(os.listdir(chan)) == sorted(["a" * 64 + ".json", "b" * 64 + ".json", "c" * 64 + ".json",
                                                "d" * 64 + ".json", "broken.json"])   # read-only: nothing added
 
@@ -308,7 +310,12 @@ def test_only_the_worker_imports_the_goal_engine():
                 if bad == "subprocess" and f == "engine.py":
                     assert "import subprocess" not in src, f
                     continue
+                if bad == "journal." and f == "notes.py":
+                    continue          # rc2: notes.py reads the journal (read-only; checked below)
                 assert bad not in src.lower(), (f, bad)
+    nsrc = open(os.path.join(root, "goals", "notes.py")).read()
+    assert "import" not in "".join(l for l in nsrc.splitlines() if "journal" in l and "import" in l)
+    assert re.findall(r"open\(ap, \"(\w+)\"\)", nsrc) == ["rb", "rb"] and "PettaJournal" not in nsrc
     v2src = open(os.path.join(root, "goals", "v2.py")).read()
     assert v2src.count("subprocess.Popen(") == 1 and "shell=True" not in v2src and "start_new_session=True" in v2src
 

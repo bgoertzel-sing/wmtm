@@ -87,17 +87,29 @@ def _base(action, sigs, who, q, n=1):
     return {"action": action, "need": t["need"], "effects": list(t["effects"]), "who": who,
             "text": t["text"].format(who=who, q=q, n=n), "signals": sigs, "key": ckey(action, [s["text"] for s in sigs]),
             "items": sorted({i for s in sigs for i in s["items"] if i}),
-            "topic": sorted(set().union(*[s["keys"] for s in sigs])) if sigs else []}
+            "topic": sorted(set().union(*[s.get("ckeys") or s["keys"] for s in sigs])) if sigs else []}
 
 
-def recently_proposed(who, ks, ts_last, history, now, reask_s):
-    """-> the history entry that blocks a re-proposal (same person, same topic, within reask_s, nothing new), else None.
+def drop_own_wait(text, who):
+    """rc2: "..., waiting on <who>." is redundant in a line addressed to <who> -> removed (whole sentence kept)."""
+    if not who or who == needs.SELF:
+        return text
+    t = re.sub(r"[,;]?\s*\(?(?:still\s+)?(?:waiting|blocked)\s+on\s+%s(?:'s\s+\w+)?\)?(?=\s*[.;!?]?\s*$)" % re.escape(who),
+               "", text, flags=re.I)
+    if t != text and t.strip() and not t.rstrip().endswith((".", "?", "!")):
+        t = t.rstrip(" ,;") + "."
+    return t if len(needs.keys(t)) >= 2 else text
+
+
+def recently_proposed(who, ks, ts_last, history, now, reask_s, thr=None):
+    """-> the history entry that blocks a re-proposal (same person, same topic CLUSTER (rc2: paraphrases under a new
+    id count), within reask_s, nothing new), else None.
     'Something new' = a note on the topic newer than that proposal that adds >= 2 new topic words."""
     for h in history or ():
         if now - float(h.get("ts", 0)) >= reask_s or h.get("who") != who:
             continue
         hk = set(h.get("topic") or ())
-        if not needs.topic_match(ks, hk):
+        if not needs.cluster_match(ks, hk, thr):
             continue
         if ts_last > float(h["ts"]) and len(ks - hk) >= 2:
             continue
@@ -111,13 +123,23 @@ def candidates(est, kb=None, now=None, age_cap_d=7.0, st=None, ctx=None):
     now = 0.0 if now is None else now
     hist = ctx.get("history") or ()
     reask_s = float(st.get("reask_s", 3 * 86400.0)); remind_s = float(st.get("remind_after_s", 86400.0))
+    thr = st.get("topic_overlap")
+    max_age_s = float(st.get("max_item_age_s", 7 * 86400.0))
     out, supp = [], []
 
     def blocked(s, who):
-        h = recently_proposed(who, s["keys"], s["ts_last"], hist, now, reask_s)
+        h = recently_proposed(who, s.get("ckeys") or s["keys"], s["ts_last"], hist, now, reask_s, thr)
         if h:
             supp.append((s["text"], "fix4_reask_within_%gd" % (reask_s / 86400.0)))
         return bool(h)
+
+    def too_old(s):
+        """rc2: no message about an item last raised more than goal_max_item_age_days ago (a newer note re-raising
+        it moves ts_last)."""
+        if max_age_s > 0 and now - float(s["ts_last"]) > max_age_s:
+            supp.append((s["text"], "rc2_item_older_than_%gd" % (max_age_s / 86400.0)))
+            return True
+        return False
 
     for s in est["unc"]["signals"]:
         sal = 0.2 + 0.8 * s["sal"]
@@ -125,7 +147,7 @@ def candidates(est, kb=None, now=None, age_cap_d=7.0, st=None, ctx=None):
         age_d = max(0.0, (now - s["ts"]) / 86400.0)
         age = 0.4 + 0.6 * min(age_d, age_cap_d) / age_cap_d
         human = s["who"] and s["who"] != needs.SELF
-        if human and not blocked(s, s["who"]):
+        if human and not too_old(s) and not blocked(s, s["who"]):
             q = s.get("body") or s["text"]
             c = _base("ClarifyQuestion", [s], s["who"], q)
             c["cons"] = {"salience": sal, "specificity": spec, "fit": 1.0 if _ASKY.search(s["text"]) else 0.6, "age": age}
@@ -154,6 +176,8 @@ def candidates(est, kb=None, now=None, age_cap_d=7.0, st=None, ctx=None):
                 continue
             c = _base("SelfTask", [s], needs.SELF, s["text"]); c["cons"] = cons; out.append(c)
             continue
+        if too_old(s):
+            continue
         lc = s.get("last_contact") or 0.0
         quiet_since = max(s["ts"], lc if lc > s["ts"] else 0.0)
         if now - quiet_since < remind_s:
@@ -162,9 +186,10 @@ def candidates(est, kb=None, now=None, age_cap_d=7.0, st=None, ctx=None):
         txt, own = split_promises(named(s["text"], s))   # R2.1: the bot's own promises never go into a message
         for o in own:
             supp.append((o, "r21_own_promise_to_selftask"))
-            ss = dict(s, who=needs.SELF, kind="self", text=o, body=o, keys=needs.keys(o))
+            ss = dict(s, who=needs.SELF, kind="self", text=o, body=o, keys=needs.keys(o), ckeys=needs.keys(o))
             if not blocked(ss, needs.SELF) and len(ss["keys"]) >= 2:
                 c = _base("SelfTask", [ss], needs.SELF, o); c["cons"] = dict(cons, specificity=0.6); out.append(c)
+        txt = drop_own_wait(txt, s["who"])
         if len(needs.keys(txt)) < 2 or blocked(s, s["who"]):
             continue
         c = _base("RemindPending", [dict(s, text=txt)], s["who"], txt); c["cons"] = cons; out.append(c)
@@ -173,6 +198,8 @@ def candidates(est, kb=None, now=None, age_cap_d=7.0, st=None, ctx=None):
     for s in est["unc"]["signals"] + comp:
         if not (s["who"] and s["who"] == to and len(s["text"]) <= SUMMARY_SENT_MAX):
             continue                                       # a status goes to one person, about that person's items
+        if too_old(s):
+            continue
         lc = s.get("last_contact") or 0.0
         if now - max(s["ts_last"], lc if lc > s["ts_last"] else 0.0) < remind_s:
             supp.append((s["text"], "r21_summary_item_too_fresh"))      # R2.1: >= 1 day no-reply per item
@@ -180,25 +207,25 @@ def candidates(est, kb=None, now=None, age_cap_d=7.0, st=None, ctx=None):
         txt, own = split_promises(named(s["text"], s))
         for o in own:                                      # R2.1: the bot's own promises are self-tasks
             supp.append((o, "r21_own_promise_to_selftask"))
-            ss = dict(s, who=needs.SELF, kind="self", text=o, body=o, keys=needs.keys(o))
+            ss = dict(s, who=needs.SELF, kind="self", text=o, body=o, keys=needs.keys(o), ckeys=needs.keys(o))
             if not blocked(ss, needs.SELF) and len(ss["keys"]) >= 2:
                 c = _base("SelfTask", [ss], needs.SELF, o)
                 c["cons"] = {"salience": 0.2 + 0.8 * s["sal"], "specificity": 0.6, "fit": 1.0}
                 out.append(c)
         if len(needs.keys(txt)) < 2:
             continue
-        human.append(dict(s, text=txt))
+        human.append(dict(s, text=drop_own_wait(txt, to)))
     if len(human) >= 2 and to:
         top, seen = [], []
         for s in sorted(human, key=lambda x: (-x["sal"], -x["ts_last"])):
-            if any(needs.topic_match(s["keys"], k) for k in seen):
+            if any(needs.cluster_match(s["keys"], k, thr) for k in seen):
                 continue
             seen.append(s["keys"]); top.append(s)
             if len(top) == SUMMARY_MAX:
                 break
         if len(top) >= 2:
             ks = set().union(*[s["keys"] for s in top])
-            if not recently_proposed(to, ks, max(s["ts_last"] for s in top), hist, now, reask_s):
+            if not recently_proposed(to, ks, max(s["ts_last"] for s in top), hist, now, reask_s, thr):
                 q = " ".join("(%d) %s" % (i + 1, s["text"].rstrip()) for i, s in enumerate(top))
                 c = _base("SummarizeStatus", top, to, q, n=len(top))
                 c["cons"] = {"salience": 0.2 + 0.8 * max(x["sal"] for x in top), "fit": min(1.0, len(top) / 3.0)}

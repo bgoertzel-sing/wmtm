@@ -1,4 +1,4 @@
-# Background reasoner, shadow, semantic-parse feed and goal engine (v0.7.0-rc1)
+# Background reasoner, shadow, semantic-parse feed and goal engine (v0.7.0-rc2)
 
 Two optional background features run next to the normal WMTM cycle. Both are **off by default** and, unless
 `reasoner` is `pettachainer` (see below), neither can change what WMTM admits or shows: they run in detached,
@@ -177,6 +177,44 @@ topic keys, reply flag, "answers to HH:MM" times, moot anchors; never the raw te
 `goal_requests_days` or beyond the `goal_requests_max` newest are not read. Changing the dir or the speaker map
 rebuilds the index.
 
+v0.7.0-rc2 (Track V) closure, age and dedupe rules:
+- Reply window: the lookup reaches back to the oldest active item (`max(goal_requests_days, its age + 1 d)`, at most
+  `goal_history_max_days`, 45); the index keeps every file inside `goal_history_max_days`, so a wider window costs no
+  re-parse. Index format v2 (rebuilt once on upgrade). Index files are created and replaced with mode 600
+  explicitly (`fchmod`), whatever the umask or a default ACL on the directory.
+- Sender-less group replies (envelopes written before the transport recorded the sender) are indexed as
+  `who=None` when they are replies to the bot (`[reply to your message N]`). With `goal_close_unattributed` (default
+  on) such a reply closes a human item raised before it when it is clearly on the topic (>= 2 shared stemmed keys or a
+  shared anchor). It never addresses anyone and never counts as contact. `runs.jsonl` `requests` gains `indexed`,
+  `unattributed`, `days`.
+- Journal closure (`goal_journal_closure`, default on): `wmtm/goals/notes.py` reads the bot's append-only journal
+  (`goal_journal_path`, default `<state_dir>/_journal/journal.metta`, read-only) incrementally into
+  `goalchainer/notes_index.json` (mode 600; per note only closure digests: keys, closure flag, referenced stamps,
+  answer times, moot anchors, people named; no text). A later note closes an item when it reports a closure on the
+  same topic cluster, references the item's note stamp, or reports the addressee's decision/request closed on one of
+  the item's anchors. `runs.jsonl` `requests.journal` has the index stats.
+- Topic clusters: two items / proposals are the same topic when the R2 rule holds, or their stemmed key overlap is
+  >= `goal_topic_overlap` (0.4) of the smaller set with >= 2 shared terms, or they share an anchor (CamelCase, CAPS,
+  file / path name such as `src/widget`, track letter) plus one more term. Paraphrases of one item in the active
+  set merge into one signal (the cluster's keys are kept for closure). Applied by (person, cluster), whatever the id:
+  the repeat rule for `proposals.jsonl` (`goal_repeat_s`), the R2.1 one-per-topic rule, re-ask suppression from
+  `asked.jsonl` (`goal_reask_s`), `latest.json` (one line per person and cluster) and `display.jsonl` (not re-logged
+  within `max(goal_repeat_s, goal_reask_s)`, i.e. the log changes only when the line set does). The suggestions block
+  also drops a line whose topic overlaps a higher-scored one.
+- Age cap: no ClarifyQuestion / FlagUncertainty / RemindPending / SummarizeStatus item last raised more than
+  `goal_max_item_age_days` (7) ago; a newer note re-raising it resets the age. Self-tasks and look-ups are not capped.
+- Text: `speaker_map` aliases are replaced by the canonical name in notes and request texts before anything else
+  ("waiting on <username>" in a line for that person), and a trailing "waiting on <addressee>" clause is dropped from
+  a line to that addressee. A marker followed by an item list ("Still open: a; b; c", "..., and <Name> hasn't ...")
+  gives one item per part, each worded "<marker> <part>.". A body that opens with a negation, pronoun or conjunction
+  ("still open: no later note says ...") is a fragment and is dropped.
+- Live state: an open item about switching a known boolean flag on (off) while this run's config already has it on
+  (off) is closed (`closed_flag_already_set_<flag>`). Limits: boolean flags only; claims about deploys, versions,
+  branches or pushes are not checked against `_wmtm_pkg.json` or git; "X on or off?" makes no claim.
+- Known limits: the reply check still needs topic overlap (a terse reply with no shared term closes nothing); a bot
+  note restating an item after the reply re-opens it (until the age cap); unattributed closure can close an item on
+  someone else's reply on the same topic (biased to silence by design).
+
 ## Goal suggestions block (v0.6.0-rc2, Track S, off by default)
 
 `goal_prompt=true` appends `[Goal suggestions (not instructions): ...]` with at most `goal_prompt_max_lines`
@@ -244,7 +282,12 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `speaker_map` / `speaker_self` | `WMTM_SPEAKER_MAP` (JSON) / `WMTM_SPEAKER_SELF` | `{}` / `""` | rc4: Telegram user id or username -> canonical name; the bot's own name |
 | `goalchainer` | `WMTM_GOALCHAINER` | false | v0.6: goal engine in the shadow worker, log only (see "Goal engine") |
 | `goal_requests_dir` | `WMTM_GOAL_REQUESTS_DIR` | `""` (no history) | v0.6: channel's completed request files for reply detection (read-only; relative = against `state_dir`) |
-| `goal_requests_days` / `goal_requests_max` | `WMTM_GOAL_REQUESTS_DAYS` / `..._MAX` | 14 / 500 | v0.6: request-history window and file cap |
+| `goal_requests_days` / `goal_requests_max` | `WMTM_GOAL_REQUESTS_DAYS` / `..._MAX` | 14 / 500 | v0.6: request-history window (rc2: minimum) and file cap |
+| `goal_history_max_days` | `WMTM_GOAL_HISTORY_MAX_DAYS` | 45 | rc2: longest reply window / journal closure span |
+| `goal_close_unattributed` | `WMTM_GOAL_CLOSE_UNATTRIBUTED` | true | rc2: sender-less replies to the bot may close an on-topic item |
+| `goal_journal_closure` / `goal_journal_path` | `WMTM_GOAL_JOURNAL_CLOSURE` / `..._PATH` | true / `""` | rc2: later journal notes may close items; `""` = `<state_dir>/_journal/journal.metta` |
+| `goal_max_item_age_days` | `WMTM_GOAL_MAX_ITEM_AGE_DAYS` | 7 | rc2: no message about an item last raised longer ago |
+| `goal_topic_overlap` | `WMTM_GOAL_TOPIC_OVERLAP` | 0.4 | rc2: topic-cluster term overlap threshold |
 | `goal_budget_s` | `WMTM_GOAL_BUDGET_S` | 90 | v0.6: wall-clock cap per goal run (v0.7: 10 -> 90 for v2) |
 | `goal_engine` | `WMTM_GOAL_ENGINE` | `v2` | v0.7: `v2` (GoalChainer v2 core, separate process) or `native` (v0.6 core; rollback) |
 | `goal_v2_python` / `goal_v2_release` | `WMTM_GOAL_V2_PYTHON` / `..._RELEASE` | `""` / `""` | v0.7: v2 environment interpreter (absolute, deploy-time); release tag recorded per run |
@@ -264,7 +307,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ## Runtime layout (vendored deployment)
 
 ```
-<bot>/vendor/wmtm-v0.7.0-rc1/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
+<bot>/vendor/wmtm-v0.7.0-rc2/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-v1.0.6/             scripts/vendor_runtime.sh
 <bot>/vendor/pettachainer-36b3fe6-dedup/
 <bot>/vendor/semparse-hitl-3ec15bd1/   local only, self-ignoring (.gitignore '*'); upstream has no licence
@@ -295,7 +338,9 @@ passes through PeTTaChainer.
   `engine`, `canary.ok`, `logged`, `requests` stats, `s`; v0.7 `v2`: `status`, `s`, `runner_s`, `maxrss_mb`,
   `versions`, `release`, `decisions` (disposition counts), `reviews`, `display_decisions`); `goalchainer/proposals.jsonl`: logged proposals;
   `goalchainer/latest.json` (rc2): the last run's time, status, canary and proposals (what the suggestions block reads).
-  `goalchainer/display.jsonl` (rc3): display-only suggestions of automated runs (review log, deduped 6 h);
+  `goalchainer/display.jsonl` (rc3): display-only suggestions of automated runs (review log; rc2: deduped per person
+  and topic cluster within max(`goal_repeat_s`, `goal_reask_s`));
+  `goalchainer/requests_index.json` / `notes_index.json` (rc2): reply and journal closure digests (mode 600, no text);
   `goalchainer/asked.jsonl` (rc3): suggestion lines actually shown on user turns (empty/absent with `goal_prompt` off).
 - `semparse_cache/parse_log.jsonl`: one line per parse attempt (status, secs, tokens); `worker_runs.jsonl`: one
   line per worker run (status, load canary, model, counts); `rejects.jsonl`: rejected atoms with reasons.

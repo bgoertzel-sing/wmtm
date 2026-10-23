@@ -54,7 +54,51 @@ def settings(cfg=None):
             "people": needs.people_patterns(cfg.get("speaker_map")), "self_name": str(cfg.get("speaker_self") or ""),
             "requests": list(cfg.get("goal_requests") or ()),
             "remind_after_s": float(cfg.get("goal_remind_after_s", 86400.0)),
-            "reask_s": float(cfg.get("goal_reask_s", 3 * 86400.0))}
+            "reask_s": float(cfg.get("goal_reask_s", 3 * 86400.0)),
+            # v0.7.0rc2 (Track V)
+            "topic_overlap": float(cfg.get("goal_topic_overlap", needs.TOPIC_OVERLAP)),
+            "max_item_age_s": float(cfg.get("goal_max_item_age_days", 7.0)) * 86400.0,
+            "aliases": needs.alias_map(cfg.get("speaker_map"), cfg.get("speaker_self")),
+            "names": sorted({str(v).lower() for v in (cfg.get("speaker_map") or {}).values() if v}),
+            "close_unattributed": bool(cfg.get("goal_close_unattributed", True)),
+            "notes": list(cfg.get("goal_notes") or ()),
+            "flags": live_flags(cfg)}
+
+
+def live_flags(cfg):
+    """rc2: the boolean flags of this run's config (flags file / env / defaults) -> {name: value}, for the
+    'item contradicted by live state' check.  Only keys the config actually carries."""
+    from .. import runtime_config as rc
+    return {k: cfg[k] for k, spec in rc.SPEC.items() if spec[1] is bool and isinstance(cfg.get(k), bool)}
+
+
+def same_cluster(a, b, thr=None):
+    """(person, topic cluster) identity of two proposal-like records (who + topic)."""
+    return (str(a.get("who") or "") == str(b.get("who") or "")
+            and needs.cluster_match(set(a.get("topic") or ()), set(b.get("topic") or ()), thr))
+
+
+def dedupe_cluster(props, thr=None):
+    """rc2: keep the first proposal per (person, topic cluster) (input order = rank / score order)."""
+    out = []
+    for p in props:
+        if not any(same_cluster(p, q, thr) for q in out if q.get("action") in actions.MESSAGE_ACTIONS
+                   and p.get("action") in actions.MESSAGE_ACTIONS):
+            out.append(p)
+    return out
+
+
+def mark_recent(cands, ctx, thr=None):
+    """rc2: a candidate in the same (person, topic cluster) as a proposal logged inside goal_repeat_s counts as that
+    proposal (repeat discount, not re-logged, owns the topic), whatever its id: paraphrases get new ids."""
+    ents = list(ctx.get("recent_entries") or ())
+    if not ents:
+        return
+    rec = set(ctx.get("recent") or ())
+    for c in cands:
+        if c["key"] not in rec and any(same_cluster(c, e, thr) for e in ents):
+            rec.add(c["key"])
+    ctx["recent"] = rec
 
 
 def gmean(xs):
@@ -105,6 +149,7 @@ def propose(raw_items, cfg=None, ctx=None, now=None, kb=None, extra_candidates=(
     if trace is not None:
         trace.extend((None, t, r) for t, r in supp)
     cands = cl + [dict(c) for c in extra_candidates]
+    mark_recent(cands, ctx, st["topic_overlap"])
     impl = None
     for c in cands:
         lg = legitimacy.evaluate(c, ctx, cfg); impl = lg["impl"]
@@ -125,8 +170,8 @@ def propose(raw_items, cfg=None, ctx=None, now=None, kb=None, extra_candidates=(
             refused.append((c["id"], r)); continue
         if c["action"] in actions.DEDUPE_ACTIONS:          # R2.1: one proposal per (person, topic) across action types
             ks = set(c.get("topic") or ())
-            dup = next((k for k in kept if k is not c and k["who"] == c.get("who") and needs.topic_match(ks, set(k.get("topic") or ()))),
-                       None)
+            dup = next((k for k in kept if k is not c and k["who"] == c.get("who")
+                        and needs.cluster_match(ks, set(k.get("topic") or ()), st["topic_overlap"])), None)
             if dup:
                 c["status"] = "dup"; supp.append((c["text"], "r21_same_topic_as_" + dup["action"]))
                 if trace is not None:
@@ -172,7 +217,7 @@ def goal_canary(cfg=None):
 
 
 # ------------------------------------------------------------------ v0.7: GoalChainer v2 core
-def _dedupe_recent(cands, ctx, supp, trace=None):
+def _dedupe_recent(cands, ctx, supp, trace=None, thr=None):
     """R2.1 against the log: a recently logged proposal still owns its (person, topic); other candidates on it are
     dropped before v2 sees them (within one run, v2's withdrawal groups apply the same rule)."""
     rec = set(ctx.get("recent") or ())
@@ -181,8 +226,8 @@ def _dedupe_recent(cands, ctx, supp, trace=None):
     for c in cands:
         if c["action"] in actions.DEDUPE_ACTIONS and c["key"] not in rec:
             ks = set(c.get("topic") or ())
-            dup = next((k for k in kept if k["who"] == c.get("who") and needs.topic_match(ks, set(k.get("topic") or ()))),
-                       None)
+            dup = next((k for k in kept if k["who"] == c.get("who")
+                        and needs.cluster_match(ks, set(k.get("topic") or ()), thr)), None)
             if dup:
                 c["status"] = "dup"; c["id"] = c["key"]; c.setdefault("score", 0.0)
                 supp.append((c["text"], "r21_same_topic_as_" + dup["action"]))
@@ -211,8 +256,9 @@ def prepare_v2(raw_items, cfg=None, ctx=None, now=None, kb=None, extra_candidate
             continue
         seen.add(c["key"]); cands.append(c)
         c["why"] = _why(c, est, now) if c.get("signals") else c.get("why", "")
-    keep, dups = _dedupe_recent(cands, ctx, supp, trace)
-    job, amap = v2.build_series(label, keep, est, st, now, ctx, passes, v2.dedupe_groups(keep))
+    mark_recent(cands, ctx, st["topic_overlap"])
+    keep, dups = _dedupe_recent(cands, ctx, supp, trace, st["topic_overlap"])
+    job, amap = v2.build_series(label, keep, est, st, now, ctx, passes, v2.dedupe_groups(keep, st["topic_overlap"]))
     return {"st": st, "est": est, "ctx": ctx, "now": now, "supp": supp, "dups": dups, "job": job, "amap": amap,
             "label": label}
 
@@ -349,16 +395,20 @@ def _tail(path):
             yield e
 
 
-def _recent(path, now, window, hist_window=0.0, asked_path=None):
+def _recent(path, now, window, hist_window=0.0, asked_path=None, entries=None):
     """Proposal ids logged within window (repeat discount; from proposals.jsonl) and the proposals that were really
     ASKED within hist_window as {ts, who, topic, action} (R2 re-ask rule).  Track T: "asked" = rendered into a goal
     prompt block (asked.jsonl, written by wmtm/goal_prompt.py) -- logging alone no longer counts, so with
-    goal_prompt off nothing is ever asked.  Reads file tails only."""
+    goal_prompt off nothing is ever asked.  Reads file tails only.  rc2: entries (optional list) receives the logged
+    proposals within window as {id, who, topic, action} for the (person, topic cluster) repeat rule."""
     keys, hist = set(), []
     for e in _tail(path):
         try:
             if now - float(e.get("ts") or 0) <= window:
                 keys.add(e.get("id"))
+                if e.get("who") and e.get("topic"):
+                    (entries if entries is not None else []).append({"id": e.get("id"), "who": e.get("who"), "topic": list(e.get("topic") or ()),
+                                           "action": e.get("action")})
         except (TypeError, ValueError):
             continue
     for e in _tail(asked_path) if asked_path else ():
@@ -417,7 +467,7 @@ def run_shadow(raw, rec, cfg, source=None, now=None):
         rc.append_jsonl(os.path.join(d, "runs.jsonl"), run, mx)
     except Exception:   # noqa: BLE001
         pass
-    write_latest(d, run, latest if run.get("status") == "ok" else [])
+    write_latest(d, run, latest if run.get("status") == "ok" else [], cfg_value(cfg, "goal_topic_overlap"))
     return run
 
 
@@ -433,27 +483,27 @@ def _display_key(p):
     return (str(p.get("who") or ""), tuple(str(t) for t in (p.get("topic") or ())), str(p.get("text") or ""))
 
 
-def log_display(d, run, source, now, shown, dedupe_s, mx, rc):
+def log_display(d, run, source, now, shown, dedupe_s, mx, rc, thr=None):
     """rc3: append the display-only suggestions of an automated run to <d>/display.jsonl (same record structure as
     proposals.jsonl + display_only: true, run_id, ts) so they can be reviewed / rated before phase 2.  A suggestion
-    identical to one logged within dedupe_s (same who + topic + text) is not logged again.  Size-rotated like the
+    identical to one logged within dedupe_s (same who + topic + text), or (rc2) in the same (person, topic cluster),
+    is not logged again: the log changes only when the line set does.  Size-rotated like the
     other JSONL logs.  Nothing reads this file back except this dedupe.  -> number of lines written."""
     if not shown:
         return 0
     path = os.path.join(d, DISPLAY)
-    seen = set()
+    seen = []
     for e in _tail(path):
         try:
             if 0 <= now - float(e.get("ts") or 0) < dedupe_s:
-                seen.add(_display_key(e))
+                seen.append(e)
         except (TypeError, ValueError):
             continue
     n = 0
     for p in shown:
-        k = _display_key(p)
-        if k in seen:
+        if any(_display_key(p) == _display_key(e) or same_cluster(p, e, thr) for e in seen):
             continue
-        seen.add(k)
+        seen.append(p)
         rc.append_jsonl(path, {"ts": now, "run_id": run["run_id"], "source": source, **{f: p.get(f) for f in FIELDS},
                                "who": p.get("who"), "effects": p.get("effects"), "topic": p.get("topic") or [],
                                **{f: p[f] for f in V2_FIELDS if f in p}, "display_only": True}, mx)
@@ -461,7 +511,7 @@ def log_display(d, run, source, now, shown, dedupe_s, mx, rc):
     return n
 
 
-def write_latest(d, run, proposals):
+def write_latest(d, run, proposals, thr=None):
     """Track S: <d>/latest.json = this run's time, status, canary result and ALL its proposals (repeats included;
     proposals.jsonl holds new ones only).  A failed run writes an empty list, so an older run's suggestions never
     survive it.  Atomic (tmp + os.replace).  Never raises."""
@@ -469,6 +519,7 @@ def write_latest(d, run, proposals):
         can = run.get("canary") or {}
         if run.get("status") != "ok":
             proposals = []
+        proposals = dedupe_cluster(list(proposals or []), thr)     # rc2: one line per (person, topic cluster)
         rec = {"ts": run.get("ts"), "run_id": run.get("run_id"), "status": run.get("status"),
                "canary_ok": bool(can.get("ok")) and run.get("status") == "ok",
                "proposals": [{k: p.get(k) for k in LATEST_FIELDS} for p in (proposals or [])]}
@@ -490,19 +541,11 @@ def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
     if not can.get("ok"):
         run["status"] = "canary_fail"
         return
-    raw = [dict(r) for r in raw or []]
-    q = cached_queries(cfg, {r.get("id") for r in raw})
-    for r in raw:
-        if r.get("id") in q:
-            r["queries"] = q[r["id"]]
-    kb = [x.get("proof") for x in rec.get("queries") or [] if x.get("ok") and x.get("proof")]
+    raw, q, kb, rq, cfg = _inputs(raw, rec, cfg, now)
     st = settings(cfg)
-    rq = {}
-    if not cfg.get("goal_requests") and cfg.get("goal_requests_dir"):
-        from . import requests as _rq
-        cfg = dict(cfg, goal_requests=_rq.load(cfg, now, rq))
-    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"], os.path.join(d, ASKED))
-    ctx = {"autonomous": source == "automated", "recent": recent, "history": hist}
+    ents = []
+    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"], os.path.join(d, ASKED), ents)
+    ctx = {"autonomous": source == "automated", "recent": recent, "history": hist, "recent_entries": ents}
     res = propose(raw, cfg, ctx, now=now, kb=kb)
     logged = 0
     run["_latest"] = [p for p in res["proposals"] if p.get("status") == "proposed" and p["legit"].get("d", 0) > 0]
@@ -516,7 +559,8 @@ def _run(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
                  and p.get("status") == "proposed" and p["legit"].get("d", 0) > 0 and not check_proposal(p)]
         run["_latest"] += shown
         run["display_only"] = len(shown)
-        run["display_logged"] = log_display(d, run, source, now, shown, st["repeat_s"], mx, rc)
+        run["display_logged"] = log_display(d, run, source, now, shown, max(st["repeat_s"], st["reask_s"]), mx, rc,
+                                             st["topic_overlap"])
     for p in res["proposals"]:
         if p["legit"]["discounts"].get("repeat"):
             continue                       # already logged inside the repeat window
@@ -538,9 +582,16 @@ def _inputs(raw, rec, cfg, now):
             r["queries"] = q[r["id"]]
     kb = [x.get("proof") for x in rec.get("queries") or [] if x.get("ok") and x.get("proof")]
     rq = {}
+    oldest = min([needs.item_ts(r, now) for r in raw if r.get("content")] or [now])
     if not cfg.get("goal_requests") and cfg.get("goal_requests_dir"):
         from . import requests as _rq
-        cfg = dict(cfg, goal_requests=_rq.load(cfg, now, rq))
+        # rc2: the reply lookup reaches back to the oldest active item (bounded by goal_history_max_days)
+        cfg = dict(cfg, goal_requests=_rq.load(cfg, now, rq, days=_rq.window_days(cfg, oldest, now)))
+    if not cfg.get("goal_notes") and cfg.get("goal_journal_closure", True):
+        from . import notes as _nt
+        ns = {}
+        cfg = dict(cfg, goal_notes=_nt.load(cfg, now, ns))
+        rq = dict(rq, journal=ns) if rq else {"journal": ns}
     return raw, q, kb, rq, cfg
 
 
@@ -568,9 +619,10 @@ def _run_v2(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
         return
     raw, q, kb, rq, cfg = _inputs(raw, rec, cfg, now)
     st = settings(cfg)
-    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"], os.path.join(d, ASKED))
+    ents = []
+    recent, hist = _recent(ppath, now, st["repeat_s"], st["reask_s"], os.path.join(d, ASKED), ents)
     auto = source == "automated"
-    ctx = {"autonomous": auto, "recent": recent, "history": hist}
+    ctx = {"autonomous": auto, "recent": recent, "history": hist, "recent_entries": ents}
     main_pass = "automated" if auto else "human"
     main = prepare_v2(raw, cfg, ctx, now=now, kb=kb, label="main", passes=("automated", "human") if auto else ("human",))
     pos, neg = canary_v2_prepare(cfg)
@@ -612,7 +664,8 @@ def _run_v2(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
                  and p.get("status") == "proposed" and p["legit"].get("d", 0) > 0 and not check_proposal(p)]
         run["_latest"] += shown
         run["display_only"] = len(shown)
-        run["display_logged"] = log_display(d, run, source, now, shown, st["repeat_s"], mx, rc)
+        run["display_logged"] = log_display(d, run, source, now, shown, max(st["repeat_s"], st["reask_s"]), mx, rc,
+                                             st["topic_overlap"])
         run["v2"]["display_decisions"] = [x.get("disposition") for x in dh["decisions"]]
     logged = _log_proposals(r, ppath, run, source, now, mx, rc)
     run.update(status="ok", needs=r["needs"], candidates=len(r["candidates"]), vetoed=len(r["vetoed"]),

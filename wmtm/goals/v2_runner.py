@@ -60,7 +60,8 @@ def run_series(s, budget, workdir, api):
     run_request, run_motivation_request, RunBudget = api
     t0 = time.time()
     d = os.path.join(workdir, "".join(ch for ch in str(s.get("label") or "s") if ch.isalnum() or ch in "-_")[:40])
-    os.makedirs(d, exist_ok=True)
+    os.makedirs(d, mode=0o700, exist_ok=True)
+    os.chmod(d, 0o700)          # rc2: v2's store refuses a world-writable parent (umask 0); private either way
     header, blocks, order = s["header"], s["blocks"], list(s["order"])
     remove = {k: set(v) for k, v in (s.get("remove") or {}).items()}
     store = os.path.join(d, "motivation.sqlite3")

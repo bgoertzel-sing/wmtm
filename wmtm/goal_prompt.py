@@ -140,6 +140,20 @@ def speaker_of(store, cfg, request):
         return None
 
 
+def distinct_topics(props, thr=0.4):
+    """rc2: one line per topic: a proposal whose topic terms overlap an earlier (higher-scored) line's by >= thr of
+    the smaller set (and >= 2 terms) is a paraphrase and is not shown.  The engine already dedupes latest.json by
+    (person, topic cluster); this guards a file written by an older engine.  Plain set overlap, no engine import."""
+    out = []
+    for p in props:
+        t = set(p.get("topic") or ())
+        if any(len(t & set(q.get("topic") or ())) >= max(2, thr * min(len(t), len(set(q.get("topic") or ())) or 1))
+               for q in out):
+            continue
+        out.append(p)
+    return out
+
+
 def eligible(rec, cfg, now=None, speaker=None, automated=False):
     """-> (ok, reason).  Reasons: off | automated | missing | status | canary | stale | future | no_speaker | empty."""
     if not _setting(cfg, "goal_prompt"):
@@ -222,7 +236,7 @@ def render(cfg, now=None, rec=None, speaker=None, automated=False, record=False)
         if not ok:
             return None
         n = max(0, min(MAX_LINES, int(_setting(cfg, "goal_prompt_max_lines"))))
-        props = sorted(candidates(rec, speaker), key=lambda p: -float(p.get("score") or 0))[:n]
+        props = distinct_topics(sorted(candidates(rec, speaker), key=lambda p: -float(p.get("score") or 0)))[:n]
         if not props:
             return None
         out = HEADER + "\n" + "\n".join("  - " + phrase(p, speaker, _setting(cfg, "speaker_map")) for p in props)

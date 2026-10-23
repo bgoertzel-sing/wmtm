@@ -54,7 +54,8 @@ def test_display_log_written_by_automated_run_with_proposal_structure(tmp_path):
 
 
 def test_display_log_dedupes_within_window_then_relogs(tmp_path):
-    cfg = _cfg(tmp_path, goal_repeat_s=6 * 3600.0)
+    # rc2: the display dedupe window is max(goal_repeat_s, goal_reask_s) and works per (person, topic cluster)
+    cfg = _cfg(tmp_path, goal_repeat_s=6 * 3600.0, goal_reask_s=6 * 3600.0)
     engine.run_shadow([_it(1, Q)], OK, cfg, source="automated", now=NOW)
     n1 = len(_lines(_g(tmp_path, "display.jsonl")))
     r = engine.run_shadow([_it(1, Q)], OK, cfg, source="automated", now=NOW + 3600)
@@ -89,7 +90,7 @@ def test_display_log_never_counts_as_asked(tmp_path):
 
 
 def test_display_log_size_rotates(tmp_path):
-    cfg = _cfg(tmp_path, jsonl_max_bytes=200)
+    cfg = _cfg(tmp_path, jsonl_max_bytes=200, goal_reask_s=6 * 3600.0)
     engine.run_shadow([_it(1, Q)], OK, cfg, source="automated", now=NOW)
     engine.run_shadow([_it(1, Q)], OK, cfg, source="automated", now=NOW + 7 * 3600)
     p = _g(tmp_path, "display.jsonl")

@@ -90,6 +90,15 @@ SPEC = {
     "goal_requests_dir":   ("WMTM_GOAL_REQUESTS_DIR", str, "", _D),
     "goal_requests_days":  ("WMTM_GOAL_REQUESTS_DAYS", float, 14.0, None),
     "goal_requests_max":   ("WMTM_GOAL_REQUESTS_MAX", int, 500, None),
+    # v0.7.0rc2 (Track V): closure, age cap and paraphrase dedupe (see docs/RUNTIME.md "Goal engine").
+    # The request window grows with the age of the oldest active item (goal_requests_days is the minimum), up to
+    # goal_history_max_days; the journal closure index (digests only) covers the same span.
+    "goal_history_max_days": ("WMTM_GOAL_HISTORY_MAX_DAYS", float, 45.0, None),
+    "goal_close_unattributed": ("WMTM_GOAL_CLOSE_UNATTRIBUTED", bool, True, None),  # sender-less group replies may close
+    "goal_journal_closure": ("WMTM_GOAL_JOURNAL_CLOSURE", bool, True, None),  # later journal notes may close items
+    "goal_journal_path":   ("WMTM_GOAL_JOURNAL_PATH", str, "", _D),        # "" = <state_dir>/_journal/journal.metta
+    "goal_max_item_age_days": ("WMTM_GOAL_MAX_ITEM_AGE_DAYS", float, 7.0, None),  # no message about older items
+    "goal_topic_overlap":  ("WMTM_GOAL_TOPIC_OVERLAP", float, 0.4, None),  # topic-cluster term overlap threshold
     # v0.4: write PeTTaChainer-admitted conclusions back to the long-term journal (derived_promotion)?  Off = they
     # live in working memory only.  Python-PLN / tool-derived items are not affected.
     "reasoner_writeback":  ("WMTM_REASONER_WRITEBACK", bool, False, None),

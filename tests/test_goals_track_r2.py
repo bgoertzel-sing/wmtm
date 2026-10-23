@@ -153,7 +153,8 @@ def test_fix4_remind_clock_restarts_on_addressee_contact():
 
 
 def test_fix4_no_reask_within_three_days_unless_new():
-    items = [_it(1, "Open question for Quill: should widget1 use the blue sprocket bracket?", age_d=4)]
+    # (age 2 d: at NOW + 3.5 d the item is 5.5 d old, inside the rc2 7-day age cap)
+    items = [_it(1, "Open question for Quill: should widget1 use the blue sprocket bracket?", age_d=2)]
     first = engine.propose(items, _cfg(), now=NOW)
     ask = [p for p in first["all_proposed"] if p["action"] == "ClarifyQuestion"][0]
     hist = [{"ts": NOW, "who": "quill", "topic": ask["topic"], "action": ask["action"]}]

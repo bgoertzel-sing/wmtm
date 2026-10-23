@@ -80,6 +80,31 @@ pushed.
 - Fast-path imports trimmed (`subprocess`/`resource` imported where used; builtin sha256 instead of hashlib).
 - Tests: `tests/test_automated_hooks.py`.
 
+## v0.7.0-rc2 (2026-10-24)
+Track V: fixes to the WMTM goal layers (needs, requests, actions, engine, goal_prompt) after the live phase-2 review
+of v0.6.0-rc3/v0.7.0-rc1 failed (stale "still open" items, paraphrase repeats, fragments / aliases / bundles, items
+contradicted by live flags). GoalChainer v2 core, runtime and protocol unchanged (`pymetta-native.2`). Still log only;
+`goal_prompt` still off. All rc1 flags-file keys are still valid; new keys have defaults (`docs/RUNTIME.md`).
+- Closure: the reply window grows with the age of the oldest active item (`goal_history_max_days`, 45);
+  sender-less group replies to the bot may close an on-topic item (`goal_close_unattributed`); later journal notes
+  close items through a read-only incremental digest index of the journal (`goal_journal_closure`,
+  `goal_journal_path`, `goalchainer/notes_index.json`); topic matching uses stemmed keys and path anchors; a note
+  reporting the addressee's decision/request closed on one of the item's anchors closes it.
+- Age cap: no message about an item last raised more than `goal_max_item_age_days` (7) ago.
+- Paraphrase dedupe by (person, topic cluster) (`goal_topic_overlap`, 0.4) instead of id: signal merge, repeat rule
+  (`proposals.jsonl`), one-per-topic, re-ask (`asked.jsonl`), `latest.json`, `display.jsonl` (window
+  max(`goal_repeat_s`, `goal_reask_s`)), and a guard in the suggestions block.
+- Text: speaker_map aliases -> canonical name everywhere; redundant "waiting on <addressee>" dropped; bundled item
+  lists split into one item each; fragments dropped instead of cut.
+- Live state: items about switching a boolean flag that is already in that state are closed (limits in RUNTIME.md).
+- `requests_index.json` / `notes_index.json` are written with mode 600 explicitly (`fchmod`; the live dir's default
+  ACL had left the rc1 index at 640). Request index format v2: rebuilt once on the first run after the upgrade.
+- The per-run v2 scratch dir is created mode 700 explicitly: GoalChainer v2's store refuses a world-writable parent,
+  so under umask 0 every run failed its canary (found by the rc2 deploy smoke).
+- `scripts/goals_replay.py`: `--requests-dir` (copy of the completed request files) and `--journal-closure`.
+- Tests: `tests/test_goals_track_v.py`; rc1 tests updated where rc2 changes the rule (age cap, index counts, display
+  window).
+
 ## v0.7.0-rc1 (2026-10-21)
 The goal engine's core moves to MesTTo's GoalChainer v2 (release `pymetta-native.2`, commit 5c6ecda), run as a
 separate process from its own environment. WMTM keeps extraction, addressees, timing and the log-only harness. Still

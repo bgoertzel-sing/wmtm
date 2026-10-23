@@ -6,10 +6,14 @@ Per replay day D: the active set = the notes from the window_days before the end
 Per-unit checks: the goal canary must pass before anything runs; each proposal passes engine.check_proposal.
 v0.7: --engine v2 --v2-python <GoalChainer v2 env python> runs the same days through GoalChainer v2 (one runner
 process per day; the v2 canary runs first).  days.jsonl then also holds v2's decisions per day.
+v0.7.0rc2: --requests-dir COPY/completed reads a copy of the channel's completed request files through
+wmtm.goals.requests (window sized by the oldest active note, index in --out); --journal-closure lets later notes of
+the same journal close items (wmtm.goals.notes, index in --out); a proposal in the same (person, topic cluster) as one
+already logged is not logged again (the live repeat / re-ask rules).
 """
 import argparse, calendar, csv, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from wmtm.goals import engine
+from wmtm.goals import engine, needs
 
 NOTE = re.compile(r'\(EventNote ev-(ep-note-(\d{8}T\d{6})Z) "((?:[^"\\]|\\.)*)"\)')
 
@@ -33,6 +37,8 @@ def main():
     ap.add_argument("--engine", default="native", choices=("native", "v2"))
     ap.add_argument("--v2-python", default="", help="v0.7: interpreter of the GoalChainer v2 environment")
     ap.add_argument("--v2-timeout", type=float, default=120.0)
+    ap.add_argument("--requests-dir", default="", help="rc2: copy of the completed request files")
+    ap.add_argument("--journal-closure", action="store_true", help="rc2: later journal notes may close items")
     a = ap.parse_args()
     cfg = {"goalchainer": True, "goalchainer_src": a.goalchainer_src, "semparse_dir": a.semparse,
            "speaker_map": (json.load(open(a.flags)).get("speaker_map") or {}) if a.flags else {},
@@ -40,13 +46,16 @@ def main():
            "goal_requests": [json.loads(l) for l in open(a.requests)] if a.requests else []}
     if a.engine == "v2":
         cfg.update(goal_engine="v2", goal_v2_python=a.v2_python, goal_v2_timeout_s=a.v2_timeout)
+    cfg["runtime_dir"] = a.out
+    if a.journal_closure:
+        cfg.update(goal_journal_path=a.journal, goal_journal_closure=True)
     can = engine.goal_canary(cfg) if a.engine == "native" else engine.goal_canary_v2(cfg)
     if not can.get("ok"):
         sys.exit("goal canary failed: %r" % can)
     ns = notes(a.journal)
     t0 = calendar.timegm(time.strptime(a.since, "%Y-%m-%d")); t1 = calendar.timegm(time.strptime(a.until, "%Y-%m-%d")) + 86400
     os.makedirs(a.out, exist_ok=True)
-    seen, rows, days, hist = {}, [], [], []
+    seen, rows, days, hist, logged = {}, [], [], [], []
     q = engine.cached_queries(cfg, {i for i, _, _ in ns}) if a.semparse else {}
     for day in range(int(t0), int(t1), 86400):
         now = day + 86400
@@ -55,13 +64,23 @@ def main():
             continue
         raw = [{"id": i, "content": c, "sti": 0.2 + 0.8 * (t - (now - a.window_days * 86400)) / (a.window_days * 86400),
                 "source_type": "recalled", "origin_ts": t, **({"queries": q[i]} if i in q else {})} for i, t, c in win]
-        ctx = {"autonomous": False, "recent": set(seen), "history": list(hist)}
+        dcfg = cfg
+        if a.requests_dir:
+            from wmtm.goals import requests as greq
+            oldest = min(t for _, t, _ in win)
+            dcfg = dict(cfg, goal_requests_dir=a.requests_dir,
+                        goal_requests=greq.load(dict(cfg, goal_requests_dir=a.requests_dir), now, {},
+                                                days=greq.window_days(cfg, oldest, now)))
+        if a.journal_closure:
+            from wmtm.goals import notes as gnotes
+            dcfg = dict(dcfg, goal_notes=gnotes.load(cfg, now, {}))
+        ctx = {"autonomous": False, "recent": set(seen), "history": list(hist), "recent_entries": list(logged)}
         t_run = time.time()
         if a.engine == "v2":
-            rr = engine.propose_v2(raw, cfg, ctx, now=now)
+            rr = engine.propose_v2(raw, dcfg, ctx, now=now)
             r = rr["human"]; r["runner"] = rr["_runner"]
         else:
-            r = engine.propose(raw, cfg, ctx, now=now)
+            r = engine.propose(raw, dcfg, ctx, now=now)
         bad = [p for p in r["proposals"] if engine.check_proposal(p)]
         assert not bad, bad
         days.append({"day": time.strftime("%Y-%m-%d", time.gmtime(day)), "notes": len(win), "needs": r["needs"],
@@ -70,8 +89,10 @@ def main():
                      "s": round(time.time() - t_run, 2), **({"decisions": r.get("decisions"), "runner": r.get("runner")}
                                                              if a.engine == "v2" else {})})
         for p in r["proposals"]:
-            if p["id"] in seen:
+            if p["id"] in seen or any(engine.same_cluster(p, e) for e in logged if now - e["ts"] < 3 * 86400):
                 continue
+            logged.append({"ts": now, "id": p["id"], "who": p.get("who"), "topic": p.get("topic") or [],
+                           "action": p["action"]})
             seen[p["id"]] = 1; days[-1]["logged"] += 1
             hist.append({"ts": now, "who": p.get("who"), "topic": p.get("topic") or [], "action": p["action"]})
             rows.append(dict(day=days[-1]["day"], **{k: p[k] for k in engine.FIELDS}, who=p.get("who"),
