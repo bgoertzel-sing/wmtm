@@ -211,3 +211,42 @@ def test_prerequisite_task_id_words_are_not_evidence():
     notes = [_note("n1", T0, goal),
              _note("n2", T0 + D, "Oct21 05:52 CLOSED t-2026-10-28-widget-docs. The widget docs passed review and are done.")]
     assert L.Lifecycle(notes).observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+
+
+def test_numbers_and_direction_keep_requests_apart():
+    # review 2, point 1
+    a = G(SELF + "Still open: increase widget cache retention to 30 days.")
+    b = G(SELF + "Still open: increase widget cache retention to 90 days.")
+    assert not L.same_goal(a, b)[0]
+    c = G(SELF + "Still open: move files from src/widget to src/gadget.")
+    d = G(SELF + "Still open: move files from src/gadget to src/widget.")
+    assert not L.same_goal(c, d)[0]
+    e = G(SELF + "Still open: rename cache -> store.")
+    f = G(SELF + "Still open: rename store -> cache.")
+    assert not L.same_goal(e, f)[0]
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    v1 = lc.observe(P(SELF + "Still open: increase widget cache retention to 30 days.", T0 + 10, ["ep-note-n1"], pid="a"))
+    v2 = lc.observe(P(SELF + "Still open: increase widget cache retention to 90 days.", T0 + 20, ["ep-note-n1"], pid="b"))
+    assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"]
+    # the same request still merges
+    assert L.same_goal(a, G(SELF + "PENDING: increase widget cache retention to 30 days"))[0]
+
+
+def test_closure_of_a_different_object_does_not_satisfy():
+    # review 2, point 2
+    goal = SELF + "Still open: rotate the cache logs for src/widget."
+    for txt in ("The cache logs for src/gadget were rotated and are done.",):
+        lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, txt)])
+        assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open", txt
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "The cache logs for src/widget were rotated and are done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "satisfied"
+    g30 = SELF + "Still open: set widget cache retention to 30 days."
+    lc = L.Lifecycle([_note("n1", T0, g30), _note("n2", T0 + D, "Widget cache retention set to 90 days, done.")])
+    assert lc.observe(P(g30, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+
+
+def test_verb_direction_without_from_keeps_requests_apart():
+    a = G(SELF + "Still open: rename widget to gadget in the docs.")
+    b = G(SELF + "Still open: rename gadget to widget in the docs.")
+    assert not L.same_goal(a, b)[0]
+    assert L.same_goal(a, G(SELF + "PENDING: rename widget to gadget in the docs"))[0]

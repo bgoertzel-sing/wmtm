@@ -6,6 +6,7 @@ The live worker, the flags and goal_prompt never call any of this. It only reads
 ## Goal ID and dedup
 - Goal body: the proposal text with its wrapper ("Self-task (log only, no message):", "Remind X about:") and any leading open markers (Still open:, PENDING:, waiting on) removed.
 - Terms: `needs.norm(needs.keys(body))`, plus short acronyms (LTM, CoS) and hive task ids, minus the marker words.
+- Value and direction anchors (review 2): every standalone number becomes an anchor `#30` (so "30 days" != "90 days"), and every directed pair becomes `@dir:a>b` ("from A to B", "A -> B", "rename/move/copy/migrate/switch A to B"), so a reversed move never merges with the original.
 - Two proposals are the **same goal** only if all of these hold:
   - same `who`;
   - same action;
@@ -24,6 +25,7 @@ States are computed **as of the proposal time**: only notes and goals before it 
   - Sources read: journal EventNotes and, with `--git-repo`, commit subjects. Hive "done" results reach the journal as CLOSED notes, which is how readme-flags is matched.
   - A closing sentence has a non-negated resolution word (`needs.res_hit`) or CLOSED / DONE / is done / deleted / trimmed / removed / merged / fixed, and no earlier open marker.
   - These never count as closing: LINK / SUPPORTS / CORRECTION / LESSON / NOTE / ROOT CAUSE sentences, and WMTM enrichment clusters (`MemoryCluster`, `wmtm-enrich-`), because they restate older notes.
+  - Anchor conflict (review 2): a closing sentence is skipped when, for some anchor kind (entity/path `@`, number `#`, direction `@dir:`), both the goal and the sentence have anchors of that kind and share none. "cache logs for src/gadget rotated" never closes "rotate cache logs for src/widget"; "retention 90 days, done" never closes "retention to 30 days".
   - The closing sentence matches the goal in any of these ways:
     - (a) it names one of the goal's task ids that is not a precondition. In "once t-x closes, do Y", closing t-x is not evidence for Y: Y must match on its own terms, and the condition words (once, clos, ...) are ignored;
     - (b) it shares >= 2 distinctive terms including an anchor, and the whole note shares >= `SAT_MIN`-1 = 3;

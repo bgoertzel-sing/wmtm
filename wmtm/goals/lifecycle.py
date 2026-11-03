@@ -68,11 +68,21 @@ def terms(text):
         if w.upper() == w and len(w) >= 2 and w not in _ACRO_STOP or (len(w) >= 3 and re.fullmatch(r"[A-Z][a-z][A-Z]", w)):
             t.add("@" + w.lower())
     t |= {"@" + x for x in _TASK.findall(b)}
+    t |= {"#" + n for n in _NUM.findall(b)}                       # numeric values: 30 days != 90 days
+    for m in _DIR.finditer(b):                                     # direction: from A to B != from B to A
+        g_ = [x for x in m.groups() if x]
+        a_, b_ = g_[0], g_[1]
+        t.add("@dir:%s>%s" % (a_.strip(".,;:").lower(), b_.strip(".,;:").lower()))
     return t
 
 
+_NUM = re.compile(r"(?<![\w./:-])(\d+(?:\.\d+)?)(?![\w/:-])")
+_DIR = re.compile(r"\bfrom\s+(\S+)\s+(?:to|into|onto)\s+(\S+)|(?<!\S)(\S+)\s*(?:->|=>|\u2192)\s*(\S+)|"
+                  r"\b(?:rename|renam|move|copy|migrate|switch|port|convert|change)\s+(?:the\s+)?(\S+)\s+(?:to|into)\s+(\S+)", re.I)
+
+
 def anchors(ts):
-    return {x for x in ts if x.startswith("@") or x.startswith("track_") or
+    return {x for x in ts if x.startswith("@") or x.startswith("#") or x.startswith("track_") or
             (re.fullmatch(r"[0-9a-f]{7,40}", x) and re.search(r"\d", x) and re.search(r"[a-f]", x))}
 
 
@@ -132,6 +142,22 @@ def supersedes(new, old):
     return ""
 
 
+def _kind(a):
+    return "#" if a.startswith("#") else ("dir" if a.startswith("@dir:") else "@")
+
+
+def anchor_conflict(goal_terms, sent_terms):
+    """-> conflicting anchors if the sentence is about a different object: for some anchor kind (entity/path @,
+    number #, direction @dir:) the goal has anchors, the sentence has anchors of that kind, and they share none."""
+    ga, sa = anchors(goal_terms), anchors(sent_terms)
+    for k in ("@", "#", "dir"):
+        gk = {x for x in ga if _kind(x) == k}
+        sk = {x for x in sa if _kind(x) == k}
+        if gk and sk and not (gk & sk):
+            return sorted(sk)
+    return []
+
+
 def closing_sentences(note_text):
     """Sentences of a note that report a closure: a non-negated resolution word (needs.res_hit) or CLOSED / DONE /
     is done / deleted / trimmed / removed / merged / fixed, not preceded by an open marker ("still open:",
@@ -174,6 +200,8 @@ def closure_match(goal, note_terms, note_text, common=()):
             g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
     gt = task_ids(goal["text"]) - pre
     for s in closing_sentences(note_text):
+        if anchor_conflict(goal["terms"], terms(s)):
+            continue                     # closes a different object (src/gadget vs src/widget, 90 vs 30 days)
         tids = gt & task_ids(s)
         if tids:
             return "closing sentence names task %s" % sorted(tids)[0]
