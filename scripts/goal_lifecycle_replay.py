@@ -54,7 +54,7 @@ def replay(props, notes, since=None, until=None, cutoff=None):
                      "pre-rc2", "engine_id": p.get("id"), "gid": v["gid"], "action": p.get("action"),
                      "kind": "person" if p.get("action") == "RemindPending" else "self", "who": p.get("who"),
                      "keep": v["keep"], "state": v["state"], "reason": v["reason"], "items": p.get("items") or []})
-    end = rows[-1]["ts"] if rows else time.time()
+    end = until if until else (rows[-1]["ts"] if rows else time.time())   # states as of the window end
     goals = []
     for g in lc.goals:
         st, why = lc.state_at(g, end)

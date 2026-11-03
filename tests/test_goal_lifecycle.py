@@ -69,12 +69,22 @@ def test_duplicates_dropped_and_same_gid():
 
 
 def test_satisfied_by_task_id():
-    notes = [_note("n1", T0, "Still open: once t-2026-10-28-widget-docs closes, delete branch hive/w-backup."),
+    notes = [_note("n1", T0, "Still open: write the widget docs for t-2026-10-28-widget-docs."),
              _note("n2", T0 + D, "Oct21 05:52 CLOSED t-2026-10-28-widget-docs. It passed review.")]
-    lc = L.Lifecycle(notes)
-    v = lc.observe(P(SELF + "Still open: once t-2026-10-28-widget-docs closes, delete branch hive/w-backup.",
-                     T0 + 2 * D, ["ep-note-n1"]))
+    v = L.Lifecycle(notes).observe(P(SELF + "Still open: write the widget docs for t-2026-10-28-widget-docs.",
+                                     T0 + 2 * D, ["ep-note-n1"]))
     assert v["state"] == "satisfied" and "ep-note-n2" in v["reason"] and "names task" in v["reason"]
+
+
+def test_closing_a_prerequisite_does_not_satisfy_the_follow_up():
+    # review 1, point 2: "once t-x closes, delete branch Y" is not done when t-x closes
+    goal = SELF + "Still open: once t-2026-10-28-widget-docs closes, delete branch hive/w-backup."
+    notes = [_note("n1", T0, goal), _note("n2", T0 + D, "Oct21 05:52 CLOSED t-2026-10-28-widget-docs. It passed review.")]
+    lc = L.Lifecycle(notes)
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+    notes.append(_note("n3", T0 + 2.5 * D, "Branch hive/w-backup deleted after the widget-docs close."))
+    v = L.Lifecycle(notes).observe(P(goal, T0 + 3 * D, ["ep-note-n1"]))
+    assert v["state"] == "satisfied" and "ep-note-n3" in v["reason"]
 
 
 def test_satisfied_by_closing_sentence_terms():
@@ -153,3 +163,43 @@ def test_multi_item_goal_needs_every_item_closed():
                       _note("n4", T0 + D, "The sprocket docs rewrite for gizmo pages is done.")])
     v = lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))
     assert v["state"] == "satisfied" and "all 3 items" in v["reason"]
+
+
+def test_different_anchors_never_supersede():
+    # review 1, point 1: src/widget vs src/gadget must not merge AND must not retire each other
+    a = "Remind quill about: Still waiting on quill's src/widget answer about the cache layout."
+    b = "Remind quill about: Still waiting on quill's src/gadget answer about the cache layout."
+    lc = L.Lifecycle([_note("n1", T0, a), _note("n2", T0 + D, b)])
+    va = lc.observe(P(a, T0 + D / 2, ["ep-note-n1"], "quill", "RemindPending", "a"))
+    vb = lc.observe(P(b, T0 + 2 * D, ["ep-note-n2"], "quill", "RemindPending", "b"))
+    assert va["keep"] and vb["keep"] and va["gid"] != vb["gid"]
+    assert lc.state_at(lc.goals[0], T0 + 2 * D + 1)[0] == "open"
+
+
+def test_different_action_never_supersedes():
+    a = G(SELF + "Still open: widget cache rotation for gadget logs.")
+    b = G("Remind quill about: widget cache rotation for gadget logs.", "self", "RemindPending")
+    a.update(gid="a", src_ts=T0, first_ts=T0); b.update(gid="b", src_ts=T0 + D, first_ts=T0 + D)
+    assert L.supersedes(b, a) == ""
+
+
+def test_merged_repeat_from_newer_note_moves_source_forward():
+    # review 1, point 3: an old closure must not satisfy a goal re-raised by a newer "still open" note
+    goal = SELF + "Still open: widget cache rotation for gadget logs."
+    notes = [_note("n1", T0, goal), _note("n2", T0 + D, "The widget cache rotation for gadget logs is done."),
+             _note("n3", T0 + 2 * D, goal)]
+    lc = L.Lifecycle(notes)
+    lc.observe(P(goal, T0 + D / 2, ["ep-note-n1"], pid="a"))
+    v = lc.observe(P(goal, T0 + 3 * D, ["ep-note-n3"], pid="b"))
+    assert v["state"] == "open" and lc.goals[0]["src_ts"] == T0 + 2 * D
+
+
+def test_replay_final_states_use_window_end():
+    # review 1, point 4: a closure after the last proposal but inside the window counts
+    import os, sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts"))
+    import goal_lifecycle_replay as R
+    goal = SELF + "Still open: widget cache rotation for gadget logs."
+    notes = [_note("n1", 100.0, goal), _note("n2", 200.0, "The widget cache rotation for gadget logs is done.")]
+    rows, goals = R.replay([P(goal, 110.0, ["ep-note-n1"])], notes, since=None, until=300.0)
+    assert rows[0]["keep"] and goals[0]["state"] == "satisfied"

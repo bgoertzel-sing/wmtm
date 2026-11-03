@@ -12,7 +12,7 @@ Rules (thresholds are module constants so a replay can report them):
 * Same goal (same ID): same person (``who``) AND same action AND Jaccard(terms) >= MERGE_JACCARD AND equal anchor sets
   (anchors = "@x" entities / paths, track letters, commit hashes, task ids).  An anchor present on one side only means a
   different object, so it never merges.  The ID is that of the first goal in the cluster (sha1 of who|action|terms).
-* superseded: a later goal (newer source note) for the same person either restates it (covers >= COVER of its terms)
+* superseded: a later goal (newer source note) for the same person AND same action either restates it (covers >= COVER of its terms)
   or it was split: later smaller goals each covered >= COVER by it, whose union covers >= SPLIT_COVER of its terms
   (one split-off item alone never retires the other items).
 * satisfied: a journal note newer than the goal's newest source note reports a closure (a CLOSED / RESOLVED / DONE
@@ -76,6 +76,15 @@ def anchors(ts):
             (re.fullmatch(r"[0-9a-f]{7,40}", x) and re.search(r"\d", x) and re.search(r"[a-f]", x))}
 
 
+_PREREQ = re.compile(r"\b(?:once|after|when|until|as soon as)\s+(t-\d{4}-\d{2}-\d{2}-[a-z0-9-]+|p-\d{4}-[a-z0-9-]+)\s+"
+                     r"(?:closes|is closed|has closed|is done|passes|is merged|merges|lands)\b", re.I)
+
+
+def prereq_ids(text):
+    """Task ids named as a precondition ("once t-x closes, do Y"): closing them does not do Y."""
+    return set(m.group(1) for m in _PREREQ.finditer(text or ""))
+
+
 def task_ids(text):
     return set(_TASK.findall(text or ""))
 
@@ -113,9 +122,12 @@ def supersedes(new, old):
         return ""
     if (new["src_ts"], new["first_ts"]) <= (old["src_ts"], old["first_ts"]):
         return ""
-    if cover(old["terms"], new["terms"]) >= COVER:
+    if new.get("action") != old.get("action"):
+        return ""
+    an, ao = anchors(new["terms"]), anchors(old["terms"])
+    if an == ao and cover(old["terms"], new["terms"]) >= COVER:
         return "restated by %s" % new["gid"]
-    if len(new["terms"]) < len(old["terms"]) and cover(new["terms"], old["terms"]) >= COVER:
+    if an <= ao and len(new["terms"]) < len(old["terms"]) and cover(new["terms"], old["terms"]) >= COVER:
         return "split: item %s taken over by %s" % (" ".join(sorted(new["terms"]))[:60], new["gid"])
     return ""
 
@@ -150,11 +162,15 @@ def note_closes(note_text):
 
 def closure_match(goal, note_terms, note_text, common=()):
     """-> reason string if a closure sentence of the note matches the goal, else ''.  Sentence level: the closing
-    sentence itself must carry the match.  (a) it names one of the goal's task ids; (b) it shares >= 2 distinctive
+    sentence itself must carry the match.  (a) it names one of the goal's task ids that is not a
+    precondition ("once t-x closes, do Y": closing t-x is not evidence for Y; Y must match on its own terms); (b) it shares >= 2 distinctive
     terms with the goal, one of them an anchor, and the whole note shares >= SAT_MIN - 1 distinctive terms; (c) it
     alone shares >= 3 distinctive terms and >= SAT_FRAC of them."""
-    g = {x for x in goal["terms"] if x.lstrip("@") not in common}
-    gt = task_ids(goal["text"])
+    pre = prereq_ids(goal["text"])
+    g = {x for x in goal["terms"] if x.lstrip("@") not in common and x.lstrip("@") not in pre}
+    if pre:                              # the condition's own words (once/clos) carry no evidence for the follow-up
+        g -= {"once", "clos", "after", "when", "until", "pass", "merg"}
+    gt = task_ids(goal["text"]) - pre
     for s in closing_sentences(note_text):
         tids = gt & task_ids(s)
         if tids:
@@ -220,6 +236,12 @@ class Lifecycle:
                 if p.get("id") not in g["engine_ids"]:
                     g["engine_ids"].append(p.get("id"))
                     g["merges"].append({"engine_id": p.get("id"), "rule": why})
+                for x in p.get("items") or []:   # newest-source rule: a repeat from a newer note moves src_ts forward
+                    if x not in g["items"]:
+                        g["items"].append(x)
+                src = [self.note_ts.get(x) for x in (p.get("items") or []) if self.note_ts.get(x)]
+                if src and max(src) > g["src_ts"]:
+                    g["src_ts"] = max(src)
                 return g, False
         src = [self.note_ts.get(x) for x in (p.get("items") or []) if self.note_ts.get(x)]
         g = {"gid": goal_id(cand["who"], cand["action"], ts), "who": cand["who"], "action": cand["action"],
