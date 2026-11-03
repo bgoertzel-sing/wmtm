@@ -16,6 +16,14 @@ The live worker, the flags and goal_prompt never call any of this. It only reads
 - Goal ID: `sha1(who|action|sorted terms)[:12]` of the first proposal in the cluster. It is stable across runs and term order.
 - Why 0.8: the existing `cluster_match` (overlap / min) merges short texts with almost anything. On the Oct 19–29 log, "no later note says I joined" matched 9 of 13 other goals. Jaccard >= 0.8 plus equal anchors merged no pair of distinct texts in that log.
 
+## Polarity, order and object kinds (review 3)
+- Polarity: a body containing a negation or reversal word (not, never, don't, stop, avoid, without, cancel, revert, undo, disable, remove, drop) gets the anchor `@neg`, so "increase X" and "do not increase X" never merge.
+- Order: "before" and "after" become `@rel:before` / `@rel:after`; "merge/rebase/cherry-pick A into B" is a direction `@dir:a>b`.
+- `@neg` and `@rel:*` identify a goal but are not closure evidence: they are removed from the terms that a closing sentence must share.
+- A negated imperative goal ("do not X", "stop X") is only closed by a closing sentence that is itself negated ("we will not X; done"), never by "X done".
+- Anchor conflict is checked per kind: entity `@x`, path `@a/b`, task id `@t-...`, number `#N`, direction `@dir:`, order `@rel:`. A shared entity (`@ltm`) therefore does not hide conflicting paths (src/widget vs src/gadget).
+- Known limit: symmetric phrasings ("swap A and B" vs "swap B and A") merge on purpose because they mean the same thing; other paraphrases of direction are not modelled.
+
 ## Newest source
 When a proposal merges into an existing goal, its source notes are added to the goal and `src_ts` moves forward to the newest one. A goal re-raised by a newer "still open" note is therefore not satisfied by an older closure.
 
@@ -47,3 +55,8 @@ Final states (goals.json, rating sheet) are computed as of `--until` (the window
 - `dropped.csv`: every dropped proposal with its reason.
 - `kept.csv` and `goals.json`.
 - `rating_sheet.{csv,md}`: one row per goal still open, with the goal id, the source note and a rating column (approve / reject / already done / wrong).
+
+## Future work (design notes, not implemented)
+- Speaker provenance ranking: rank goals by who raised them (a human request in chat > a human remark > a self-task derived from my own notes), and keep the speaker and message id on each goal so the rating sheet can show and sort by it.
+- New-evidence-only scheduling: re-evaluate a goal only when a new note touches its terms or anchors (or the stale timer fires), instead of re-scanning the whole journal on every cycle; a goal with no new evidence is never re-proposed.
+- Approved goals become CoS hive proposals: once a human rates a goal "do it" on the rating sheet, emit a hive `propose` (title, what is wanted, acceptance criteria, source citation telegram:<chat>/<msg>) for the chief of staff to approve and assign; the goal moves to a `proposed` state and is closed by the hive task's outcome.

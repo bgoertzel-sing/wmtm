@@ -69,6 +69,9 @@ def terms(text):
             t.add("@" + w.lower())
     t |= {"@" + x for x in _TASK.findall(b)}
     t |= {"#" + n for n in _NUM.findall(b)}                       # numeric values: 30 days != 90 days
+    t |= {"@rel:" + w.lower() for w in _REL.findall(b)}          # temporal relation: before != after
+    if _NEGW.search(b):                                            # polarity: "do X" != "do not X"
+        t.add("@neg")
     for m in _DIR.finditer(b):                                     # direction: from A to B != from B to A
         g_ = [x for x in m.groups() if x]
         a_, b_ = g_[0], g_[1]
@@ -78,7 +81,16 @@ def terms(text):
 
 _NUM = re.compile(r"(?<![\w./:-])(\d+(?:\.\d+)?)(?![\w/:-])")
 _DIR = re.compile(r"\bfrom\s+(\S+)\s+(?:to|into|onto)\s+(\S+)|(?<!\S)(\S+)\s*(?:->|=>|\u2192)\s*(\S+)|"
-                  r"\b(?:rename|renam|move|copy|migrate|switch|port|convert|change)\s+(?:the\s+)?(\S+)\s+(?:to|into)\s+(\S+)", re.I)
+                  r"\b(?:rename|renam|move|copy|migrate|switch|port|convert|change|merge|rebase|cherry-pick)\s+(?:the\s+)?(\S+)\s+(?:to|into)\s+(\S+)", re.I)
+
+
+_REL = re.compile(r"\b(before|after)\b", re.I)
+_NEGW = re.compile(r"\b(?:not|never|no longer|don't|dont|do not|doesn't|shouldn't|must not|stop|avoid|without|cancel|"
+                   r"revert|undo|disable|remove|drop)\b|n't\b", re.I)
+
+
+_NEG_IMP = re.compile(r"^\s*(?:(?:still open|pending|todo)\s*:\s*)?(?:please\s+)?(?:do not|don't|dont|never|stop|avoid|must not)\b", re.I)
+_MODIFIERS = {"@neg", "@rel:before", "@rel:after"}
 
 
 def anchors(ts):
@@ -143,18 +155,29 @@ def supersedes(new, old):
 
 
 def _kind(a):
+    if a == "@neg":
+        return "neg"
+    if a.startswith("@rel:"):
+        return "rel"
+    if a.startswith("@t-") or a.startswith("@p-"):
+        return "task"
+    if a.startswith("@") and "/" in a:
+        return "path"
     return "#" if a.startswith("#") else ("dir" if a.startswith("@dir:") else "@")
 
 
 def anchor_conflict(goal_terms, sent_terms):
-    """-> conflicting anchors if the sentence is about a different object: for some anchor kind (entity/path @,
-    number #, direction @dir:) the goal has anchors, the sentence has anchors of that kind, and they share none."""
+    """-> conflicting anchors if the sentence is about a different object: for some anchor kind (entity @, path @a/b,
+    task id, number #, direction @dir:, before/after @rel:) the goal and the sentence each name an anchor of that kind
+    that the other lacks.  Checked per kind, so a shared entity (@ltm) never hides conflicting paths."""
     ga, sa = anchors(goal_terms), anchors(sent_terms)
-    for k in ("@", "#", "dir"):
+    for k in ("@", "path", "task", "#", "dir", "rel"):
         gk = {x for x in ga if _kind(x) == k}
         sk = {x for x in sa if _kind(x) == k}
+        # a different object: both name anchors of this kind and share none.  Paths and task ids are their own
+        # kinds, so a shared entity (@ltm) does not excuse src/widget vs src/gadget
         if gk and sk and not (gk & sk):
-            return sorted(sk)
+            return sorted(sk - gk)
     return []
 
 
@@ -199,7 +222,11 @@ def closure_match(goal, note_terms, note_text, common=()):
         for t in pre:
             g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
     gt = task_ids(goal["text"]) - pre
+    neg_imp = bool(_NEG_IMP.search(body(goal["text"])))
+    g -= _MODIFIERS                      # polarity / before-after identify a goal but are no closure evidence
     for s in closing_sentences(note_text):
+        if neg_imp and not _NEGW.search(s):
+            continue                     # "do not X" is not closed by "X done" (opposite polarity)
         if anchor_conflict(goal["terms"], terms(s)):
             continue                     # closes a different object (src/gadget vs src/widget, 90 vs 30 days)
         tids = gt & task_ids(s)

@@ -250,3 +250,48 @@ def test_verb_direction_without_from_keeps_requests_apart():
     b = G(SELF + "Still open: rename gadget to widget in the docs.")
     assert not L.same_goal(a, b)[0]
     assert L.same_goal(a, G(SELF + "PENDING: rename widget to gadget in the docs"))[0]
+
+
+def test_merge_direction_and_before_after_keep_requests_apart():
+    a = G(SELF + "Still open: merge hive/a into main.")
+    b = G(SELF + "Still open: merge main into hive/a.")
+    assert not L.same_goal(a, b)[0]
+    c = G(SELF + "Still open: widget cache rotation before promotion.")
+    d = G(SELF + "Still open: widget cache rotation after promotion.")
+    assert not L.same_goal(c, d)[0]
+    assert L.same_goal(c, G(SELF + "PENDING: widget cache rotation before promotion"))[0]
+
+
+def test_negated_request_is_a_different_goal():
+    # review 3, point 1
+    a = G(SELF + "Still open: increase widget cache retention to 30 days.")
+    b = G(SELF + "Still open: do not increase widget cache retention to 30 days.")
+    assert not L.same_goal(a, b)[0]
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    v1 = lc.observe(P("Increase widget cache retention to 30 days.", T0 + 10, ["ep-note-n1"], pid="a"))
+    v2 = lc.observe(P("Do not increase widget cache retention to 30 days.", T0 + 20, ["ep-note-n1"], pid="b"))
+    assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"]
+
+
+def test_shared_entity_does_not_hide_conflicting_paths():
+    # review 3, point 2
+    goal = SELF + "Rotate the LTM cache logs for src/widget."
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "The LTM cache logs for src/gadget were rotated and are done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "The LTM cache logs for src/widget were rotated and are done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "satisfied"
+
+
+def test_negated_goal_is_not_closed_by_the_positive_action():
+    goal = SELF + "Do not increase widget cache retention to 30 days."
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "Widget cache retention increased to 30 days, done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+    lc = L.Lifecycle([_note("n1", T0, goal),
+                      _note("n2", T0 + D, "Decided: we will not increase widget cache retention to 30 days; done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "satisfied"
+
+
+def test_reversed_move_does_not_close_the_original():
+    goal = SELF + "Move files from src/widget to src/gadget."
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "Moved files from src/gadget to src/widget, done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
