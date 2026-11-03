@@ -70,8 +70,7 @@ def terms(text):
     t |= {"@" + x for x in _TASK.findall(b)}
     t |= {"#" + n for n in _NUM.findall(b)}                       # numeric values: 30 days != 90 days
     t |= {"@rel:" + w.lower() for w in _REL.findall(b)}          # temporal relation: before != after
-    if _NEGW.search(b):                                            # polarity: "do X" != "do not X"
-        t.add("@neg")
+    t |= {"@neg:" + x for x in neg_scope(b)}                       # scoped polarity: "do X" != "do not X"
     for m in _DIR.finditer(b):                                     # direction: from A to B != from B to A
         g_ = [x for x in m.groups() if x]
         a_, b_ = g_[0], g_[1]
@@ -87,6 +86,34 @@ _DIR = re.compile(r"\bfrom\s+(\S+)\s+(?:to|into|onto)\s+(\S+)|(?<!\S)(\S+)\s*(?:
 _REL = re.compile(r"\b(before|after)\b", re.I)
 _NEGW = re.compile(r"\b(?:not|never|no longer|don't|dont|do not|doesn't|shouldn't|must not|stop|avoid|without|cancel|"
                    r"revert|undo|disable|remove|drop)\b|n't\b", re.I)
+
+
+def neg_scope(text):
+    """-> the terms that a negation word applies to: for every negation / reversal word, the first content term after
+    it (within 4 words).  "increase X without downtime" -> {downtim}; "do not increase X without downtime" ->
+    {increas, downtim}.  Scoped, so one negation never masks another.  A negation followed by "yet" in the same
+    clause ("Ben hasn't answered yet", "not yet merged") is a pending state, the same as "still waiting on", and is
+    skipped."""
+    out = set()
+    for m in _NEGW.finditer(text or ""):
+        clause = re.split(r"[.;:!?\n]", text[m.end():], 1)[0]
+        if re.search(r"\byet\b", clause, re.I) or re.match(r"\s*yet\b", text[m.end():], re.I):
+            continue                     # "hasn't answered yet" / "not yet" describe a pending state, not a prohibition
+        for w in re.findall(r"[\w/.-]+", text[m.end():])[:4]:
+            k = {x for x in needs.norm(needs.keys(w)) if x not in _MARKER_WORDS}
+            if k:
+                out.add(sorted(k)[0])
+                break
+    return out
+
+
+def polarity_conflict(goal_terms, sent_text):
+    """True if the sentence and the goal share a term that one of them negates and the other does not
+    ("we will not increase X; done" never closes "increase X", "X increased" never closes "do not increase X")."""
+    gneg = {x[5:] for x in goal_terms if x.startswith("@neg:")}
+    sneg = neg_scope(sent_text)
+    shared = {x for x in goal_terms if not x.startswith("@")} & (terms(sent_text) | sneg)
+    return any((x in gneg) != (x in sneg) for x in shared | (gneg & sneg))
 
 
 _NEG_IMP = re.compile(r"^\s*(?:(?:still open|pending|todo)\s*:\s*)?(?:please\s+)?(?:do not|don't|dont|never|stop|avoid|must not)\b", re.I)
@@ -155,7 +182,7 @@ def supersedes(new, old):
 
 
 def _kind(a):
-    if a == "@neg":
+    if a.startswith("@neg"):
         return "neg"
     if a.startswith("@rel:"):
         return "rel"
@@ -222,11 +249,11 @@ def closure_match(goal, note_terms, note_text, common=()):
         for t in pre:
             g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
     gt = task_ids(goal["text"]) - pre
-    neg_imp = bool(_NEG_IMP.search(body(goal["text"])))
     g -= _MODIFIERS                      # polarity / before-after identify a goal but are no closure evidence
+    g = {x for x in g if not x.startswith("@neg:")}
     for s in closing_sentences(note_text):
-        if neg_imp and not _NEGW.search(s):
-            continue                     # "do not X" is not closed by "X done" (opposite polarity)
+        if polarity_conflict(goal["terms"], s):
+            continue                     # opposite polarity on a shared term, in either direction
         if anchor_conflict(goal["terms"], terms(s)):
             continue                     # closes a different object (src/gadget vs src/widget, 90 vs 30 days)
         tids = gt & task_ids(s)

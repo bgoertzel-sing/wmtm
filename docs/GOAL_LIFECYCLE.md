@@ -17,10 +17,10 @@ The live worker, the flags and goal_prompt never call any of this. It only reads
 - Why 0.8: the existing `cluster_match` (overlap / min) merges short texts with almost anything. On the Oct 19–29 log, "no later note says I joined" matched 9 of 13 other goals. Jaccard >= 0.8 plus equal anchors merged no pair of distinct texts in that log.
 
 ## Polarity, order and object kinds (review 3)
-- Polarity: a body containing a negation or reversal word (not, never, don't, stop, avoid, without, cancel, revert, undo, disable, remove, drop) gets the anchor `@neg`, so "increase X" and "do not increase X" never merge.
+- Polarity is scoped (review 4): every negation or reversal word (not, never, don't, stop, avoid, without, cancel, revert, undo, disable, remove, drop) adds an anchor `@neg:<term>` for the first content term after it (within 4 words). "increase X without downtime" -> `@neg:downtim`; "do not increase X without downtime" -> `@neg:increas`, `@neg:downtim`. One negation therefore never masks another. A negation followed by "yet" in the same clause ("Ben hasn't answered yet") is a pending state and adds nothing.
+- Closure polarity is checked in both directions (review 4): a closing sentence is skipped when it shares a term with the goal that one side negates and the other does not. "We will not increase X; done" never closes "increase X", and "X increased, done" never closes "do not increase X".
 - Order: "before" and "after" become `@rel:before` / `@rel:after`; "merge/rebase/cherry-pick A into B" is a direction `@dir:a>b`.
 - `@neg` and `@rel:*` identify a goal but are not closure evidence: they are removed from the terms that a closing sentence must share.
-- A negated imperative goal ("do not X", "stop X") is only closed by a closing sentence that is itself negated ("we will not X; done"), never by "X done".
 - Anchor conflict is checked per kind: entity `@x`, path `@a/b`, task id `@t-...`, number `#N`, direction `@dir:`, order `@rel:`. A shared entity (`@ltm`) therefore does not hide conflicting paths (src/widget vs src/gadget).
 - Known limit: symmetric phrasings ("swap A and B" vs "swap B and A") merge on purpose because they mean the same thing; other paraphrases of direction are not modelled.
 
