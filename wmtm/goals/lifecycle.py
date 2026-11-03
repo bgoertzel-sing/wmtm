@@ -168,8 +168,10 @@ def closure_match(goal, note_terms, note_text, common=()):
     alone shares >= 3 distinctive terms and >= SAT_FRAC of them."""
     pre = prereq_ids(goal["text"])
     g = {x for x in goal["terms"] if x.lstrip("@") not in common and x.lstrip("@") not in pre}
-    if pre:                              # the condition's own words (once/clos) carry no evidence for the follow-up
+    if pre:                              # the condition's own words (once/clos, the task id's words) carry no evidence
         g -= {"once", "clos", "after", "when", "until", "pass", "merg"}
+        for t in pre:
+            g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
     gt = task_ids(goal["text"]) - pre
     for s in closing_sentences(note_text):
         tids = gt & task_ids(s)

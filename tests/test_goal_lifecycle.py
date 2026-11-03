@@ -203,3 +203,11 @@ def test_replay_final_states_use_window_end():
     notes = [_note("n1", 100.0, goal), _note("n2", 200.0, "The widget cache rotation for gadget logs is done.")]
     rows, goals = R.replay([P(goal, 110.0, ["ep-note-n1"])], notes, since=None, until=300.0)
     assert rows[0]["keep"] and goals[0]["state"] == "satisfied"
+
+
+def test_prerequisite_task_id_words_are_not_evidence():
+    # the words inside the prerequisite's id (widget, docs) must not let its CLOSED sentence satisfy the follow-up
+    goal = SELF + "Still open: once t-2026-10-28-widget-docs closes, switch sprocket back to main and delete hive/w-backup."
+    notes = [_note("n1", T0, goal),
+             _note("n2", T0 + D, "Oct21 05:52 CLOSED t-2026-10-28-widget-docs. The widget docs passed review and are done.")]
+    assert L.Lifecycle(notes).observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
