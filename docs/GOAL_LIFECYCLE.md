@@ -68,7 +68,23 @@ Final states (goals.json, rating sheet) are computed as of `--until` (the window
 - `kept.csv` and `goals.json`.
 - `rating_sheet.{csv,md}`: one row per goal still open, with the goal id, the source note and a rating column (approve / reject / already done / wrong).
 
+## Known limits (cos answer 1, after review 10)
+The matcher is lexical: bag-of-terms plus anchors. It is correct on the real Oct 19-29 replay and on the order's test pairs. Constructed sentences can still beat it. **It must not drive live behaviour (goal_prompt or any other live path) until it is replaced by structured per-clause slots** (op, object, value, order, polarity, modality, tense, subject), probably built on a real parser. Each review found one of the probe families below. Families marked "anchored" have a lexical fix, but other phrasings in the same family may still slip through. Families marked "open" are not handled.
+- Numbers and direction (review 2, anchored: #N, @dir). Example: "set widget retention to 30 days" vs "... to 90 days"; "move src/widget to src/gadget" vs the reverse.
+- Negation and its scope (reviews 3-4, anchored: @neg:<term>, two-way polarity_conflict). Example: "do not merge X" vs "merge X"; "we will not merge X; done" closing "merge X".
+- Yet-exceptions (reviews 5-6, anchored: _stative_neg, _negated_close). Example: "do not merge X yet" vs "merge X"; "X is not yet merged" closing "merge X".
+- Operation polarity (review 6, anchored: @op). Example: "increase widget retention" vs "decrease widget retention".
+- Operation and object (review 7, anchored: @opobj). Example: "increase widget retention and decrease gadget retention" vs the swap.
+- Modality (review 7, anchored: _irrealis_close). Example: "X will be merged tomorrow", "if X is merged", "X should be merged" counted as done.
+- Object phrase and clause scope (review 8, anchored: whole-phrase @opobj, clause evidence spans). Example: "increase cache retention for widgets and decrease it for gadgets" vs the swap; "X will be merged, and the unrelated typo was fixed" closing "merge X".
+- Numbers bound to objects (review 9, anchored: @num). Example: "widget retention to 30 days and gadget retention to 90 days" vs the swap.
+- Modal scope over lists (review 9, anchored: _breaks_scope for participle lists). Example: "X will be reviewed, tested and merged" counted as done.
+- Ordering (review 10, open): @rel before/after is not bound to which object comes first. Example: "Configure widget cache retention before gadget cache retention" merges with the reversed order.
+- Modifier scope (review 10, open): adverbs and by-phrases inside a participle list end a modal's scope. Example: "X will be carefully reviewed, thoroughly tested and merged" and "X will be reviewed and tested by the team and merged" count as done.
+- General: clause splitting is punctuation plus and/but/then/while/whereas; pronouns resolve only through clause structure, not coreference; a paraphrased subject ("the patch" for "widget cache changes") counts as foreign, so the goal stays open; irregular participles outside a short list may end a modal's scope.
+
 ## Future work (design notes, not implemented)
 - Speaker provenance ranking: rank goals by who raised them (a human request in chat > a human remark > a self-task derived from my own notes), and keep the speaker and message id on each goal so the rating sheet can show and sort by it.
 - New-evidence-only scheduling: re-evaluate a goal only when a new note touches its terms or anchors (or the stale timer fires), instead of re-scanning the whole journal on every cycle; a goal with no new evidence is never re-proposed.
 - Approved goals become CoS hive proposals: once a human rates a goal "do it" on the rating sheet, emit a hive `propose` (title, what is wanted, acceptance criteria, source citation telegram:<chat>/<msg>) for the chief of staff to approve and assign; the goal moves to a `proposed` state and is closed by the hive task's outcome.
+- Structured per-clause slots (replaces the lexical matcher; cos takes it and the spaCy-class dependency question to the humans): parse each clause into (op, object, value, order, polarity, modality, tense, subject) and compare slots, not term bags.
