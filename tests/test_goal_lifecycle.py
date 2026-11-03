@@ -525,3 +525,74 @@ C += [(_MG, "Widget cache changes had to be merged into production, and they wer
       (_MG, "Assuming approval, widget cache changes are merged into production.", "open"),
       (_MG, "Should widget cache changes be merged into production?", "open"),
       (_MG, "Whether widget cache changes are merged into production is unclear.", "open")]
+
+
+# review 8: whole object phrase bound to its operation; a completion counts only for its own clause
+M += [("increase cache retention for widgets and decrease cache retention for gadgets",
+       "decrease cache retention for widgets and increase cache retention for gadgets", False),
+      ("enable caching for widgets and disable caching for gadgets",
+       "disable caching for widgets and enable caching for gadgets", False),
+      ("increase cache retention for widgets and decrease cache retention for gadgets",
+       "PENDING: increase cache retention for widgets and decrease cache retention for gadgets", True)]
+C += [(_MG, "Widget cache changes will be merged into production, and the unrelated typo was fixed.", "open"),
+      (_MG, "Widget cache changes should be merged into production; the README typo was fixed.", "open"),
+      (_MG, "The unrelated typo was fixed, but widget cache changes are not merged into production.", "open"),
+      (_MG, "The typo was fixed and widget cache changes were merged into production.", "satisfied"),
+      (_MG, "Widget cache changes were merged into production and the typo was fixed.", "satisfied"),
+      ("Increase cache retention for widgets and decrease cache retention for gadgets.",
+       "DONE: cache retention for widgets was decreased and cache retention for gadgets was increased.", "open"),
+      ("Increase cache retention for widgets and decrease cache retention for gadgets.",
+       "DONE: cache retention for widgets was increased and cache retention for gadgets was decreased.", "satisfied")]
+
+
+def test_review8_object_phrase_binding_observe():
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    a = "Increase cache retention for widgets and decrease cache retention for gadgets"
+    b = "Decrease cache retention for widgets and increase cache retention for gadgets"
+    v1 = lc.observe(P(a, T0 + 10, ["ep-note-n1"], pid="a"))
+    v2 = lc.observe(P(b, T0 + 20, ["ep-note-n1"], pid="b"))
+    assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"]
+
+C += [("Increase cache retention for widgets and decrease cache retention for gadgets.",
+       "DONE: cache retention for widgets was increased; gadget work will follow.", "open"),
+      ("Increase cache retention for widgets and decrease cache retention for gadgets.",
+       "DONE: cache retention for widgets was increased. DONE: cache retention for gadgets was decreased.", "satisfied"),
+      (_MG, "Widget cache changes are pending review, and the old branch was deleted.", "open"),
+      (_MG, "We still need to merge widget cache changes into production; the lint error was fixed.", "open"),
+      (_MG, "Widget cache changes might be merged into production later, but the flaky test was fixed.", "open"),
+      (_MG, "Widget cache changes were merged into production, and the typo will be fixed.", "satisfied"),
+      (_MG, "Widget cache changes: merged into production.", "satisfied"),
+      (_MG, "The widget cache changes, after review, were merged into production.", "satisfied"),
+      ("Remove the stale widget cache backups.", "The stale widget cache backups were removed and the job is done.", "satisfied")]
+M += [("raise the limit for widget caches and lower the limit for gadget caches",
+       "lower the limit for widget caches and raise the limit for gadget caches", False),
+      ("add tests for widgets and remove tests for gadgets", "remove tests for widgets and add tests for gadgets", False),
+      ("increase cache retention for widgets", "decrease cache retention for widgets", False),
+      ("increase cache retention for widgets", "increase the cache retention for widgets", True)]
+
+C += [("Increase cache retention for widgets and decrease cache retention for gadgets.",
+       "Cache retention for widgets was increased and is done.", "open")]
+
+# review 8: pre-post paraphrase families (object phrases, unrelated-clause completions, partial compound closure)
+M += [("increase retention of widget caches and decrease retention of gadget caches", "decrease retention of widget caches and increase retention of gadget caches", False),
+      ("for widgets, increase cache retention; for gadgets, decrease it", "for widgets, decrease cache retention; for gadgets, increase it", False),
+      ("increase the widget cache retention and decrease the gadget cache retention", "decrease the widget cache retention and increase the gadget cache retention", False),
+      ("enable the cache flag on widgets and disable it on gadgets", "disable the cache flag on widgets and enable it on gadgets", False),
+      ("we should increase cache retention for widgets", "we should decrease cache retention for widgets", False),
+      ("remove stale backups", "remove the stale backups", True)]
+_IDW = "Increase cache retention for widgets and decrease cache retention for gadgets."
+C += [(_MG, "Widget cache changes will be merged into production; the unrelated typo was fixed.", "open"),
+      (_MG, "Widget cache changes will be merged into production, while the typo was fixed.", "open"),
+      (_MG, "Widget cache changes will be merged into production, the typo was fixed.", "open"),
+      (_MG, "Widget cache changes will be merged into production. The unrelated typo was fixed.", "open"),
+      (_MG, "The typo was fixed; widget cache changes will be merged into production.", "open"),
+      (_MG, "Widget cache changes will be merged into production and the README in production was fixed.", "open"),
+      (_MG, "The unrelated typo was fixed and widget cache changes are pending.", "open"),
+      (_MG, "Widget cache changes were merged into production, then the typo was fixed.", "satisfied"),
+      (_MG, "After review, widget cache changes were merged into production.", "satisfied"),
+      (_MG, "Widget cache changes to production: merged.", "satisfied"),
+      ("Remove the stale widget cache backups.", "The stale widget cache backups: removed.", "satisfied"),
+      ("Rotate the cache logs for src/widget.", "The cache logs for src/widget were rotated and are done.", "satisfied"),
+      (_IDW, "DONE: increased cache retention for widgets and decreased cache retention for gadgets.", "satisfied"),
+      (_IDW, "DONE: decreased cache retention for widgets and increased cache retention for gadgets.", "open"),
+      (_IDW, "DONE: cache retention for gadgets was decreased.", "open")]

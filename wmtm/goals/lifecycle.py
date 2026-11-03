@@ -83,33 +83,68 @@ _PASS = re.compile(r"\b(?:was|were|is|are|been|be|being|get|gets|got)(?:n't)?\s+
                    r"(?:(?:not|never|already|just|now|also|finally|successfully)\s+)*$", re.I)
 
 
+_OBJ_STOP = re.compile(r"\b(?:to|into|onto|from|by|until|before|after|without|with)\b", re.I)
+
+
+def _obj(words):
+    ws = sorted({x for x in (_cw(w) for w in words) if x})
+    return "_".join(ws[:6]) if ws else None
+
+
+_VERB_LEAD = re.compile(r"(?:^|\b(?:to|will|shall|should|must|can|could|would|please|then|also|we|i|you|they|did|do|"
+                        r"does|'ll|not|never|first|now|just|already|finally|successfully)|n't)\s*$", re.I)
+
+
+def _verb_use(cl, m):
+    """The operation word is used as a verb (review 8 regression guard): not a noun form (-ion, -al), and either
+    clause-initial (imperative), after a pronoun / modal / "to" / adverb, passive ("was increased"), or past -ed."""
+    w = m.group(0).lower()
+    if re.search(r"(?:ion|ions|al)$", w):
+        return False
+    pre = cl[:m.start()]
+    if _PASS.search(pre) or _VERB_LEAD.search(pre.strip()) or not pre.strip():
+        return True
+    return w.endswith("ed")
+
+
 def op_bindings(b):
-    """@opobj:<op>><object> per clause (review 7): the operation verb bound to the first content word of its object.
-    Active "increase widget cache" -> increas>widget; passive "widget cache was increased" -> increas>widget.  So
-    "increase widget and decrease gadget" != "decrease widget and increase gadget"."""
+    """@opobj:<op>><object phrase> per clause (reviews 7, 8): the operation verb bound to ALL content stems of its
+    object phrase, sorted (active: the words after the verb up to a to/into/from/by/with phrase; passive "X was
+    increased": the words before).  So "increase cache retention for widgets and decrease it for gadgets" binds
+    increas>cach_retention_widget, not just increas>cach."""
     out = set()
     for cl in _CLAUSE.split(b or ""):
         for m in _OPW.finditer(cl):
             op = m.group(1).lower().replace("maximis", "maximiz").replace("minimis", "minimiz")
-            obj = None
-            words = cl[:m.start()].split() if _PASS.search(cl[:m.start()]) else cl[m.end():].split()[:4]
-            for w in words:
-                obj = _cw(w)
-                if obj:
-                    break
+            if not _verb_use(cl, m):
+                continue                 # "the promotion", "goal block = ...": a noun, it binds nothing
+            if _PASS.search(cl[:m.start()]):
+                words = cl[:m.start()].split()
+            else:
+                after = cl[m.end():]
+                k = _OBJ_STOP.search(after)
+                words = (after[:k.start()] if k else after).split()[:8]
+            obj = _obj(words)
             if obj:
                 out.add("@opobj:%s>%s" % (op, obj))
     return out
 
 
+def _obj_compat(a, b):
+    A, B = set(a.split("_")), set(b.split("_"))
+    return A <= B or B <= A
+
+
 def opobj_conflict(goal_terms, sent_terms):
-    """A closing sentence applies to an object an operation that the goal binds to a different operation
-    ("widget was decreased" for "increase widget and decrease gadget")."""
-    gb = {tuple(x[7:].split(">", 1)) for x in goal_terms if x.startswith("@opobj:")}
+    """A closing clause applies to an object an operation that the goal binds to a different operation on that
+    object ("widget retention was decreased" for "increase widget retention and decrease gadget retention")."""
+    gb = [tuple(x[7:].split(">", 1)) for x in goal_terms if x.startswith("@opobj:")]
     for x in sent_terms:
         if x.startswith("@opobj:"):
             o, ob = x[7:].split(">", 1)
-            if (o, ob) not in gb and any(ob == y and o != q for q, y in gb):
+            if any(o == q and _obj_compat(ob, y) for q, y in gb):
+                continue
+            if any(o != q and _obj_compat(ob, y) for q, y in gb):
                 return [x]
     return []
 
@@ -385,13 +420,45 @@ def closing_sentences(note_text):
                 continue                # "changes are not yet merged", "were never fixed": a pending state (review 6)
             if _irrealis_close(s, p):
                 continue                # "will be merged tomorrow", "if ... merged, notify", "should be merged" (review 7)
-            out.append(s)
-            break
+            out.append(_evidence_span(s, p))
     return out
+
+
+_PRON = re.compile(r"\b(?:they|it|these|those|this|that|them|both|all)\b", re.I)
+
+
+def _evidence_span(s, p):
+    """The part of sentence s that the clean closure word at p reports on (review 8): its own clause, not the whole
+    sentence, so "X will be merged, and the unrelated typo was fixed" is evidence only for the typo.
+    - a leading label ("DONE: ...") covers the rest of the sentence up to ";"
+    - an elided or pronoun subject ("... and is done", "now they are merged") takes the previous clause(s) as its
+      referent, extending backwards until a clause with a content word is included."""
+    m = re.match(r"(\w+)\s*:", s[p:])
+    if m:
+        return s[p + m.end():].split(";", 1)[0]
+    cuts = sorted({0, len(s)} | {x.end() for x in _CLAUSE.finditer(s)})
+    i = max(k for k in range(len(cuts) - 1) if cuts[k] <= p)
+    lo, hi = cuts[i], cuts[i + 1]
+    while lo > 0:
+        head = [w for w in _PRON.sub(" ", s[lo:p]).split() if _cw(w)]
+        if head:
+            break
+        lo = max(c for c in cuts if c < lo)
+    return s[lo:hi]
 
 
 def note_closes(note_text):
     return bool(closing_sentences(note_text))
+
+
+def _all_ops_covered(goal_terms, spans):
+    """A goal binding two or more operations to different objects ("increase widget retention and decrease gadget
+    retention") is closed only when the note's closing spans report each binding; half done stays open."""
+    gb = [tuple(x[7:].split(">", 1)) for x in goal_terms if x.startswith("@opobj:")]
+    if len({y for _, y in gb}) < 2:
+        return True
+    st = [tuple(x[7:].split(">", 1)) for sp in spans for x in terms(sp) if x.startswith("@opobj:")]
+    return all(any(o == q and _obj_compat(ob, y) for o, ob in st) for q, y in gb)
 
 
 def closure_match(goal, note_terms, note_text, common=()):
@@ -409,7 +476,10 @@ def closure_match(goal, note_terms, note_text, common=()):
     gt = task_ids(goal["text"]) - pre
     g -= _MODIFIERS                      # polarity / before-after identify a goal but are no closure evidence
     g = {x for x in g if not x.startswith("@neg:") and not x.startswith("@op:") and not x.startswith("@opobj:")}
-    for s in closing_sentences(note_text):
+    spans = closing_sentences(note_text)
+    if not _all_ops_covered(goal["terms"], spans):
+        return ""                        # a compound goal needs every bound operation reported done (review 8)
+    for s in spans:
         if polarity_conflict(goal["terms"], s):
             continue                     # opposite polarity on a shared term, in either direction
         if opobj_conflict(goal["terms"], terms(s)):
