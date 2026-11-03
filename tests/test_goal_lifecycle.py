@@ -417,7 +417,14 @@ C=[('Increase widget cache retention to 30 days.','Decided: we will not increase
  ('Set widget cache retention to 30 days.','Widget cache retention set to 90 days, done.','open'),
  ('Move files from src/widget to src/gadget.','Moved files from src/gadget to src/widget, done.','open'),
  ('Rotate the cache logs for src/widget.','The cache logs for src/widget were not rotated yet.','open')]
-C += [('Disable the widget cache flag.','The widget cache flag was enabled and is done.','open'),
+C += [('Merge widget cache changes into production.','Nothing was merged into production for the widget cache changes.','open'),
+ ('Merge widget cache changes into production.','No widget cache changes were merged into production.','open'),
+ ('Merge widget cache changes into production.','Widget cache changes failed to be merged into production.','open'),
+ ('Merge widget cache changes into production.','Widget cache changes are almost merged into production.','open'),
+ ('Merge widget cache changes into production.','Widget cache changes are partially merged into production.','open'),
+ ('Merge widget cache changes into production.','With no conflicts, the widget cache changes were merged into production.','satisfied'),
+ ('Merge widget cache changes into production.','Widget cache changes were merged into production, no conflicts.','satisfied'),
+('Disable the widget cache flag.','The widget cache flag was enabled and is done.','open'),
  ('Remove the stale widget cache backups.','The stale widget cache backups were not removed.','open'),
  ('Do not remove the stale widget cache backups.','The stale widget cache backups were removed.','open')]
 M += [('remove the stale widget cache backups','do not remove the stale widget cache backups',False),
@@ -443,3 +450,78 @@ def test_adversarial_closure_probes():
         if st != want:
             bad.append((g, n, st))
     assert not bad, bad
+
+
+# review 7: operations bound to objects; plans / conditions / questions are no completion
+M += [("increase widget cache retention and decrease gadget cache retention",
+       "decrease widget cache retention and increase gadget cache retention", False),
+      ("copy production records into archive storage", "copy archive records into production storage", False),
+      ("move production records to archive storage", "move archive records to production storage", False),
+      ("enable widget cache and disable gadget cache", "disable widget cache and enable gadget cache", False),
+      ("add widget tests and remove gadget tests", "remove widget tests and add gadget tests", False),
+      ("increase widget cache retention and decrease gadget cache retention",
+       "PENDING: increase widget cache retention and decrease gadget cache retention", True),
+      ("copy production records into archive storage", "copy the production records into archive storage", True)]
+_MG = "Merge widget cache changes into production."
+_ID = "Increase widget cache retention and decrease gadget cache retention."
+C += [(_MG, "Widget cache changes will be merged into production tomorrow.", "open"),
+      (_MG, "If widget cache changes are merged into production, notify the team.", "open"),
+      (_MG, "Widget cache changes should be merged into production.", "open"),
+      (_MG, "Widget cache changes are going to be merged into production.", "open"),
+      (_MG, "Widget cache changes need to be merged into production.", "open"),
+      (_MG, "Widget cache changes can be merged into production once tests pass.", "open"),
+      (_MG, "Widget cache changes may have been merged into production.", "open"),
+      (_MG, "Were widget cache changes merged into production?", "open"),
+      (_MG, "When widget cache changes are merged into production, notify the team.", "open"),
+      (_MG, "Once widget cache changes are merged into production, close the ticket.", "open"),
+      (_MG, "Widget cache changes are scheduled to be merged into production.", "open"),
+      (_MG, "Widget cache changes get merged into production later.", "open"),
+      (_MG, "Widget cache changes were merged into production yesterday.", "satisfied"),
+      (_MG, "Widget cache changes were merged into production; the team will be notified.", "satisfied"),
+      (_MG, "When the review passed, widget cache changes were merged into production.", "satisfied"),
+      (_ID, "DONE: widget cache retention was decreased and gadget cache retention was increased.", "open"),
+      (_ID, "DONE: widget cache retention was increased and gadget cache retention was decreased.", "satisfied"),
+      ("Copy production records into archive storage.", "DONE: copied archive records into production storage.", "open"),
+      ("Copy production records into archive storage.", "DONE: copied production records into archive storage.", "satisfied")]
+
+
+def test_review7_operation_object_binding_observe():
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    for a, b in [("Increase widget cache retention and decrease gadget cache retention",
+                  "Decrease widget cache retention and increase gadget cache retention"),
+                 ("Copy production records into archive storage", "Copy archive records into production storage")]:
+        v1 = lc.observe(P(a, T0 + 10, ["ep-note-n1"], pid="a" + a))
+        v2 = lc.observe(P(b, T0 + 20, ["ep-note-n1"], pid="b" + b))
+        assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"], (a, b)
+
+
+# review 7: more operation-object and irrealis probes, kept in the fixture
+M += [("raise widget cache limit and lower gadget cache limit", "lower widget cache limit and raise gadget cache limit", False),
+      ("migrate production records to archive storage", "migrate archive records to production storage", False),
+      ("rename widget config to gadget config", "rename gadget config to widget config", False),
+      ("start widget job and stop gadget job", "stop widget job and start gadget job", False),
+      ("copy production records into archive storage", "PENDING: copy production records into archive storage", True)]
+C += [(_MG, "Widget cache changes'll be merged into production.", "open"),
+      (_MG, "Widget cache changes would be merged into production if approved.", "open"),
+      (_MG, "Widget cache changes are to be merged into production.", "open"),
+      (_MG, "We plan to merge widget cache changes into production.", "open"),
+      (_MG, "Widget cache changes are expected to be merged into production next week.", "open"),
+      (_MG, "Unless tests fail, widget cache changes are merged into production.", "open"),
+      (_MG, "If approved, widget cache changes are merged into production.", "open"),
+      (_MG, "Widget cache changes have been merged into production.", "satisfied"),
+      (_MG, "DONE: merged widget cache changes into production.", "satisfied"),
+      (_MG, "Widget cache changes were successfully merged into production.", "satisfied"),
+      ("Raise widget cache limit and lower gadget cache limit.", "DONE: widget cache limit was lowered and gadget cache limit was raised.", "open"),
+      ("Raise widget cache limit and lower gadget cache limit.", "DONE: widget cache limit was raised and gadget cache limit was lowered.", "satisfied"),
+      ("Migrate production records to archive storage.", "DONE: migrated archive records to production storage.", "open"),
+      ("Migrate production records to archive storage.", "DONE: migrated production records to archive storage.", "satisfied")]
+
+C += [(_MG, "Widget cache changes had to be merged into production, and they were merged.", "satisfied"),
+      (_MG, "Widget cache changes were merged into production and will be monitored.", "satisfied"),
+      (_MG, "DONE: merged widget cache changes into production; we will notify the team.", "satisfied"),
+      (_MG, "Widget cache changes could be merged into production.", "open"),
+      (_MG, "Widget cache changes might be merged into production.", "open"),
+      (_MG, "Widget cache changes won't be merged into production.", "open"),
+      (_MG, "Assuming approval, widget cache changes are merged into production.", "open"),
+      (_MG, "Should widget cache changes be merged into production?", "open"),
+      (_MG, "Whether widget cache changes are merged into production is unclear.", "open")]
