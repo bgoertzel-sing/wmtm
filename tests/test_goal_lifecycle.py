@@ -324,3 +324,20 @@ def test_pending_not_yet_is_not_a_prohibition():
     assert not any(x.startswith("@neg") for x in a["terms"])
     b = G(SELF + "Still open: do not merge to master before Ben's OK.")
     assert any(x.startswith("@neg") for x in b["terms"])
+
+
+def test_yet_does_not_excuse_a_prohibition_or_decision():
+    # review 5
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    v1 = lc.observe(P("Increase widget cache retention to 30 days", T0 + 10, ["ep-note-n1"], pid="a"))
+    v2 = lc.observe(P("Do not increase widget cache retention to 30 days yet", T0 + 20, ["ep-note-n1"], pid="b"))
+    assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"]
+    goal = SELF + "Increase widget cache retention to 30 days."
+    lc = L.Lifecycle([_note("n1", T0, goal),
+                      _note("n2", T0 + D, "DONE: We will not increase widget cache retention to 30 days yet.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+    for t in ["Still open: don't merge hive/a yet.", "Still open: we won't merge hive/a yet.",
+              "Still open: never merge hive/a yet.", "Still open: must not merge hive/a yet."]:
+        assert any(x.startswith("@neg") for x in G(SELF + t)["terms"]), t
+    for t in ["Still open: Ben hasn't answered on src/context yet.", "Still open: src/context is not merged yet."]:
+        assert not any(x.startswith("@neg") for x in G(SELF + t)["terms"]), t

@@ -88,17 +88,39 @@ _NEGW = re.compile(r"\b(?:not|never|no longer|don't|dont|do not|doesn't|shouldn'
                    r"revert|undo|disable|remove|drop)\b|n't\b", re.I)
 
 
+_STATIVE_AUX = {"has", "have", "had", "is", "are", "was", "were", "been", "am", "still"}
+_DIRECTIVE_AUX = {"do", "does", "did", "will", "would", "wo", "must", "should", "shall", "can", "ca", "could", "may",
+                  "might", "please", "we", "i", "you", "to"}
+
+
+def _stative_neg(text, m):
+    """True if negation match m is a state description ("Ben hasn't answered", "is not merged", "src/context not
+    yet merged"), never for a prohibition or decision ("do not", "don't", "must not", "will not", "never", "stop").
+    Only a stative negation may be excused by "yet" (review 5)."""
+    w = m.group(0).lower()
+    if w != "not" and w != "n't":
+        return False                     # don't, never, stop, avoid, without, ... are directives, never pending states
+    prev = re.findall(r"[\w']+", text[:m.start()])
+    prev = prev[-1].lower() if prev else ""
+    if prev in _STATIVE_AUX:
+        return True
+    if w == "not" and prev not in _DIRECTIVE_AUX and re.match(r"\s*yet\b", text[m.end():], re.I):
+        return not re.match(r"\s*(?:(?:still open|pending|todo)\s*:\s*)?$", text[:m.start()], re.I)  # bare "Not yet ..." opening an order stays a directive
+    return False
+
+
 def neg_scope(text):
     """-> the terms that a negation word applies to: for every negation / reversal word, the first content term after
     it (within 4 words).  "increase X without downtime" -> {downtim}; "do not increase X without downtime" ->
-    {increas, downtim}.  Scoped, so one negation never masks another.  A negation followed by "yet" in the same
-    clause ("Ben hasn't answered yet", "not yet merged") is a pending state, the same as "still waiting on", and is
-    skipped."""
+    {increas, downtim}.  Scoped, so one negation never masks another.  A STATIVE negation followed by "yet" in the same
+    clause ("Ben hasn't answered yet", "src/context is not merged yet") is a pending state, the same as "still waiting
+    on", and is skipped.  A prohibition or decision with "yet" ("do not increase X yet", "we will not X yet") keeps
+    its anchor (review 5)."""
     out = set()
     for m in _NEGW.finditer(text or ""):
         clause = re.split(r"[.;:!?\n]", text[m.end():], 1)[0]
-        if re.search(r"\byet\b", clause, re.I) or re.match(r"\s*yet\b", text[m.end():], re.I):
-            continue                     # "hasn't answered yet" / "not yet" describe a pending state, not a prohibition
+        if re.search(r"\byet\b", clause, re.I) and _stative_neg(text, m):
+            continue                     # "hasn't answered yet" / "is not merged yet" describe a pending state
         for w in re.findall(r"[\w/.-]+", text[m.end():])[:4]:
             k = {x for x in needs.norm(needs.keys(w)) if x not in _MARKER_WORDS}
             if k:
