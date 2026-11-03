@@ -341,3 +341,105 @@ def test_yet_does_not_excuse_a_prohibition_or_decision():
         assert any(x.startswith("@neg") for x in G(SELF + t)["terms"]), t
     for t in ["Still open: Ben hasn't answered on src/context yet.", "Still open: src/context is not merged yet."]:
         assert not any(x.startswith("@neg") for x in G(SELF + t)["terms"]), t
+
+
+def test_opposite_operations_are_different_goals():
+    # review 6, point 1
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    v1 = lc.observe(P("Increase widget cache retention for expired production records to 30 days", T0 + 10, ["ep-note-n1"], pid="a"))
+    v2 = lc.observe(P("Decrease widget cache retention for expired production records to 30 days", T0 + 20, ["ep-note-n1"], pid="b"))
+    assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"]
+    goal = SELF + "Increase widget cache retention for expired production records to 30 days."
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D,
+                      "Widget cache retention for expired production records was decreased to 30 days and is done.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+
+
+def test_not_yet_merged_does_not_satisfy():
+    # review 6, point 2
+    goal = SELF + "Merge widget cache changes into production."
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "Widget cache changes are not yet merged into production.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "open"
+    lc = L.Lifecycle([_note("n1", T0, goal), _note("n2", T0 + D, "Widget cache changes were merged into production.")])
+    assert lc.observe(P(goal, T0 + 2 * D, ["ep-note-n1"]))["state"] == "satisfied"
+
+
+# review 6: the adversarial probe set, kept as a fixture so every later rule change is checked against all of it
+_PS = "Self-task (log only, no message): Still open: "
+_PS2 = "Self-task (log only, no message): "
+M=[('increase widget cache retention to 30 days','do not increase widget cache retention to 30 days',False),
+ ('increase widget cache retention to 30 days','do not increase widget cache retention to 30 days yet',False),
+ ('increase widget cache retention to 30 days',"don't increase widget cache retention to 30 days yet",False),
+ ('increase widget cache retention to 30 days',"we will not increase widget cache retention to 30 days yet",False),
+ ('increase widget cache retention to 30 days',"never increase widget cache retention to 30 days yet",False),
+ ('increase widget cache retention to 30 days',"not yet: increase widget cache retention to 30 days",False),
+ ('increase widget cache retention for expired production records to 30 days','decrease widget cache retention for expired production records to 30 days',False),
+ ('raise widget cache retention for expired production records to 30 days','lower widget cache retention for expired production records to 30 days',False),
+ ('extend widget cache retention for expired production records','shorten widget cache retention for expired production records',False),
+ ('upgrade the widget cache library','downgrade the widget cache library',False),
+ ('install the widget cache plugin','uninstall the widget cache plugin',False),
+ ('lock the widget cache table','unlock the widget cache table',False),
+ ('include widget cache records in the export','exclude widget cache records in the export',False),
+ ('increase widget cache retention without downtime','decrease widget cache retention without downtime',False),
+ ('do not increase widget cache retention','do not decrease widget cache retention',False),
+ ('increase widget cache retention to 30 days without downtime','do not increase widget cache retention to 30 days without downtime',False),
+ ('increase widget retention without downtime','increase widget retention with downtime',False),
+ ('stop the widget cache job without alerting','stop the widget cache job',False),
+ ('enable the widget cache flag','disable the widget cache flag',False),('add tests for widget cache','remove tests for widget cache',False),
+ ('merge hive/a into main','merge main into hive/a',False),('widget cache rotation before promotion','widget cache rotation after promotion',False),
+ ('rotate LTM logs for src/widget','rotate LTM logs for src/gadget',False),('retention to 30 days','retention to 30.5 days',False),
+ ('never delete widget logs','delete widget logs',False),
+ ('increase widget cache retention to 30 days','PENDING: increase widget cache retention to 30 days',True),
+ ('increase widget cache retention to 30 days','increase the widget cache retention to 30 days',True),
+ ('do not increase widget cache retention to 30 days',"don't increase widget cache retention to 30 days",True),
+ ("merge to master; Ben hasn't answered on src/context yet","merge to master; Ben has not answered on src/context yet",True)]
+C=[('Increase widget cache retention to 30 days.','Decided: we will not increase widget cache retention to 30 days; done.','open'),
+ ('Increase widget cache retention to 30 days.','DONE: We will not increase widget cache retention to 30 days yet.','open'),
+ ('Increase widget cache retention to 30 days.',"DONE: we won't increase widget cache retention to 30 days yet.",'open'),
+ ('Increase widget cache retention to 30 days.','Widget cache retention was increased to 30 days and is done.','satisfied'),
+ ('Increase widget cache retention to 30 days.','Widget cache retention was decreased to 30 days and is done.','open'),
+ ('Increase widget cache retention for expired production records to 30 days.','Widget cache retention for expired production records was decreased to 30 days and is done.','open'),
+ ('Increase widget cache retention for expired production records to 30 days.','Widget cache retention for expired production records was increased to 30 days and is done.','satisfied'),
+ ('Do not increase widget cache retention to 30 days.','Widget cache retention was increased to 30 days and is done.','open'),
+ ('Do not increase widget cache retention to 30 days.','Decided: we will not increase widget cache retention to 30 days; done.','satisfied'),
+ ('Do not increase widget cache retention to 30 days yet.','DONE: we will not increase widget cache retention to 30 days yet.','satisfied'),
+ ('Increase widget cache retention to 30 days without downtime.','Widget cache retention was increased to 30 days without downtime and is done.','satisfied'),
+ ('Increase widget cache retention to 30 days without downtime.','Decided: we will not increase widget cache retention to 30 days without downtime; done.','open'),
+ ('Merge widget cache changes into production.','Widget cache changes are not yet merged into production.','open'),
+ ('Merge widget cache changes into production.','Widget cache changes were not merged into production.','open'),
+ ('Merge widget cache changes into production.','Widget cache changes have never been merged into production.','open'),
+ ('Merge widget cache changes into production.',"Widget cache changes aren't merged into production yet.",'open'),
+ ('Merge widget cache changes into production.','Widget cache changes were merged into production.','satisfied'),
+ ('Merge widget cache changes into production.','Widget cache changes were not tested before, but now they are merged into production.','satisfied'),
+ ('Remove the stale widget cache backups.','The stale widget cache backups were removed.','satisfied'),
+ ('Rotate the LTM cache logs for src/widget.','The LTM cache logs for src/gadget were rotated and are done.','open'),
+ ('Rotate the LTM cache logs for src/widget.','The LTM cache logs for src/widget were rotated and are done.','satisfied'),
+ ('Set widget cache retention to 30 days.','Widget cache retention set to 90 days, done.','open'),
+ ('Move files from src/widget to src/gadget.','Moved files from src/gadget to src/widget, done.','open'),
+ ('Rotate the cache logs for src/widget.','The cache logs for src/widget were not rotated yet.','open')]
+C += [('Disable the widget cache flag.','The widget cache flag was enabled and is done.','open'),
+ ('Remove the stale widget cache backups.','The stale widget cache backups were not removed.','open'),
+ ('Do not remove the stale widget cache backups.','The stale widget cache backups were removed.','open')]
+M += [('remove the stale widget cache backups','do not remove the stale widget cache backups',False),
+ ('start the widget cache job','stop the widget cache job',False)]
+
+
+def _pg(t):
+    return {"text": _PS + t, "terms": L.terms(_PS + t), "who": "self", "action": "SelfTask"}
+
+
+def test_adversarial_merge_probes():
+    bad = [(a, b) for a, b, want in M if L.same_goal(_pg(a), _pg(b))[0] != want]
+    assert not bad, bad
+
+
+def test_adversarial_closure_probes():
+    D_, T_ = 86400.0, 1.7e9
+    bad = []
+    for g, n, want in C:
+        lc = L.Lifecycle([("ep-note-n1", T_, _PS2 + g), ("ep-note-n2", T_ + D_, n)])
+        st = lc.observe({"text": _PS2 + g, "ts": T_ + 2 * D_, "items": ["ep-note-n1"], "who": "self",
+                         "action": "SelfTask", "id": "x"})["state"]
+        if st != want:
+            bad.append((g, n, st))
+    assert not bad, bad

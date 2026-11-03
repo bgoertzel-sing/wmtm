@@ -70,6 +70,7 @@ def terms(text):
     t |= {"@" + x for x in _TASK.findall(b)}
     t |= {"#" + n for n in _NUM.findall(b)}                       # numeric values: 30 days != 90 days
     t |= {"@rel:" + w.lower() for w in _REL.findall(b)}          # temporal relation: before != after
+    t |= {"@op:" + w.lower().replace("maximis", "maximiz").replace("minimis", "minimiz") for w in _OPW.findall(b)}
     t |= {"@neg:" + x for x in neg_scope(b)}                       # scoped polarity: "do X" != "do not X"
     for m in _DIR.finditer(b):                                     # direction: from A to B != from B to A
         g_ = [x for x in m.groups() if x]
@@ -84,8 +85,15 @@ _DIR = re.compile(r"\bfrom\s+(\S+)\s+(?:to|into|onto)\s+(\S+)|(?<!\S)(\S+)\s*(?:
 
 
 _REL = re.compile(r"\b(before|after)\b", re.I)
-_NEGW = re.compile(r"\b(?:not|never|no longer|don't|dont|do not|doesn't|shouldn't|must not|stop|avoid|without|cancel|"
-                   r"revert|undo|disable|remove|drop)\b|n't\b", re.I)
+# polar operations (review 6): "increase X" != "decrease X".  Each verb maps to an operation id; a goal or sentence
+# naming an operation gets the anchor @op:<id>, so opposite operations on the same object never merge or close.
+_OPW = re.compile(r"\b(increas|decreas|rais|lower|enabl|disabl|add|remov|grow|shrink|extend|shorten|lengthen|expand|"
+                  r"collaps|start|stop|allow|deny|block|includ|exclud|upgrad|downgrad|maximi[sz]|minimi[sz]|unlock|lock|"
+                  r"encrypt|decrypt|uninstall|install|promot|demot|attach|detach|cancel|revert|undo|undid|drop)"
+                  r"(?:e|es|ed|ing|s|d|ion|ions|al|led|ling|ped|ping|ne)?\b", re.I)
+# true negations only (review 6): reversal verbs (remove, disable, stop, cancel, revert, undo, drop) are operations,
+# handled by the @op: anchors, so "Remove X" is closed by "X was removed" and "enable X" != "disable X" still holds
+_NEGW = re.compile(r"\b(?:not|never|no longer|don't|dont|do not|doesn't|shouldn't|must not|avoid|without)\b|n't\b", re.I)
 
 
 _STATIVE_AUX = {"has", "have", "had", "is", "are", "was", "were", "been", "am", "still"}
@@ -208,6 +216,8 @@ def _kind(a):
         return "neg"
     if a.startswith("@rel:"):
         return "rel"
+    if a.startswith("@op:"):
+        return "op"
     if a.startswith("@t-") or a.startswith("@p-"):
         return "task"
     if a.startswith("@") and "/" in a:
@@ -220,7 +230,7 @@ def anchor_conflict(goal_terms, sent_terms):
     task id, number #, direction @dir:, before/after @rel:) the goal and the sentence each name an anchor of that kind
     that the other lacks.  Checked per kind, so a shared entity (@ltm) never hides conflicting paths."""
     ga, sa = anchors(goal_terms), anchors(sent_terms)
-    for k in ("@", "path", "task", "#", "dir", "rel"):
+    for k in ("@", "path", "task", "#", "dir", "rel", "op"):
         gk = {x for x in ga if _kind(x) == k}
         sk = {x for x in sa if _kind(x) == k}
         # a different object: both name anchors of this kind and share none.  Paths and task ids are their own
@@ -228,6 +238,19 @@ def anchor_conflict(goal_terms, sent_terms):
         if gk and sk and not (gk & sk):
             return sorted(sk - gk)
     return []
+
+
+_TRUE_NEG = re.compile(r"\b(?:not|never|no longer)\b|n't\b", re.I)
+def _negated_close(s, p):
+    """True if a negation word stands in the same clause before the closure word at p, within 6 words
+    ("Widget cache changes are not yet merged", "logs were never rotated or removed")."""
+    for m in _TRUE_NEG.finditer(s[:p]):
+        gap = s[m.end():p]
+        if re.search(r"[.;:!?\n]|\b(?:but|and then|now)\b", gap, re.I):
+            continue
+        if len(re.findall(r"[\w/.-]+", gap)) <= 6:
+            return True
+    return False
 
 
 def closing_sentences(note_text):
@@ -250,6 +273,8 @@ def closing_sentences(note_text):
         mk = needs.marker(s)
         if mk and mk[2].start() <= p:
             continue
+        if _negated_close(s, p):
+            continue                    # "changes are not yet merged", "were never fixed": a pending state (review 6)
         out.append(s)
     return out
 
@@ -272,7 +297,7 @@ def closure_match(goal, note_terms, note_text, common=()):
             g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
     gt = task_ids(goal["text"]) - pre
     g -= _MODIFIERS                      # polarity / before-after identify a goal but are no closure evidence
-    g = {x for x in g if not x.startswith("@neg:")}
+    g = {x for x in g if not x.startswith("@neg:") and not x.startswith("@op:")}
     for s in closing_sentences(note_text):
         if polarity_conflict(goal["terms"], s):
             continue                     # opposite polarity on a shared term, in either direction
