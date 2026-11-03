@@ -135,6 +135,40 @@ def _obj_compat(a, b):
     return A <= B or B <= A
 
 
+_NUM_CLAUSE = re.compile(r"[.;:!?\n]|\b(?:and|but|then|while|whereas)\b", re.I)   # commas kept: "for widgets, keep 30"
+
+
+def num_bindings(b):
+    """@num:<object>=<value>[_<unit>] per clause (review 9): each number bound to the content stems of the words
+    before it in its clause (operation verbs, stop words and other numbers dropped, last 6 stems), so
+    "widget retention to 30 days and gadget retention to 90 days" != the swap."""
+    out = set()
+    for cl in _NUM_CLAUSE.split(b or ""):
+        prev = 0
+        for m in _NUM.finditer(cl):
+            seg, prev = cl[prev:m.start()], m.end()      # only words since the previous number of the clause
+            ws = [x for x in (_cw(w) for w in seg.split()) if x and not re.search(r"\d", x)]
+            obj = "_".join(sorted(set(ws[-6:]))) if ws else ""
+            nxt = cl[m.end():].split()[:1]
+            unit = _cw(nxt[0]) if nxt else None
+            val = m.group(1) + ("_" + unit if unit and not re.search(r"\d", unit) else "")
+            if obj:
+                out.add("@num:%s=%s" % (obj, val))
+    return out
+
+
+def numobj_conflict(goal_terms, sent_terms):
+    """A closing clause gives one of the goal's objects a different value than the goal does."""
+    gb = [tuple(x[5:].rsplit("=", 1)) for x in goal_terms if x.startswith("@num:")]
+    for x in sent_terms:
+        if x.startswith("@num:"):
+            o, v = x[5:].rsplit("=", 1)
+            same = [gv for go, gv in gb if _obj_compat(o, go)]
+            if same and v not in same:
+                return [x]
+    return []
+
+
 def opobj_conflict(goal_terms, sent_terms):
     """A closing clause applies to an object an operation that the goal binds to a different operation on that
     object ("widget retention was decreased" for "increase widget retention and decrease gadget retention")."""
@@ -170,6 +204,7 @@ def terms(text):
             continue                                               # "now they are merged into": pronoun subject, no object named
         t.add("@dir:%s>%s" % (_phrase(a_), _phrase(b_)))
     t |= op_bindings(b)                                            # operation bound to its object (review 7)
+    t |= num_bindings(b)                                           # number bound to its object (review 9)
     return t
 
 
@@ -318,6 +353,8 @@ def _kind(a):
         return "rel"
     if a.startswith("@opobj:"):
         return "opobj"
+    if a.startswith("@num:"):
+        return "numobj"
     if a.startswith("@op:"):
         return "op"
     if a.startswith("@t-") or a.startswith("@p-"):
@@ -359,12 +396,32 @@ def anchor_conflict(goal_terms, sent_terms):
 
 _TRUE_NEG = re.compile(r"\b(?:not|never|no longer|no|nothing|none|neither|nor|failed to|fails to|unable to|yet to|"
                        r"almost|nearly|partially|partly|half)\b|n't\b", re.I)
+_PART = re.compile(r"(?:\w+(?:ed|en|wn|t)|done|made|set|put|run|built|shipped|tested|reviewed|fixed)$", re.I)
+
+
+def _breaks_scope(gap):
+    """True if a separator inside gap (between a modal/negation and the closure word) starts a new clause.
+    A comma or and/or followed only by participles ("will be reviewed, tested and merged") is a coordinated
+    predicate list under the same modal, so it does not break the scope (review 9)."""
+    if re.search(r"[.;:!?\n]|\b(?:but|now)\b", gap, re.I):
+        return True
+    parts = re.split(r",|\b(?:and|or)\b", gap, flags=re.I)        # "and then" is checked like "and" (review 9)
+    if len(parts) == 1:
+        return False
+    for seg in parts[1:]:
+        ws = [w.strip(".,;:!?()\"'") for w in seg.split()]
+        ws = [w for w in ws if w and w.lower() not in ("also", "then", "finally", "fully", "successfully")]
+        if any(not _PART.match(w) for w in ws):
+            return True
+    return False
+
+
 def _negated_close(s, p):
     """True if a negation word stands in the same clause before the closure word at p, within 6 words
     ("Widget cache changes are not yet merged", "logs were never rotated or removed")."""
     for m in _TRUE_NEG.finditer(s[:p]):
         gap = s[m.end():p]
-        if re.search(r"[.;:!?,\n]|\b(?:but|and then|now)\b", gap, re.I):
+        if _breaks_scope(gap):
             continue
         if len(re.findall(r"[\w/.-]+", gap)) <= 6:
             return True
@@ -387,7 +444,7 @@ def _irrealis_close(s, p):
         return True                      # a sentence-initial condition governs its whole main clause
     for m in _IRREALIS.finditer(s[:p]):
         gap = s[m.end():p]
-        if re.search(r"[.;:!?,\n]|\b(?:but|and then|now)\b", gap, re.I):
+        if _breaks_scope(gap):
             continue
         if m.group(0).lower() == "when" and re.search(r"\b(?:was|were|had|did)\b", gap, re.I):
             continue
@@ -461,6 +518,21 @@ def _all_ops_covered(goal_terms, spans):
     return all(any(o == q and _obj_compat(ob, y) for o, ob in st) for q, y in gb)
 
 
+_SUBJ_AUX = re.compile(r"\b(?:was|were|is|are|has|have|had|been|got|gets)\b", re.I)
+
+
+def _foreign_subject(span, goal_terms):
+    """True if the evidence clause has an explicit subject (content words before its first auxiliary) and none of
+    those words is a goal term: the completion is about something else (review 9)."""
+    m = _SUBJ_AUX.search(span)
+    if not m:
+        return False
+    head = span[:m.start()].split(",")[-1]          # ", after review, were merged": elided subject, not foreign
+    subj = [x for x in (_cw(w) for w in _PRON.sub(" ", head).split()) if x]
+    gt = {x.lstrip("@") for x in goal_terms}        # anchors (@hive/rf-r2-backup) count as goal words too
+    return bool(subj) and not ({x.lstrip("@") for x in subj} & gt)
+
+
 def closure_match(goal, note_terms, note_text, common=()):
     """-> reason string if a closure sentence of the note matches the goal, else ''.  Sentence level: the closing
     sentence itself must carry the match.  (a) it names one of the goal's task ids that is not a
@@ -475,13 +547,16 @@ def closure_match(goal, note_terms, note_text, common=()):
             g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
     gt = task_ids(goal["text"]) - pre
     g -= _MODIFIERS                      # polarity / before-after identify a goal but are no closure evidence
-    g = {x for x in g if not x.startswith("@neg:") and not x.startswith("@op:") and not x.startswith("@opobj:")}
+    g = {x for x in g if not x.startswith("@neg:") and not x.startswith("@op:") and not x.startswith("@opobj:")
+         and not x.startswith("@num:")}
     spans = closing_sentences(note_text)
     if not _all_ops_covered(goal["terms"], spans):
         return ""                        # a compound goal needs every bound operation reported done (review 8)
     for s in spans:
         if polarity_conflict(goal["terms"], s):
             continue                     # opposite polarity on a shared term, in either direction
+        if numobj_conflict(goal["terms"], terms(s)):
+            continue                     # the sentence gives one of the goal's objects another value (review 9)
         if opobj_conflict(goal["terms"], terms(s)):
             continue                     # the sentence applies another operation to one of the goal's objects
         if anchor_conflict(goal["terms"], terms(s)):
@@ -489,6 +564,8 @@ def closure_match(goal, note_terms, note_text, common=()):
         tids = gt & task_ids(s)
         if tids:
             return "closing sentence names task %s" % sorted(tids)[0]
+        if _foreign_subject(s, goal["terms"]):
+            continue                     # the clause names its own subject, none of the goal's ("the typo was fixed and merged")
         sh = g & terms(s)
         if len(sh) >= 2 and anchors(sh) and len(g & note_terms) >= SAT_MIN - 1:
             return "closing sentence shares %s (anchor %s), note shares %d" % (

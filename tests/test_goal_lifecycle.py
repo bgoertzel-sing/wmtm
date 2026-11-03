@@ -596,3 +596,63 @@ C += [(_MG, "Widget cache changes will be merged into production; the unrelated 
       (_IDW, "DONE: increased cache retention for widgets and decreased cache retention for gadgets.", "satisfied"),
       (_IDW, "DONE: decreased cache retention for widgets and increased cache retention for gadgets.", "open"),
       (_IDW, "DONE: cache retention for gadgets was decreased.", "open")]
+
+
+# review 9: numbers bound to their objects; a modal governs a coordinated participle list
+_NW = "Increase widget cache retention to 30 days and increase gadget cache retention to 90 days."
+M += [("Increase widget cache retention to 30 days and increase gadget cache retention to 90 days",
+       "Increase widget cache retention to 90 days and increase gadget cache retention to 30 days", False),
+      ("set widget timeout to 5 seconds and gadget timeout to 10 seconds", "set widget timeout to 10 seconds and gadget timeout to 5 seconds", False),
+      ("give widgets 2 workers and gadgets 4 workers", "give widgets 4 workers and gadgets 2 workers", False),
+      ("for widgets, keep 30 days; for gadgets, keep 90 days", "for widgets, keep 90 days; for gadgets, keep 30 days", False),
+      ("set widget retention to 30 days, gadget retention to 90 days", "set widget retention to 90 days, gadget retention to 30 days", False),
+      ("increase widget cache retention to 30 days", "increase widget cache retention to 90 days", False),
+      ("increase widget cache retention to 30 days", "increase the widget cache retention to 30 days", True),
+      ("Increase widget cache retention to 30 days and increase gadget cache retention to 90 days",
+       "PENDING: increase widget cache retention to 30 days and increase gadget cache retention to 90 days", True)]
+C += [(_MG, "Widget cache changes will be reviewed, tested and merged into production.", "open"),
+      (_MG, "Widget cache changes will be reviewed, tested, and merged into production.", "open"),
+      (_MG, "Widget cache changes should be reviewed and merged into production.", "open"),
+      (_MG, "Widget cache changes are going to be tested and then merged into production.", "open"),
+      (_MG, "Widget cache changes were not reviewed, tested or merged into production.", "open"),
+      (_MG, "Widget cache changes need to be reviewed, approved and merged into production.", "open"),
+      (_MG, "Widget cache changes might get tested and merged into production.", "open"),
+      (_MG, "Widget cache changes were reviewed, tested and merged into production.", "satisfied"),
+      (_MG, "Widget cache changes will be monitored, but they were merged into production.", "satisfied"),
+      (_MG, "We will notify the team, and widget cache changes were merged into production.", "satisfied"),
+      (_NW, "DONE: widget cache retention was increased to 90 days and gadget cache retention was increased to 30 days.", "open"),
+      (_NW, "DONE: widget cache retention was increased to 30 days and gadget cache retention was increased to 90 days.", "satisfied"),
+      ("Increase widget cache retention to 30 days.", "DONE: widget cache retention was increased to 90 days.", "open"),
+      ("Increase widget cache retention to 30 days.", "DONE: widget cache retention was increased to 30 days.", "satisfied")]
+
+
+def test_review9_number_object_binding_observe():
+    lc = L.Lifecycle([_note("n1", T0, "x")])
+    a = "Increase widget cache retention to 30 days and increase gadget cache retention to 90 days"
+    b = "Increase widget cache retention to 90 days and increase gadget cache retention to 30 days"
+    v1 = lc.observe(P(a, T0 + 10, ["ep-note-n1"], pid="a"))
+    v2 = lc.observe(P(b, T0 + 20, ["ep-note-n1"], pid="b"))
+    assert v1["keep"] and v2["keep"] and v1["gid"] != v2["gid"]
+
+C += [(_MG, "Widget cache changes will be reviewed, then tested, then merged into production.", "open"),
+      (_MG, "Widget cache changes will be reviewed, tested or merged into production.", "open"),
+      (_MG, "Widget cache changes are scheduled to be reviewed, tested and merged into production.", "open"),
+      (_MG, "Widget cache changes won't be tested or merged into production.", "open"),
+      (_MG, "Widget cache changes will be reviewed, and the typo was fixed and merged into production.", "open"),
+      (_MG, "Widget cache changes were reviewed, then tested and merged into production.", "satisfied"),
+      (_MG, "The team will review it later, and widget cache changes were merged into production.", "satisfied")]
+M += [("widget retention should be 30 days and gadget retention should be 90 days", "widget retention should be 90 days and gadget retention should be 30 days", False),
+      ("keep 30 days of widget logs and 90 days of gadget logs", "keep 90 days of widget logs and 30 days of gadget logs", False),
+      ("retention: widgets 30 days, gadgets 90 days", "retention: widgets 90 days, gadgets 30 days", False),
+      ("increase widget cache retention to 30 days", "increase widget cache retention to 30 days, please", True)]
+
+# review 9: foreign-subject completions and positive controls
+C += [(_MG, "The typo was fixed and merged into production.", "open"),
+      (_MG, "The README was updated and merged into production.", "open"),
+      (_MG, "They were merged into production.", "open"),
+      (_MG, "The changes for the widget cache were merged into production.", "satisfied"),
+      (_MG, "All widget cache changes have been merged into production.", "satisfied"),
+      (_MG, "Yesterday, widget cache changes were merged into production.", "satisfied"),
+      (_MG, "Widget cache changes were reviewed; they were merged into production.", "satisfied"),
+      ("Remove the stale widget cache backups.", "Stale widget cache backups: removed.", "satisfied"),
+      ("Remove the stale widget cache backups.", "The old gadget logs were removed.", "open")]
