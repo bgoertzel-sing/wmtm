@@ -1,0 +1,63 @@
+## remotes
+me	/tmp/pc_me (fetch)
+mesto	https://github.com/MesTTo/PeTTaChainer (fetch)
+origin	https://github.com/rTreutlein/PeTTaChainer (fetch)
+## branch heads
+me/goalchainer-native.2 38b14734 2026-10-18
+me/master 36b3fe68 2026-07-17
+me/total-implication-ctv a9602462 2026-06-09
+mesto/goalchainer-native.2 38b14734 2026-10-18
+mesto/master 36b3fe68 2026-07-17
+mesto/total-implication-ctv a9602462 2026-06-09
+origin/codex/metta-validator-api 5c58c93f 2026-08-04
+origin/dynamic-concept-node-prior 44a0baeb 2026-06-24
+origin/master 9884ae6d 2026-11-03
+origin/simplify-compiler-chainer 824c2512 2026-06-25
+origin/total-implication-ctv a9602462 2026-06-09
+origin/typecheck-v2-strict 64951f48 2026-08-03
+origin/weak-marginal-projection 879fa186 2026-06-24
+## 36b3fe6: 36b3fe68 2026-07-17 07:31:35 +1000 Deduplicate backward result and benchmark helpers
+## 38b1473: 38b14734 2026-10-18 15:05:51 +1100 Bind the head before is-var where pymetta holds its argument
+## 49ca6f3: 49ca6f37 2026-11-03 15:44:10 +0100 Index the rulelookup report and remove it from the root
+## containment of wmtm commits in every branch (yes=ancestor)
+me/goalchainer-native.2 contains 36b3fe6: yes
+me/goalchainer-native.2 contains 38b1473: yes
+me/master contains 36b3fe6: yes
+me/master contains 38b1473: no
+me/total-implication-ctv contains 36b3fe6: no
+me/total-implication-ctv contains 38b1473: no
+mesto/goalchainer-native.2 contains 36b3fe6: yes
+mesto/goalchainer-native.2 contains 38b1473: yes
+mesto/master contains 36b3fe6: yes
+mesto/master contains 38b1473: no
+mesto/total-implication-ctv contains 36b3fe6: no
+mesto/total-implication-ctv contains 38b1473: no
+origin/codex/metta-validator-api contains 36b3fe6: no
+origin/codex/metta-validator-api contains 38b1473: no
+origin/dynamic-concept-node-prior contains 36b3fe6: no
+origin/dynamic-concept-node-prior contains 38b1473: no
+origin/master contains 36b3fe6: no
+origin/master contains 38b1473: no
+origin/simplify-compiler-chainer contains 36b3fe6: no
+origin/simplify-compiler-chainer contains 38b1473: no
+origin/total-implication-ctv contains 36b3fe6: no
+origin/total-implication-ctv contains 38b1473: no
+origin/typecheck-v2-strict contains 36b3fe6: no
+origin/typecheck-v2-strict contains 38b1473: no
+origin/weak-marginal-projection contains 36b3fe6: no
+origin/weak-marginal-projection contains 38b1473: no
+## merge-bases with rT branches, ahead/behind (left=wmtm commit, right=branch)
+36b3fe6 vs origin/codex/metta-validator-api: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 11	164
+38b1473 vs origin/codex/metta-validator-api: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 20	164
+36b3fe6 vs origin/dynamic-concept-node-prior: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 11	50
+38b1473 vs origin/dynamic-concept-node-prior: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 20	50
+36b3fe6 vs origin/master: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 11	1095
+38b1473 vs origin/master: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 20	1095
+36b3fe6 vs origin/simplify-compiler-chainer: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 11	72
+38b1473 vs origin/simplify-compiler-chainer: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 20	72
+36b3fe6 vs origin/total-implication-ctv: merge-base 9553bd61 2026-05-27 14:57:40 +0200; counts 21	11
+38b1473 vs origin/total-implication-ctv: merge-base 9553bd61 2026-05-27 14:57:40 +0200; counts 30	11
+36b3fe6 vs origin/typecheck-v2-strict: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 11	161
+38b1473 vs origin/typecheck-v2-strict: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 20	161
+36b3fe6 vs origin/weak-marginal-projection: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 11	51
+38b1473 vs origin/weak-marginal-projection: merge-base 6b88df7c 2026-06-09 10:57:56 +0200; counts 20	51

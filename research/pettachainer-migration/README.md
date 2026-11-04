@@ -21,6 +21,7 @@ Note: wmtm's .gitignore:30 (`pettachainer-*/`) matches this directory name, so t
 - `logs/failed_ids/*.ids`: the sorted failing test IDs from each suite log (`grep '^FAILED '`, cut at ` - `).
 - `shims/recovered/`: diffs for shims later overwritten or reverted (shim4c, shim6, shim7, probe118), rebuilt from scratch-tree backups (.orig, .pre118, .prefa, .fa-current, .pre-finally), plus the first error of each shim5-8 run.
 - `evidence/fitness/`: the fitness report (t-2026-11-03-pettachainer-fitness) and the pytest logs whose counts this report quotes (186; 117/69; 242; 240+2).
+- `evidence/fitness/lineage.txt`, `pc_shadow_andform*.diff`, `pytest_pc_*_andform_floor.txt`: engine/branch lineage and the tested pc_shadow proof-acceptance fix (W8).
 - `logs/*.summary.txt`: the pass/fail line and the top error for each GoalChainer suite run (raw logs were 34 MB, not committed).
 - `probes/`: the probes and outputs that the report quotes. (All 139 probe scripts are in `probes/all/` and all 148 probe outputs are in `probes/all_out/`.)
 
