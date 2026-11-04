@@ -1,7 +1,8 @@
 """Track H parse worker: ``python -m wmtm.workers.semparse_feed --dir D [--config C]``.
 
 Launched detached by wmtm/parse_cache.py; never waited on.  Drains the parse queue under the hourly cap with the
-Track C SemParseAdapter: LLM via the existing OpenAI-compatible gateway (BASE_URL / LLM_MODEL / AI_API_KEY from the
+Track C SemParseAdapter: LLM via the existing OpenAI-compatible gateway through Man Hin's upstream chat-completions
+provider (parse_cache.gateway_llm_usage; BASE_URL / LLM_MODEL / AI_API_KEY from the
 environment, else from the env file named by ``llm_env_file``; the file is only read, never copied), load check in
 PeTTaChainer (PeTTa v1.0.6 + PeTTaChainer 36b3fe6 dedup-patched, paths from the runtime config).
 
@@ -90,7 +91,8 @@ try:
         status["load_canary"] = ("Member grace person" in pos) and ("Member grace robot" not in neg)
         if not status["load_canary"]:
             status["status"] = "canary_fail"; finish(3)
-    llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None)
+    llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None, hitl=HITL,   # upstream provider (review-7)
+                            workdir=os.path.join(a.dir, "provider"))
     status["model"] = getattr(llm, "model", None)
     from wmtm.semparse_adapter import SemParseAdapter
     if a.llm_canary:

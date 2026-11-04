@@ -331,3 +331,37 @@ def test_explicit_hashes_all_skipped_stay_empty(tmp_path):
     assert (out / "per_note.jsonl").read_text() == ""
     assert M.select({h1: ("i1", "x")}, 30, 0, []) == ([], [])          # explicit empty list never samples
     assert M.select({h1: ("i1", "x")}, 30, 0, None) == ([h1], [])
+
+
+@needs_hitl
+def test_feed_llm_is_upstream_provider(tmp_path, monkeypatch):
+    """review-7: the production feed's llm (parse_cache.gateway_llm_usage) is upstream's chat-completions provider,
+    the same client measure_parse uses; parse_cache has no HTTP client of its own."""
+    from wmtm import parse_cache as PC
+    import inspect
+    assert "urllib" not in inspect.getsource(PC)
+    for k in ("BASE_URL", "LLM_MODEL", "AI_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    gw = _FakeGateway("hello", GW_USAGE)
+    envf = tmp_path / "llm.env"
+    envf.write_text(f"BASE_URL={gw.base_url}\nLLM_MODEL=openclaw/protocosmo2\nAI_API_KEY=fk\n")
+    try:
+        llm = PC.gateway_llm_usage(env_file=str(envf), hitl=HITL, workdir=str(tmp_path / "prov"))
+        assert llm("SYS", "USER") == "hello"
+    finally:
+        gw.close()
+    assert llm.provider == "chat-completions" and llm.module.PROVIDERS["chat-completions"].__module__ == llm.module.__name__
+    r = gw.seen[0]
+    assert r["auth"] == "Bearer fk" and r["body"]["model"] == "openclaw/protocosmo2" and r["body"]["temperature"] == 0
+    assert llm.last_usage["prompt_tokens"] == 3100 and llm.last_usage["total_tokens"] == 3150
+
+
+@needs_hitl
+def test_feed_llm_without_base_url_is_llm_error(monkeypatch):
+    from wmtm import parse_cache as PC
+    for k in ("BASE_URL", "WMTM_LLM_ENV_FILE"):
+        monkeypatch.delenv(k, raising=False)
+    llm = PC.gateway_llm_usage(hitl=HITL)
+    with pytest.raises(RuntimeError, match="BASE_URL"):
+        llm("s", "u")
+    assert llm.last_usage is None
