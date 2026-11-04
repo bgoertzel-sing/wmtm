@@ -1,0 +1,11 @@
+--- shims/runtime_helpers.orig.pl	2026-11-03 14:28:24.399271009 -0700
++++ shims/runtime_helpers.shim9.pl	2026-11-03 14:53:06.879349556 -0700
+@@ -3,7 +3,7 @@
+ :- use_module(library(heaps)).
+ :- use_module(library(assoc)).
+ :- use_module(library(nb_set)).
+-:- use_module(library(yall)).
++%shim3 :- use_module(library(yall)).
+ :- ensure_loaded('../lib/natives').
+ :- ensure_loaded('../lib/collections').
+ :- ensure_loaded('../lib/numeric').

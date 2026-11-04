@@ -1,0 +1,18 @@
+--- shims/bootstrap.orig.metta	2026-11-03 14:26:17.413261978 -0700
++++ shims/bootstrap.shim4b.metta	2026-11-03 14:34:34.819804282 -0700
+@@ -30,11 +30,10 @@
+          (callPredicate
+             (Predicate (directory_file_path $metta-parent $helper-relative $parent-runtime-helper)))
+          $parent-runtime-helper)))
+-   (import_prolog_functions_from_file
+-      (if (== $runtime-helper $parent-runtime-helper)
+-         $runtime-helper
+-         (superpose ($runtime-helper $parent-runtime-helper)))
+-      (quote (declare-natives! declare-forward!))))
++   (let $_ (callPredicate (Predicate (ensure_loaded "gc/src/external/PeTTaChainer/pettachainer/metta/prolog/runtime_helpers.pl")))
++     (import_prolog_functions_from_file
++        "gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl"
++        (declare-natives! declare-forward!))))
+ 
+ !(import! &self lib/natives)
+ !(import! &self core/natives)

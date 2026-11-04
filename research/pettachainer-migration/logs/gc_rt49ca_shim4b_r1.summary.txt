@@ -1,0 +1,5 @@
+# gc_rt49ca_shim4b_r1
+117 failed, 69 passed in 61.90s (0:01:01)
+    115 E       metta._errors.errors.EngineError: no predicate named heap-empty? is loaded, so registering it would compile every call to it into a partial application rather than failing
+    115 E               janus_swi.janus.PrologError: no predicate named heap-empty? is loaded, so registering it would compile every call to it into a partial application rather than failing
+    115 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: no predicate named heap-empty? is loaded, so registering it would compile every call to it into a partial application rather

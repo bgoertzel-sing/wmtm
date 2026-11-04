@@ -1,0 +1,5 @@
+# gc_rt49ca_shim3_r1
+117 failed, 69 passed in 60.14s (0:01:00)
+    116 E       metta._errors.errors.EngineError: refuse_other_sources_name/2: declare-natives! is already registered from gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl. Two libraries defining one name destroy each other's predicate, because a consulted file REPLACES a st
+    116 E               janus_swi.janus.PrologError: refuse_other_sources_name/2: declare-natives! is already registered from gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl. Two libraries defining one name destroy each other's predicate, because a consulted file REPLACES a
+    116 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: refuse_other_sources_name/2: declare-natives! is already registered from gc/src/external/PeTTaChainer/pettachaine
