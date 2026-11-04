@@ -250,3 +250,64 @@ def test_split_usage_never_fills_zero():
                                                     "prompt_tokens", "completion_tokens", "total_tokens")}
     full = P.split_usage({"input": 100, "cached": 60, "cache_write": 10, "output": 5})
     assert (full["uncached_input"], full["total_tokens"]) == (30, 105)
+
+
+def _row(w=None, live=100.0):
+    full = w is not None
+    return {"status": "admitted", "accepted": 1, "rejected": 0, "error_kind": None,
+            "uncached_input": 10 if full else None, "cache_write": 0 if full else None,
+            "cache_read": 0 if full else None, "output": 0 if full else None, "weighted": w,
+            "latency_s": 5.0, "live_log": "spk1", "live_secs": 40.0,
+            "live_weighted_lo": live, "live_weighted_hi": live}
+
+
+class _A:
+    seed, hashes, per_hour = 0, "", 20.0
+
+
+def test_summary_partial_usage_gives_no_median_ratio_or_verdict():
+    """review-5 #1 probe: 1 note with full usage + 29 unknown -> no median, no ratio, usage_ok None."""
+    rows = [_row(10.0)] + [_row(None) for _ in range(29)]
+    s = M.summarize(rows, "m", False, "d", 30, [], 0, _A())
+    assert s["median"]["weighted"] is None and s["median"]["uncached_input"] is None
+    assert s["measured_rows"]["weighted"] == 1 and s["usage_complete"] is False
+    assert s["ratio_new_over_live"]["vs_lo"] is None and s["ratio_new_over_live"]["vs_hi"] is None
+    assert s["budget"]["usage_ok"] is None
+    assert s["median"]["latency_s"] == 5.0 and s["budget"]["latency_ok"] is True
+
+
+def test_summary_complete_usage_pairs_with_live():
+    rows = [_row(10.0, 100.0), _row(30.0, 10.0), _row(20.0, None)]   # 3rd note has no live baseline
+    s = M.summarize(rows, "m", False, "d", 3, [], 0, _A())
+    assert s["usage_complete"] and s["median"]["weighted"] == 20.0
+    assert s["ratio_new_over_live"]["paired_rows_hi"] == 2
+    assert s["ratio_new_over_live"]["vs_hi"] == round(20.0 / 55.0, 3) and s["budget"]["usage_ok"] is True
+
+
+@needs_hitl
+def test_main_skips_long_notes_never_truncates(tmp_path):
+    """review-5 #2 probe: a 2,160-char note is skipped and reported (default parse_max_chars), not measured
+    as a prefix; the adapter records truncation, so a cut item is detectable."""
+    sd, h1 = make_state(tmp_path)
+    st = json.loads((sd / "_wmtm_state.json").read_text())
+    long_txt = ("Mira painted the fence. " * 90)[:2160]
+    st["store"]["items"]["long"] = {"id": "long", "content": long_txt}
+    (sd / "_wmtm_state.json").write_text(json.dumps(st))
+    hl = M.content_hash(long_txt)
+    mock = tmp_path / "mock.jsonl"
+    mock.write_text(json.dumps({"hash": h1, "reply": REPLY}) + "\n")
+    out = tmp_path / "out"
+    assert M.main(["--state-dir", str(sd), "--hashes", f"{h1},{hl}", "--out", str(out),
+                   "--mock-replies", str(mock)]) == 0
+    s = json.loads((out / "summary.json").read_text())
+    assert s["max_chars"] == 1500 and s["notes_over_max_chars_in_state"] == 1
+    assert s["hashes_skipped_long"] == [hl] and s["parsed"] == 1
+    per = [json.loads(x) for x in (out / "per_note.jsonl").read_text().splitlines()]
+    assert [r["hash"] for r in per] == [h1] and per[0]["chars"] == len(NOTES["i1"])
+    out2 = tmp_path / "out2"                            # random sample never picks the long note either
+    assert M.main(["--state-dir", str(sd), "-n", "30", "--out", str(out2), "--mock-replies", str(mock)]) == 0
+    assert hl not in (out2 / "per_note.jsonl").read_text()
+    from wmtm import semparse_adapter as sp
+    ad = sp.SemParseAdapter(lambda s_, u: "", system="S", max_chars=5)
+    assert ad.parse_item("x", {"text": "abcdefgh"}).truncated_chars == 3
+    assert ad.parse_item("y", {"text": "abc"}).truncated_chars == 0

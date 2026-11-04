@@ -264,6 +264,7 @@ class ParseResult:
     catalog_status: Optional[str] = None               # catalog mode: upstream tmpl.validate status
     latency_s: Optional[float] = None                  # wall time of the LLM call(s) for this item
     usage: dict = field(default_factory=dict)          # summed provider token usage, if the LLM reports it
+    truncated_chars: int = 0                           # chars of the item cut off by max_chars (0 = whole item)
 
 
 class SemParseAdapter:
@@ -339,8 +340,10 @@ class SemParseAdapter:
         """Track O: parse with CONTEXT (atoms of related earlier notes, verbatim) and TEXT; long notes are parsed
         per short passage, each passage seeing the context plus the atoms accepted from earlier passages."""
         from .semparse_context import split_passages
-        text = item_text(item)[: self.max_chars]
+        full = item_text(item)
+        text = full[: self.max_chars]
         total = ParseResult(str(item_id), text)
+        total.truncated_chars = len(full) - len(text)
         own = []
         for k, p in enumerate(split_passages(text, passage_chars) or [text]):
             ctx = (list(context_atoms) + own)[-max_context_atoms:] if (context_atoms or own) else []
@@ -356,8 +359,10 @@ class SemParseAdapter:
 
     def parse_item(self, item_id, item, context_atoms=(), scope_id=None) -> ParseResult:
         from .semparse_context import user_message, atom_body
-        text = item_text(item)[: self.max_chars]
+        full = item_text(item)
+        text = full[: self.max_chars]
         res = ParseResult(str(item_id), text)
+        res.truncated_chars = len(full) - len(text)
         ctx_bodies = {atom_body(a) for a in context_atoms}
         if self.mode == "catalog":
             return self._parse_catalog(res, item_id, text, ctx_bodies, scope_id)

@@ -14,7 +14,9 @@
   (``*.local.jsonl`` is git-ignored).
 * weighted usage = uncached*w_in + cache_write*w_cw + cache_read*w_cr + output*w_out, Anthropic price ratios
   relative to base input (WEIGHTS); computed the same way for the live baseline.  429 / 529 / usage-limit errors
-  are counted.  --mock-replies {"hash": ..., "reply": ...} lines replace the provider (no network, tokens null).
+  are counted.  Medians, ratios and budget verdicts need EVERY parsed note measured (measured_rows gives the
+  coverage); the usage ratio pairs new and live on the same notes.  Notes longer than --max-chars (default
+  parse_max_chars, as the live feed) are skipped and reported, never truncated.  --mock-replies {"hash": ..., "reply": ...} lines replace the provider (no network, tokens null).
 * provider (answer 7): --provider openclaw (default) = OpenAI-compatible Chat Completions at --base-url
   (default http://127.0.0.1:18789/v1), --model an agent target such as openclaw/protocosmo2, bearer token from
   $OPENCLAW_GATEWAY_TOKEN (--token-env); built on upstream semantic-parse.py's DeepSeek client (wmtm.semparse_provider
@@ -119,9 +121,23 @@ def select(notes, n, seed, hashes):
     return random.Random(seed).sample(keys, min(n, len(keys))), []
 
 
+def _num(x):
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
 def _med(xs):
-    xs = [x for x in xs if isinstance(x, (int, float))]
+    """Median of the known values (live baseline columns only: their coverage is reported alongside)."""
+    xs = [x for x in xs if _num(x)]
     return round(statistics.median(xs), 3) if xs else None
+
+
+def _med_all(xs):
+    """review-5 #1: median of the new parser's measurements only when EVERY row has one; any unknown -> None
+    (unmeasured), so a partial sample never yields a median, a ratio or a budget verdict."""
+    xs = list(xs)
+    if not xs or not all(_num(x) for x in xs):
+        return None
+    return round(statistics.median(xs), 3)
 
 
 def main(argv=None):
@@ -141,6 +157,9 @@ def main(argv=None):
     ap.add_argument("--effort", default="low", help="upstream semantic-parse.py --effort (default: low)")
     ap.add_argument("--mock-replies", default="", help="jsonl of {hash, reply}: no network, tokens not measured")
     ap.add_argument("--per-hour", type=float, default=20.0, help="parse cap (0 = no pacing)")
+    ap.add_argument("--max-chars", type=int, default=None,
+                    help="notes longer than this are skipped and reported, never truncated "
+                         "(default: the state dir's parse_max_chars, as the live feed uses)")
     a = ap.parse_args(argv)
     sd = os.path.abspath(a.state_dir)
     os.makedirs(a.out, exist_ok=True)
@@ -148,9 +167,16 @@ def main(argv=None):
     if a.hashes:
         src = open(a.hashes[1:]).read().split() if a.hashes.startswith("@") else a.hashes.split(",")
         hashes = [h.strip() for h in src if h.strip()]
+    cfg = rc.resolve(sd)
+    semparse_dir = cfg["semparse_dir"]
+    # review-5 #2: like the live feed (parse_cache skips items > parse_max_chars), a note longer than the limit
+    # is skipped and reported, never measured as a truncated prefix under the full note's hash.
+    max_chars = a.max_chars if a.max_chars is not None else int(cfg["parse_max_chars"])
     notes = load_notes(sd)
-    chosen, missing = select(notes, a.n, a.seed, hashes)
-    semparse_dir = rc.resolve(sd)["semparse_dir"]
+    too_long = {h for h, (_, t) in notes.items() if len(t) > max_chars}
+    skipped_long = [h for h in hashes if h in too_long]
+    chosen, missing = select({h: v for h, v in notes.items() if h not in too_long}, a.n, a.seed,
+                             [h for h in hashes if h not in too_long])
     base = load_baseline(semparse_dir)
     mock = None
     if a.mock_replies:
@@ -164,7 +190,8 @@ def main(argv=None):
             llm = upstream_llm("anthropic", model=a.model, flags=["--effort", a.effort],
                                workdir=os.path.join(a.out, "_provider"))
         model = llm.model
-    ad = sp.SemParseAdapter(llm, mode="catalog", reject_log=os.path.join(a.out, "rejects.local.jsonl"))
+    ad = sp.SemParseAdapter(llm, mode="catalog", reject_log=os.path.join(a.out, "rejects.local.jsonl"),
+                            max_chars=max_chars)
     gap = 0 if (mock is not None or not a.per_hour) else 3600.0 / a.per_hour
     rows, limit_errors, last = [], 0, None
     bad = open(os.path.join(a.out, "bad_parses.local.jsonl"), "w", encoding="utf-8")
@@ -175,6 +202,8 @@ def main(argv=None):
         iid, txt = notes[h]
         llm.cur = h
         res = ad.parse_item(iid, {"text": txt})
+        if res.truncated_chars:                             # structural check: never report a prefix
+            raise RuntimeError(f"note {h} was truncated by {res.truncated_chars} chars; refusing the measurement")
         err = res.error or ""
         is_limit = any(m in err.lower() for m in LIMIT_MARKERS)
         limit_errors += is_limit
@@ -185,7 +214,8 @@ def main(argv=None):
                "accepted": len(res.accepted), "rejected": len(res.rejected), "declarations": len(res.declarations),
                "error_kind": ("limit" if is_limit else "error" if err else None),
                **tok, "weighted": weighted(tok),
-               "latency_s": None if mock is not None else round(res.latency_s or 0.0, 3),
+               "chars": len(txt),
+               "latency_s": None if (mock is not None or res.latency_s is None) else round(res.latency_s, 3),
                "live_log": b and b["log"], "live_secs": b and b.get("secs"),
                "live_weighted_lo": live_weighted(b, "uncached_input"),
                "live_weighted_hi": live_weighted(b, "cache_write")}
@@ -197,37 +227,49 @@ def main(argv=None):
     with open(os.path.join(a.out, "per_note.jsonl"), "w", encoding="utf-8") as fh:
         for r in rows:
             fh.write(json.dumps(r) + "\n")
-    summary = summarize(rows, model, mock is not None, semparse_dir, len(notes), missing, limit_errors, a)
+    summary = summarize(rows, model, mock is not None, semparse_dir, len(notes), missing, limit_errors, a,
+                        {"max_chars": max_chars, "notes_over_max_chars_in_state": len(too_long),
+                         "hashes_skipped_long": skipped_long})
     with open(os.path.join(a.out, "summary.json"), "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=1)
     print(json.dumps(summary, indent=1))
     return 0
 
 
-def summarize(rows, model, mocked, semparse_dir, n_notes, missing, limit_errors, a):
+def summarize(rows, model, mocked, semparse_dir, n_notes, missing, limit_errors, a, extra=None):
     st = {k: sum(1 for r in rows if r["status"] == k) for k in ("admitted", "partial", "rejected")}
+    keys = list(WEIGHTS) + ["weighted", "latency_s"]
     nm = "not measured (no credential)" if mocked else None
-    med = {k: (nm or _med([r[k] for r in rows])) for k in list(WEIGHTS) + ["weighted", "latency_s"]}
+    measured = {k: sum(1 for r in rows if _num(r[k])) for k in keys}
+    med = {k: (nm or _med_all([r[k] for r in rows])) for k in keys}      # None unless every row measured it
+    complete = (not mocked) and bool(rows) and measured["weighted"] == len(rows)
     lo = _med([r["live_weighted_lo"] for r in rows]); hi = _med([r["live_weighted_hi"] for r in rows])
-    new_w = None if mocked else med["weighted"]
-    ratio = (lambda d: round(new_w / d, 3) if isinstance(new_w, (int, float)) and d else None)
-    lat = None if mocked else med["latency_s"]
+
+    def paired(col):                                    # new vs live on the SAME notes (those with a baseline)
+        pr = [r for r in rows if _num(r[col])]
+        if not complete or not pr:
+            return None, len(pr)
+        new, live = _med_all([r["weighted"] for r in pr]), _med_all([r[col] for r in pr])
+        return (round(new / live, 3) if live else None), len(pr)
+    r_lo, n_lo = paired("live_weighted_lo"); r_hi, n_hi = paired("live_weighted_hi")
+    lat = med["latency_s"] if (not mocked and measured["latency_s"] == len(rows)) else None
     return {"model": model, "mocked": mocked, "notes_in_state": n_notes, "parsed": len(rows),
-            "seed": a.seed, "hashes_given": bool(a.hashes), "hashes_missing": missing,
+            "seed": a.seed, "hashes_given": bool(a.hashes), "hashes_missing": missing, **(extra or {}),
             "semparse_dir_set": bool(semparse_dir), "status": st,
             "statements_accepted": sum(r["accepted"] for r in rows),
             "statements_rejected": sum(r["rejected"] for r in rows),
             "errors": sum(1 for r in rows if r["error_kind"]), "limit_errors_429_or_usage": limit_errors,
-            "weights": WEIGHTS, "median": med,
+            "weights": WEIGHTS, "measured_rows": measured, "usage_complete": complete, "median": med,
             "live_baseline": {"joined": sum(1 for r in rows if r["live_log"]),
                               "median_weighted_lo_prompt_as_uncached": lo,
                               "median_weighted_hi_prompt_as_cache_write": hi,
                               "median_secs": _med([r["live_secs"] for r in rows])},
-            "ratio_new_over_live": {"vs_lo": ratio(lo), "vs_hi": ratio(hi)},
+            "ratio_new_over_live": {"vs_lo": r_lo, "vs_hi": r_hi, "paired_rows_lo": n_lo, "paired_rows_hi": n_hi,
+                                    "basis": "medians over the notes that have a live baseline; only when every "
+                                             "parsed note reported full usage (else null)"},
             "budget": {"usage_ratio_max": 2.0, "median_latency_max_s": 180, "per_hour_cap": a.per_hour,
-                       "usage_ok": (None if ratio(hi) is None else ratio(hi) <= 2.0),
+                       "usage_ok": (None if r_hi is None else r_hi <= 2.0),
                        "latency_ok": (None if lat is None else lat <= 180)}}
-
 
 if __name__ == "__main__":
     sys.exit(main())
