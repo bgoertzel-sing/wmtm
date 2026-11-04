@@ -260,14 +260,31 @@ class ParseResult:
     queries: list = field(default_factory=list)
     rejected: list = field(default_factory=list)   # (atom_text, reason)
     error: Optional[str] = None
+    declarations: list = field(default_factory=list)   # catalog mode: (: sym Type) atoms, scoped
+    catalog_status: Optional[str] = None               # catalog mode: upstream tmpl.validate status
+    latency_s: Optional[float] = None                  # wall time of the LLM call(s) for this item
+    usage: dict = field(default_factory=dict)          # summed provider token usage, if the LLM reports it
 
 
 class SemParseAdapter:
     def __init__(self, llm: LLM, loader=None, prompt_path: str = DEFAULT_PROMPT,
                  reject_log: Optional[str] = None, system: Optional[str] = None,
                  max_chars: int = 2000, reject_log_max_bytes: Optional[int] = None,
-                 preamble: Optional[bool] = None):
+                 preamble: Optional[bool] = None, mode: Optional[str] = None,
+                 hitl_root: Optional[str] = None):
         self.llm = llm
+        # mode "legacy": the model writes MeTTa (prompt.txt, hitl <= legacy-line);
+        # mode "catalog": the model writes JSON instances, upstream tmpl.validate emits MeTTa (hitl >= 1f1a7a6f).
+        self.mode = (mode or os.environ.get("WMTM_SEMPARSE_MODE") or "legacy").strip().lower()
+        if self.mode not in ("legacy", "catalog"):
+            raise ValueError(f"unknown semparse mode {self.mode!r}")
+        self.hitl_root = hitl_root
+        if self.mode == "catalog":
+            from .semparse_catalog import prompt_path as _cpp
+            if system is None and not prompt_path:
+                prompt_path = _cpp(hitl_root)
+            if preamble is None:
+                preamble = False      # the legacy pre-instruction block targets MeTTa output, not JSON
         self.loader = loader          # object with add_atom(str); None = no PeTTa check
         if system is None:
             with open(prompt_path, encoding="utf-8") as fh:
@@ -286,6 +303,19 @@ class SemParseAdapter:
         self.reject_log = reject_log
         self.max_chars = max_chars
         self.reject_log_max_bytes = reject_log_max_bytes
+
+    def _call_llm(self, res: ParseResult, system: str, user: str) -> str:
+        """Call the LLM, adding wall time and any reported token usage (llm.last_usage) to `res`."""
+        t0 = time.perf_counter()
+        try:
+            return self.llm(system, user)
+        finally:
+            res.latency_s = (res.latency_s or 0.0) + (time.perf_counter() - t0)
+            u = getattr(self.llm, "last_usage", None)
+            if isinstance(u, dict):
+                for k, v in u.items():
+                    if isinstance(v, (int, float)) and not isinstance(v, bool):
+                        res.usage[k] = res.usage.get(k, 0) + v
 
     def _log(self, res: ParseResult, atom: str, reason: str, stage: str):
         res.rejected.append((atom, reason))
@@ -323,8 +353,10 @@ class SemParseAdapter:
         text = item_text(item)[: self.max_chars]
         res = ParseResult(str(item_id), text)
         ctx_bodies = {atom_body(a) for a in context_atoms}
+        if self.mode == "catalog":
+            return self._parse_catalog(res, item_id, text, ctx_bodies, scope_id)
         try:
-            reply = self.llm(self.system, user_message(text, list(context_atoms)))
+            reply = self._call_llm(res, self.system, user_message(text, list(context_atoms)))
         except Exception as e:                       # noqa: BLE001
             res.error = f"llm error: {e}"
             self._log(res, "", res.error, "llm")
@@ -333,6 +365,50 @@ class SemParseAdapter:
             res.error = "empty reply"
             self._log(res, "", res.error, "llm")
             return res
+        self._accept_forms(res, reply, item_id, scope_id, ctx_bodies)
+        if not res.accepted and not res.queries and not res.rejected:
+            self._log(res, reply[:300], "reply contained no atoms", "syntax")
+        return res
+
+    def _parse_catalog(self, res, item_id, text, ctx_bodies, scope_id) -> ParseResult:
+        """Catalog mode: JSON instances -> upstream tmpl.validate.inspect -> statements -> the usual checks.
+        Context atoms are not sent (the catalog prompt has no CONTEXT slot); they still filter re-emissions."""
+        from .semparse_catalog import reply_to_statements, item_message
+        try:
+            reply = self._call_llm(res, self.system, item_message(safe_id(item_id), text))
+        except Exception as e:                       # noqa: BLE001
+            res.error = f"llm error: {e}"
+            self._log(res, "", res.error, "llm")
+            return res
+        if not reply or not reply.strip():
+            res.error = "empty reply"
+            self._log(res, "", res.error, "llm")
+            return res
+        out = reply_to_statements(reply, text, self.hitl_root)
+        res.catalog_status = out["status"]
+        for f in out["findings"]:
+            if f.get("kind") in ("json", "contract", "instance", "upstream"):
+                self._log(res, reply[:300] if f.get("kind") == "json" else "",
+                          f"catalog {f.get('kind')}: {str(f.get('detail'))[:300]}", "catalog")
+        prefix = safe_id(item_id)
+        sprefix = safe_id(scope_id if scope_id is not None else item_id)
+        for d in out["declarations"]:
+            for src, node, err in split_toplevel(str(d)):
+                if err or not isinstance(node, list):
+                    self._log(res, src, f"declaration syntax: {err}", "syntax")
+                    continue
+                dn = _scope_skolems(node, prefix)
+                if sprefix != prefix:
+                    dn = _rescope(dn, prefix, sprefix)
+                if to_str(dn) not in res.declarations:
+                    res.declarations.append(to_str(dn))
+        self._accept_forms(res, "\n".join(str(x) for x in out["statements"]), item_id, scope_id, ctx_bodies)
+        if not res.accepted and not res.rejected:
+            self._log(res, reply[:300], f"catalog reply produced no statements (status {out['status']})", "catalog")
+        return res
+
+    def _accept_forms(self, res, reply, item_id, scope_id, ctx_bodies):
+        from .semparse_context import atom_body
         prefix = safe_id(item_id)
         sprefix = safe_id(scope_id if scope_id is not None else item_id)   # sk_* scope = the note, not the passage
         for src, node, err in split_toplevel(reply):
@@ -363,9 +439,6 @@ class SemParseAdapter:
                         self._log(res, atom, f"petta load: {str(e)[:200]}", "petta")
                         continue
                 res.accepted.append(atom)
-        if not res.accepted and not res.queries and not res.rejected:
-            self._log(res, reply[:300], "reply contained no atoms", "syntax")
-        return res
 
     def parse_items(self, items: Iterable) -> list:
         return [self.parse_item(i, it) for i, it in items]
@@ -398,5 +471,7 @@ def gateway_llm(base_url=None, model=None, key=None, timeout=300.0,
             base_url.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(),
             headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
         r = json.loads(urllib.request.urlopen(req, timeout=timeout).read())
+        call.last_usage = r.get("usage") if isinstance(r.get("usage"), dict) else None
         return r["choices"][0]["message"]["content"]
+    call.last_usage = None
     return call
