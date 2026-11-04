@@ -102,7 +102,7 @@ def _run_worker(tmp_path, spec, *extra):
     return code, json.loads(out.read_text().strip().splitlines()[-1]), sp
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_integration_synthetic(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     rc, rec, sp = _run_worker(tmp_path, spec)
@@ -114,14 +114,14 @@ def test_integration_synthetic(tmp_path):
     assert not sp.exists()                                    # spec deleted
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_fault_timeout_is_canary_fail_not_hang(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     t = time.time(); rc, rec, _ = _run_worker(tmp_path, spec, "--timeout", "0.0001")
     assert rc == 3 and rec["status"] == "canary_fail" and rec["queries"] == [] and time.time() - t < 60
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_fault_bad_vendor_is_warm_fail(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     rc, rec, _ = _run_worker(tmp_path, spec, "--vendor", str(tmp_path / "nope"), "--warm-timeout", "20")

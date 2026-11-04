@@ -26,8 +26,8 @@ def test_defaults_off_without_file(tmp_path):
     assert cfg["runtime_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR)
     assert cfg["shadow_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "pc_shadow")
     assert cfg["semparse_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "semparse_cache")
-    assert cfg["petta_dir"] == os.path.join(rc.VENDOR_ROOT, "petta-v1.0.6")
-    assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-36b3fe6-dedup")
+    assert cfg["petta_dir"] == os.path.join(rc.VENDOR_ROOT, "petta-3681b9b")
+    assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-202b9379")
     assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-3ec15bd1", "prompt.txt")
     assert cfg["swipl_bin"] == "" and cfg["llm_env_file"] == ""
 

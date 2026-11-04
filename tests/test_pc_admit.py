@@ -190,7 +190,7 @@ def test_fault_dead_worker_pidfile_does_not_block(tmp_path, monkeypatch):
 
 
 # ------------------------------------------------------------------ integration (real PeTTaChainer)
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_integration_worker_writes_admit_file_and_cycle_admits(tmp_path, monkeypatch):
     import subprocess, sys
     import _fake_semparse; _fake_semparse.install(monkeypatch)
