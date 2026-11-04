@@ -136,3 +136,12 @@ separately and keeps that boundary:
 - Is there a supported way to ask for the k best admissible actions in one review, instead of re-reviewing with
   withdrawn actions?
 - Should the motivation stream persist across runs? WMTM uses one per run, because it reports no host attempts yet.
+
+## Known engine limits (PeTTaChainer rT 202b9379)
+
+- **PC3, And-elimination confidence.** A stored `(And A B)` derives its conjuncts, but the confidence is conservatively 0
+  under 202b9379: conjuncts `c≈3.7e-16`, and the stored And itself `c=0.0`. The cause is that the `polynomial_answer`
+  ratio bound (event_node.pl:82) exceeds s(1-s) when the roots are uninformed, so V is capped and c=0. No local engine
+  patch and no shim (Track P: upstream first). Upstream repro: `upstream/pettachainer/PC3_202b9379.md`
+  (`pc3_and_elimination_202b9379.metta`, `pc3_conf_check.py`). Any test that fails because of this is listed as
+  "blocked on upstream (PC3)". Such tests are never skipped, mocked or loosened.
