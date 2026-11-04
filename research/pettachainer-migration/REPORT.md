@@ -1,8 +1,8 @@
 # What wmtm would need to change to run on rTreutlein/PeTTaChainer 49ca6f3
 
 ## Summary
-andy asked what wmtm would need to change to run on rT PeTTaChainer 49ca6f3. Short answer: on the wmtm side, very
-little. That is a medium-sized change: rewrite the rule form, repoint one vendor flag and one canary. The real blocker
+andy asked what wmtm would need to change to run on rT PeTTaChainer 49ca6f3. Short answer: on the wmtm side, a small to
+medium change: rewrite the rule form, repoint one vendor flag and one canary. The real blocker
 is that rT 49ca6f3 does not run on GoalChainer v2's pymetta engine. I needed 22+ shims across 66 upstream files just to
 get it to load. After all of them, the GoalChainer suite still has the same 117 failures (69 pass with no shims, 31
 pass with the last shim set). Basic fact reads still return nothing (open item 1). The same 117 test IDs fail before and after the shims
