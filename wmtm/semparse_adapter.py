@@ -389,10 +389,14 @@ class SemParseAdapter:
             return res
         out = reply_to_statements(reply, text, self.hitl_root)
         res.catalog_status = out["status"]
+        # review-2 #2: every upstream finding (contract/instance/type, lints such as dangling-referent, and span
+        # lints such as span-not-verbatim) is kept with the note id and reason; any finding -> partial below
         for f in out["findings"]:
-            if f.get("kind") in ("json", "contract", "instance", "upstream"):
-                self._log(res, reply[:300] if f.get("kind") == "json" else "",
-                          f"catalog {f.get('kind')}: {str(f.get('detail'))[:300]}", "catalog")
+            k = f.get("kind")
+            why = f.get("detail") or "; ".join(f"{a}={f[a]}" for a in sorted(f) if a != "kind") or k
+            where = (reply[:300] if k == "json" else
+                     str(f.get("span") or f.get("instance") or "")[:300])
+            self._log(res, where, f"catalog {k}: {str(why)[:300]}", "catalog")
         # review-1 #2: instances upstream could not emit were dropped so the valid part is still admitted
         for inst, why in out.get("dropped") or []:
             self._log(res, inst, f"catalog instance dropped (emission failed): {why}", "catalog")

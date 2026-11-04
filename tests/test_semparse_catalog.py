@@ -108,3 +108,18 @@ def test_llm_without_usage_attribute():
     ad = sp.SemParseAdapter(lambda s, u: "(: a (P x) (STV 1.0 0.9))", system="S")
     res = ad.parse_item("n2", {"text": "hello"})
     assert res.usage == {} and res.latency_s is not None
+
+
+@needs_hitl
+def test_adapter_catalog_span_finding_is_partial_and_logged(tmp_path):
+    """review-2 #2: upstream span/graph lints (here span-not-verbatim) are logged and make the parse partial."""
+    bad = json.loads(REPLY)
+    bad["instances"][1]["span"] = "NOT IN NOTE"
+    log = tmp_path / "rej.jsonl"
+    ad = sp.SemParseAdapter(lambda s, u: json.dumps(bad), loader=FakeLoader(), mode="catalog",
+                            reject_log=str(log))
+    res = ad.parse_item("note-9", {"text": TEXT})
+    assert res.catalog_status == "partial"
+    assert any("span-not-verbatim" in why for _, why in res.rejected)
+    recs = [json.loads(l) for l in log.read_text().splitlines()]
+    assert any(r["item_id"] == "note-9" and "span-not-verbatim" in r["reason"] for r in recs)
