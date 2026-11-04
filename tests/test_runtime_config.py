@@ -28,7 +28,8 @@ def test_defaults_off_without_file(tmp_path):
     assert cfg["semparse_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "semparse_cache")
     assert cfg["petta_dir"] == os.path.join(rc.VENDOR_ROOT, "petta-v1.0.6")
     assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-36b3fe6-dedup")
-    assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-3ec15bd1", "prompt.txt")
+    assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-1f1a7a6f", "templates", "generated", "PROMPT_CATALOG.txt")
+    assert cfg["semparse_hitl"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-1f1a7a6f") and cfg["semparse_mode"] == "catalog"
     assert cfg["swipl_bin"] == "" and cfg["llm_env_file"] == ""
 
 
@@ -125,7 +126,7 @@ def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
             return ("(: a (Member sk_req_1 request) (STV 1.0 0.9))\n(: b (Inheritance request message) (STV 1.0 0.9))\n"
                     "(: c (Member zed request) (STV 1.0 0.9))")
     from wmtm.semparse_adapter import SemParseAdapter
-    llm = LLM(); pcm.process_queue(c, llm, adapter=SemParseAdapter(llm, loader=None, system="SYS"))
+    llm = LLM(); pcm.process_queue(c, llm, adapter=SemParseAdapter(llm, loader=None, system="SYS", mode="legacy"))
     st = WMTMStore(); st.admit("n1", text, source_type="recalled", initial_sti=1.0)
     spec = pc_shadow.build_snapshot(st, cycle=1)
     # Track J: the parse gate (default on) rejects placeholder-subject facts before the KB, and logs them

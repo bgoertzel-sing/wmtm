@@ -1,13 +1,11 @@
-"""tools/measure_parse.py and wmtm.anthropic_llm on a tiny synthetic fixture state dir (no network, no real notes)."""
+"""tools/measure_parse.py and wmtm.semparse_provider (upstream provider) on a tiny synthetic fixture state dir (no network, no real notes)."""
 import importlib.util
-import io
 import json
 import os
-import urllib.error
 
 import pytest
 
-from wmtm import anthropic_llm as A
+from wmtm import semparse_provider as P
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 spec = importlib.util.spec_from_file_location("measure_parse", os.path.join(HERE, "..", "tools", "measure_parse.py"))
@@ -77,31 +75,45 @@ def test_baseline_default_dir_and_flags_dir(tmp_path):
     assert h1 in M.load_baseline(rc.resolve(str(sd2))["semparse_dir"])
 
 
-def test_anthropic_llm_request_and_usage_split():
+@needs_hitl
+def test_upstream_provider_request_and_usage_split(tmp_path, monkeypatch):
+    """review-1 #4: the measurement goes through upstream semantic-parse.py's Anthropic class."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k-test")
+    src = os.path.join(HITL, "semantic-parse.py")
+    before = open(src, "rb").read()
+    llm = P.upstream_llm("anthropic", hitl=HITL, workdir=str(tmp_path / "prov"))
     seen = {}
 
-    def opener(req, t):
-        seen["body"] = json.loads(req.data)
-        seen["hdr"] = dict(req.header_items())
-        return json.dumps({"content": [{"type": "text", "text": "hi"}], "usage": {
+    def fake(url, headers, body, timeout, **kw):
+        seen.update(url=url, headers=headers, body=body, kw=kw)
+        return {"content": [{"type": "text", "text": "hi"}], "stop_reason": "end_turn", "usage": {
             "input_tokens": 12, "cache_read_input_tokens": 3000, "cache_creation_input_tokens": 0,
-            "output_tokens": 40}}).encode()
-    llm = A.anthropic_llm(key="k-test", opener=opener)
+            "output_tokens": 40}}
+    monkeypatch.setattr(llm.module, "_post_json", fake)
     assert llm("SYS", "USER") == "hi"
+    assert hasattr(llm.module.Anthropic, "key") and os.path.dirname(llm.module.__file__) == str(tmp_path / "prov")
     assert seen["body"]["system"][0]["cache_control"] == {"type": "ephemeral"}
-    assert seen["body"]["model"] == A.DEFAULT_MODEL
+    assert seen["body"]["model"] == llm.model == llm.module.Anthropic.default_model
+    assert seen["headers"]["x-api-key"] == "k-test" and 429 in seen["kw"]["long_codes"]
     assert llm.last_usage["uncached_input"] == 12 and llm.last_usage["cache_read"] == 3000
-    assert llm.last_usage["prompt_tokens"] == 3012
+    assert llm.last_usage["prompt_tokens"] == 3012 and llm.last_usage["output"] == 40
+    assert open(src, "rb").read() == before                      # the pinned checkout is never modified
 
 
-def test_anthropic_llm_429_and_no_key(monkeypatch):
-    def opener(req, t):
-        raise urllib.error.HTTPError(A.URL, 429, "too many", {}, io.BytesIO(b""))
-    with pytest.raises(A.RateLimited):
-        A.anthropic_llm(key="k", opener=opener)("s", "u")
+@needs_hitl
+def test_upstream_provider_errors_propagate(tmp_path, monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    with pytest.raises(RuntimeError):
-        A.anthropic_llm(opener=opener)("s", "u")
+    llm = P.upstream_llm("anthropic", hitl=HITL, workdir=str(tmp_path / "prov"))
+    with pytest.raises(llm.module.ProviderError):
+        llm("s", "u")                                   # no key
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+
+    def boom(*a, **k):
+        raise llm.module.ProviderError("HTTP 429: rate_limit_error")
+    monkeypatch.setattr(llm.module, "_post_json", boom)
+    with pytest.raises(llm.module.ProviderError, match="429"):
+        llm("s", "u")
+    assert any(m in "http 429: rate_limit_error" for m in M.LIMIT_MARKERS)
 
 
 @needs_hitl

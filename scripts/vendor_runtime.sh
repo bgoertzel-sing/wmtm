@@ -2,7 +2,7 @@
 # Build the reasoner runtime that the background workers use, as plain directories under DEST:
 #   DEST/petta-v1.0.6/                  git archive of trueagi-io/PeTTa tag v1.0.6 (ae66fa8)
 #   DEST/pettachainer-36b3fe6-dedup/    git archive of MesTTo/PeTTaChainer 36b3fe6 (pettachainer/) + dedup-import patch
-#   DEST/semparse-hitl-3ec15bd1/        semantic-parsing-hitl prompt + seeded rules (NOT redistributable; local only)
+#   DEST/semparse-hitl-1f1a7a6f/        semantic-parsing-hitl templates/ + LICENSE (MIT) @1f1a7a6f
 # Each dir gets VERSION and MANIFEST.sha256.  These are the default relative paths in wmtm/runtime_config.py when
 # DEST is the directory that holds the vendored wmtm-<tag>/.  Nothing here is committed to this repo.
 #   usage: PETTA_SRC=<PeTTa clone> PETTACHAINER_SRC=<PeTTaChainer clone> [SEMPARSE_SRC=<hitl clone>] vendor_runtime.sh DEST
@@ -28,6 +28,6 @@ cp "$W/patches/pettachainer-dedup-import.patch" "$d/"
 printf 'source=https://github.com/MesTTo/PeTTaChainer\ncommit=%s\npatch=pettachainer-dedup-import.patch sha256=%s\n' \
   "$PC_PIN" "$(sha256sum "$W/patches/pettachainer-dedup-import.patch" | cut -d' ' -f1)" > "$d/VERSION"; manifest "$d"
 
-d="$DEST/semparse-hitl-3ec15bd1"; [ ! -e "$d" ] || { echo "exists: $d" >&2; exit 1; }
+d="$DEST/semparse-hitl-1f1a7a6f"; [ ! -e "$d" ] || { echo "exists: $d" >&2; exit 1; }
 "$W/scripts/fetch_semparse_hitl.sh" "$d"; manifest "$d"
 echo "runtime vendored under $DEST"

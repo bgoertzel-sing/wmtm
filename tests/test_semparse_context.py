@@ -1,6 +1,13 @@
 """Track O: CONTEXT coreference helpers + adapter context path (LLM mocked)."""
+import pytest
 from wmtm import semparse_adapter as sp
 from wmtm import semparse_context as sc
+
+
+@pytest.fixture(autouse=True)
+def _legacy_semparse_mode(monkeypatch):
+    """These tests exercise legacy mode (the model writes MeTTa); catalog is the default since p2 review-1."""
+    monkeypatch.setenv("WMTM_SEMPARSE_MODE", "legacy")
 
 CTX = ["(: i_n1__maya_name (Name maya \"Maya\") (STV 1.0 0.99))",
        "(: i_n1__e_k (Member sk_kitten_1__i_n1 kitten) (STV 1.0 0.99))"]

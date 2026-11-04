@@ -275,7 +275,7 @@ def _worker_cfg(tmp_path, **kw):
 
 def test_semparse_worker_records_actual_priority(tmp_path):
     d = tmp_path / "c"; d.mkdir()
-    cp = _worker_cfg(tmp_path, semparse_prompt=str(tmp_path / "missing_prompt.txt"))
+    cp = _worker_cfg(tmp_path, semparse_mode="legacy", semparse_prompt=str(tmp_path / "missing_prompt.txt"))
     r = subprocess.run([sys.executable, "-m", pcm.WORKER_MODULE, "--dir", str(d), "--config", cp, "--no-loader"],
                        cwd=rc.DIST_ROOT, env=rc.worker_env({}), capture_output=True, timeout=60)
     assert r.returncode == 5
@@ -283,6 +283,20 @@ def test_semparse_worker_records_actual_priority(tmp_path):
     assert rec["status"] == "prompt_missing"
     assert rec["prio"] == {"nice": 19, "policy": "idle"}
     assert rec["prio_end"]["end"] == {"nice": 19, "policy": "idle"} and rec["prio_end"]["resets"] == 0
+
+
+def test_semparse_worker_catalog_mode_refuses_unpinned_checkout(tmp_path):
+    """review-1 #3: catalog mode (the default) refuses a hitl checkout that is not 1f1a7a6f + MIT LICENSE."""
+    d = tmp_path / "c"; d.mkdir()
+    fake = tmp_path / "hitl"; (fake / "templates" / "tmpl").mkdir(parents=True)
+    (fake / "VERSION").write_text("commit=3ec15bd1\n")
+    cp = _worker_cfg(tmp_path, semparse_hitl=str(fake))
+    env = rc.worker_env({}); env.pop("WMTM_SEMPARSE_HITL", None); env.pop("WMTM_SEMPARSE_MODE", None)
+    r = subprocess.run([sys.executable, "-m", pcm.WORKER_MODULE, "--dir", str(d), "--config", cp, "--no-loader"],
+                       cwd=rc.DIST_ROOT, env=env, capture_output=True, timeout=60)
+    assert r.returncode == 5
+    rec = json.loads((d / "worker_runs.jsonl").read_text().splitlines()[-1])
+    assert rec["status"] == "hitl_pin" and rec["mode"] == "catalog" and "1f1a7a6f" in rec["error"]
 
 
 def test_shadow_worker_records_actual_priority(tmp_path):

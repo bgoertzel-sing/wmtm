@@ -275,7 +275,10 @@ class SemParseAdapter:
         self.llm = llm
         # mode "legacy": the model writes MeTTa (prompt.txt, hitl <= legacy-line);
         # mode "catalog": the model writes JSON instances, upstream tmpl.validate emits MeTTa (hitl >= 1f1a7a6f).
-        self.mode = (mode or os.environ.get("WMTM_SEMPARSE_MODE") or "legacy").strip().lower()
+        if not mode and not os.environ.get("WMTM_SEMPARSE_MODE"):
+            from .runtime_config import SPEC as _SPEC
+            mode = _SPEC["semparse_mode"][2]                    # default: "catalog" (hitl @1f1a7a6f)
+        self.mode = (mode or os.environ.get("WMTM_SEMPARSE_MODE")).strip().lower()
         if self.mode not in ("legacy", "catalog"):
             raise ValueError(f"unknown semparse mode {self.mode!r}")
         self.hitl_root = hitl_root
@@ -390,9 +393,21 @@ class SemParseAdapter:
             if f.get("kind") in ("json", "contract", "instance", "upstream"):
                 self._log(res, reply[:300] if f.get("kind") == "json" else "",
                           f"catalog {f.get('kind')}: {str(f.get('detail'))[:300]}", "catalog")
+        # review-1 #2: instances upstream could not emit were dropped so the valid part is still admitted
+        for inst, why in out.get("dropped") or []:
+            self._log(res, inst, f"catalog instance dropped (emission failed): {why}", "catalog")
+        # review-1 #1: upstream's own record of text the reply did not cover -> a partial parse, never silent
+        for kind in ("unmapped", "issues"):
+            for u in out.get(kind) or []:
+                span = u.get("span") if isinstance(u, dict) else u
+                why = ("; ".join(str(u[k]) for k in ("code", "construction", "reason", "detail") if u.get(k))
+                       if isinstance(u, dict) else None)
+                self._log(res, str(span)[:300], f"catalog {kind}: {str(why or u)[:300]}", "catalog_" + kind)
+        if res.rejected and res.catalog_status == "ok":
+            res.catalog_status = "partial"
         prefix = safe_id(item_id)
         sprefix = safe_id(scope_id if scope_id is not None else item_id)
-        for d in out["declarations"]:
+        for d in out.get("declarations") or []:          # upstream returns None on emission failure
             for src, node, err in split_toplevel(str(d)):
                 if err or not isinstance(node, list):
                     self._log(res, src, f"declaration syntax: {err}", "syntax")
@@ -402,7 +417,7 @@ class SemParseAdapter:
                     dn = _rescope(dn, prefix, sprefix)
                 if to_str(dn) not in res.declarations:
                     res.declarations.append(to_str(dn))
-        self._accept_forms(res, "\n".join(str(x) for x in out["statements"]), item_id, scope_id, ctx_bodies)
+        self._accept_forms(res, "\n".join(str(x) for x in out.get("statements") or []), item_id, scope_id, ctx_bodies)
         if not res.accepted and not res.rejected:
             self._log(res, reply[:300], f"catalog reply produced no statements (status {out['status']})", "catalog")
         return res

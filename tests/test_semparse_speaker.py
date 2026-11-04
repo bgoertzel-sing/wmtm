@@ -1,10 +1,17 @@
 """Track Q: speaker linking (synthetic names and ids only; LLM mocked)."""
 import json, os
+import pytest
 
 from wmtm import semparse_speaker as ss
 from wmtm import semparse_adapter as sp
 from wmtm import parse_cache as pcm
 from wmtm import runtime_config as rc
+
+
+@pytest.fixture(autouse=True)
+def _legacy_semparse_mode(monkeypatch):
+    """These tests exercise legacy mode (the model writes MeTTa); catalog is the default since p2 review-1."""
+    monkeypatch.setenv("WMTM_SEMPARSE_MODE", "legacy")
 
 M = {"111": "zed", "222": "quinn", "zedhandle": "zed"}
 

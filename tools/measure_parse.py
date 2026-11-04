@@ -14,6 +14,8 @@
 * weighted usage = uncached*w_in + cache_write*w_cw + cache_read*w_cr + output*w_out, Anthropic price ratios
   relative to base input (WEIGHTS); computed the same way for the live baseline.  429 / 529 / usage-limit errors
   are counted.  --mock-replies {"hash": ..., "reply": ...} lines replace the provider (no network, tokens null).
+* provider: upstream semantic-parse.py PROVIDERS["anthropic"] (wmtm.semparse_provider; our upstream PR patch is
+  applied to a scratch copy while the 1f1a7a6f pin still has the placeholder); --effort is upstream's flag.
 """
 import argparse, hashlib, json, os, random, statistics, sys, time
 
@@ -21,7 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from wmtm import runtime_config as rc                       # noqa: E402
 from wmtm import semparse_adapter as sp                     # noqa: E402
-from wmtm.anthropic_llm import anthropic_llm, RateLimited   # noqa: E402
+from wmtm.semparse_provider import upstream_llm             # noqa: E402  (upstream semantic-parse.py providers)
 
 # Anthropic price ratios vs base input (Sonnet-class: $3 in, $3.75 5-min cache write, $0.30 cache read, $15 out)
 WEIGHTS = {"uncached_input": 1.0, "cache_write": 1.25, "cache_read": 0.1, "output": 5.0}
@@ -124,6 +126,7 @@ def main(argv=None):
     ap.add_argument("--hashes", default="", help="comma list, or @file with one hash per line")
     ap.add_argument("--out", default="measure_out")
     ap.add_argument("--model", default=None)
+    ap.add_argument("--effort", default="low", help="upstream semantic-parse.py --effort (default: low)")
     ap.add_argument("--mock-replies", default="", help="jsonl of {hash, reply}: no network, tokens not measured")
     ap.add_argument("--per-hour", type=float, default=20.0, help="parse cap (0 = no pacing)")
     a = ap.parse_args(argv)
@@ -143,7 +146,8 @@ def main(argv=None):
         llm = lambda s, u: mock.get(llm.cur, "")              # noqa: E731
         llm.last_usage, model = None, "mock"
     else:
-        llm = anthropic_llm(model=a.model)
+        llm = upstream_llm("anthropic", model=a.model, flags=["--effort", a.effort],
+                           workdir=os.path.join(a.out, "_provider"))
         model = llm.model
     ad = sp.SemParseAdapter(llm, mode="catalog", reject_log=os.path.join(a.out, "rejects.local.jsonl"))
     gap = 0 if (mock is not None or not a.per_hour) else 3600.0 / a.per_hour
