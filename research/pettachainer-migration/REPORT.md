@@ -5,8 +5,8 @@ andy asked what wmtm would need to change to run on rT PeTTaChainer 49ca6f3. Sho
 little. That is a medium-sized change: rewrite the rule form, repoint one vendor flag and one canary. The real blocker
 is that rT 49ca6f3 does not run on GoalChainer v2's pymetta engine. I needed 22+ shims across 66 upstream files just to
 get it to load. After all of them, the GoalChainer suite still has the same 117 failures (69 pass with no shims, 31
-pass with the last shim set). Basic fact reads still return nothing (open item 1). The shims cleared **none** of the
-117 failures. Each one only moved the first error further along the load path.
+pass with the last shim set). Basic fact reads still return nothing (open item 1). The same 117 test IDs fail before and after the shims
+(logs/failed_ids), so the shims cleared **none** of them. Each one only moved the first error further along the load path.
 
 **Recommendation: stay** on the current pins (wmtm vendor pettachainer-36b3fe6-dedup, GoalChainer runtime 38b1473),
 and **wait for named upstream changes** (section 5). Adopting now would be a large (L+) job: in effect, we would be
@@ -37,21 +37,34 @@ Effort: S < 1 h, M = half a day to 2 days, L = more than a week or unknown.
 | G3 | goalchainer_pettachainer.metta:19 `set-backward-premise-prefilter`, :41/:52 `chainer-reset!` | not defined in rT 49ca6f3. `!(chainer-reset!)` returns itself unevaluated (probes/qprobe11.out.txt). Needs an rT equivalent, or GC drops them | upstream (rT or GC) | M |
 | G4 | tests/record_pettachainer_petta_beliefs.py:48-49 | same import path and prefilter call | upstream (GC) | S |
 
-### 1c. rT PeTTaChainer under pymetta (the shims; details in README.md)
+### 1c. rT PeTTaChainer under pymetta (the shims)
 All of these are **upstream** (rT PeTTaChainer and/or the pymetta engine). None of them is wmtm-side.
-| shim | problem | effort to fix properly |
+Effort to fix properly: arrows M (pymetta)/L (rT); type relaxations (shim15/18/19/23, about 260 declaration sites) L; load order (shim2-6) M; apply_fn1 S-M; Prolog->MeTTa calls (shim9-13/20/21/22) L; storage M-L; heaps S; map-flat/superpose M; Bool accumulator M; compact-datatypes M.
+
+Paths are relative to external/PeTTaChainer/ unless marked GoalChainer. Line numbers are on the shimmed side of `shims/rt49ca-vs-shimmed.diff`. `shims/LOCATIONS.md` lists every hunk per tag (583 hunks, 67 files, generated mechanically from the tags on the edited lines; 14 untagged hunks are listed at its end). The diff also contains two scratch backup files (`kb_publication.metta.orig62`, `.orig68`). They are noise, not shims.
+
+| shim | blocker | location (shimmed tree, file:line) |
 |---|---|---|
-| shim1/5/7/17/18 | pymetta refuses annotated arrows whose parameters are themselves annotated arrows (higher-order types) | M (pymetta) or L (rT signatures) |
-| shim15/19/23 | pymetta checks return and argument types that PeTTa ignores: `Atom`/`List X`/`SkPattern` -> `%Undefined%`/`Expression`, about 260 sites | L (rT-wide type audit) |
-| shim2/3/4/4b/6 | load order, duplicate yall import, double `declare-natives!`, relative Prolog paths | M |
-| shim4c/14 | `apply_fn1/3` (PeTTa translator only) used by `finally` | S-M |
-| shim9-13, shim20 | Prolog calls into MeTTa functions (`bidirectional-implication-form?`, `canon`, ... see pl_calls.txt). pymetta does not export MeTTa functions as Prolog predicates | L |
-| shim21/22 | `prefix-key/3` term_index (same cause) | S once the general fix exists |
-| pc_store_access.pl | space-row storage differs under pymetta (`'$metta_atoms:<space>'` modules plus a trailing token). Direct row facts and `retractall` miss | M-L (an rT storage abstraction) |
-| heapshim | library(heaps) not visible from the MeTTa module | S |
-| probe63/68/75 | `map-flat` drops partial applications; `superpose` does not evaluate its argument | M |
-| probe118 (reverted) | curried calls with a Bool accumulator return (). About 20 latent sites | M |
-| brand/the/data | builtins from rT PeTTa compact-datatypes 3681b9b, missing from the pymetta wheel | M (pymetta) |
+| shim1 (`shim1_nested_arrows.py`), shim5, shim7 | nested annotated arrows refused (`fold-semidet`, `context-with-scope`, `particle-map-pairs`) | script over every `(: name TYPE)`; surviving untagged hunks: `pettachainer/metta/compiler/source_lowering.metta:623`, `:732`; `pettachainer/metta/runtime/evaluator/folds.metta:77`, `:122`; `pettachainer/metta/core/natives.metta:310` (context-with-scope, shim5); the other rewrites were later overwritten by shim15/17/18 at the same lines (see LOCATIONS.md). shim7 (particle-map-pairs) has no surviving hunk: location not recoverable |
+| shim2, shim4, shim4b | duplicate yall import; relative Prolog path | `pettachainer/metta/bootstrap.metta:33-34` (removed `import_prolog_functions_from_file`; `bootstrap.shim4b.diff` hunk :30-39); `pettachainer/metta/prolog/runtime_helpers.pl:6-11` (yall, tagged shim3) |
+| shim3 | double `declare-natives!` registration | `pettachainer/metta/lib/natives.pl:19-37` (removed clause) |
+| shim4c, shim14 | `apply_fn1/3` missing under pymetta (`finally/3`) | `pettachainer/metta/lib/natives.pl:28-36` (`pc_apply_unit`), `:81-85` (shim14) |
+| shim6 | `sk-take!` not loaded (registration order) | no surviving hunk in the final diff (overwritten by shim18/19 at `sk-take-fresh!`/`sk-take-rate` declarations); location not recoverable |
+| shim8 | PLN config path moved | GoalChainer `src/goal_chainer/evidence_chainer.py:85` (hunk :82-88) |
+| shim9-12 | `bidirectional-implication-form?/2` called from Prolog | `runtime_helpers.shim9.diff` hunk :3-9; forwarding stub in `pettachainer/metta/prolog/ingestion.pl:326-354` |
+| shim13, shim20 | Prolog -> MeTTa forwarding (`format/3`, pl_calls.txt) | `pettachainer/metta/prolog/ingestion.pl:326-354`; `pettachainer/metta/lib/natives.metta:13-32` |
+| heapshim | library(heaps) not visible | `pettachainer/metta/lib/natives.metta:13-14` (heap arity decls; `empty_heap`/`add_to_heap` type decls removed); standalone `shims/heapshim*.pl` |
+| shim15 / shim15b | return types -> `%Undefined%` | 146 hunks / 36 files and 18 hunks / 8 files; e.g. `pettachainer/metta/compiler/rules.metta:611`, `pettachainer/metta/runtime/backward/execution.metta:3`; full list LOCATIONS.md |
+| shim17 | higher-order fold/map signatures | `pettachainer/metta/compiler/source_lowering.metta:108`, `:293`; `pettachainer/metta/lib/collections.metta:2-36` |
+| shim18 | `List X` -> `Expression` | 290 hunks / 50 files; e.g. `pettachainer/metta/compiler/query_lowering.metta:142`, `:157`, `:412`; full list LOCATIONS.md |
+| shim19 | `SkPattern` etc. -> `%Undefined%` | 388 hunks / 23 files; e.g. `pettachainer/metta/compiler/fold_sources.metta:3`, `:20`; full list LOCATIONS.md |
+| shim21, shim22 | `prefix-key/3` not a Prolog predicate | `pettachainer/metta/runtime/store/fact_index.metta:28`; `pettachainer/metta/prolog/term_index.pl:108-110` |
+| shim23 | 52 `sk-*`/store signature relaxations | `pettachainer/metta/core/natives.metta`: 14 hunks, lines 7-25 ... 324-341 (LOCATIONS.md) |
+| pc_store_access | space-row storage under pymetta | new `pettachainer/metta/prolog/pc_store_access.pl:1-21`; `pettachainer/metta/prolog/context_overlay.pl:27`, `:48`, `:56-66`; `pettachainer/metta/prolog/space_store.pl:7`, `:17`, `:36` |
+| probe63/68/75 | `map-flat` partial apps; `superpose` arg | `pettachainer/metta/runtime/kb_publication.metta:44-61` |
+| probe118 (reverted) | curried Bool accumulator returns () | `pettachainer/metta/runtime/evaluator/versions.metta`; reverted, so no hunk; line not recorded |
+| brand/the/data | compact-datatypes builtins missing | no file edit (scratch `add-atom` at runtime, warmprobe136/137) |
+| G2 (GoalChainer) | warm-up rules Premises -> bare Implication | GoalChainer `src/goal_chainer/policy/goalchainer_pettachainer.metta:44-45` (hunk :41-48) |
 
 ## 2. Open items (not solved here)
 1. **Fact reads return () under pymetta.** After `compileadd` or `kb-publish-fact!` of one fact,
@@ -79,10 +92,15 @@ All of these are **upstream** (rT PeTTaChainer and/or the pymetta engine). None 
 | gc_rt49ca_fa_r1 (5-test subset) | 1 failed / 4 passed | warm-up must answer True |
 | gc_rt49ca_fa_r2 (final shim set) | 117 failed / 31 passed (148 tests in this log, vs 186) | 116x `warm-up gc-pettachainer-warm-up must answer True once`, 1x answer diff |
 
-So the evidence failures cleared went from 0 of 117 to 0 of 117. The shims got rT to load and run under pymetta
-(load errors 117 -> 0), but every failure became a wrong answer instead: the warm-up's fact read returns (). Note: fa_r2 covers 148 tests and the
-other runs cover 186 (the progress bars reach 100% at 148 in fa_r2), so 31 vs 69 passes cannot be compared. The
-comparable figure is the 117 failures, which is the same in every run.
+**Overlap of failures (by test ID).** `logs/failed_ids/<run>.ids` holds the sorted failing test IDs from each log (`grep -aE '^FAILED ' log | sed -E 's/^FAILED //; s/ - .*//' | sort -u`). Comparing each run with noshim_r1 (`comm`):
+
+| run | failing IDs | shared with noshim_r1 | new | cleared |
+|---|---|---|---|---|
+| noshim_r1, shim1..shim13 (all 20 r1/r2/warmplain logs) | 117 | 117 | 0 | 0 |
+| fa_r2 (final shim set) | 117 | 117 | 0 | 0 |
+| fa_r1 (5-test subset) | 1 | 1 | 0 | (not run) |
+
+So the same 117 test IDs fail in every full run, and **none of the original 117 failures cleared** with the shims tested. The shims did change *why* they fail. Load errors became a wrong warm-up answer (116 of 117 in fa_r2). Pass counts are not comparable: fa_r2's log covers 148 tests, the other runs cover 186 (69 vs 31 passes). Limit: this is about the logged runs only. I don't know which of the 69/31 passing tests overlap, because the logs record only failures by ID.
 
 ## 4. Options
 | option | effort | risk | notes |

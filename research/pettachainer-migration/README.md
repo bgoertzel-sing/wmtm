@@ -17,32 +17,34 @@ Note: wmtm's .gitignore:30 (`pettachainer-*/`) matches this directory name, so t
 - `shims/*.pl`, `shims/shim1_nested_arrows.py`: standalone shim files.
 - `shims/s15_files.txt`: the files touched by the type-rewrite shims (15/17/18/23).
 - `shims/pl_calls.txt`: MeTTa-only functions that Prolog code calls (the input to shim20).
+- `shims/LOCATIONS.md`: every hunk of the full diff, grouped by shim tag, with file and line ranges.
+- `logs/failed_ids/*.ids`: the sorted failing test IDs from each suite log (`grep '^FAILED '`, cut at ` - `).
 - `logs/*.summary.txt`: the pass/fail line and the top error for each GoalChainer suite run (raw logs were 34 MB, not committed).
 - `probes/`: the probes and outputs that the report quotes. (About 130 other warm-up probes were not kept. Each one
   fixed a single failure.)
 
-## Shim -> blocker map
-| shim | file(s) | blocker it addresses (first error it moved past) |
+## Shim -> blocker map (with locations)
+Paths are relative to external/PeTTaChainer/ unless marked GoalChainer. Line numbers are on the shimmed side of `shims/rt49ca-vs-shimmed.diff`. `shims/LOCATIONS.md` lists every hunk per tag (583 hunks, 67 files, generated mechanically from the tags on the edited lines; 14 untagged hunks are listed at its end). The diff also contains two scratch backup files (`kb_publication.metta.orig62`, `.orig68`). They are noise, not shims.
+
+| shim | blocker | location (shimmed tree, file:line) |
 |---|---|---|
-| shim1 (`shim1_nested_arrows.py`) | every `(: name TYPE)` in metta/ | pymetta `metta_add_atom/3: cannot honour the annotated arrow for fold-semidet` (nested `-[c]->` parameter types). Rewrites the inner arrows to `->` |
-| shim2 (`bootstrap.shim4b.diff`, part) | metta/bootstrap.metta | `import/1: No permission to import yall:(/)/3 into user (already imported from metta_engine)` |
-| shim3 | lib/natives.pl, bootstrap | `declare-natives! is already registered from .../lib/natives.pl` (double registration) |
-| shim4/4b | bootstrap.metta | `source_sink .../src/prolog/runtime_helpers.pl does not exist` (relative Prolog path resolves against the host cwd) |
-| shim4c (`natives.shim4c.diff`) + shim14 | lib/natives.pl | `finally/3` calls `apply_fn1/3`, which exists only in the PeTTa translator and not in pymetta. Routed through `reduce/2` (`pc_apply_unit`) |
-| shim5, shim7 | type decls (context-with-scope, particle-map-pairs) | further nested annotated arrows that shim1 missed (higher-order parameters) |
-| shim6 | natives registration | `no predicate named sk-take! is loaded` (registration order) |
-| shim8 (`evidence_chainer.py.diff`) | GoalChainer evidence_chainer.py:85 | PLN config moved: `logic_configs/pln` -> `core/logic_configs/pln` |
-| shim9-12 (`runtime_helpers.shim9.diff`) | prolog/runtime_helpers.pl | `Unknown procedure 'bidirectional-implication-form?'/2`: Prolog calls a MeTTa function. shim11 was a bad edit (syntax error at :280), reverted |
-| shim13 | prolog/ingestion.pl | forwarding wrappers in the module ingestion.pl loads into. Next error: `format/3: too many arguments` |
-| shim15 | ~35 files (s15_files.txt) | `Atom`/precise return types -> `%Undefined%` (209 sites in total). pymetta type-checks returns that PeTTa ignores |
-| shim17/18 | lib/collections.metta etc. | higher-order fold/map signatures (`fold-semidet`, `map-semidet`, `foreach-flat`, `any-flat?`) -> `%Undefined%`/`Expression` |
-| shim19 | prefilter-premise-blocks? | `SkPattern` arg type -> `%Undefined%` |
-| shim20 (`shim20.pl`) | prolog/*.pl | Prolog -> MeTTa forwarding stubs for every name in pl_calls.txt (`M:'name'(...)` in the MeTTa module) |
-| shim21/22 | core/runtime_terms_keys.metta, prolog/term_index.pl | `prefix-key/3` is a MeTTa function, not exported as a Prolog predicate under pymetta. Added a Prolog def via `index-hash` |
-| shim23 | runtime/backward/*, store/* | 52 `sk-*` / store signature relaxations (List X -> Expression) |
-| `pc_store_access.pl` | prolog/space_store.pl, term_index.pl | space-row storage: PeTTa keeps rows as plain `Space(...)` facts; pymetta keeps them in `'$metta_atoms:<space>'` modules with an extra trailing token. `retractall(Space(..))` / direct `'&kb_prefix'(...)` calls see nothing. Prototype accessor `pc_row/2` |
-| heapshim*.pl | runtime scheduling | `library(heaps)` predicates are not visible from the MeTTa module under pymetta. Five name variants were tried |
-| probe63/68/75 tags | fact_index.metta, kb_publication.metta | pymetta `map-flat` drops partial applications; `superpose` does not evaluate its argument. Hashes are bound first |
-| (probe 118, reverted) | evaluator/versions.metta | curried call with a Bool accumulator (`fold-flat (sk-gives-way-step p) false`) returns ()/BadArgType. An uncurried helper fixed one site; about 20 sites have the same pattern |
-| (warmprobe 136/137, scratch add-atom) | runtime | `brand`/`the`/`data` are PeTTa builtins from rT PeTTa pr/compact-datatypes 3681b9b. The pymetta wheel lacks them |
-| `goalchainer_pettachainer.metta.diff` | GoalChainer policy :44-45 | warm-up rules rewritten from Premises/Conclusions to bare `(Implication p c)`. rT dropped the Premises form |
+| shim1 (`shim1_nested_arrows.py`), shim5, shim7 | nested annotated arrows refused (`fold-semidet`, `context-with-scope`, `particle-map-pairs`) | script over every `(: name TYPE)`; surviving untagged hunks: `pettachainer/metta/compiler/source_lowering.metta:623`, `:732`; `pettachainer/metta/runtime/evaluator/folds.metta:77`, `:122`; `pettachainer/metta/core/natives.metta:310` (context-with-scope, shim5); the other rewrites were later overwritten by shim15/17/18 at the same lines (see LOCATIONS.md). shim7 (particle-map-pairs) has no surviving hunk: location not recoverable |
+| shim2, shim4, shim4b | duplicate yall import; relative Prolog path | `pettachainer/metta/bootstrap.metta:33-34` (removed `import_prolog_functions_from_file`; `bootstrap.shim4b.diff` hunk :30-39); `pettachainer/metta/prolog/runtime_helpers.pl:6-11` (yall, tagged shim3) |
+| shim3 | double `declare-natives!` registration | `pettachainer/metta/lib/natives.pl:19-37` (removed clause) |
+| shim4c, shim14 | `apply_fn1/3` missing under pymetta (`finally/3`) | `pettachainer/metta/lib/natives.pl:28-36` (`pc_apply_unit`), `:81-85` (shim14) |
+| shim6 | `sk-take!` not loaded (registration order) | no surviving hunk in the final diff (overwritten by shim18/19 at `sk-take-fresh!`/`sk-take-rate` declarations); location not recoverable |
+| shim8 | PLN config path moved | GoalChainer `src/goal_chainer/evidence_chainer.py:85` (hunk :82-88) |
+| shim9-12 | `bidirectional-implication-form?/2` called from Prolog | `runtime_helpers.shim9.diff` hunk :3-9; forwarding stub in `pettachainer/metta/prolog/ingestion.pl:326-354` |
+| shim13, shim20 | Prolog -> MeTTa forwarding (`format/3`, pl_calls.txt) | `pettachainer/metta/prolog/ingestion.pl:326-354`; `pettachainer/metta/lib/natives.metta:13-32` |
+| heapshim | library(heaps) not visible | `pettachainer/metta/lib/natives.metta:13-14` (heap arity decls; `empty_heap`/`add_to_heap` type decls removed); standalone `shims/heapshim*.pl` |
+| shim15 / shim15b | return types -> `%Undefined%` | 146 hunks / 36 files and 18 hunks / 8 files; e.g. `pettachainer/metta/compiler/rules.metta:611`, `pettachainer/metta/runtime/backward/execution.metta:3`; full list LOCATIONS.md |
+| shim17 | higher-order fold/map signatures | `pettachainer/metta/compiler/source_lowering.metta:108`, `:293`; `pettachainer/metta/lib/collections.metta:2-36` |
+| shim18 | `List X` -> `Expression` | 290 hunks / 50 files; e.g. `pettachainer/metta/compiler/query_lowering.metta:142`, `:157`, `:412`; full list LOCATIONS.md |
+| shim19 | `SkPattern` etc. -> `%Undefined%` | 388 hunks / 23 files; e.g. `pettachainer/metta/compiler/fold_sources.metta:3`, `:20`; full list LOCATIONS.md |
+| shim21, shim22 | `prefix-key/3` not a Prolog predicate | `pettachainer/metta/runtime/store/fact_index.metta:28`; `pettachainer/metta/prolog/term_index.pl:108-110` |
+| shim23 | 52 `sk-*`/store signature relaxations | `pettachainer/metta/core/natives.metta`: 14 hunks, lines 7-25 ... 324-341 (LOCATIONS.md) |
+| pc_store_access | space-row storage under pymetta | new `pettachainer/metta/prolog/pc_store_access.pl:1-21`; `pettachainer/metta/prolog/context_overlay.pl:27`, `:48`, `:56-66`; `pettachainer/metta/prolog/space_store.pl:7`, `:17`, `:36` |
+| probe63/68/75 | `map-flat` partial apps; `superpose` arg | `pettachainer/metta/runtime/kb_publication.metta:44-61` |
+| probe118 (reverted) | curried Bool accumulator returns () | `pettachainer/metta/runtime/evaluator/versions.metta`; reverted, so no hunk; line not recorded |
+| brand/the/data | compact-datatypes builtins missing | no file edit (scratch `add-atom` at runtime, warmprobe136/137) |
+| G2 (GoalChainer) | warm-up rules Premises -> bare Implication | GoalChainer `src/goal_chainer/policy/goalchainer_pettachainer.metta:44-45` (hunk :41-48) |
