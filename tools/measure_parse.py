@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Measure the P2 parser (catalog mode + Anthropic provider) on N notes of a wmtm state dir.
+"""Measure the P2 parser (catalog mode + configurable provider) on N notes of a wmtm state dir.
 
     python tools/measure_parse.py --state-dir <sd> [-n 30] [--seed 0] [--hashes h1,h2|@file]
                                   [--out <dir>] [--mock-replies <jsonl>] [--per-hour 20]
+                                  [--provider openclaw --base-url http://127.0.0.1:18789/v1 --model openclaw/<agent>]
 
 * notes: <sd>/_wmtm_state.json -> store.items[*].content; sample seeded (reproducible) or given content hashes
   (content_hash = sha256(text)[:24], the parse cache's key).
@@ -14,8 +15,11 @@
 * weighted usage = uncached*w_in + cache_write*w_cw + cache_read*w_cr + output*w_out, Anthropic price ratios
   relative to base input (WEIGHTS); computed the same way for the live baseline.  429 / 529 / usage-limit errors
   are counted.  --mock-replies {"hash": ..., "reply": ...} lines replace the provider (no network, tokens null).
-* provider: upstream semantic-parse.py PROVIDERS["anthropic"] (wmtm.semparse_provider; our upstream PR patch is
-  applied to a scratch copy while the 1f1a7a6f pin still has the placeholder); --effort is upstream's flag.
+* provider (answer 7): --provider openclaw (default) = OpenAI-compatible Chat Completions at --base-url
+  (default http://127.0.0.1:18789/v1), --model an agent target such as openclaw/protocosmo2, bearer token from
+  $OPENCLAW_GATEWAY_TOKEN (--token-env); built on upstream semantic-parse.py's DeepSeek client (wmtm.semparse_provider
+  .gateway_llm).  --provider anthropic = upstream PROVIDERS["anthropic"] (our upstream PR patch applied to a scratch
+  copy while the 1f1a7a6f pin still has the placeholder); --effort is upstream's flag (anthropic only).
 """
 import argparse, hashlib, json, os, random, statistics, sys, time
 
@@ -23,7 +27,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from wmtm import runtime_config as rc                       # noqa: E402
 from wmtm import semparse_adapter as sp                     # noqa: E402
-from wmtm.semparse_provider import upstream_llm             # noqa: E402  (upstream semantic-parse.py providers)
+from wmtm.semparse_provider import upstream_llm, gateway_llm, GATEWAY_TOKEN_ENV  # noqa: E402  (upstream providers)
+
+DEFAULT_BASE_URL = "http://127.0.0.1:18789/v1"
 
 # Anthropic price ratios vs base input (Sonnet-class: $3 in, $3.75 5-min cache write, $0.30 cache read, $15 out)
 WEIGHTS = {"uncached_input": 1.0, "cache_write": 1.25, "cache_read": 0.1, "output": 5.0}
@@ -125,7 +131,13 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--hashes", default="", help="comma list, or @file with one hash per line")
     ap.add_argument("--out", default="measure_out")
-    ap.add_argument("--model", default=None)
+    ap.add_argument("--provider", choices=("openclaw", "anthropic"), default="openclaw",
+                    help="openclaw: OpenAI-compatible gateway at --base-url (answer 7, default); "
+                         "anthropic: upstream Anthropic provider (ANTHROPIC_API_KEY)")
+    ap.add_argument("--base-url", default=os.environ.get("WMTM_SEMPARSE_BASE_URL", DEFAULT_BASE_URL),
+                    help="gateway /v1 base (default $WMTM_SEMPARSE_BASE_URL or %(default)s)")
+    ap.add_argument("--token-env", default=GATEWAY_TOKEN_ENV, help="env var holding the gateway bearer token")
+    ap.add_argument("--model", default=None, help="e.g. openclaw/protocosmo2 (gateway agent target)")
     ap.add_argument("--effort", default="low", help="upstream semantic-parse.py --effort (default: low)")
     ap.add_argument("--mock-replies", default="", help="jsonl of {hash, reply}: no network, tokens not measured")
     ap.add_argument("--per-hour", type=float, default=20.0, help="parse cap (0 = no pacing)")
@@ -146,8 +158,11 @@ def main(argv=None):
         llm = lambda s, u: mock.get(llm.cur, "")              # noqa: E731
         llm.last_usage, model = None, "mock"
     else:
-        llm = upstream_llm("anthropic", model=a.model, flags=["--effort", a.effort],
-                           workdir=os.path.join(a.out, "_provider"))
+        if a.provider == "openclaw":                        # answer 7: the OpenClaw gateway (OpenAI-compatible)
+            llm = gateway_llm(a.base_url, model=a.model, token_env=a.token_env)
+        else:
+            llm = upstream_llm("anthropic", model=a.model, flags=["--effort", a.effort],
+                               workdir=os.path.join(a.out, "_provider"))
         model = llm.model
     ad = sp.SemParseAdapter(llm, mode="catalog", reject_log=os.path.join(a.out, "rejects.local.jsonl"))
     gap = 0 if (mock is not None or not a.per_hour) else 3600.0 / a.per_hour

@@ -131,3 +131,93 @@ def test_main_mocked_end_to_end(tmp_path):
     for t in NOTES.values():                            # no note text outside the local bad-parse file
         assert t not in per and t not in (out / "summary.json").read_text()
     assert "Mira" in (out / "bad_parses.local.jsonl").read_text()
+
+
+class _FakeGateway:
+    """Local OpenAI-compatible Chat Completions SSE server (stands in for the OpenClaw gateway; no network)."""
+
+    def __init__(self, reply_text, usage):
+        import http.server
+        import threading
+        self.seen = []
+        outer = self
+
+        class H(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def do_POST(self):
+                n = int(self.headers.get("Content-Length") or 0)
+                outer.seen.append({"path": self.path, "auth": self.headers.get("Authorization"),
+                                   "body": json.loads(self.rfile.read(n))})
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream")
+                self.end_headers()
+                chunks = [{"model": "openclaw/protocosmo2", "choices": [{"delta": {"role": "assistant"}}]},
+                          {"choices": [{"delta": {"content": reply_text}}]},
+                          {"choices": [{"delta": {}, "finish_reason": "stop"}]},
+                          {"choices": [], "usage": usage}]
+                for c in chunks:
+                    self.wfile.write(b"data: " + json.dumps(c).encode() + b"\n\n")
+                self.wfile.write(b"data: [DONE]\n\n")
+
+        self.srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H)
+        self.base_url = f"http://127.0.0.1:{self.srv.server_address[1]}/v1"
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+
+    def close(self):
+        self.srv.shutdown()
+
+
+GW_USAGE = {"prompt_tokens": 3100, "completion_tokens": 50, "total_tokens": 3150,
+            "prompt_tokens_details": {"cached_tokens": 3000}}
+
+
+@needs_hitl
+def test_gateway_provider_request_and_usage(tmp_path, monkeypatch):
+    """review-3 / answer 7: OpenAI-compatible gateway at --base-url, agent target model, bearer token."""
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    gw = _FakeGateway("hello", GW_USAGE)
+    try:
+        llm = P.gateway_llm(gw.base_url, model="openclaw/protocosmo2", hitl=HITL)
+        assert llm("SYS", "USER") == "hello"
+    finally:
+        gw.close()
+    r = gw.seen[0]
+    assert r["path"] == "/v1/chat/completions" and r["auth"] == "Bearer gw-test"
+    assert r["body"]["model"] == "openclaw/protocosmo2" and r["body"]["stream"] is True
+    assert r["body"]["stream_options"] == {"include_usage": True}
+    assert [m["role"] for m in r["body"]["messages"]] == ["system", "user"]
+    assert "thinking" not in r["body"] and "response_format" not in r["body"]   # DeepSeek-only fields dropped
+    u = llm.last_usage
+    assert u["cache_read"] == 3000 and u["uncached_input"] == 100 and u["output"] == 50
+    assert llm.provider == "openclaw" and llm.module.__file__ == os.path.join(HITL, "semantic-parse.py")
+
+
+@needs_hitl
+def test_gateway_provider_no_token(monkeypatch):
+    monkeypatch.delenv("OPENCLAW_GATEWAY_TOKEN", raising=False)
+    llm = P.gateway_llm("http://127.0.0.1:9/v1", model="openclaw/x", hitl=HITL)
+    with pytest.raises(llm.module.ProviderError, match="OPENCLAW_GATEWAY_TOKEN"):
+        llm("s", "u")
+
+
+@needs_hitl
+def test_main_gateway_end_to_end(tmp_path, monkeypatch):
+    """measure_parse --provider openclaw --base-url ... --model openclaw/protocosmo2 runs (exit 0) and measures."""
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    sd, h1 = make_state(tmp_path)
+    gw = _FakeGateway(REPLY, GW_USAGE)
+    out = tmp_path / "out"
+    try:
+        rc_ = M.main(["--state-dir", str(sd), "-n", "1", "--hashes", h1, "--out", str(out), "--per-hour", "0",
+                      "--provider", "openclaw", "--base-url", gw.base_url, "--model", "openclaw/protocosmo2"])
+    finally:
+        gw.close()
+    assert rc_ == 0
+    s = json.loads((out / "summary.json").read_text())
+    assert s["model"] == "openclaw/protocosmo2" and not s["mocked"]
+    assert s["status"]["admitted"] == 1 and s["errors"] == 0
+    row = json.loads((out / "per_note.jsonl").read_text().splitlines()[0])
+    assert row["cache_read"] == 3000 and row["output"] == 50 and row["weighted"] is not None
+    assert row["latency_s"] is not None and gw.seen[0]["body"]["model"] == "openclaw/protocosmo2"

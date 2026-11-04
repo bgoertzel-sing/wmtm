@@ -30,11 +30,11 @@ def _load(path: str, name: str = "semantic_parse_upstream"):
     return mod
 
 
-def load_upstream(hitl: str, workdir: str = None):
+def load_upstream(hitl: str, workdir: str = None, need_anthropic: bool = True):
     """semantic-parse.py of the (verified) checkout ``hitl``; patched copy if Anthropic is a placeholder."""
     src = os.path.join(hitl, "semantic-parse.py")
     mod = _load(src)
-    if hasattr(mod.Anthropic, "key"):
+    if hasattr(mod.Anthropic, "key") or not need_anthropic:
         return mod
     patches = sorted(glob.glob(PATCH_GLOB))
     if not patches:
@@ -78,4 +78,72 @@ def upstream_llm(provider: str = "anthropic", model: str = None, hitl: str = Non
         return r.text
 
     call.last_usage, call.model, call.provider, call.module, call.args = None, m, provider, mod, args
+    return call
+
+
+GATEWAY_TOKEN_ENV = "OPENCLAW_GATEWAY_TOKEN"
+
+
+def gateway_provider_class(mod):
+    """answer 7: an OpenAI-compatible Chat Completions endpoint (the OpenClaw gateway, ``--base-url``) built on
+    upstream's own DeepSeek provider (same OpenAI-format streaming client, ``_post_json`` retries and
+    ``_read_sse``); only the URL, the key and the DeepSeek-only body fields differ."""
+
+    class Gateway(mod.DeepSeek):
+        name = "openclaw"
+        default_model = "openclaw/default"
+        env_keys = (GATEWAY_TOKEN_ENV,)
+
+        def __init__(self, args, base_url: str, token_env: str = GATEWAY_TOKEN_ENV):
+            super().__init__(args)
+            self.url = base_url.rstrip("/") + "/chat/completions"
+            self.token_env = token_env
+            self.env_keys = (token_env,)
+
+        def key(self) -> str:
+            if os.environ.get(self.token_env):
+                return os.environ[self.token_env]
+            raise mod.ProviderError(f"set {self.token_env} (gateway bearer token)")
+
+        def request(self, system: str, user: str, model: str):
+            a = self.args
+            body = {"model": model, "stream": True, "stream_options": {"include_usage": True},
+                    "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+            if getattr(a, "max_tokens", None):
+                body["max_tokens"] = a.max_tokens
+            if getattr(a, "temperature", None) is not None:
+                body["temperature"] = a.temperature
+            return self.url, {"Authorization": "Bearer <key>"}, body
+
+        def complete(self, system: str, user: str, model: str):
+            r = super().complete(system, user, model)
+            u = getattr(r, "raw_usage", None) or {}
+            if r.usage.get("cached") is None:          # OpenAI shape: prompt_tokens_details.cached_tokens
+                r.usage["cached"] = (u.get("prompt_tokens_details") or {}).get("cached_tokens")
+            if u.get("cache_creation_input_tokens") is not None:
+                r.usage["cache_write"] = u["cache_creation_input_tokens"]
+            return r
+
+    return Gateway
+
+
+def gateway_llm(base_url: str, model: str = None, hitl: str = None, flags=(), token_env: str = GATEWAY_TOKEN_ENV):
+    """llm(system, user) through an OpenAI-compatible gateway (e.g. http://127.0.0.1:18789/v1,
+    model openclaw/<agent>) using upstream's provider code; ``flags`` are upstream provider CLI flags."""
+    from .semparse_catalog import hitl_root
+    mod = load_upstream(hitl_root(hitl), need_anthropic=False)
+    ap = argparse.ArgumentParser(add_help=False)
+    mod.add_provider_args(ap)
+    args = ap.parse_args(["--provider", "deepseek"] + list(flags))
+    prov = gateway_provider_class(mod)(args, base_url, token_env)
+    m = model or prov.default_model
+
+    def call(system: str, user: str) -> str:
+        call.last_usage = None
+        r = prov.complete(system, user, m)
+        call.last_usage = split_usage(r.usage)
+        return r.text
+
+    call.last_usage, call.model, call.provider, call.module, call.args = None, m, "openclaw", mod, args
+    call.base_url = prov.url
     return call
