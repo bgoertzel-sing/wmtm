@@ -1,0 +1,36 @@
+--- gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.prefa	2026-11-03 20:16:12.019184881 -0700
++++ gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.fa-current	2026-11-03 21:14:50.778949934 -0700
+@@ -178,12 +178,11 @@
+          ((sk-fold $args) (if (sk-instance-fold? $args) (not (== (sk-left-out $hash $exclude) ()))
+                             (not (== (sk-rate-left-out $args $exclude) ()))))
+          ((sk-prior $rate-args)
+-            (fold-flat (sk-input-leaves-out-step $exclude) false (sk-prior-inputs (compound-rate-goals $rate-args false $_rate))))
++            (foldl-atom (sk-prior-inputs (compound-rate-goals $rate-args false $_rate)) false $fa-acc $fa-x (sk-input-leaves-out-step $exclude $fa-acc $fa-x)))
+          ($_statement
+             (if (sk-rule-truth-key? $key)
+-               (fold-flat (sk-row-leaves-out-step $exclude) false
+-                  (collapse (match &sk_row ($hash $stored $_rhash (sk-row $_ident $_concl $premises $_seq))
+-                     (if (=alpha $stored $key) $premises (empty)))))
++               (foldl-atom (collapse (match &sk_row ($hash $stored $_rhash (sk-row $_ident $_concl $premises $_seq))
++                     (if (=alpha $stored $key) $premises (empty)))) false $fa-acc $fa-x (sk-row-leaves-out-step $exclude $fa-acc $fa-x))
+                false))))))
+ 
+ ;; A population prior, `(population-prior pattern)` (sk-start-prior!), is the
+@@ -539,7 +538,7 @@
+    (case $message (
+       ((sk-val ($_type $_kbctx $proof $_tv) $ev $_deps)
+          (if (sk-message-counted? $proof $base-proof) $kept
+-            (if (fold-flat (sk-same-evidence-step $ev) false $kept) $kept (cons $message $kept))))
++            (if (foldl-atom $kept false $fa-acc $fa-x (sk-same-evidence-step $ev $fa-acc $fa-x)) $kept (cons $message $kept))))
+       ($_none $kept))))
+ 
+ (: sk-same-evidence-step (-[det]-> EvidenceSet Bool SkeletonValue Bool)) ; shim19
+@@ -827,7 +826,7 @@
+                                (let* (($_removed (remove-variant-row! &sk_deferred (quote ($hash $rhash (sk-deferred $row-owner $row-rule $rc $rp $rk)))))
+                                       ($_work (sk-work! $hash $row-owner -1))) (empty))))))))
+                        ())
+-                  (if (fold-semidet (sk-application-waits? $node) false (sk-children $hash $node)) false true)
++                  (if (foldl-atom (sk-children $hash $node) false $fa-acc $fa-x (sk-application-waits? $node $fa-acc $fa-x)) false true)
+                   false)
+                false)))
+       ($_fold false))))

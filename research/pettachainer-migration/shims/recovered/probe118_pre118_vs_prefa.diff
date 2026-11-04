@@ -1,0 +1,20 @@
+--- gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.pre118	2026-11-03 16:13:26.028991700 -0700
++++ gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.prefa	2026-11-03 20:16:12.019184881 -0700
+@@ -160,7 +160,7 @@
+ 
+ (: sk-row-leaves-out-step (-[det]-> Expression Bool Expression Bool)) ; shim18 ; shim19
+ (= (sk-row-leaves-out-step $exclude $found $premises)
+-   (if $found true (fold-flat (sk-leaves-out-step $exclude) false $premises)))
++   (if $found true (foldl-atom $premises false $acc $p (sk-leaves-out-step $exclude $acc $p))))
+ 
+ (: sk-rule-truth-key? (-[det]-> SkeletonKey Bool)) ; shim19
+ (= (sk-rule-truth-key? $key)
+@@ -457,7 +457,7 @@
+ (= (sk-standing-step $values $kept $value)
+    (case $value (
+       ((sk-val $fact $_ev $_deps)
+-         (if (fold-flat (sk-gives-way-step (sk-fact-step-proof $fact)) false $values) $kept (cons $value $kept)))
++         (if (foldl-atom $values false $acc $v (sk-gives-way-step (sk-fact-step-proof $fact) $acc $v)) $kept (cons $value $kept)))
+       ($_goal (cons $value $kept)))))
+ 
+ ;; In a private judgment, an assumption-dependent alternative excludes the

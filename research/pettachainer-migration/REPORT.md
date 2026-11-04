@@ -45,11 +45,11 @@ Paths are relative to external/PeTTaChainer/ unless marked GoalChainer. Line num
 
 | shim | blocker | location (shimmed tree, file:line) |
 |---|---|---|
-| shim1 (`shim1_nested_arrows.py`), shim5, shim7 | nested annotated arrows refused (`fold-semidet`, `context-with-scope`, `particle-map-pairs`) | script over every `(: name TYPE)`; surviving untagged hunks: `pettachainer/metta/compiler/source_lowering.metta:623`, `:732`; `pettachainer/metta/runtime/evaluator/folds.metta:77`, `:122`; `pettachainer/metta/core/natives.metta:310` (context-with-scope, shim5); the other rewrites were later overwritten by shim15/17/18 at the same lines (see LOCATIONS.md). shim7 (particle-map-pairs) has no surviving hunk: location not recoverable |
+| shim1 (`shim1_nested_arrows.py`), shim5, shim7 | nested annotated arrows refused (`fold-semidet`, `context-with-scope`, `particle-map-pairs`) | script over every `(: name TYPE)`; surviving untagged hunks: `pettachainer/metta/compiler/source_lowering.metta:623`, `:732`; `pettachainer/metta/runtime/evaluator/folds.metta:77`, `:122`; `pettachainer/metta/core/natives.metta:310` (context-with-scope, shim5); the other rewrites were later overwritten by shim15/17/18 at the same lines (see LOCATIONS.md). shim7 (particle-map-pairs, particle-map2-inner and 2 more): `third_party/pln_formulas/metta/distributions.metta:333`, `:341`, `:350-365`, `:455` (recovered: `shims/recovered/shim7_distributions.metta.diff`, a vendored file outside pettachainer/ and so outside the main diff) |
 | shim2, shim4, shim4b | duplicate yall import; relative Prolog path | `pettachainer/metta/bootstrap.metta:33-34` (removed `import_prolog_functions_from_file`; `bootstrap.shim4b.diff` hunk :30-39); `pettachainer/metta/prolog/runtime_helpers.pl:6-11` (yall, tagged shim3) |
 | shim3 | double `declare-natives!` registration | `pettachainer/metta/lib/natives.pl:19-37` (removed clause) |
 | shim4c, shim14 | `apply_fn1/3` missing under pymetta (`finally/3`) | `pettachainer/metta/lib/natives.pl:28-36` (`pc_apply_unit`), `:81-85` (shim14) |
-| shim6 | `sk-take!` not loaded (registration order) | no surviving hunk in the final diff (overwritten by shim18/19 at `sk-take-fresh!`/`sk-take-rate` declarations); location not recoverable |
+| shim6 | `sk-take!` not loaded (registration order) | `pettachainer/metta/lib/natives.pl:16-19`: `declare-forward!` routed to `declare-natives!` so forward decls such as `sk-take!` (`pettachainer/metta/core/natives.metta:315`) register (recovered: `shims/recovered/shim6_vs_liborig.diff`; file mtime 14:41:14 falls between the shim6 run 14:39:45 and shim7 run 14:42:50, see `shims/recovered/shim5-8_first_errors.txt`) |
 | shim8 | PLN config path moved | GoalChainer `src/goal_chainer/evidence_chainer.py:85` (hunk :82-88) |
 | shim9-12 | `bidirectional-implication-form?/2` called from Prolog | `runtime_helpers.shim9.diff` hunk :3-9; forwarding stub in `pettachainer/metta/prolog/ingestion.pl:326-354` |
 | shim13, shim20 | Prolog -> MeTTa forwarding (`format/3`, pl_calls.txt) | `pettachainer/metta/prolog/ingestion.pl:326-354`; `pettachainer/metta/lib/natives.metta:13-32` |
@@ -62,7 +62,7 @@ Paths are relative to external/PeTTaChainer/ unless marked GoalChainer. Line num
 | shim23 | 52 `sk-*`/store signature relaxations | `pettachainer/metta/core/natives.metta`: 14 hunks, lines 7-25 ... 324-341 (LOCATIONS.md) |
 | pc_store_access | space-row storage under pymetta | new `pettachainer/metta/prolog/pc_store_access.pl:1-21`; `pettachainer/metta/prolog/context_overlay.pl:27`, `:48`, `:56-66`; `pettachainer/metta/prolog/space_store.pl:7`, `:17`, `:36` |
 | probe63/68/75 | `map-flat` partial apps; `superpose` arg | `pettachainer/metta/runtime/kb_publication.metta:44-61` |
-| probe118 (reverted) | curried Bool accumulator returns () | `pettachainer/metta/runtime/evaluator/versions.metta`; reverted, so no hunk; line not recorded |
+| probe118 (reverted) | curried Bool accumulator returns () | `pettachainer/metta/runtime/evaluator/versions.metta`; `:163` and `:460` (the two `fold-flat ... false` Bool-accumulator sites). Recovered snapshots: `shims/recovered/probe118_pre118_vs_prefa.diff` (the inlined `foldl-atom` form at both sites), `probe118_prefa_vs_facurrent.diff`, `probe118_facurrent_vs_final.diff` (the revert). The first variant (helper `sk-any-gives-way`) was replaced at the same two sites before a snapshot was taken. The preserved `foldl-atom` form is the same fix, written inline |
 | brand/the/data | compact-datatypes builtins missing | no file edit (scratch `add-atom` at runtime, warmprobe136/137) |
 | G2 (GoalChainer) | warm-up rules Premises -> bare Implication | GoalChainer `src/goal_chainer/policy/goalchainer_pettachainer.metta:44-45` (hunk :41-48) |
 
@@ -86,7 +86,7 @@ Paths are relative to external/PeTTaChainer/ unless marked GoalChainer. Line num
 ## 3. What the shims achieved (from existing logs only; logs/*.summary.txt)
 | run | result | first error |
 |---|---|---|
-| baseline: GC 38b1473 on its own runtime (fitness rev3, F13) | 186 passed | none |
+| baseline: GC 38b1473 on its own runtime (`evidence/fitness/pytest_gc_38b1473.txt`: `186 passed`; same run as the fitness report's finding 13, `evidence/fitness/REPORT.md`) | 186 passed | none |
 | gc_rt49ca_noshim_r1 | 117 failed / 69 passed | annotated arrow fold-semidet |
 | shim1..shim13 (r1/r2, 14 logs) | 117 failed / 69 passed each | moves: foreach-flat -> yall -> declare-natives! -> runtime_helpers path -> context-with-scope -> sk-take! -> particle-map-pairs -> pln path -> bidirectional-implication-form? -> format/3 |
 | gc_rt49ca_fa_r1 (5-test subset) | 1 failed / 4 passed | warm-up must answer True |
@@ -106,7 +106,7 @@ So the same 117 test IDs fail in every full run, and **none of the original 117 
 | option | effort | risk | notes |
 |---|---|---|---|
 | A. Stay (36b3fe6-dedup + GC 38b1473) | 0 | low | works today. 186/186 GC, the wmtm suites are green. Forgoes rT's fixes (no duplicate import, newer rulelookup) |
-| B. Adopt for wmtm only (PeTTa path, W1-W7) | M (2-4 days) | medium | wmtm's shadow and semparse run under PeTTa, not pymetta, so section 1c does not apply. The fitness run showed 240+2 fail, so W2-W5 are needed. Not tested beyond the fitness report |
+| B. Adopt for wmtm only (PeTTa path, W1-W7) | M (2-4 days) | medium | wmtm's shadow and semparse run under PeTTa, not pymetta, so section 1c does not apply. The fitness run showed 240 passed / 2 failed (`evidence/fitness/pytest_goals_pc_rt.txt`; base: 242 passed, `pytest_goals_pc_base.txt`), so W2-W5 are needed. Not tested beyond the fitness report |
 | C. Adopt for GoalChainer v2 | L+ | high | in effect a port of rT to pymetta (section 1c plus open item 1). Risks silent wrong answers from about 260 type relaxations |
 | D. Adopt everywhere | L+ | high | B + C |
 | E. Wait for named upstream changes | 0 now | low | (1) pymetta: higher-order annotated arrows, MeTTa functions callable from Prolog, compact-datatypes builtins, map-flat/superpose parity; (2) rT: a storage accessor instead of raw row facts, `chainer-reset!`/prefilter equivalents, a documented rule form; (3) GC: G1-G4 |
