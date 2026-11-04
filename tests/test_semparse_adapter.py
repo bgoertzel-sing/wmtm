@@ -5,6 +5,12 @@ import pytest
 from wmtm import semparse_adapter as sp
 
 
+@pytest.fixture(autouse=True)
+def _legacy_semparse_mode(monkeypatch):
+    """These tests exercise legacy mode (the model writes MeTTa); catalog is the default since p2 review-1."""
+    monkeypatch.setenv("WMTM_SEMPARSE_MODE", "legacy")
+
+
 class FakeLoader:
     def __init__(self, fail_on=None):
         self.atoms, self.fail_on = [], fail_on

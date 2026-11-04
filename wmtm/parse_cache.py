@@ -268,9 +268,15 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
     return out
 
 
-def gateway_llm_usage(timeout=300.0, env_file=None):
-    """Like semparse_adapter.gateway_llm, but keeps the reply's token usage in call.last_usage."""
-    import urllib.request
+def gateway_llm_usage(timeout=300.0, env_file=None, hitl=None, workdir=None):
+    """The production feed's llm(system, user): Man Hin's upstream ``chat-completions`` provider (our upstream
+    patch 0003, via semparse_provider.gateway_llm), the same client measure_parse uses -- no WMTM HTTP code.
+
+    p2 review-7: BASE_URL / LLM_MODEL / AI_API_KEY come from the environment, else from ``env_file`` (only read,
+    never copied); a key found only in the file is exported to this process as AI_API_KEY, the variable the
+    upstream provider is told to read (--api-key-env).  Token usage lands in call.last_usage (prompt_tokens /
+    completion_tokens / total_tokens; None when the server does not report it).  If the provider cannot be
+    built (no BASE_URL, hitl checkout missing) the returned call raises, so each parse records an llm error."""
     env_file = env_file or os.environ.get("WMTM_LLM_ENV_FILE", "")
     env = {}
     if env_file and os.path.exists(os.path.expanduser(env_file)):
@@ -279,19 +285,21 @@ def gateway_llm_usage(timeout=300.0, env_file=None):
                 k, v = line.rstrip("\n").split("=", 1); env[k.strip().replace("export ", "", 1).strip()] = v.strip().strip('"').strip("'")
     base = os.environ.get("BASE_URL") or env.get("BASE_URL")
     model = os.environ.get("LLM_MODEL") or env.get("LLM_MODEL")
-    key = os.environ.get("AI_API_KEY") or env.get("AI_API_KEY")
+    if not os.environ.get("AI_API_KEY") and env.get("AI_API_KEY"):
+        os.environ["AI_API_KEY"] = env["AI_API_KEY"]
+    from .semparse_provider import gateway_llm
+    try:
+        if not base:
+            raise RuntimeError("BASE_URL not set (environment or llm_env_file)")
+        return gateway_llm(base, model=model, hitl=hitl, token_env="AI_API_KEY", workdir=workdir,
+                           flags=["--timeout", str(float(timeout)), "--temperature", "0"])
+    except Exception as e:                          # noqa: BLE001  (reported per parse as an llm error)
+        err = "gateway provider unavailable: %s: %s" % (type(e).__name__, e)
 
-    def call(system, user):
-        body = {"model": model, "temperature": 0,
-                "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
-        req = urllib.request.Request(base.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(),
-                                     headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
-        r = json.loads(urllib.request.urlopen(req, timeout=timeout).read())
-        call.last_usage = r.get("usage") or {}
-        return r["choices"][0]["message"]["content"]
-    call.last_usage = {}
-    call.model = model
-    return call
+        def call(system, user):
+            raise RuntimeError(err)
+        call.last_usage, call.model, call.provider = None, model, None
+        return call
 
 
 # ---------------------------------------------------------------- cycle hook

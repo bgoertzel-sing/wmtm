@@ -6,6 +6,12 @@ from wmtm.parse_cache import ParseCache, process_queue, content_hash
 from wmtm.store import WMTMStore
 
 
+@pytest.fixture(autouse=True)
+def _legacy_semparse_mode(monkeypatch):
+    """These tests exercise legacy mode (the model writes MeTTa); catalog is the default since p2 review-1."""
+    monkeypatch.setenv("WMTM_SEMPARSE_MODE", "legacy")
+
+
 def _store(texts):
     st = WMTMStore()
     for i, t in enumerate(texts):

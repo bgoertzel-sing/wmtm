@@ -1,12 +1,16 @@
 """Track H parse worker: ``python -m wmtm.workers.semparse_feed --dir D [--config C]``.
 
 Launched detached by wmtm/parse_cache.py; never waited on.  Drains the parse queue under the hourly cap with the
-Track C SemParseAdapter: LLM via the existing OpenAI-compatible gateway (BASE_URL / LLM_MODEL / AI_API_KEY from the
+Track C SemParseAdapter: LLM via the existing OpenAI-compatible gateway through Man Hin's upstream chat-completions
+provider (parse_cache.gateway_llm_usage; BASE_URL / LLM_MODEL / AI_API_KEY from the
 environment, else from the env file named by ``llm_env_file``; the file is only read, never copied), load check in
 PeTTaChainer (PeTTa v1.0.6 + PeTTaChainer 36b3fe6 dedup-patched, paths from the runtime config).
 
 Gates before any LLM spend:
-  * the semantic-parsing prompt must exist and match ``semparse_prompt_sha256`` (pinned hitl @3ec15bd1);
+  * mode ``semparse_mode`` (default "catalog"): the hitl checkout ``semparse_hitl`` must be semantic-parsing-hitl
+    @1f1a7a6f with its MIT LICENSE (semparse_catalog.verify_checkout), and the prompt sent is its
+    templates/generated/PROMPT_CATALOG.txt (no legacy preamble); mode "legacy" sends ``semparse_prompt``;
+  * the prompt file must exist and match ``semparse_prompt_sha256`` (default: PROMPT_CATALOG.txt @1f1a7a6f);
   * a no-LLM load canary (Grace pilot facts + mem_inh) must prove (Member grace person) and not
     (Member grace robot) through the same loader.
 Optional --llm-canary also parses the canary sentence through the LLM (costs one parse; counted against the cap).
@@ -29,7 +33,8 @@ a = ap.parse_args()
 CFG = rc.load_worker_config(a.config) if a.config else rc.resolve()
 a.petta = a.petta or CFG["petta_dir"]
 a.vendor = a.vendor or CFG["pettachainer_dir"]
-a.prompt = a.prompt or CFG["semparse_prompt"]
+MODE = (os.environ.get("WMTM_SEMPARSE_MODE") or CFG.get("semparse_mode") or "catalog").strip().lower()
+HITL = CFG.get("semparse_hitl") or None
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb"))
 PRIO_GUARD = rc.PriorityGuard(CFG)          # SCHED_IDLE + nice set here in the child, re-asserted while it runs
 PRIO = PRIO_GUARD.start()
@@ -54,6 +59,16 @@ def finish(code):
 
 
 try:
+    status["mode"] = MODE
+    if MODE == "catalog":
+        from wmtm import semparse_catalog as _sc
+        try:
+            HITL = _sc.hitl_root(HITL)       # wrong pin / missing or altered LICENSE -> refuse before any spend
+        except (_sc.HitlPinError, FileNotFoundError) as e:
+            status.update(status="hitl_pin", error=str(e)[:200]); finish(5)
+        a.prompt = a.prompt or _sc.prompt_path(HITL)
+    else:
+        a.prompt = a.prompt or CFG["semparse_prompt"]
     try:
         with open(a.prompt, "rb") as fh:
             got = hashlib.sha256(fh.read()).hexdigest()
@@ -76,12 +91,13 @@ try:
         status["load_canary"] = ("Member grace person" in pos) and ("Member grace robot" not in neg)
         if not status["load_canary"]:
             status["status"] = "canary_fail"; finish(3)
-    llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None)
+    llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None, hitl=HITL,   # upstream provider (review-7)
+                            workdir=os.path.join(a.dir, "provider"))
     status["model"] = getattr(llm, "model", None)
     from wmtm.semparse_adapter import SemParseAdapter
     if a.llm_canary:
-        r = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt,
-                           preamble=bool(CFG.get("semparse_preamble", True))).parse_item("canary1", "Grace is a pilot. Pilots are people.")
+        r = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, mode=MODE, hitl_root=HITL,
+                           preamble=MODE == "legacy" and bool(CFG.get("semparse_preamble", True))).parse_item("canary1", "Grace is a pilot. Pilots are people.")
         u = llm.last_usage or {}
         with cache._lock():   # canary spend counts against the hourly cap
             rc.append_jsonl(cache.log_path, {"ts": time.time(), "item_id": "canary1", "status": "canary",
@@ -92,8 +108,8 @@ try:
         status["llm_canary"] = {"ok": ok, "accepted": len(r.accepted), "error": r.error}
         if not ok:
             status["status"] = "llm_canary_fail"; finish(3)
-    pre = CFG.get("semparse_preamble", True)
-    ad = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, reject_log=cache.reject_log,
+    pre = MODE == "legacy" and CFG.get("semparse_preamble", True)   # the preamble targets MeTTa output, not JSON
+    ad = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, mode=MODE, hitl_root=HITL, reject_log=cache.reject_log,
                          max_chars=cache.max_chars, reject_log_max_bytes=cache.log_max_bytes, preamble=bool(pre))
     status.update(preamble=ad.preamble, file_sha256=ad.file_sha256, prompt_sha256=ad.prompt_sha256)   # v0.5: what is sent
     from wmtm.parse_cache import CTX_VERSION, SPK_VERSION, process_queue_ctx, process_queue_spk

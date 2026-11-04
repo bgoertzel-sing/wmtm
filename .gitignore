@@ -31,3 +31,7 @@ pettachainer-*/
 semparse-hitl-*/
 _wmtm_shadow/
 _wmtm_flags.json
+
+# measure_parse.py bad-parse / reject logs hold note text: never commit
+*.local.jsonl
+measure_out/

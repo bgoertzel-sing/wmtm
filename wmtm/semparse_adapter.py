@@ -260,14 +260,35 @@ class ParseResult:
     queries: list = field(default_factory=list)
     rejected: list = field(default_factory=list)   # (atom_text, reason)
     error: Optional[str] = None
+    declarations: list = field(default_factory=list)   # catalog mode: (: sym Type) atoms, scoped
+    catalog_status: Optional[str] = None               # catalog mode: upstream tmpl.validate status
+    latency_s: Optional[float] = None                  # wall time of the LLM call(s) for this item
+    usage: dict = field(default_factory=dict)          # summed provider token usage, if the LLM reports it
+    truncated_chars: int = 0                           # chars of the item cut off by max_chars (0 = whole item)
 
 
 class SemParseAdapter:
     def __init__(self, llm: LLM, loader=None, prompt_path: str = DEFAULT_PROMPT,
                  reject_log: Optional[str] = None, system: Optional[str] = None,
                  max_chars: int = 2000, reject_log_max_bytes: Optional[int] = None,
-                 preamble: Optional[bool] = None):
+                 preamble: Optional[bool] = None, mode: Optional[str] = None,
+                 hitl_root: Optional[str] = None):
         self.llm = llm
+        # mode "legacy": the model writes MeTTa (prompt.txt, hitl <= legacy-line);
+        # mode "catalog": the model writes JSON instances, upstream tmpl.validate emits MeTTa (hitl >= 1f1a7a6f).
+        if not mode and not os.environ.get("WMTM_SEMPARSE_MODE"):
+            from .runtime_config import SPEC as _SPEC
+            mode = _SPEC["semparse_mode"][2]                    # default: "catalog" (hitl @1f1a7a6f)
+        self.mode = (mode or os.environ.get("WMTM_SEMPARSE_MODE")).strip().lower()
+        if self.mode not in ("legacy", "catalog"):
+            raise ValueError(f"unknown semparse mode {self.mode!r}")
+        self.hitl_root = hitl_root
+        if self.mode == "catalog":
+            from .semparse_catalog import prompt_path as _cpp
+            if system is None and not prompt_path:
+                prompt_path = _cpp(hitl_root)
+            if preamble is None:
+                preamble = False      # the legacy pre-instruction block targets MeTTa output, not JSON
         self.loader = loader          # object with add_atom(str); None = no PeTTa check
         if system is None:
             with open(prompt_path, encoding="utf-8") as fh:
@@ -287,6 +308,22 @@ class SemParseAdapter:
         self.max_chars = max_chars
         self.reject_log_max_bytes = reject_log_max_bytes
 
+    def _call_llm(self, res: ParseResult, system: str, user: str) -> str:
+        """Call the LLM, adding wall time and any reported token usage (llm.last_usage) to `res`."""
+        t0 = time.perf_counter()
+        try:
+            return self.llm(system, user)
+        finally:
+            res.latency_s = (res.latency_s or 0.0) + (time.perf_counter() - t0)
+            u = getattr(self.llm, "last_usage", None)
+            if isinstance(u, dict):
+                for k, v in u.items():                 # review-4: an unreported field (None) in any call
+                    if v is None:                        # makes the sum unknown, never a partial / zero sum
+                        res.usage[k] = None
+                    elif isinstance(v, (int, float)) and not isinstance(v, bool) and \
+                            not (k in res.usage and res.usage[k] is None):
+                        res.usage[k] = res.usage.get(k, 0) + v
+
     def _log(self, res: ParseResult, atom: str, reason: str, stage: str):
         res.rejected.append((atom, reason))
         if self.reject_log:
@@ -303,8 +340,10 @@ class SemParseAdapter:
         """Track O: parse with CONTEXT (atoms of related earlier notes, verbatim) and TEXT; long notes are parsed
         per short passage, each passage seeing the context plus the atoms accepted from earlier passages."""
         from .semparse_context import split_passages
-        text = item_text(item)[: self.max_chars]
+        full = item_text(item)
+        text = full[: self.max_chars]
         total = ParseResult(str(item_id), text)
+        total.truncated_chars = len(full) - len(text)
         own = []
         for k, p in enumerate(split_passages(text, passage_chars) or [text]):
             ctx = (list(context_atoms) + own)[-max_context_atoms:] if (context_atoms or own) else []
@@ -320,11 +359,15 @@ class SemParseAdapter:
 
     def parse_item(self, item_id, item, context_atoms=(), scope_id=None) -> ParseResult:
         from .semparse_context import user_message, atom_body
-        text = item_text(item)[: self.max_chars]
+        full = item_text(item)
+        text = full[: self.max_chars]
         res = ParseResult(str(item_id), text)
+        res.truncated_chars = len(full) - len(text)
         ctx_bodies = {atom_body(a) for a in context_atoms}
+        if self.mode == "catalog":
+            return self._parse_catalog(res, item_id, text, ctx_bodies, scope_id)
         try:
-            reply = self.llm(self.system, user_message(text, list(context_atoms)))
+            reply = self._call_llm(res, self.system, user_message(text, list(context_atoms)))
         except Exception as e:                       # noqa: BLE001
             res.error = f"llm error: {e}"
             self._log(res, "", res.error, "llm")
@@ -333,6 +376,66 @@ class SemParseAdapter:
             res.error = "empty reply"
             self._log(res, "", res.error, "llm")
             return res
+        self._accept_forms(res, reply, item_id, scope_id, ctx_bodies)
+        if not res.accepted and not res.queries and not res.rejected:
+            self._log(res, reply[:300], "reply contained no atoms", "syntax")
+        return res
+
+    def _parse_catalog(self, res, item_id, text, ctx_bodies, scope_id) -> ParseResult:
+        """Catalog mode: JSON instances -> upstream tmpl.validate.inspect -> statements -> the usual checks.
+        Context atoms are not sent (the catalog prompt has no CONTEXT slot); they still filter re-emissions."""
+        from .semparse_catalog import reply_to_statements, item_message
+        try:
+            reply = self._call_llm(res, self.system, item_message(safe_id(item_id), text))
+        except Exception as e:                       # noqa: BLE001
+            res.error = f"llm error: {e}"
+            self._log(res, "", res.error, "llm")
+            return res
+        if not reply or not reply.strip():
+            res.error = "empty reply"
+            self._log(res, "", res.error, "llm")
+            return res
+        out = reply_to_statements(reply, text, self.hitl_root)
+        res.catalog_status = out["status"]
+        # review-2 #2: every upstream finding (contract/instance/type, lints such as dangling-referent, and span
+        # lints such as span-not-verbatim) is kept with the note id and reason; any finding -> partial below
+        for f in out["findings"]:
+            k = f.get("kind")
+            why = f.get("detail") or "; ".join(f"{a}={f[a]}" for a in sorted(f) if a != "kind") or k
+            where = (reply[:300] if k == "json" else
+                     str(f.get("span") or f.get("instance") or "")[:300])
+            self._log(res, where, f"catalog {k}: {str(why)[:300]}", "catalog")
+        # review-1 #2: instances upstream could not emit were dropped so the valid part is still admitted
+        for inst, why in out.get("dropped") or []:
+            self._log(res, inst, f"catalog instance dropped (emission failed): {why}", "catalog")
+        # review-1 #1: upstream's own record of text the reply did not cover -> a partial parse, never silent
+        for kind in ("unmapped", "issues"):
+            for u in out.get(kind) or []:
+                span = u.get("span") if isinstance(u, dict) else u
+                why = ("; ".join(str(u[k]) for k in ("code", "construction", "reason", "detail") if u.get(k))
+                       if isinstance(u, dict) else None)
+                self._log(res, str(span)[:300], f"catalog {kind}: {str(why or u)[:300]}", "catalog_" + kind)
+        if res.rejected and res.catalog_status == "ok":
+            res.catalog_status = "partial"
+        prefix = safe_id(item_id)
+        sprefix = safe_id(scope_id if scope_id is not None else item_id)
+        for d in out.get("declarations") or []:          # upstream returns None on emission failure
+            for src, node, err in split_toplevel(str(d)):
+                if err or not isinstance(node, list):
+                    self._log(res, src, f"declaration syntax: {err}", "syntax")
+                    continue
+                dn = _scope_skolems(node, prefix)
+                if sprefix != prefix:
+                    dn = _rescope(dn, prefix, sprefix)
+                if to_str(dn) not in res.declarations:
+                    res.declarations.append(to_str(dn))
+        self._accept_forms(res, "\n".join(str(x) for x in out.get("statements") or []), item_id, scope_id, ctx_bodies)
+        if not res.accepted and not res.rejected:
+            self._log(res, reply[:300], f"catalog reply produced no statements (status {out['status']})", "catalog")
+        return res
+
+    def _accept_forms(self, res, reply, item_id, scope_id, ctx_bodies):
+        from .semparse_context import atom_body
         prefix = safe_id(item_id)
         sprefix = safe_id(scope_id if scope_id is not None else item_id)   # sk_* scope = the note, not the passage
         for src, node, err in split_toplevel(reply):
@@ -363,9 +466,6 @@ class SemParseAdapter:
                         self._log(res, atom, f"petta load: {str(e)[:200]}", "petta")
                         continue
                 res.accepted.append(atom)
-        if not res.accepted and not res.queries and not res.rejected:
-            self._log(res, reply[:300], "reply contained no atoms", "syntax")
-        return res
 
     def parse_items(self, items: Iterable) -> list:
         return [self.parse_item(i, it) for i, it in items]
@@ -398,5 +498,7 @@ def gateway_llm(base_url=None, model=None, key=None, timeout=300.0,
             base_url.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(),
             headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
         r = json.loads(urllib.request.urlopen(req, timeout=timeout).read())
+        call.last_usage = r.get("usage") if isinstance(r.get("usage"), dict) else None
         return r["choices"][0]["message"]["content"]
+    call.last_usage = None
     return call

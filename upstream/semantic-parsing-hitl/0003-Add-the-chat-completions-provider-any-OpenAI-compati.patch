@@ -1,0 +1,220 @@
+From 923d708545ee51987f805f45e288aa496c95cc32 Mon Sep 17 00:00:00 2001
+From: ProtoMegaBot2 <protomegabot2@users.noreply.github.com>
+Date: Wed, 4 Nov 2026 19:41:37 +0000
+Subject: [PATCH] Add the chat-completions provider (any OpenAI-compatible
+ endpoint at --base-url)
+
+A configurable base URL for self-hosted servers, gateways and proxies: <base-url>/chat/completions,
+streamed with DeepSeek's client (_post_json retries, _read_sse), bearer key from the variable named by
+--api-key-env, --model required. Only portable request fields are sent. Usage in the shared shape;
+cache read from prompt_tokens_details.cached_tokens or prompt_cache_hit_tokens, cache write from
+cache_creation_input_tokens; a field the server does not report stays None, never zero.
+Tests: templates/tests/test_chat_completions.py (no network, no key).
+---
+ semantic-parse.py                        | 60 ++++++++++++++-
+ templates/tests/test_chat_completions.py | 97 ++++++++++++++++++++++++
+ 2 files changed, 155 insertions(+), 2 deletions(-)
+ create mode 100644 templates/tests/test_chat_completions.py
+
+diff --git a/semantic-parse.py b/semantic-parse.py
+index a012e5e6..f74feda2 100755
+--- a/semantic-parse.py
++++ b/semantic-parse.py
+@@ -8,11 +8,13 @@ issues) is printed.  Providers are pluggable: one small class per provider, sele
+     python semantic-parse.py "Teodor gave Yusra a thermos."
+     python semantic-parse.py "…" --provider google --model gemini-2.5-flash --effort low
+     python semantic-parse.py "…" --provider deepseek --model deepseek-v4-pro --effort low
++    python semantic-parse.py "…" --provider chat-completions --base-url http://127.0.0.1:8000/v1 --model <name>
+     python semantic-parse.py "…" --out run.json          # keep the full run record
+     python semantic-parse.py "…" --dry-run               # show the request, call nothing
+ 
+ Keys come from the environment: GEMINI_API_KEY (or GOOGLE_API_KEY), OPENAI_API_KEY,
+-DEEPSEEK_API_KEY, ANTHROPIC_API_KEY.  Only the standard library is used.
++DEEPSEEK_API_KEY, ANTHROPIC_API_KEY; for ``--provider chat-completions --base-url <url>`` (any
++OpenAI-compatible server) the variable named by --api-key-env.  Only the standard library is used.
+ 
+ Every reply is validated after the call by the catalog's validator (templates/tmpl/validate.py:
+ the emitter's instance checks, graph lints, C9 type check): findings go to stderr and into the run
+@@ -406,6 +408,56 @@ class DeepSeek:
+         return reply
+ 
+ 
++class ChatCompletions(DeepSeek):
++    """Any OpenAI-compatible Chat Completions endpoint at ``--base-url`` (a self-hosted model server, a
++    gateway or proxy): ``<base-url>/chat/completions``, streamed like DeepSeek, with the bearer key read from
++    the environment variable named by ``--api-key-env`` (default CHAT_COMPLETIONS_API_KEY).
++
++    Only the portable request fields are sent (model, messages, stream with usage, max_tokens,
++    temperature): no thinking or JSON-mode fields, whose names differ between servers. Usage is reported in
++    the shared shape; the cache read is taken from ``prompt_tokens_details.cached_tokens`` (OpenAI's field)
++    or ``prompt_cache_hit_tokens`` (DeepSeek's), the cache write from ``cache_creation_input_tokens`` where a
++    server reports it. A field the server does not report stays None (unknown), never zero."""
++
++    name = "chat-completions"
++    default_model = None
++    env_keys = ("CHAT_COMPLETIONS_API_KEY",)
++
++    def __init__(self, args):
++        self.args = args
++        base = getattr(args, "base_url", None)
++        if not base:
++            raise ProviderError("--provider chat-completions needs --base-url (e.g. http://127.0.0.1:8000/v1)")
++        self.url = base.rstrip("/") + "/chat/completions"
++        self.key_env = getattr(args, "api_key_env", None) or "CHAT_COMPLETIONS_API_KEY"
++        self.env_keys = (self.key_env,)
++
++    def key(self) -> str:
++        if os.environ.get(self.key_env):
++            return os.environ[self.key_env]
++        raise ProviderError(f"set {self.key_env}")
++
++    def request(self, system: str, user: str, model: str) -> tuple[str, dict, dict]:
++        a = self.args
++        if not model:
++            raise ProviderError("--provider chat-completions needs --model (the server has no default here)")
++        body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
++                "stream": True, "stream_options": {"include_usage": True}}
++        if a.max_tokens:
++            body["max_tokens"] = a.max_tokens
++        if a.temperature is not None:
++            body["temperature"] = a.temperature
++        return self.url, {"Authorization": "Bearer <key>"}, body
++
++    def complete(self, system: str, user: str, model: str) -> Reply:
++        reply = super().complete(system, user, model)
++        u = reply.raw_usage or {}
++        cached = (u.get("prompt_tokens_details") or {}).get("cached_tokens")
++        reply.usage["cached"] = cached if cached is not None else u.get("prompt_cache_hit_tokens")
++        reply.usage["cache_write"] = u.get("cache_creation_input_tokens")
++        return reply
++
++
+ class Anthropic:
+     """Anthropic (the Claude models) through the Messages REST API.
+ 
+@@ -481,7 +533,7 @@ class Anthropic:
+         return reply
+ 
+ 
+-PROVIDERS = {p.name: p for p in (Google, OpenAI, DeepSeek, Anthropic)}
++PROVIDERS = {p.name: p for p in (Google, OpenAI, DeepSeek, ChatCompletions, Anthropic)}
+ 
+ 
+ # --------------------------------------------------------------------------
+@@ -577,6 +629,10 @@ def add_provider_args(ap: argparse.ArgumentParser) -> None:
+     shared with the suite runner (templates/tmpl/suite.py), which adds them to its own parser."""
+     ap.add_argument("--provider", choices=sorted(PROVIDERS), default="google")
+     ap.add_argument("--model", default=None, help="model name (default: the provider's default)")
++    ap.add_argument("--base-url", default=None,
++                    help="chat-completions: the OpenAI-compatible API base, e.g. http://127.0.0.1:8000/v1 (required for it)")
++    ap.add_argument("--api-key-env", default="CHAT_COMPLETIONS_API_KEY",
++                    help="chat-completions: environment variable holding the bearer key (default: CHAT_COMPLETIONS_API_KEY)")
+     ap.add_argument("--effort", choices=EFFORTS, default="low",
+                     help="reasoning effort (default: low). Gemini 3+: a thinking level (none -> LOW, the lowest level every model offers; "
+                          "xhigh / max -> HIGH, the highest); Gemini 2.x: a thinking budget (none -> 0); "
+diff --git a/templates/tests/test_chat_completions.py b/templates/tests/test_chat_completions.py
+new file mode 100644
+index 00000000..a268799b
+--- /dev/null
++++ b/templates/tests/test_chat_completions.py
+@@ -0,0 +1,97 @@
++"""Tests for the chat-completions provider (semantic-parse.py, class ChatCompletions): any OpenAI-compatible
++Chat Completions endpoint at --base-url, with no network and no key.
++
++* --base-url is required and the URL is <base-url>/chat/completions; --model is required (no default);
++* the key comes from the variable named by --api-key-env only, and a missing key is a clear ProviderError;
++* the request carries only the portable fields (no thinking / JSON-mode fields) and asks for usage in the stream;
++* usage in the shared shape; a field the server does not report stays None, never zero.
++
++Run from ``templates/``: ``python tests/test_chat_completions.py``
++"""
++from __future__ import annotations
++
++import argparse
++import importlib.util
++import os
++import unittest
++from unittest import mock
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++ROOT = os.path.abspath(os.path.join(HERE, os.pardir, os.pardir))
++_spec = importlib.util.spec_from_file_location("semantic_parse", os.path.join(ROOT, "semantic-parse.py"))
++SP = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(SP)
++
++
++def args(*argv):
++    ap = argparse.ArgumentParser()
++    SP.add_provider_args(ap)
++    ap.add_argument("--dry-run", action="store_true")
++    return ap.parse_args(["--provider", "chat-completions", *argv])
++
++
++def reply(usage):
++    r = {"choices": [{"message": {"role": "assistant", "content": '{"instances": []}'}, "finish_reason": "stop"}]}
++    if usage is not None:
++        r["usage"] = usage
++    return r
++
++
++class ChatCompletionsTest(unittest.TestCase):
++    def test_registered(self):
++        self.assertIs(SP.PROVIDERS["chat-completions"], SP.ChatCompletions)
++
++    def test_base_url_required(self):
++        with self.assertRaisesRegex(SP.ProviderError, "--base-url"):
++            SP.ChatCompletions(args())
++
++    def test_url_and_model(self):
++        p = SP.ChatCompletions(args("--base-url", "http://127.0.0.1:8000/v1/"))
++        url, headers, body = p.request("CATALOG", "ITEM", "agent/x")
++        self.assertEqual(url, "http://127.0.0.1:8000/v1/chat/completions")
++        self.assertEqual(headers["Authorization"], "Bearer <key>")
++        self.assertEqual(body["model"], "agent/x")
++        self.assertEqual(body["stream_options"], {"include_usage": True})
++        self.assertEqual([m["role"] for m in body["messages"]], ["system", "user"])
++        for k in ("thinking", "reasoning_effort", "response_format"):
++            self.assertNotIn(k, body)
++        with self.assertRaisesRegex(SP.ProviderError, "--model"):
++            p.request("C", "I", None)
++
++    def test_key_from_named_variable(self):
++        p = SP.ChatCompletions(args("--base-url", "http://h/v1", "--api-key-env", "GW_TOKEN"))
++        with mock.patch.dict(os.environ, {}, clear=True):
++            with self.assertRaisesRegex(SP.ProviderError, "GW_TOKEN"):
++                p.key()
++        with mock.patch.dict(os.environ, {"GW_TOKEN": "t"}, clear=True):
++            self.assertEqual(p.key(), "t")
++
++    def complete(self, usage):
++        p = SP.ChatCompletions(args("--base-url", "http://h/v1"))
++        with mock.patch.dict(os.environ, {"CHAT_COMPLETIONS_API_KEY": "k"}, clear=True), \
++                mock.patch.object(SP, "_post_json", return_value=reply(usage)) as post:
++            r = p.complete("CATALOG", "ITEM", "m")
++        self.assertEqual(post.call_args[0][1]["Authorization"], "Bearer k")
++        return r
++
++    def test_usage_openai_shape(self):
++        r = self.complete({"prompt_tokens": 3100, "completion_tokens": 50, "total_tokens": 3150,
++                           "prompt_tokens_details": {"cached_tokens": 3000}})
++        self.assertEqual(r.text, '{"instances": []}')
++        self.assertEqual((r.usage["input"], r.usage["cached"], r.usage["output"]), (3100, 3000, 50))
++        self.assertIsNone(r.usage["cache_write"])
++
++    def test_usage_partial_stays_unknown(self):
++        r = self.complete({"prompt_tokens": 3100, "completion_tokens": 50})
++        self.assertEqual((r.usage["input"], r.usage["output"]), (3100, 50))
++        self.assertIsNone(r.usage["cached"])
++        self.assertIsNone(r.usage["cache_write"])
++
++    def test_no_usage_stays_unknown(self):
++        r = self.complete(None)
++        for k in ("input", "output", "cached", "cache_write", "total"):
++            self.assertIsNone(r.usage[k], k)
++
++
++if __name__ == "__main__":
++    unittest.main()
+-- 
+2.34.1
+
