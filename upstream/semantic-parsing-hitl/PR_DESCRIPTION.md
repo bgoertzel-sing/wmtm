@@ -1,7 +1,8 @@
 # Add the Anthropic provider to semantic-parse.py
 
 Base: semantic-parsing-hitl @ 1f1a7a6f ("Do a major repo cleanup and re-org").
-Patches: 0001 (the provider), 0002 (its tests). Apply with `git am 000*.patch`.
+Patches: 0001 (the Anthropic provider), 0002 (its tests), 0003 (the chat-completions provider, below, with its
+tests). Apply with `git am 000*.patch`.
 
 ## What
 `class Anthropic` replaces the placeholder. It talks to the Messages REST API
@@ -40,3 +41,13 @@ package, and the patch doesn't change that.
 No live API call yet: there was no key in the authoring environment. The first real run should check that
 `cache_read_input_tokens` > 0 from the second item on. If the catalog is shorter than the model's minimum
 cacheable length, the API silently sends it uncached.
+
+## Also: the chat-completions provider (patch 0003)
+`--provider chat-completions --base-url <url> --model <name>` sends to any OpenAI-compatible Chat Completions
+endpoint (`<base-url>/chat/completions`: a self-hosted model server, a gateway, a proxy). It reuses DeepSeek's
+client (streamed, `_post_json` retries, `_read_sse`); the bearer key comes from the variable named by
+`--api-key-env` (default `CHAT_COMPLETIONS_API_KEY`). `--base-url` and `--model` are required. Only portable
+fields are sent (model, messages, stream with `stream_options.include_usage`, max_tokens, temperature).
+Usage is in the shared shape: cache read from `prompt_tokens_details.cached_tokens` (or
+`prompt_cache_hit_tokens`), cache write from `cache_creation_input_tokens`; a field the server does not
+report stays None, never zero. Tests: `templates/tests/test_chat_completions.py` (7, no network, no key).

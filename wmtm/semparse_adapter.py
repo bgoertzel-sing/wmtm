@@ -316,8 +316,11 @@ class SemParseAdapter:
             res.latency_s = (res.latency_s or 0.0) + (time.perf_counter() - t0)
             u = getattr(self.llm, "last_usage", None)
             if isinstance(u, dict):
-                for k, v in u.items():
-                    if isinstance(v, (int, float)) and not isinstance(v, bool):
+                for k, v in u.items():                 # review-4: an unreported field (None) in any call
+                    if v is None:                        # makes the sum unknown, never a partial / zero sum
+                        res.usage[k] = None
+                    elif isinstance(v, (int, float)) and not isinstance(v, bool) and \
+                            not (k in res.usage and res.usage[k] is None):
                         res.usage[k] = res.usage.get(k, 0) + v
 
     def _log(self, res: ParseResult, atom: str, reason: str, stage: str):

@@ -156,7 +156,7 @@ class _FakeGateway:
                 chunks = [{"model": "openclaw/protocosmo2", "choices": [{"delta": {"role": "assistant"}}]},
                           {"choices": [{"delta": {"content": reply_text}}]},
                           {"choices": [{"delta": {}, "finish_reason": "stop"}]},
-                          {"choices": [], "usage": usage}]
+                          {"choices": [], "usage": usage}][: 4 if usage is not None else 3]
                 for c in chunks:
                     self.wfile.write(b"data: " + json.dumps(c).encode() + b"\n\n")
                 self.wfile.write(b"data: [DONE]\n\n")
@@ -170,7 +170,7 @@ class _FakeGateway:
 
 
 GW_USAGE = {"prompt_tokens": 3100, "completion_tokens": 50, "total_tokens": 3150,
-            "prompt_tokens_details": {"cached_tokens": 3000}}
+            "prompt_tokens_details": {"cached_tokens": 3000}, "cache_creation_input_tokens": 0}
 
 
 @needs_hitl
@@ -191,7 +191,9 @@ def test_gateway_provider_request_and_usage(tmp_path, monkeypatch):
     assert "thinking" not in r["body"] and "response_format" not in r["body"]   # DeepSeek-only fields dropped
     u = llm.last_usage
     assert u["cache_read"] == 3000 and u["uncached_input"] == 100 and u["output"] == 50
-    assert llm.provider == "openclaw" and llm.module.__file__ == os.path.join(HITL, "semantic-parse.py")
+    assert llm.provider == "chat-completions"                      # upstream provider (patch 0003), not WMTM code
+    assert llm.module.PROVIDERS["chat-completions"].__module__ == llm.module.__name__
+    assert any(p.endswith(".patch") and "/0003-" in p for p in llm.module.PATCHED_FROM[1])
 
 
 @needs_hitl
@@ -221,3 +223,30 @@ def test_main_gateway_end_to_end(tmp_path, monkeypatch):
     row = json.loads((out / "per_note.jsonl").read_text().splitlines()[0])
     assert row["cache_read"] == 3000 and row["output"] == 50 and row["weighted"] is not None
     assert row["latency_s"] is not None and gw.seen[0]["body"]["model"] == "openclaw/protocosmo2"
+
+
+@needs_hitl
+@pytest.mark.parametrize("usage", [{"prompt_tokens": 3100, "completion_tokens": 50}, None])
+def test_gateway_missing_usage_is_unmeasured(usage, monkeypatch):
+    """review-4 #1: fields the server does not report stay None (never 0); weighted usage is then None."""
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    gw = _FakeGateway("hello", usage)
+    try:
+        llm = P.gateway_llm(gw.base_url, model="openclaw/x", hitl=HITL)
+        assert llm("SYS", "USER") == "hello"
+    finally:
+        gw.close()
+    u = llm.last_usage
+    assert u["cache_read"] is None and u["cache_write"] is None and u["uncached_input"] is None
+    if usage is None:
+        assert u["output"] is None and u["prompt_tokens"] is None and u["total_tokens"] is None
+    else:
+        assert u["output"] == 50 and u["prompt_tokens"] == 3100
+    assert M.weighted({k: u.get(k) for k in M.WEIGHTS}) is None
+
+
+def test_split_usage_never_fills_zero():
+    assert P.split_usage({}) == {k: None for k in ("uncached_input", "cache_read", "cache_write", "output",
+                                                    "prompt_tokens", "completion_tokens", "total_tokens")}
+    full = P.split_usage({"input": 100, "cached": 60, "cache_write": 10, "output": 5})
+    assert (full["uncached_input"], full["total_tokens"]) == (30, 105)
