@@ -19,3 +19,13 @@ Version: upstream master 36b3fe6 (+ our dedup-import patch except where noted). 
 - **PC4** – `PeTTaChainer.add_atom` validates with `pln_validator.check_stmt`, which only checks that the TV *matches the pattern* `(STV $s $c)` (pln_validator.py:5,35); values are never range-checked, and the MeTTa `compileadd` path has no check at all. **Candidate patch `pc4_stv_range_check.patch`** (Python-side, 37 lines): numeric STV must have s,c ∈ [0,1]. Verified: the three bad atoms now raise `ValueError` at add_atom; Grace canary, negative control and Premises-form rule unchanged. Limits: does not cover direct `compileadd` from MeTTa (the .metta repro still shows PC4 there); allows c = 1.0 because the chainer itself uses `(STV 1.0 1.0)` internally (our adapter stays stricter, c < 1).
 - **PC6** – `petta_chainer.metta:1` imports `chainer/compile`, and `context/context_generation.metta:16` imports it again (reached via `context/context_from_kb`, petta_chainer.metta:18). PeTTa's `import!` is not idempotent, so every `compile` definition exists twice and nondeterministic calls multiply per nesting level. **Patch: `../../../patches/pettachainer-dedup-import.patch`** (one line, drop the second import) – verified above. A longer-term upstream fix is an import-once guard in PeTTa.
 - **PC5/PC7** not in scope (PC5 = missing native mem_inh / doc; PC7 fixed in 36b3fe6).
+
+## Track P1 (rT 202b9379, 2026-11-04)
+- **PC5** – `pc5_modus_ponens_202b9379.metta`. Modus ponens from a premise with s<1 halves the conclusion confidence.
+  Command: `cd <PeTTaChainer@202b9379>/pettachainer/metta && cp <abs>/pc5_modus_ponens_202b9379.metta ./_pc5.metta && PATH=<swipl-9.3.36>/bin:$PATH <PeTTa@3681b9b>/run.sh ./_pc5.metta`
+  Expected: (Q x) with s≈0.81 and c≈0.88 (as on rT 38b1473). Actual: `(STV 0.8325 0.4395)`. Control with premise s=1.0: `(STV 0.85 0.92)`.
+  Effect: GoalChainer `tests/test_input_sensitivity.py::test_decision_depends_on_the_request` fails (wrong action ranking).
+- **PY1** – `py1_nested_annotated_arrow.metta`. pymetta 0.9.4+goalchainer.native.2 refuses a nested annotated arrow
+  (`-[semidet]->` inside `-[semidet]->`), the declaration at PeTTaChainer 202b9379 `lib/collections.metta:2`, so petta_chainer cannot load under pymetta.
+  Command: `<venv with pymetta==0.9.4+goalchainer.native.2>/bin/python -c "import metta,sys; print(metta.MeTTa().run(open(sys.argv[1]).read()))" py1_nested_annotated_arrow.metta`
+  Expected: declaration accepted; `(fold-semidet add2 0 (Cons 1 (Cons 2 Nil)))` → 3. Actual: `EngineError: metta_add_atom/3: cannot honour the annotated arrow for fold-semidet ... (annotated arrows require a named function and a concrete top-level cardinality and effect ...)` from `metta/_runtime/engine/spaces/arrow_products.pl:58`.
