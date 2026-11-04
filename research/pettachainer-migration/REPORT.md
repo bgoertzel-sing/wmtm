@@ -2,7 +2,7 @@
 
 ## Summary
 andy asked what wmtm would need to change to run on rT PeTTaChainer 49ca6f3. Short answer: on the wmtm side, a small to
-medium change: rewrite the rule form, repoint one vendor flag and one canary. The real blocker
+medium change: rewrite the rule form, give rules CTV instead of STV truth values (W2b), repoint one vendor flag, and add an evidence-grading canary (W7). The real blocker
 is that rT 49ca6f3 does not run on GoalChainer v2's pymetta engine. I needed 22+ shims across 66 upstream files just to
 get it to load. After all of them, the GoalChainer suite still has the same 117 failures (69 pass with no shims, 31
 pass with the last shim set). Basic fact reads still return nothing (open item 1). The same 117 test IDs fail before and after the shims
@@ -25,9 +25,10 @@ Effort: S < 1 h, M = half a day to 2 days, L = more than a week or unknown.
 | W2 | wmtm/workers/pc_shadow.py:39-42 (RULES), :44 CANARY | rT dropped `(Implication (Premises ..) (Conclusions ..))`. Rewrite the rules to bare `(Implication p c)` / `And` premises (fitness F2, F18) | wmtm | S |
 | W3 | wmtm/semparse_adapter.py:184-207 `normalise()` | it currently converts And -> Premises (Oct 15 canary). It would need to invert that for rT, then re-run the semparse canary | wmtm | M |
 | W4 | wmtm/workers/semparse_feed.py:71 (load canary rule), :74-75, :91 | same rule-form rewrite. The canary criterion must allow for rT's population prior (unproved goals get a prior TV, fitness F3) | wmtm | S-M |
+| W2b | truth values: wmtm/workers/pc_shadow.py:40-42 (RULES `(STV 1.0 0.99)`), wmtm/workers/semparse_feed.py:71 (canary rule), wmtm/semparse_adapter.py:146-156 `check_statement()` (accepts only `(STV s c)` for every statement, so rules cannot carry CTV) | **STV -> CTV for rules.** On rT a rule with a plain STV still fires but with very low confidence (0.0135 for imp_trans, 0.065 for a one-premise rule); with a CTV, confidence is normal (0.90) (`evidence/fitness/REPORT.md:18-19`, findings 3-4; the And+CTV rules plus a prior filter pass 62/62 PC tests, :21). Facts (pc_shadow.py:34, :277, CANARY :44) can stay STV. `check_statement()` must allow CTV on Implication statements, and the confidence readers (pc_shadow.py:102 regex `STV\s+...`) must accept the result TV form | wmtm | S-M (rules S; adapter + readers + canary re-run M) |
 | W5 | wmtm/pc_shadow.py:19-22 (`Implication` -> `Implies` head) | recheck: under rT, `Implies rain slippery` failed 2 tests (fitness F10) | wmtm | S-M |
 | W6 | wmtm/workers/pc_shadow.py:50-61, semparse_feed.py:67-69 (`PeTTaChainer()`, `add_atom`, `query(steps, timeout_sec)`) | the Python API is unchanged in 49ca6f3. No change expected; re-verify | wmtm | S |
-| W7 | wmtm/goals/v2.py:234 (`client()` env) | drops GOALCHAINER_PETTACHAINER_DIR, so the v2 canary never opens PeTTaChainer (fitness F18). Pass it through if v2 should use a non-default PeTTaChainer | wmtm | S |
+| W7 | wmtm/goals/v2.py:234 (`client()` env) | drops GOALCHAINER_PETTACHAINER_DIR. Passing it through is needed for a non-default PeTTaChainer to reach GoalChainer's evidence grading, but it is **not sufficient to test rT**: the v2 goal canary does not use PeTTaChainer at all (the goal/deontic path loads only GoalChainer's own MeTTa policy; strace shows 0 PeTTaChainer files opened, `evidence/fitness/REPORT.md:97`). Evidence grading (`evidence_chainer.py`) is the only GoalChainer code that loads it. So W7 = pass the variable through **and** add a canary that runs evidence grading (e.g. tests/test_evidence_chainer.py), which is where rT fails 117/186 (section 3) | wmtm | S (passthrough) + S-M (new canary) |
 
 ### 1b. GoalChainer v2 adapter (GoalChainer repo, runs under pymetta-native.2)
 | # | where | change | side | effort |
@@ -72,13 +73,29 @@ Paths are relative to external/PeTTaChainer/ unless marked GoalChainer. Line num
    Because of this, the shared warm-up `gc-pettachainer-warm-up` answers `(False)` (warmprobe135-137), and that alone
    accounts for 116 of the 117 fa_r2 failures. The suspects are sk-read-fact / sk-fact-matches? / sk-leaf-fact-step
    (runtime/fact_reads/selection.metta:4, :29, :86), which return () for &kb_prefix rows.
-   *Best hypothesis:* the rows are written through pymetta's `add_sexp` into `'$metta_atoms:&kb_prefix'` with the
+   *Contrary evidence: a successful fact read.* Earlier, `probes/warmprobe118.txt:48` and `:52` (run 20:13:15) show both
+   backward-query variants, `execute-backward-run` and `execute-backward`, returning the published fact
+   `(B b) ... (fact-source (ev-set 1) f2) (STV 1.0 0.9)` with its proof and TV, after the same `kb-publish-fact!` call (:44)
+   that later returns () in qprobe11 (21:24:27, `probes/qprobe11.out.txt:45-46`). That run had a version of probe118's
+   Bool-accumulator fix in place (the `.prefa` snapshot taken 3 minutes later, 20:16:12, holds the inlined `foldl-atom` form:
+   `shims/recovered/probe118_pre118_vs_prefa.diff`; the run may have used the earlier `sk-any-gives-way` helper variant at the
+   same two sites). The fix was reverted afterwards
+   (`probe118_facurrent_vs_final.diff`, 21:14-21:20). It does not show compatibility: the same probe still ends in
+   `PREP TypeError` (:53), and the full suite was never run in that state. But it means reads *can* work under pymetta with the
+   same publish path, so the regression is in something changed between 20:13 and 21:24. `evidence/timeline_118_to_q11.txt`
+   lists those files: the versions.metta revert, plus store/fact_settings.metta, fact_reads/policy.metta,
+   backward/skeleton.metta, the evaluator files and the natives.pl/natives.metta finally/pcapply shims. **This moves the
+   Bool-accumulator revert to the leading suspect**, ahead of the storage-row hypothesis below. The success weakens that
+   hypothesis (rows written by `kb-publish-fact!` were readable under pymetta at 20:13) but does not rule it out, because
+   one store file, `runtime/store/fact_settings.metta`, also changed in the window (21:19:37).
+   *Second hypothesis (storage rows):* the rows are written through pymetta's `add_sexp` into `'$metta_atoms:&kb_prefix'` with the
    extra trailing storage token, and the read side then misses them. Either it matches a 5-field row pattern against
    6-field storage terms, or it calls the bare `'&kb_prefix'/5` Prolog facts, which pc_store_access.pl only partly
-   redirects. The second suspect is the curried Bool-accumulator bug (probe118), which also yields ().
-   *What would settle it:* after one compileadd, dump the stored &kb_prefix row(s) (`metta_storage_term`) and the
-   exact pattern that sk-read-fact matches. Then run the same 1-fact query on unmodified rT under PeTTa, where it
-   works, and diff the two. That needs at most 2 probes.
+   redirects. The curried Bool-accumulator bug (probe118) also yields (), and is the leading suspect (see above).
+   *What would settle it:* re-apply only the probe118 fix (`shims/recovered/probe118_pre118_vs_prefa.diff`) to the final
+   tree and re-run qprobe11. If reads return the fact, the revert is the cause; if not, bisect the other files in
+   `evidence/timeline_118_to_q11.txt`. Only then fall back to the row dump (`metta_storage_term` vs sk-read-fact's pattern)
+   for the storage hypothesis. At most 4 probes.
 2. `chainer-reset!` and `set-backward-premise-prefilter` have no rT equivalent (G3).
 3. rT's population prior for unproved goals changes how canaries must be read (W4).
 4. The latent Bool-accumulator sites (about 20) were not fixed. probe118's fix was reverted.
@@ -106,7 +123,7 @@ So the same 117 test IDs fail in every full run, and **none of the original 117 
 | option | effort | risk | notes |
 |---|---|---|---|
 | A. Stay (36b3fe6-dedup + GC 38b1473) | 0 | low | works today. 186/186 GC, the wmtm suites are green. Forgoes rT's fixes (no duplicate import, newer rulelookup) |
-| B. Adopt for wmtm only (PeTTa path, W1-W7) | M (2-4 days) | medium | wmtm's shadow and semparse run under PeTTa, not pymetta, so section 1c does not apply. The fitness run showed 240 passed / 2 failed (`evidence/fitness/pytest_goals_pc_rt.txt`; base: 242 passed, `pytest_goals_pc_base.txt`), so W2-W5 are needed. Not tested beyond the fitness report |
+| B. Adopt for wmtm only (PeTTa path, W1-W7 incl. W2b) | M (2-4 days) | medium | wmtm's shadow and semparse run under PeTTa, not pymetta, so section 1c does not apply. The fitness run showed 240 passed / 2 failed (`evidence/fitness/pytest_goals_pc_rt.txt`; base: 242 passed, `pytest_goals_pc_base.txt`), so W2-W5 are needed. Not tested beyond the fitness report |
 | C. Adopt for GoalChainer v2 | L+ | high | in effect a port of rT to pymetta (section 1c plus open item 1). Risks silent wrong answers from about 260 type relaxations |
 | D. Adopt everywhere | L+ | high | B + C |
 | E. Wait for named upstream changes | 0 now | low | (1) pymetta: higher-order annotated arrows, MeTTa functions callable from Prolog, compact-datatypes builtins, map-flat/superpose parity; (2) rT: a storage accessor instead of raw row facts, `chainer-reset!`/prefilter equivalents, a documented rule form; (3) GC: G1-G4 |
@@ -115,5 +132,5 @@ So the same 117 test IDs fail in every full run, and **none of the original 117 
 rT fixes before then, B is feasible on its own, because wmtm's shadow and semparse workers use PeTTa, not pymetta.
 
 **Bounded follow-up (optional):** "Settle PeTTaChainer fact-read under pymetta". Scope: open item 1 only, at most
-2 h, at most 4 probes. Deliverable: confirm or reject the row-storage hypothesis, quoting the stored row and the
-matched pattern. No new shims.
+2 h, at most 4 probes. Deliverable: confirm or reject that reverting probe118's Bool-accumulator fix broke fact reads
+(warmprobe118 read OK at 20:13; qprobe11 () at 21:24), then, if needed, the row-storage hypothesis. No new shims.

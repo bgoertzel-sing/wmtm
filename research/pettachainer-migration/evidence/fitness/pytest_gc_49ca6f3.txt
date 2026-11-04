@@ -22412,7 +22412,7 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 input = None, capture_output = True, timeout = None, check = True
 popenargs = (['~/research-agent/projects/omegaclaw/runtimes/goalchainer-v2-pymetta-native.2/src/.venv/bin/python', '-...efore["own"] - after["own"]).elements()),\n    "automatic": after["automatic"], "entries": after["entries"],\n}))\n'],)
-kwargs = {'text': True, 'env': {'SHELL': '/bin/bash', 'OMEGACLAW_OUTER_AGENT_ID': 'main', 'OMEGACLAW_OUTER_LOG': '/home/opencla...-agent/projects/omegaclaw/protocosmo2/phase2-checked-baseline/repos/PeTTa/chroma_db', ...}, 'stdout': -1, 'stderr': -1}
+kwargs = {'text': True, 'env': {'SHELL': '/bin/bash', 'OMEGACLAW_OUTER_AGENT_ID': 'main', 'OMEGACLAW_OUTER_LOG': '~/...', ...}, 'stdout': -1, 'stderr': -1}
 
     def run(*popenargs,
             input=None, capture_output=False, timeout=None, check=False, **kwargs):
