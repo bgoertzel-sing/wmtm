@@ -115,7 +115,9 @@ def live_weighted(b, prompt_as):
 
 
 def select(notes, n, seed, hashes):
-    if hashes:
+    """hashes=None -> seeded random sample of n; a list (even empty) -> exactly those hashes that are in notes.
+    review-6: an explicit sample whose hashes were all skipped stays empty; it never falls back to sampling."""
+    if hashes is not None:
         return [h for h in hashes if h in notes], [h for h in hashes if h not in notes]
     keys = sorted(notes)
     return random.Random(seed).sample(keys, min(n, len(keys))), []
@@ -163,7 +165,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     sd = os.path.abspath(a.state_dir)
     os.makedirs(a.out, exist_ok=True)
-    hashes = []
+    hashes = None                                           # None = random sample; a list = explicit sample
     if a.hashes:
         src = open(a.hashes[1:]).read().split() if a.hashes.startswith("@") else a.hashes.split(",")
         hashes = [h.strip() for h in src if h.strip()]
@@ -174,9 +176,9 @@ def main(argv=None):
     max_chars = a.max_chars if a.max_chars is not None else int(cfg["parse_max_chars"])
     notes = load_notes(sd)
     too_long = {h for h, (_, t) in notes.items() if len(t) > max_chars}
-    skipped_long = [h for h in hashes if h in too_long]
+    skipped_long = [h for h in (hashes or []) if h in too_long]
     chosen, missing = select({h: v for h, v in notes.items() if h not in too_long}, a.n, a.seed,
-                             [h for h in hashes if h not in too_long])
+                             None if hashes is None else [h for h in hashes if h not in too_long])
     base = load_baseline(semparse_dir)
     mock = None
     if a.mock_replies:

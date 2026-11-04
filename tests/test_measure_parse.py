@@ -60,8 +60,8 @@ def test_load_notes_and_seeded_select(tmp_path):
     sd, h1 = make_state(tmp_path)
     notes = M.load_notes(str(sd))
     assert len(notes) == 3 and notes[h1][0] == "i1"
-    a = M.select(notes, 2, 7, [])[0]
-    assert a == M.select(notes, 2, 7, [])[0] and len(a) == 2
+    a = M.select(notes, 2, 7, None)[0]
+    assert a == M.select(notes, 2, 7, None)[0] and len(a) == 2
     assert M.select(notes, 30, 0, [h1, "nope"]) == ([h1], ["nope"])
 
 
@@ -311,3 +311,23 @@ def test_main_skips_long_notes_never_truncates(tmp_path):
     ad = sp.SemParseAdapter(lambda s_, u: "", system="S", max_chars=5)
     assert ad.parse_item("x", {"text": "abcdefgh"}).truncated_chars == 3
     assert ad.parse_item("y", {"text": "abc"}).truncated_chars == 0
+
+
+@needs_hitl
+def test_explicit_hashes_all_skipped_stay_empty(tmp_path):
+    """review-6 probe: only the long note's hash requested -> nothing parsed; never a random substitute."""
+    sd, h1 = make_state(tmp_path)
+    st = json.loads((sd / "_wmtm_state.json").read_text())
+    long_txt = ("Mira painted the fence. " * 90)[:2160]
+    st["store"]["items"]["long"] = {"id": "long", "content": long_txt}
+    (sd / "_wmtm_state.json").write_text(json.dumps(st))
+    hl = M.content_hash(long_txt)
+    mock = tmp_path / "mock.jsonl"
+    mock.write_text(json.dumps({"hash": h1, "reply": REPLY}) + "\n")
+    out = tmp_path / "out"
+    assert M.main(["--state-dir", str(sd), "--hashes", hl, "--out", str(out), "--mock-replies", str(mock)]) == 0
+    s = json.loads((out / "summary.json").read_text())
+    assert s["hashes_given"] is True and s["hashes_skipped_long"] == [hl] and s["parsed"] == 0
+    assert (out / "per_note.jsonl").read_text() == ""
+    assert M.select({h1: ("i1", "x")}, 30, 0, []) == ([], [])          # explicit empty list never samples
+    assert M.select({h1: ("i1", "x")}, 30, 0, None) == ([h1], [])
