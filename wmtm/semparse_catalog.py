@@ -24,7 +24,14 @@ PROMPT_REL = os.path.join("templates", "generated", "PROMPT_CATALOG.txt")
 _CACHE: dict = {}
 
 
-PIN = "1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef"          # the only upstream commit this bridge is written against
+PIN = "1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef"          # default upstream commit (vendored, production)
+# Upstream commits this bridge accepts -> sha256 of their templates/generated/PROMPT_CATALOG.txt.
+# f44d7b74 (2026-11-05, Man Hin latest; ships the Anthropic + chat-completions providers) is opt-in only
+# (WMTM_SEMPARSE_HITL + WMTM_SEMPARSE_PROMPT_SHA256); PIN stays the default.
+ALLOWED_PINS = {
+    PIN: "e4c4a76c7666d70f6d019fd7fea9391d91b01528f8f89132ae05d842fdd8207e",
+    "f44d7b740aed240c834165672b6a862998ee4a12": "645bff3f5c3a0670d98a463d60d18e178d899c08c58f17ea4b3ff5a53b1d25b6",
+}
 LICENSE_SHA256 = "586023696f36ad863849d2b96648022c589acdd12b27c7b15e51356343077d4c"  # MIT, (c) 2026 leungmanhin
 
 
@@ -57,17 +64,18 @@ def checkout_commit(root: str) -> Optional[str]:
 
 
 def verify_checkout(root: str) -> str:
-    """Raise HitlPinError unless ``root`` is hitl @PIN with the MIT LICENSE (sha256 checked); return root."""
+    """Raise HitlPinError unless ``root`` is hitl at one of ALLOWED_PINS with the MIT LICENSE (sha256 checked); return root."""
     import hashlib
     got = checkout_commit(root)
-    if got != PIN:
-        raise HitlPinError(f"semantic-parsing-hitl checkout {root!r} is at {got!r}, need {PIN[:8]}")
+    if got not in ALLOWED_PINS:
+        need = ", ".join(c[:8] for c in ALLOWED_PINS)
+        raise HitlPinError(f"semantic-parsing-hitl checkout {root!r} is at {got!r}, need one of {need}")
     lic = os.path.join(root, "LICENSE")
     if not os.path.isfile(lic):
         raise HitlPinError(f"semantic-parsing-hitl checkout {root!r} has no LICENSE")
     with open(lic, "rb") as fh:
         if hashlib.sha256(fh.read()).hexdigest() != LICENSE_SHA256:
-            raise HitlPinError(f"semantic-parsing-hitl LICENSE in {root!r} is not the MIT licence of {PIN[:8]}")
+            raise HitlPinError(f"semantic-parsing-hitl LICENSE in {root!r} is not the MIT licence of {got[:8]}")
     return root
 
 
