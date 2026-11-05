@@ -79,6 +79,15 @@ def baseline_tokens(row):
         u.get("cache_read_input_tokens", det.get("cached_tokens"))
     wr = u.get("cache_write") if u.get("cache_write") is not None else u.get("cache_creation_input_tokens")
     pt, out = u.get("prompt_tokens"), u.get("completion_tokens", u.get("output"))
+    tt = u.get("total_tokens")
+    if rd is None and wr is None and u.get("uncached_input") is None \
+            and pt is not None and out is not None and tt is not None:
+        # t-2026-11-05-p3-join-ab (cos answer 3): the live parse log has no cache split, but the gateway's
+        # prompt_tokens = uncached + cache_read and total_tokens additionally counts cache_write.  Same rule as
+        # t-2026-11-04-p2-real-notes recompute.py:62-64.  The old code ignored total_tokens and dropped the
+        # live call's ~88k cache_write (live_hi was ~4 prompt tokens + 5x output).
+        unc = min(4, pt)
+        return {"uncached_input": unc, "cache_read": pt - unc, "cache_write": max(0, tt - pt - out), "output": out}
     if u.get("uncached_input") is not None:
         unc = u["uncached_input"]
     elif pt is not None:
