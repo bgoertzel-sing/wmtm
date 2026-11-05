@@ -43,3 +43,17 @@ Option a = pymetta limitation (engine owner could relax it); option b = rT could
 | PY5 | `py5_two_sources_one_name.metta` (+`py3_helper.pl`, `py5_helper_second.pl`) | `refuse_other_sources_name/2: py3-a is already registered from …py3_helper.pl … (two Prolog sources claim one name)` | `declare-natives!` defined in `lib/natives.pl:4` and imported again via the runtime helper (`bootstrap.metta:33-37`) | one Prolog source per name | not shimmed (stopped here) | b (single owner) |
 
 Verified 2026-11-04 on this machine: each repro gives exactly the refusal above (PY3–PY5 load `(library lib_import)` first, as rT bootstrap.metta:6 does).
+
+### PC3 and PC8: proposed shared cause (HYPOTHESIS, not verified)
+This is a hypothesis for Roman to confirm or reject. Neither repro has been traced inside the engine to prove it.
+- Both regressions are new in rT 202b9379. They do not appear on 38b1473, and both reduce **confidence only**: strength is about right in both.
+- PC3 is traced: `polynomial_answer` (`prolog/event_node.pl:82`) returns the conservative variance bound
+  `Bound = (Q + max(C,1-C)·sqrt(ZVar·Q)) / EZ²`, capped at s(1-s). With uninformed roots this bound is far above the true
+  posterior variance, so `node_stv` maps it to c≈0 (see `PC3_202b9379.md`).
+- PC8 hypothesis: modus ponens is evaluated through the same event-node path. With premise s=1.0 the premise term is
+  deterministic, so Q=0, `Kind=exact`, and c stays at 0.92 (the control row). With s<1 the node becomes `conservative`, and the
+  same loose bound inflates V, which roughly halves c (0.44 against about 0.88 on 38b1473).
+- Prediction that would confirm it: run `pc8_modus_ponens_202b9379.metta` with the exact posterior variance put in at
+  `event_node.pl:82`, or log `Kind`, `Q` and `ZVar` there. Expect `conservative` and Bound ≫ true variance for the s=0.95 case only.
+  If PC8 shows `exact`, the hypothesis is wrong and PC8 has a separate cause.
+- If it holds, fix (b) in `PC3_202b9379.md` (exact moments for small nodes) would fix both. Fix (a) would fix neither PC8 nor the PC3 conjuncts.
