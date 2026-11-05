@@ -1,0 +1,702 @@
+"""Goal lifecycle (log only): stable goal IDs, near-duplicate merging and open/satisfied/superseded/stale states.
+
+Offline only: nothing here is called by the live worker, the prompt or the flags.  Input = logged proposals
+(``<runtime_dir>/goalchainer/proposals.jsonl`` rows) plus the journal notes; output = goal records and a per-proposal
+verdict (kept / dropped with a reason).  docs/GOAL_LIFECYCLE.md states the rules; tests/test_goal_lifecycle.py tests them.
+
+Rules (thresholds are module constants so a replay can report them):
+
+* Goal text = the proposal text without its wrapper ("Self-task (log only, no message): ", "Remind X about: ") and
+  without leading open markers ("Still open:", "PENDING:", "WAITING on ..."), terms = needs.norm(needs.keys(body)) plus
+  short acronyms (LTM, CoS), minus the marker words.
+* Same goal (same ID): same person (``who``) AND same action AND Jaccard(terms) >= MERGE_JACCARD AND equal anchor sets
+  (anchors = "@x" entities / paths, track letters, commit hashes, task ids).  An anchor present on one side only means a
+  different object, so it never merges.  The ID is that of the first goal in the cluster (sha1 of who|action|terms).
+* superseded: a later goal (newer source note) for the same person AND same action either restates it (covers >= COVER of its terms)
+  or it was split: later smaller goals each covered >= COVER by it, whose union covers >= SPLIT_COVER of its terms
+  (one split-off item alone never retires the other items).
+* satisfied: a journal note newer than the goal's newest source note reports a closure (a CLOSED / RESOLVED / DONE
+  word, needs.res_hit, or "is done" / "deleted" / "trimmed" in one of its sentences) AND matches the goal: it names one
+  of the goal's task ids, or it shares >= SAT_MIN distinctive terms (not among the journal's common closure terms) with
+  at least one shared anchor, or it shares >= SAT_FRAC of the goal's distinctive terms (and >= 3).
+* multi-item goals (needs.split_items: "a; b; c" or "a, and X hasn't ...") are satisfied only when EVERY item
+  matches a closure on its own.
+* stale: still open and its newest source note is older than STALE_DAYS when proposed, with no later journal note on
+  the topic (>= SAT_FRAC shared terms, no closure needed) in between.
+* otherwise open.  Precedence when several apply: superseded > satisfied > stale > open.
+"""
+from __future__ import annotations
+
+import hashlib
+import re
+
+from . import needs
+
+MERGE_JACCARD = 0.8
+COVER = 0.8
+SPLIT_COVER = 0.95   # a multi-item goal is superseded only when its split-off parts cover (almost) all of it
+SAT_MIN = 4
+SAT_FRAC = 0.5
+STALE_DAYS = 7.0
+
+_WRAP = re.compile(r"^\s*(?:Self-task \(log only, no message\)|Remind [\w.-]+ about|Suggest(?:ion)?[^:]{0,40})\s*:\s*",
+                   re.I)
+_LEAD = re.compile(r"^\s*(?:(?:still )?(?:open|pending)\s*:\s*|PENDING\s*:\s*|next step,? still pending\s*:\s*|"
+                   r"(?:still )?waiting on\s+)", re.I)
+_ACRO = re.compile(r"\b([A-Z][A-Za-z]{1,3})\b")
+_ACRO_STOP = {"OK", "I", "A", "NOT", "NO", "AND", "OR", "THE", "PR"}
+_TASK = re.compile(r"\b(t-\d{4}-\d{2}-\d{2}-[a-z0-9-]+|p-\d{4}-[a-z0-9-]+)\b")
+_ENRICH = re.compile(r"\(MemoryCluster |wmtm-enrich-")
+_LABEL_ANY = re.compile(r"^\s*(?:LINK|SUPPORTS|CONTRADICTS|CONTRAST|CORRECTION|LESSON|NOTE|ROOT CAUSE)\b", re.I)
+_MARKER_WORDS = {"still", "open", "pending", "waiting", "self", "task", "remind"}
+_CLOSE_EXTRA = re.compile(r"\b(CLOSED|DONE|is done|are done|deleted|trimmed|removed|merged|fixed)\b")
+
+
+def body(text):
+    b = _WRAP.sub("", text or "", count=1)
+    prev = None
+    while prev != b:
+        prev, b = b, _LEAD.sub("", b, count=1)
+    return b.strip()
+
+
+def _cw(w):
+    """Content stem of one word, or None (stop words, operation verbs)."""
+    w = w.strip(".,;:!?()[]\"'").lower()
+    if not w:
+        return None
+    if "/" in w or re.search(r"\d", w):
+        return w
+    if _OPW.fullmatch(w):
+        return None
+    ks = sorted(k for k in needs.norm(needs.keys(w)) if not k.startswith("@"))
+    return ks[0] if ks else None
+
+
+def _phrase(p):
+    ws = [x for x in (_cw(w) for w in p.split()) if x]
+    return "_".join(ws) if ws else p.strip(".,;:").lower()
+
+
+_CLAUSE = re.compile(r"[.;:!?,\n]|\b(?:and|but|then|while|whereas)\b", re.I)
+_PASS = re.compile(r"\b(?:was|were|is|are|been|be|being|get|gets|got)(?:n't)?\s+"
+                   r"(?:(?:not|never|already|just|now|also|finally|successfully)\s+)*$", re.I)
+
+
+_OBJ_STOP = re.compile(r"\b(?:to|into|onto|from|by|until|before|after|without|with)\b", re.I)
+
+
+def _obj(words):
+    ws = sorted({x for x in (_cw(w) for w in words) if x})
+    return "_".join(ws[:6]) if ws else None
+
+
+_VERB_LEAD = re.compile(r"(?:^|\b(?:to|will|shall|should|must|can|could|would|please|then|also|we|i|you|they|did|do|"
+                        r"does|'ll|not|never|first|now|just|already|finally|successfully)|n't)\s*$", re.I)
+
+
+def _verb_use(cl, m):
+    """The operation word is used as a verb (review 8 regression guard): not a noun form (-ion, -al), and either
+    clause-initial (imperative), after a pronoun / modal / "to" / adverb, passive ("was increased"), or past -ed."""
+    w = m.group(0).lower()
+    if re.search(r"(?:ion|ions|al)$", w):
+        return False
+    pre = cl[:m.start()]
+    if _PASS.search(pre) or _VERB_LEAD.search(pre.strip()) or not pre.strip():
+        return True
+    return w.endswith("ed")
+
+
+def op_bindings(b):
+    """@opobj:<op>><object phrase> per clause (reviews 7, 8): the operation verb bound to ALL content stems of its
+    object phrase, sorted (active: the words after the verb up to a to/into/from/by/with phrase; passive "X was
+    increased": the words before).  So "increase cache retention for widgets and decrease it for gadgets" binds
+    increas>cach_retention_widget, not just increas>cach."""
+    out = set()
+    for cl in _CLAUSE.split(b or ""):
+        for m in _OPW.finditer(cl):
+            op = m.group(1).lower().replace("maximis", "maximiz").replace("minimis", "minimiz")
+            if not _verb_use(cl, m):
+                continue                 # "the promotion", "goal block = ...": a noun, it binds nothing
+            if _PASS.search(cl[:m.start()]):
+                words = cl[:m.start()].split()
+            else:
+                after = cl[m.end():]
+                k = _OBJ_STOP.search(after)
+                words = (after[:k.start()] if k else after).split()[:8]
+            obj = _obj(words)
+            if obj:
+                out.add("@opobj:%s>%s" % (op, obj))
+    return out
+
+
+def _obj_compat(a, b):
+    A, B = set(a.split("_")), set(b.split("_"))
+    return A <= B or B <= A
+
+
+_NUM_CLAUSE = re.compile(r"[.;:!?\n]|\b(?:and|but|then|while|whereas)\b", re.I)   # commas kept: "for widgets, keep 30"
+
+
+def num_bindings(b):
+    """@num:<object>=<value>[_<unit>] per clause (review 9): each number bound to the content stems of the words
+    before it in its clause (operation verbs, stop words and other numbers dropped, last 6 stems), so
+    "widget retention to 30 days and gadget retention to 90 days" != the swap."""
+    out = set()
+    for cl in _NUM_CLAUSE.split(b or ""):
+        prev = 0
+        for m in _NUM.finditer(cl):
+            seg, prev = cl[prev:m.start()], m.end()      # only words since the previous number of the clause
+            ws = [x for x in (_cw(w) for w in seg.split()) if x and not re.search(r"\d", x)]
+            obj = "_".join(sorted(set(ws[-6:]))) if ws else ""
+            nxt = cl[m.end():].split()[:1]
+            unit = _cw(nxt[0]) if nxt else None
+            val = m.group(1) + ("_" + unit if unit and not re.search(r"\d", unit) else "")
+            if obj:
+                out.add("@num:%s=%s" % (obj, val))
+    return out
+
+
+def numobj_conflict(goal_terms, sent_terms):
+    """A closing clause gives one of the goal's objects a different value than the goal does."""
+    gb = [tuple(x[5:].rsplit("=", 1)) for x in goal_terms if x.startswith("@num:")]
+    for x in sent_terms:
+        if x.startswith("@num:"):
+            o, v = x[5:].rsplit("=", 1)
+            same = [gv for go, gv in gb if _obj_compat(o, go)]
+            if same and v not in same:
+                return [x]
+    return []
+
+
+def opobj_conflict(goal_terms, sent_terms):
+    """A closing clause applies to an object an operation that the goal binds to a different operation on that
+    object ("widget retention was decreased" for "increase widget retention and decrease gadget retention")."""
+    gb = [tuple(x[7:].split(">", 1)) for x in goal_terms if x.startswith("@opobj:")]
+    for x in sent_terms:
+        if x.startswith("@opobj:"):
+            o, ob = x[7:].split(">", 1)
+            if any(o == q and _obj_compat(ob, y) for q, y in gb):
+                continue
+            if any(o != q and _obj_compat(ob, y) for q, y in gb):
+                return [x]
+    return []
+
+
+def terms(text):
+    b = body(text)
+    t = {x for x in needs.norm(needs.keys(b)) if x not in _MARKER_WORDS}
+    for m in _ACRO.finditer(b):
+        w = m.group(1)
+        if w.upper() == w and len(w) >= 2 and w not in _ACRO_STOP or (len(w) >= 3 and re.fullmatch(r"[A-Z][a-z][A-Z]", w)):
+            t.add("@" + w.lower())
+    t |= {"@" + x for x in _TASK.findall(b)}
+    t |= {"#" + n for n in _NUM.findall(b)}                       # numeric values: 30 days != 90 days
+    t |= {"@rel:" + w.lower() for w in _REL.findall(b)}          # temporal relation: before != after
+    t |= {"@op:" + w.lower().replace("maximis", "maximiz").replace("minimis", "minimiz") for w in _OPW.findall(b)}
+    t |= {"@neg:" + x for x in neg_scope(b)}                       # scoped polarity: "do X" != "do not X"
+    for m in _DIR.finditer(b):                                     # direction: from A to B != from B to A
+        g_ = [x for x in m.groups() if x]
+        a_, b_ = g_[0], g_[1]
+        if m.group(5) and _AUXW & {w.lower() for w in a_.split()}:
+            continue                                               # "changes were merged into": a passive, see below
+        if m.group(7) and not [x for x in (_cw(w) for w in a_.split()) if x]:
+            continue                                               # "now they are merged into": pronoun subject, no object named
+        t.add("@dir:%s>%s" % (_phrase(a_), _phrase(b_)))
+    t |= op_bindings(b)                                            # operation bound to its object (review 7)
+    t |= num_bindings(b)                                           # number bound to its object (review 9)
+    return t
+
+
+_NUM = re.compile(r"(?<![\w./:-])(\d+(?:\.\d+)?)(?![\w/:-])")
+_DIR = re.compile(r"\bfrom\s+(\S+)\s+(?:to|into|onto)\s+(\S+)|(?<!\S)(\S+)\s*(?:->|=>|\u2192)\s*(\S+)|"
+                  r"\b(?:renam\w*|mov(?:e|es|ed|ing)|cop(?:y|ies|ied|ying)|migrat\w*|switch\w*|port(?:s|ed|ing)?|convert\w*|"
+                  r"chang(?:e|es|ed|ing)|merg(?:e|es|ed|ing)|rebas\w*|cherry-pick\w*)\s+(?:the\s+)?((?:\S+\s+){0,3}?\S+)\s+"
+                  r"(?:to|into|onto)\s+(?:the\s+)?(\S+)|"
+                  r"((?:[^\s,;:.]+\s+){0,3}?[^\s,;:.]+)\s+(?:was|were|is|are|been|got|gets)\s+(?:\w+\s+)?"
+                  r"(?:renamed|moved|copied|migrated|switched|ported|converted|changed|merged|rebased|cherry-picked)\s+"
+                  r"(?:to|into|onto)\s+(?:the\s+)?(\S+)", re.I)
+_AUXW = {"was", "were", "is", "are", "been", "be", "being", "got", "gets", "get", "has", "have", "had"}
+
+
+_REL = re.compile(r"\b(before|after)\b", re.I)
+# polar operations (review 6): "increase X" != "decrease X".  Each verb maps to an operation id; a goal or sentence
+# naming an operation gets the anchor @op:<id>, so opposite operations on the same object never merge or close.
+_OPW = re.compile(r"\b(increas|decreas|rais|lower|enabl|disabl|add|remov|grow|shrink|extend|shorten|lengthen|expand|"
+                  r"collaps|start|stop|allow|deny|block|includ|exclud|upgrad|downgrad|maximi[sz]|minimi[sz]|unlock|lock|"
+                  r"encrypt|decrypt|uninstall|install|promot|demot|attach|detach|cancel|revert|undo|undid|drop)"
+                  r"(?:e|es|ed|ing|s|d|ion|ions|al|led|ling|ped|ping|ne)?\b", re.I)
+# true negations only (review 6): reversal verbs (remove, disable, stop, cancel, revert, undo, drop) are operations,
+# handled by the @op: anchors, so "Remove X" is closed by "X was removed" and "enable X" != "disable X" still holds
+_NEGW = re.compile(r"\b(?:not|never|no longer|don't|dont|do not|doesn't|shouldn't|must not|avoid|without)\b|n't\b", re.I)
+
+
+_STATIVE_AUX = {"has", "have", "had", "is", "are", "was", "were", "been", "am", "still"}
+_DIRECTIVE_AUX = {"do", "does", "did", "will", "would", "wo", "must", "should", "shall", "can", "ca", "could", "may",
+                  "might", "please", "we", "i", "you", "to"}
+
+
+def _stative_neg(text, m):
+    """True if negation match m is a state description ("Ben hasn't answered", "is not merged", "src/context not
+    yet merged"), never for a prohibition or decision ("do not", "don't", "must not", "will not", "never", "stop").
+    Only a stative negation may be excused by "yet" (review 5)."""
+    w = m.group(0).lower()
+    if w != "not" and w != "n't":
+        return False                     # don't, never, stop, avoid, without, ... are directives, never pending states
+    prev = re.findall(r"[\w']+", text[:m.start()])
+    prev = prev[-1].lower() if prev else ""
+    if prev in _STATIVE_AUX:
+        return True
+    if w == "not" and prev not in _DIRECTIVE_AUX and re.match(r"\s*yet\b", text[m.end():], re.I):
+        return not re.match(r"\s*(?:(?:still open|pending|todo)\s*:\s*)?$", text[:m.start()], re.I)  # bare "Not yet ..." opening an order stays a directive
+    return False
+
+
+def neg_scope(text):
+    """-> the terms that a negation word applies to: for every negation / reversal word, the first content term after
+    it (within 4 words).  "increase X without downtime" -> {downtim}; "do not increase X without downtime" ->
+    {increas, downtim}.  Scoped, so one negation never masks another.  A STATIVE negation followed by "yet" in the same
+    clause ("Ben hasn't answered yet", "src/context is not merged yet") is a pending state, the same as "still waiting
+    on", and is skipped.  A prohibition or decision with "yet" ("do not increase X yet", "we will not X yet") keeps
+    its anchor (review 5)."""
+    out = set()
+    for m in _NEGW.finditer(text or ""):
+        clause = re.split(r"[.;:!?\n]", text[m.end():], 1)[0]
+        if re.search(r"\byet\b", clause, re.I) and _stative_neg(text, m):
+            continue                     # "hasn't answered yet" / "is not merged yet" describe a pending state
+        for w in re.findall(r"[\w/.-]+", text[m.end():])[:4]:
+            k = {x for x in needs.norm(needs.keys(w)) if x not in _MARKER_WORDS}
+            if k:
+                out.add(sorted(k)[0])
+                break
+    return out
+
+
+def polarity_conflict(goal_terms, sent_text):
+    """True if the sentence and the goal share a term that one of them negates and the other does not
+    ("we will not increase X; done" never closes "increase X", "X increased" never closes "do not increase X")."""
+    gneg = {x[5:] for x in goal_terms if x.startswith("@neg:")}
+    sneg = neg_scope(sent_text)
+    shared = {x for x in goal_terms if not x.startswith("@")} & (terms(sent_text) | sneg)
+    return any((x in gneg) != (x in sneg) for x in shared | (gneg & sneg))
+
+
+_NEG_IMP = re.compile(r"^\s*(?:(?:still open|pending|todo)\s*:\s*)?(?:please\s+)?(?:do not|don't|dont|never|stop|avoid|must not)\b", re.I)
+_MODIFIERS = {"@neg", "@rel:before", "@rel:after"}
+
+
+def anchors(ts):
+    return {x for x in ts if x.startswith("@") or x.startswith("#") or x.startswith("track_") or
+            (re.fullmatch(r"[0-9a-f]{7,40}", x) and re.search(r"\d", x) and re.search(r"[a-f]", x))}
+
+
+_PREREQ = re.compile(r"\b(?:once|after|when|until|as soon as)\s+(t-\d{4}-\d{2}-\d{2}-[a-z0-9-]+|p-\d{4}-[a-z0-9-]+)\s+"
+                     r"(?:closes|is closed|has closed|is done|passes|is merged|merges|lands)\b", re.I)
+
+
+def prereq_ids(text):
+    """Task ids named as a precondition ("once t-x closes, do Y"): closing them does not do Y."""
+    return set(m.group(1) for m in _PREREQ.finditer(text or ""))
+
+
+def task_ids(text):
+    return set(_TASK.findall(text or ""))
+
+
+def jaccard(a, b):
+    return len(a & b) / float(len(a | b)) if (a or b) else 0.0
+
+
+def same_goal(a, b):
+    """a, b: dicts with who, action, terms.  -> (bool, reason)."""
+    if (a.get("who") or "") != (b.get("who") or ""):
+        return False, "different person"
+    if (a.get("action") or "") != (b.get("action") or ""):
+        return False, "different action"
+    ta, tb = a["terms"], b["terms"]
+    if anchors(ta) != anchors(tb):
+        return False, "different anchors %s" % sorted(anchors(ta) ^ anchors(tb))
+    j = jaccard(ta, tb)
+    if j < MERGE_JACCARD:
+        return False, "jaccard %.2f < %.2f" % (j, MERGE_JACCARD)
+    return True, "jaccard %.2f, same anchors" % j
+
+
+def goal_id(who, action, ts):
+    return hashlib.sha1(("%s|%s|%s" % (who or "", action or "", " ".join(sorted(ts)))).encode()).hexdigest()[:12]
+
+
+def cover(small, big):
+    return len(small & big) / float(len(small)) if small else 0.0
+
+
+def supersedes(new, old):
+    """Does goal ``new`` (newer source) supersede ``old``?  -> reason or ''."""
+    if new["who"] != old["who"] or new is old:
+        return ""
+    if (new["src_ts"], new["first_ts"]) <= (old["src_ts"], old["first_ts"]):
+        return ""
+    if new.get("action") != old.get("action"):
+        return ""
+    an, ao = anchors(new["terms"]), anchors(old["terms"])
+    if an == ao and cover(old["terms"], new["terms"]) >= COVER:
+        return "restated by %s" % new["gid"]
+    if an <= ao and len(new["terms"]) < len(old["terms"]) and cover(new["terms"], old["terms"]) >= COVER:
+        return "split: item %s taken over by %s" % (" ".join(sorted(new["terms"]))[:60], new["gid"])
+    return ""
+
+
+def _kind(a):
+    if a.startswith("@neg"):
+        return "neg"
+    if a.startswith("@rel:"):
+        return "rel"
+    if a.startswith("@opobj:"):
+        return "opobj"
+    if a.startswith("@num:"):
+        return "numobj"
+    if a.startswith("@op:"):
+        return "op"
+    if a.startswith("@t-") or a.startswith("@p-"):
+        return "task"
+    if a.startswith("@") and "/" in a:
+        return "path"
+    return "#" if a.startswith("#") else ("dir" if a.startswith("@dir:") else "@")
+
+
+def _dir_compatible(gk, sk):
+    """Closure only: "@dir:widget_cach_chang>production" vs "@dir:stale_widget_cach_chang>production" name the same
+    move (same destination, one source phrase contains the other's words in order-free form)."""
+    for g in gk:
+        ga, gb = g[5:].split(">", 1)
+        for x in sk:
+            sa, sb = x[5:].split(">", 1)
+            A, B = set(ga.split("_")), set(sa.split("_"))
+            if gb == sb and (A <= B or B <= A):
+                return True
+    return False
+
+
+def anchor_conflict(goal_terms, sent_terms):
+    """-> conflicting anchors if the sentence is about a different object: for some anchor kind (entity @, path @a/b,
+    task id, number #, direction @dir:, before/after @rel:) the goal and the sentence each name an anchor of that kind
+    that the other lacks.  Checked per kind, so a shared entity (@ltm) never hides conflicting paths."""
+    ga, sa = anchors(goal_terms), anchors(sent_terms)
+    for k in ("@", "path", "task", "#", "dir", "rel", "op"):
+        gk = {x for x in ga if _kind(x) == k}
+        sk = {x for x in sa if _kind(x) == k}
+        # a different object: both name anchors of this kind and share none.  Paths and task ids are their own
+        # kinds, so a shared entity (@ltm) does not excuse src/widget vs src/gadget
+        if k == "dir" and gk and sk and not (gk & sk) and _dir_compatible(gk, sk):
+            continue
+        if gk and sk and not (gk & sk):
+            return sorted(sk - gk)
+    return []
+
+
+_TRUE_NEG = re.compile(r"\b(?:not|never|no longer|no|nothing|none|neither|nor|failed to|fails to|unable to|yet to|"
+                       r"almost|nearly|partially|partly|half)\b|n't\b", re.I)
+_PART = re.compile(r"(?:\w+(?:ed|en|wn|t)|done|made|set|put|run|built|shipped|tested|reviewed|fixed)$", re.I)
+
+
+def _breaks_scope(gap):
+    """True if a separator inside gap (between a modal/negation and the closure word) starts a new clause.
+    A comma or and/or followed only by participles ("will be reviewed, tested and merged") is a coordinated
+    predicate list under the same modal, so it does not break the scope (review 9)."""
+    if re.search(r"[.;:!?\n]|\b(?:but|now)\b", gap, re.I):
+        return True
+    parts = re.split(r",|\b(?:and|or)\b", gap, flags=re.I)        # "and then" is checked like "and" (review 9)
+    if len(parts) == 1:
+        return False
+    for seg in parts[1:]:
+        ws = [w.strip(".,;:!?()\"'") for w in seg.split()]
+        ws = [w for w in ws if w and w.lower() not in ("also", "then", "finally", "fully", "successfully")]
+        if any(not _PART.match(w) for w in ws):
+            return True
+    return False
+
+
+def _negated_close(s, p):
+    """True if a negation word stands in the same clause before the closure word at p, within 6 words
+    ("Widget cache changes are not yet merged", "logs were never rotated or removed")."""
+    for m in _TRUE_NEG.finditer(s[:p]):
+        gap = s[m.end():p]
+        if _breaks_scope(gap):
+            continue
+        if len(re.findall(r"[\w/.-]+", gap)) <= 6:
+            return True
+    return False
+
+
+_IRREALIS = re.compile(r"\b(?:will|would|should|shall|must|can|could|may|might|ought|if|unless|once|until|whether|"
+                       r"when|needs? to|has to|have to|going to|plan(?:s|ned)? to|wants? to|scheduled to|expected to|"
+                       r"about to|to be)\b|'ll\b|'d\b", re.I)
+_LATER = re.compile(r"\b(?:tomorrow|later|soon|tonight|eventually|next (?:week|month|time|sprint|release|cycle))\b", re.I)
+
+
+def _irrealis_close(s, p):
+    """True if the closure word at p is a plan, condition, obligation or question, not a completion: a modal or
+    conditional in the same clause within 8 words before it, a future time word after it in its clause, or a
+    question.  "when" counts only without a past auxiliary ("when it was merged, ..." reports a completion)."""
+    if s.rstrip().endswith("?"):
+        return True
+    if re.match(r"\s*(?:(?:DONE|CLOSED)\s*:\s*)?(?:if|unless|provided(?: that)?|in case|assuming|once)\b", s, re.I):
+        return True                      # a sentence-initial condition governs its whole main clause
+    for m in _IRREALIS.finditer(s[:p]):
+        gap = s[m.end():p]
+        if _breaks_scope(gap):
+            continue
+        if m.group(0).lower() == "when" and re.search(r"\b(?:was|were|had|did)\b", gap, re.I):
+            continue
+        if len(re.findall(r"[\w/.-]+", gap)) <= 8:
+            return True
+    return bool(_LATER.search(re.split(r"[.;:!?\n]", s[p:], 1)[0]))
+
+
+def closing_sentences(note_text):
+    """Sentences of a note that report a closure: a non-negated resolution word (needs.res_hit) or CLOSED / DONE /
+    is done / deleted / trimmed / removed / merged / fixed, not preceded by an open marker ("still open:",
+    "waiting on", "pending:") and not negated."""
+    out = []
+    if _ENRICH.search(note_text or ""):
+        return out                      # WMTM enrichment clusters restate older notes: never evidence
+    for s in needs.sentences(note_text):
+        if needs._LABEL.match(s) or _LABEL_ANY.match(s):
+            continue                    # LINK / SUPPORTS / CORRECTION / LESSON sentences relate notes, they close nothing
+        # every closure word of the sentence is a candidate; the sentence closes if ANY of them is a clean completion
+        # ("X had to be merged, and they were merged": the first is an obligation, the second a completion)
+        cand = sorted({m.start() for m in needs._RES.finditer(s)} | {m.start() for m in _CLOSE_EXTRA.finditer(s)})
+        cand = [p for p in cand if not needs._NEG_BEFORE.search(s[max(0, p - 8):p])]
+        if not cand:
+            continue
+        mk = needs.marker(s)
+        for p in cand:
+            if mk and mk[2].start() <= p:
+                continue
+            if _negated_close(s, p):
+                continue                # "changes are not yet merged", "were never fixed": a pending state (review 6)
+            if _irrealis_close(s, p):
+                continue                # "will be merged tomorrow", "if ... merged, notify", "should be merged" (review 7)
+            out.append(_evidence_span(s, p))
+    return out
+
+
+_PRON = re.compile(r"\b(?:they|it|these|those|this|that|them|both|all)\b", re.I)
+
+
+def _evidence_span(s, p):
+    """The part of sentence s that the clean closure word at p reports on (review 8): its own clause, not the whole
+    sentence, so "X will be merged, and the unrelated typo was fixed" is evidence only for the typo.
+    - a leading label ("DONE: ...") covers the rest of the sentence up to ";"
+    - an elided or pronoun subject ("... and is done", "now they are merged") takes the previous clause(s) as its
+      referent, extending backwards until a clause with a content word is included."""
+    m = re.match(r"(\w+)\s*:", s[p:])
+    if m:
+        return s[p + m.end():].split(";", 1)[0]
+    cuts = sorted({0, len(s)} | {x.end() for x in _CLAUSE.finditer(s)})
+    i = max(k for k in range(len(cuts) - 1) if cuts[k] <= p)
+    lo, hi = cuts[i], cuts[i + 1]
+    while lo > 0:
+        head = [w for w in _PRON.sub(" ", s[lo:p]).split() if _cw(w)]
+        if head:
+            break
+        lo = max(c for c in cuts if c < lo)
+    return s[lo:hi]
+
+
+def note_closes(note_text):
+    return bool(closing_sentences(note_text))
+
+
+def _all_ops_covered(goal_terms, spans):
+    """A goal binding two or more operations to different objects ("increase widget retention and decrease gadget
+    retention") is closed only when the note's closing spans report each binding; half done stays open."""
+    gb = [tuple(x[7:].split(">", 1)) for x in goal_terms if x.startswith("@opobj:")]
+    if len({y for _, y in gb}) < 2:
+        return True
+    st = [tuple(x[7:].split(">", 1)) for sp in spans for x in terms(sp) if x.startswith("@opobj:")]
+    return all(any(o == q and _obj_compat(ob, y) for o, ob in st) for q, y in gb)
+
+
+_SUBJ_AUX = re.compile(r"\b(?:was|were|is|are|has|have|had|been|got|gets)\b", re.I)
+
+
+def _foreign_subject(span, goal_terms):
+    """True if the evidence clause has an explicit subject (content words before its first auxiliary) and none of
+    those words is a goal term: the completion is about something else (review 9)."""
+    m = _SUBJ_AUX.search(span)
+    if not m:
+        return False
+    head = span[:m.start()].split(",")[-1]          # ", after review, were merged": elided subject, not foreign
+    subj = [x for x in (_cw(w) for w in _PRON.sub(" ", head).split()) if x]
+    gt = {x.lstrip("@") for x in goal_terms}        # anchors (@hive/rf-r2-backup) count as goal words too
+    return bool(subj) and not ({x.lstrip("@") for x in subj} & gt)
+
+
+def closure_match(goal, note_terms, note_text, common=()):
+    """-> reason string if a closure sentence of the note matches the goal, else ''.  Sentence level: the closing
+    sentence itself must carry the match.  (a) it names one of the goal's task ids that is not a
+    precondition ("once t-x closes, do Y": closing t-x is not evidence for Y; Y must match on its own terms); (b) it shares >= 2 distinctive
+    terms with the goal, one of them an anchor, and the whole note shares >= SAT_MIN - 1 distinctive terms; (c) it
+    alone shares >= 3 distinctive terms and >= SAT_FRAC of them."""
+    pre = prereq_ids(goal["text"])
+    g = {x for x in goal["terms"] if x.lstrip("@") not in common and x.lstrip("@") not in pre}
+    if pre:                              # the condition's own words (once/clos, the task id's words) carry no evidence
+        g -= {"once", "clos", "after", "when", "until", "pass", "merg"}
+        for t in pre:
+            g -= {x for x in needs.norm(needs.keys(t.replace("-", " ")))}
+    gt = task_ids(goal["text"]) - pre
+    g -= _MODIFIERS                      # polarity / before-after identify a goal but are no closure evidence
+    g = {x for x in g if not x.startswith("@neg:") and not x.startswith("@op:") and not x.startswith("@opobj:")
+         and not x.startswith("@num:")}
+    spans = closing_sentences(note_text)
+    if not _all_ops_covered(goal["terms"], spans):
+        return ""                        # a compound goal needs every bound operation reported done (review 8)
+    for s in spans:
+        if polarity_conflict(goal["terms"], s):
+            continue                     # opposite polarity on a shared term, in either direction
+        if numobj_conflict(goal["terms"], terms(s)):
+            continue                     # the sentence gives one of the goal's objects another value (review 9)
+        if opobj_conflict(goal["terms"], terms(s)):
+            continue                     # the sentence applies another operation to one of the goal's objects
+        if anchor_conflict(goal["terms"], terms(s)):
+            continue                     # closes a different object (src/gadget vs src/widget, 90 vs 30 days)
+        tids = gt & task_ids(s)
+        if tids:
+            return "closing sentence names task %s" % sorted(tids)[0]
+        if _foreign_subject(s, goal["terms"]):
+            continue                     # the clause names its own subject, none of the goal's ("the typo was fixed and merged")
+        sh = g & terms(s)
+        if len(sh) >= 2 and anchors(sh) and len(g & note_terms) >= SAT_MIN - 1:
+            return "closing sentence shares %s (anchor %s), note shares %d" % (
+                " ".join(sorted(sh)), sorted(anchors(sh))[0], len(g & note_terms))
+        if g and len(sh) >= 3 and len(sh) >= SAT_FRAC * len(g):
+            return "closing sentence shares %d of %d terms (%s)" % (len(sh), len(g), " ".join(sorted(sh)))
+        nsh = g & note_terms
+        if g and len(sh) >= 2 and len(nsh) >= 3 and len(nsh) >= SAT_FRAC * len(g):
+            return "closing sentence shares %s, note shares %d of %d terms" % (" ".join(sorted(sh)), len(nsh), len(g))
+    return ""
+
+
+def topic_touch(goal, note_terms, common=()):
+    g = {x for x in goal["terms"] if x.lstrip("@") not in common}
+    sh = g & note_terms
+    return bool(g) and len(sh) >= 3 and len(sh) >= SAT_FRAC * len(g)
+
+
+def note_terms(text):
+    """Terms of a whole journal note (same normalisation as goal terms)."""
+    return terms(text)
+
+
+def item_goals(goal):
+    """A multi-item goal ("a; b; c", or "a, and X hasn't ...", needs.split_items) -> one pseudo-goal per item, so
+    that closing one item never satisfies the whole goal.  A single item -> [goal]."""
+    its = needs.split_items(body(goal["text"]))
+    if len(its) < 2:
+        return [goal]
+    out = []
+    for x in its:
+        t = terms(x)
+        if t:
+            out.append({"text": x, "terms": t})
+    return out or [goal]
+
+
+class Lifecycle:
+    """Feed proposals in time order with ``observe``; ``notes`` = [(id, ts, text)] sorted by ts."""
+
+    def __init__(self, notes, common=()):
+        self.notes = list(notes)
+        self.note_ts = {i: t for i, t, _ in self.notes}
+        self.common = set(common)
+        self.goals = []            # goal records
+        self._nt = {}
+
+    def _terms_of(self, i, text):
+        if i not in self._nt:
+            self._nt[i] = note_terms(text)
+        return self._nt[i]
+
+    def _goal_for(self, p):
+        ts = terms(p.get("text"))
+        cand = {"who": p.get("who") or "", "action": p.get("action") or "", "terms": ts}
+        for g in self.goals:
+            ok, why = same_goal(cand, g)
+            if ok:
+                if p.get("id") not in g["engine_ids"]:
+                    g["engine_ids"].append(p.get("id"))
+                    g["merges"].append({"engine_id": p.get("id"), "rule": why})
+                for x in p.get("items") or []:   # newest-source rule: a repeat from a newer note moves src_ts forward
+                    if x not in g["items"]:
+                        g["items"].append(x)
+                src = [self.note_ts.get(x) for x in (p.get("items") or []) if self.note_ts.get(x)]
+                if src and max(src) > g["src_ts"]:
+                    g["src_ts"] = max(src)
+                return g, False
+        src = [self.note_ts.get(x) for x in (p.get("items") or []) if self.note_ts.get(x)]
+        g = {"gid": goal_id(cand["who"], cand["action"], ts), "who": cand["who"], "action": cand["action"],
+             "terms": ts, "text": p.get("text") or "", "engine_ids": [p.get("id")], "merges": [],
+             "items": list(p.get("items") or []), "src_ts": max(src) if src else float(p.get("ts") or 0),
+             "first_ts": float(p.get("ts") or 0), "state": "open", "why": ""}
+        self.goals.append(g)
+        return g, True
+
+    def state_at(self, g, now):
+        """State of goal g as known at time ``now`` (only notes and goals before now count).  Precedence:
+        superseded (its parts / restatement carry their own states) > satisfied > stale > open."""
+        parts, union = [], set()
+        for h in self.goals:
+            if h is g or h["first_ts"] > now:
+                continue
+            why = supersedes(h, g)
+            if why.startswith("restated"):
+                return "superseded", "superseded: %s" % why
+            if why:
+                parts.append(h["gid"]); union |= h["terms"]
+        if parts and cover(g["terms"], union) >= SPLIT_COVER:
+            return "superseded", "superseded: split into %s (parts cover %.2f of its terms)" % (
+                ", ".join(parts), cover(g["terms"], union))
+        parts = item_goals(g)
+        found = []
+        for part in parts:
+            hit = ""
+            for i, t, c in self.notes:
+                if t <= g["src_ts"] or t > now:
+                    continue
+                why = closure_match(part, self._terms_of(i, c), c, self.common)
+                if why:
+                    hit = "%s (%s)" % (i, why)
+                    break
+            if not hit:
+                break                    # one item still open: the goal is not satisfied
+            found.append(hit)
+        if found and len(found) == len(parts):
+            if len(parts) == 1:
+                return "satisfied", "satisfied by " + found[0]
+            return "satisfied", "satisfied: all %d items closed: %s" % (len(parts), "; ".join(found))
+        if now - g["src_ts"] > STALE_DAYS * 86400.0:
+            for i, t, c in self.notes:
+                if g["src_ts"] < t <= now and i not in g["items"] and topic_touch(g, self._terms_of(i, c), self.common):
+                    break
+            else:
+                return "stale", "stale: newest source note %.1f d old, no later note on the topic" % (
+                    (now - g["src_ts"]) / 86400.0)
+        return "open", ""
+
+    def observe(self, p):
+        """-> verdict dict for proposal p: {gid, keep, reason}."""
+        now = float(p.get("ts") or 0)
+        g, new = self._goal_for(p)
+        st, why = self.state_at(g, now)
+        g["state"], g["why"] = st, why
+        if st != "open":
+            return {"gid": g["gid"], "keep": False, "state": st, "reason": why}
+        if not new:
+            if p.get("id") != g["engine_ids"][0]:
+                return {"gid": g["gid"], "keep": False, "state": "open",
+                        "reason": "near-duplicate of goal %s (%s)" % (g["gid"], g["merges"][-1]["rule"])}
+            if g.get("_kept"):
+                return {"gid": g["gid"], "keep": False, "state": "open", "reason": "duplicate of goal %s" % g["gid"]}
+        g["_kept"] = True
+        return {"gid": g["gid"], "keep": True, "state": "open", "reason": "first proposal of goal"}
