@@ -56,6 +56,7 @@ SPEC = {
     # Track Q: speaker linking (off by default; new parses go to <semparse_dir>/spk1, old caches are kept).
     # speaker_map: Telegram user id / username -> canonical name; speaker_self: the bot's own name.  Flags file only.
     "speaker_link":        ("WMTM_SPEAKER_LINK", bool, False, None),
+    "name_resolve":        ("WMTM_NAME_RESOLVE", bool, False, None),          # P3 Deviation 6: (Name sk_x "label") -> deterministic symbol before the gate (wmtm/name_resolve.py)
     "speaker_map":         ("WMTM_SPEAKER_MAP", dict, {}, None),
     "speaker_self":        ("WMTM_SPEAKER_SELF", str, "", None),
     # Track R: GoalChainer phase 1 (log only; wmtm/goals).  Runs inside the PeTTaChainer shadow worker, after its

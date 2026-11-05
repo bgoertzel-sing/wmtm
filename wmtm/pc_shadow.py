@@ -254,6 +254,12 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         cached = _cache_lookup(items, cfg["semparse_dir"], context=True)
     else:
         cached = _cache_lookup(items, cfg["semparse_dir"])
+    name_rep = None
+    if cfg.get("name_resolve"):           # P3 Deviation 6: named witnesses -> deterministic symbols, before the gate
+        from .name_resolve import resolve as _nr
+        name_rep = {}
+        for iid in list(cached):
+            cached[iid], name_rep[iid] = _nr(cached[iid])
     metta, facts, n_sp, n_unparsed, i = [], [], 0, 0, 0
     src, fsrc = {}, []       # Track I provenance: KB label -> item id; (head, a, b, item id) per fact
     from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB
@@ -302,7 +308,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
             "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts),
             "skolem_goals": skolem_goals, "goal_meta": goal_meta, "goal_rank": rank_info,
             "atom_src": src, "fact_src": fsrc, "label_fact": lf,
-            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec)}
+            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec), "name_resolve": name_rep}
 
 
 def _cleanup_specs(out_dir, max_age=3600):
