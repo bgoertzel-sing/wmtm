@@ -365,3 +365,38 @@ def test_feed_llm_without_base_url_is_llm_error(monkeypatch):
     with pytest.raises(RuntimeError, match="BASE_URL"):
         llm("s", "u")
     assert llm.last_usage is None
+
+
+# OpenClaw gateway shape (probe 2026-11-05): no cache_creation_input_tokens; total_tokens carries cache-write.
+GW_OPENCLAW_USAGE = {"prompt_tokens": 2132, "completion_tokens": 9, "total_tokens": 3488,
+                     "prompt_tokens_details": {"cached_tokens": 2128}}
+
+
+@needs_hitl
+def test_gateway_cache_write_from_total(monkeypatch):
+    """cache_write = total - prompt - completion when the gateway omits it (toOpenAiChatCompletionsUsage)."""
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    gw = _FakeGateway("hello", GW_OPENCLAW_USAGE)
+    try:
+        llm = P.gateway_llm(gw.base_url, model="openclaw/x", hitl=HITL)
+        assert llm("SYS", "USER") == "hello"
+    finally:
+        gw.close()
+    u = llm.last_usage
+    assert (u["cache_read"], u["cache_write"], u["uncached_input"], u["output"]) == (2128, 1347, 4, 9)
+    assert u["cache_write_source"] == "gateway_total_minus_prompt_completion"
+    assert u["prompt_tokens"] == 2132 + 1347 and u["total_tokens"] == 3488
+    assert M.weighted({k: u.get(k) for k in M.WEIGHTS}) is not None
+
+
+def test_gateway_usage_rules():
+    split = P.split_usage({"input": 100, "cached": 60, "cache_write": None, "output": 5})
+    assert P.gateway_usage(split, {"total_tokens": 125})["cache_write"] == 20
+    assert P.gateway_usage(split, {"total_tokens": 125})["uncached_input"] == 40
+    neg = P.gateway_usage(split, {"total_tokens": 90})                  # gap < 0: stays unknown
+    assert neg["cache_write"] is None and neg["uncached_input"] is None
+    assert P.gateway_usage(split, {})["cache_write"] is None            # no total: stays unknown
+    rep = P.gateway_usage(P.split_usage({"input": 100, "cached": 60, "cache_write": 10, "output": 5}),
+                          {"total_tokens": 999})
+    assert rep["cache_write"] == 10 and rep["cache_write_source"] == "reported"
+    assert P.gateway_usage(None, {"total_tokens": 1}) is None
