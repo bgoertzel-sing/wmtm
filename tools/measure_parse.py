@@ -231,9 +231,13 @@ def main(argv=None):
                "live_weighted_lo": live_weighted(b, "uncached_input"),
                "live_weighted_hi": live_weighted(b, "cache_write")}
         rows.append(row)
+        if is_limit:                                        # cos answer 3: stop on any 429 / usage-limit error
+            print(f"STOP: limit error on note {h}: {err[:200]}", file=sys.stderr, flush=True)
         if status != "admitted" or err:
             bad.write(json.dumps({"hash": h, "item_id": iid, "text": txt, "error": err,
                                   "rejected": [[x, str(w)] for x, w in res.rejected][:50]}) + "\n")
+        if is_limit:
+            break
     bad.close()
     with open(os.path.join(a.out, "per_note.jsonl"), "w", encoding="utf-8") as fh:
         for r in rows:
