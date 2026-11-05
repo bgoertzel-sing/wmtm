@@ -327,7 +327,7 @@ HAVE_PC = os.path.isdir(os.path.join(_RC["petta_dir"], "python")) and \
     os.path.isdir(os.path.join(_RC["pettachainer_dir"], "pettachainer"))
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_worker_runs_goal_engine_after_canary(tmp_path, monkeypatch):
     import subprocess, sys
     chan = tmp_path / "completed"; chan.mkdir()
