@@ -182,29 +182,31 @@ def is_query(node) -> bool:
 
 # ---------------------------------------------------------------- normalisation
 def normalise(node) -> list:
-    """Rewrite rule forms this PeTTaChainer build does not chain on.
+    """Rewrite rules into the form PeTTaChainer 202b9379 compiles.
 
-    Canary (2026-10-15): (Implication (And p q) c) derives nothing and rules with
-    several conclusions derive nothing; (Implication (Premises ...) (Conclusions c))
-    with ONE conclusion does. So: And -> Premises, multi-conclusion -> one rule per
-    conclusion (names suffixed _c1, _c2 ...). Returns a list of statements."""
+    202b9379 (rT) wants (Implication antecedent consequent) with And for several
+    statements and REJECTS (Premises ...)/(Conclusions ...) with a rule_syntax domain
+    error at compileadd (evidence: p1 repros_before pc1/pc2 vs repros_before_andform).
+    So: Premises -> And (a single premise is unwrapped), and a rule with several
+    conclusions becomes one rule per conclusion (names suffixed _c1, _c2 ...), whose
+    consequent is a single statement. Conclusions given as (And ...) are split the same
+    way. Returns a list of statements."""
     if node[0] == "Interpretation":
         return [["Interpretation", node[1], n] for n in normalise(node[2])]
     _, name, content, tv = node
     if not (isinstance(content, list) and len(content) == 3 and content[0] == "Implication"):
         return [node]
     pre, con = content[1], content[2]
-    if isinstance(pre, list) and pre and pre[0] == "And":
-        pre = ["Premises"] + pre[1:]
-    elif not (isinstance(pre, list) and pre and pre[0] == "Premises"):
-        pre = ["Premises", pre]
-    if isinstance(con, list) and con and con[0] == "Conclusions":
+    if isinstance(pre, list) and pre and pre[0] in ("Premises", "And"):
+        ps = pre[1:]
+        pre = ps[0] if len(ps) == 1 else ["And"] + ps
+    if isinstance(con, list) and con and con[0] in ("Conclusions", "And"):
         cons = con[1:]
     else:
         cons = [con]
     if len(cons) == 1:
-        return [[":", name, ["Implication", pre, ["Conclusions", cons[0]]], tv]]
-    return [[":", f"{name}_c{i}", ["Implication", pre, ["Conclusions", c]], tv]
+        return [[":", name, ["Implication", pre, cons[0]], tv]]
+    return [[":", f"{name}_c{i}", ["Implication", pre, c], tv]
             for i, c in enumerate(cons, 1)]
 
 
