@@ -118,7 +118,8 @@ def test_integration_synthetic(tmp_path):
 def test_fault_timeout_is_canary_fail_not_hang(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     t = time.time(); rc, rec, _ = _run_worker(tmp_path, spec, "--timeout", "0.0001")
-    assert rc == 3 and rec["status"] == "canary_fail" and rec["queries"] == [] and time.time() - t < 60
+    # 120 s: proves "no hang" while leaving margin for ~20 s 202b9379 warm-up on a loaded 4-core box (review 6: 62 s at 60 s limit)
+    assert rc == 3 and rec["status"] == "canary_fail" and rec["queries"] == [] and time.time() - t < 120
 
 
 @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")

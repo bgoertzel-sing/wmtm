@@ -1,5 +1,12 @@
 # PeTTa pin
 
+## Current pin (t-2026-11-04-p1-engine)
+- PeTTa: rTreutlein/PeTTa 3681b9baa28d005dfbad21ad9b5d46b243b1e323 (compact datatypes), vendored as `petta-3681b9b`.
+- PeTTaChainer (wmtm PC shadow worker): rTreutlein/PeTTaChainer 202b93791f23a04c5ef7670625dc8a803ada09f6, vendored as `pettachainer-202b9379`, no dedup-import patch.
+- The pin is recorded in `wmtm/runtime_config.py` (`petta_dir`, `pettachainer_dir`), `scripts/vendor_runtime.sh` (`PETTA_PIN`, `PC_PIN`) and `docs/GOALS_V2.md`. If they disagree with this file, those are authoritative.
+- GoalChainer is NOT on 202b9379: its PeTTaChainer gitlink stays at 38b1473 (option c; pymetta 0.9.4+goalchainer.native.2 refuses rT 202b9379, PY1-PY5 in `upstream/pettachainer/`).
+
+## History: v1.0.4 / v1.0.5 era (Oct 2026, superseded by the pin above)
 - Omega c6dc842 Dockerfile pins `ARG PETTA_REF=v1.0.4` (lacks 21be21f swrite backslash fix).
 - Build with `--build-arg PETTA_REF=v1.0.5` (df313cd, 2026-07-23). v1.0.5 contains 21be21f (+ #200 follow-up d9a437c).
 - v1.0.4..v1.0.5 = 14 commits (swrite fix, import overhaul, commit-pinned git imports, overapplication error, specializer fix).
