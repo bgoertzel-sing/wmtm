@@ -1,0 +1,5 @@
+# gc_rt49ca_shim1b_r1
+117 failed, 69 passed in 60.37s (0:01:00)
+    116 E       metta._errors.errors.EngineError: Type error: `atom' expected, found `['declare-natives!','declare-forward!']' (a list)
+    116 E               janus_swi.janus.PrologError: Type error: `atom' expected, found `['declare-natives!','declare-forward!']' (a list)
+    116 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: Type error: `atom' expected, found `['declare-natives!','declare-forward!']' (a list)

@@ -1,0 +1,13 @@
+shim4b 14:33:24     115 E       metta._errors.errors.EngineError: no predicate named heap-empty? is loaded, so registering it would compile every call to it into a partial application rather than failing
+shim5 14:38:03     115 E       metta._errors.errors.EngineError: metta_add_atom/3: cannot honour the annotated arrow for context-with-scope: ['-[semidet]->','Atom',['-[semidet]->','Atom',_14558],_14558] (annotated a
+shim6 14:39:45     116 E       metta._errors.errors.EngineError: no predicate named sk-take! is loaded, so registering it would compile every call to it into a partial application rather than failing
+shim7 14:42:50     115 E       metta._errors.errors.EngineError: metta_add_atom/3: cannot honour the annotated arrow for particle-map-pairs: ['-[det]->',['-[det]->',_15890,_15896],['List',[_15890,'Number']],['List',
+shim8 14:45:03     116 E       metta._errors.errors.SourceNotFound: 'import!': source_sink `'gc/src/external/PeTTaChainer/pettachainer/metta/logic_configs/pln'' does not exist (gc/src/external/
+14:41:14 shims/natives.shim4c.pl
+14:43:39 shims/pln_metta.orig/distributions.metta
+14:43:39 gc/src/external/PeTTaChainer/third_party/pln_formulas/metta/distributions.metta
+21:14:50 gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.fa-current
+16:13:26 gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.pre118
+20:16:12 gc/src/external/PeTTaChainer/pettachainer/metta/runtime/evaluator/versions.metta.prefa
+21:15:50 gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl.pcapply
+21:00:08 gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl.pre-finally

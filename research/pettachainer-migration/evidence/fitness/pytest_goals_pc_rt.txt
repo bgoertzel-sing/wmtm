@@ -1,0 +1,72 @@
+........................................................................ [ 29%]
+........................................................................ [ 59%]
+............................................F.....................F..... [ 89%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+__________________________ test_integration_synthetic __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-openclaw/pytest-59/test_integration_synthetic0')
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+    def test_integration_synthetic(tmp_path):
+        spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
+        rc, rec, sp = _run_worker(tmp_path, spec)
+        assert rc == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
+        assert rec["petta"].startswith(_CFG["petta_dir"]) and rec["mem_cap_mb"] == _CFG["worker_mem_mb"]
+        proved = {q["goal"] for q in rec["queries"] if q["ok"]}
+>       assert {"(Inheritance cat animal)", "(Implies rain slippery)"} <= proved
+E       AssertionError: assert {'(Implies ra... cat animal)'} <= {'(Inheritance cat animal)'}
+E         
+E         Extra items in the left set:
+E         '(Implies rain slippery)'
+
+tests/test_pc_shadow.py:112: AssertionError
+__________ test_integration_worker_writes_admit_file_and_cycle_admits __________
+
+tmp_path = PosixPath('/tmp/pytest-of-openclaw/pytest-59/test_integration_worker_writes0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x742ba1dd1900>
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+    def test_integration_worker_writes_admit_file_and_cycle_admits(tmp_path, monkeypatch):
+        import subprocess, sys
+        import _fake_semparse; _fake_semparse.install(monkeypatch)
+        spec = pc_shadow.build_snapshot(_store(), cycle=1)
+        sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec))
+        p = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(tmp_path / "shadow.jsonl")],
+                           cwd=rc.DIST_ROOT, env=rc.worker_env(_CFG), timeout=120)
+        assert p.returncode == 0
+        doc = json.loads((tmp_path / pc_admit.ADMIT_FILE).read_text())
+        assert doc["status"] == "ok" and doc["canary_ok"]
+        goals = {r["goal"]: r for r in doc["results"]}
+>       assert {"(Inheritance cat animal)", "(Implies rain slippery)"} <= set(goals)
+E       AssertionError: assert {'(Implies ra... cat animal)'} <= {'(Inheritance cat animal)'}
+E         
+E         Extra items in the left set:
+E         '(Implies rain slippery)'
+
+tests/test_pc_admit.py:205: AssertionError
+2 failed, 240 passed in 41.17s
+Command exited with non-zero status 1
+	Command being timed: "python3 -m pytest -q -p no:cacheprovider -rs tests/test_goalchainer_bridge.py tests/test_goalchainer_orchestrator.py tests/test_goal_rank.py tests/test_goals_rc3.py tests/test_goals_track_r2.py tests/test_goals_track_r.py tests/test_goals_track_s.py tests/test_goals_track_t.py tests/test_goals_track_v.py tests/test_goals_v060.py tests/test_goals_v2.py tests/test_pc_shadow.py tests/test_pc_admit.py tests/test_pc_admit_rc2.py"
+	User time (seconds): 35.60
+	System time (seconds): 1.38
+	Percent of CPU this job got: 89%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:41.35
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 139220
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 592725
+	Voluntary context switches: 3347
+	Involuntary context switches: 1302
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 7208
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

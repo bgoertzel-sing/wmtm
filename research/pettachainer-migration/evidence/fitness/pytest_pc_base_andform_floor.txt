@@ -1,0 +1,4 @@
+=========================== short test summary info ============================
+FAILED tests/test_pc_shadow.py::test_integration_synthetic - assert (3 == 0)
+FAILED tests/test_pc_admit.py::test_integration_worker_writes_admit_file_and_cycle_admits
+2 failed, 60 passed in 2.37s

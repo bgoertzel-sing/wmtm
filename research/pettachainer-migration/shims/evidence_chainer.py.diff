@@ -1,0 +1,11 @@
+--- shims/evidence_chainer.orig.py	2026-11-03 14:45:47.375349421 -0700
++++ gc/src/src/goal_chainer/evidence_chainer.py	2026-11-03 14:45:47.376252443 -0700
+@@ -82,7 +82,7 @@
+     register_metta_library(LIBRARY, chainer_metta_dir(), budget=budget)
+     return ModuleGroup(
+         GROUP,
+-        (MettaLibrary(LIBRARY, "petta_chainer"), MettaLibrary(LIBRARY, "logic_configs/pln"), GRADING_POLICY),
++        (MettaLibrary(LIBRARY, "petta_chainer"), MettaLibrary(LIBRARY, "core/logic_configs/pln"), GRADING_POLICY),
+         warm_ups=("gc-pettachainer-warm-up",),
+     )
+ 

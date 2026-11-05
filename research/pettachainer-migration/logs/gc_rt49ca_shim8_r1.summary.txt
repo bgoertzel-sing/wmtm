@@ -1,0 +1,5 @@
+# gc_rt49ca_shim8_r1
+117 failed, 69 passed in 83.81s (0:01:23)
+    116 E       metta._errors.errors.SourceNotFound: 'import!': source_sink `'gc/src/external/PeTTaChainer/pettachainer/metta/logic_configs/pln'' does not exist (gc/src/external/PeTTaChainer/pettachainer/metta/logic_configs/pln)
+    116 E               janus_swi.janus.PrologError: 'import!': source_sink `'gc/src/external/PeTTaChainer/pettachainer/metta/logic_configs/pln'' does not exist (gc/src/external/PeTTaChainer/pettachainer/metta/logic_configs/pln)
+    116 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='logic_configs/pln') of module group pettachainer: 'import!': source_sink `'gc/src/external/PeTTaChainer/pettachainer/metta/logic_configs/pln'' does not exist (

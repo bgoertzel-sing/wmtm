@@ -1,0 +1,5 @@
+# gc_rt49ca_shim2_r1
+117 failed, 69 passed in 72.42s (0:01:12)
+    116 E       metta._errors.errors.EngineError: loading_loudly/1: the Prolog source did not load cleanly: import/1: No permission to import yall:(/)/3 into user (already imported from metta_engine) (metta_engine:metta_load_source(user: gc/src/external/PeTTaChainer/pettachainer/metta/pro
+    116 E               janus_swi.janus.PrologError: loading_loudly/1: the Prolog source did not load cleanly: import/1: No permission to import yall:(/)/3 into user (already imported from metta_engine) (metta_engine:metta_load_source(user: gc/src/external/PeTTaChainer/pettachainer/metta/
+    116 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: loading_loudly/1: the Prolog source did not load cleanly: import/1: No permission to import yall:(/)/3 into user (already im

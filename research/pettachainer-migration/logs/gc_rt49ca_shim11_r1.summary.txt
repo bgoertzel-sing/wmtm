@@ -1,0 +1,5 @@
+# gc_rt49ca_shim11_r1
+117 failed, 69 passed in 62.71s (0:01:02)
+    116 E       metta._errors.errors.EngineError: loading_loudly/1: the Prolog source did not load cleanly: gc/src/external/PeTTaChainer/pettachainer/metta/prolog/runtime_helpers.pl:280:26: Syntax error: Operator expected; gc/src/external/PeTTaChainer/pettachainer/metta/prolog/
+    116 E               janus_swi.janus.PrologError: loading_loudly/1: the Prolog source did not load cleanly: gc/src/external/PeTTaChainer/pettachainer/metta/prolog/runtime_helpers.pl:280:26: Syntax error: Operator expected; gc/src/external/PeTTaChainer/pettachainer/metta/prol
+    116 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: loading_loudly/1: the Prolog source did not load cleanly: gc/src/external/PeTTaChainer/pettachainer/metta/prolog/

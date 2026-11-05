@@ -1,0 +1,3 @@
+# gc_rt49ca_fa_r1
+1 failed, 4 passed in 22.00s
+      1 E               goal_chainer.errors.ProtocolError: Module group pettachainer's warm-up gc-pettachainer-warm-up must answer True once.

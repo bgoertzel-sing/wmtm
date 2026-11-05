@@ -1,0 +1,15 @@
+--- shims/lib_natives.orig.pl	2026-11-03 15:29:18.094187345 -0700
++++ shims/natives.shim4c.pl	2026-11-03 14:41:14.799639097 -0700
+@@ -16,11 +16,7 @@
+ 'declare-forward!'(Mode, Entries, true) :-
+     forall(member([Name|Types],Entries),
+            (length(Types,Arity),(arity(Name,Arity) -> true ; assertz(arity(Name,Arity))))),
+-    findall(Source,
+-            ( member([Name|Types], Entries), swrite([:, Name, [Mode|Types]], Source) ),
+-            Sources),
+-    atomics_to_string(Sources, "\n", Source),
+-    process_metta_string(Source, _, '&self').
++    'declare-natives!'(Mode,Entries,true).
+ 
+ % Run Work, then Cleanup however Work ends. Errors propagate instead of being
+ % swallowed by reduce/2.

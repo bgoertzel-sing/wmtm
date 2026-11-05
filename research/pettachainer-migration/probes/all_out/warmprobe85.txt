@@ -1,0 +1,47 @@
+PCMIG ingestion module = user
+Warning: execution-close-frame! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execution-close-slice! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execution-open-frame! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execution-open-slice! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-branch-share is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-evaluation-per-step is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-reserve-near! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-root-claim-limit is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-root-claim-share is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-take! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-walk-per-step is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: context-answer-seeds! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: context-cold-merged is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: context-propagate? is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execute-backward is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: run-query-execution-plan is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: present-query-plan-results is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: query-plan-runtime-goal is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: retain-query-proof! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: [Thread main] the declaration (: query (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement))
+Warning: [Thread main] the declaration (: query-materialize (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-materialize (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement))
+Warning: [Thread main] the declaration (: query-many (-[nondet]-> Number KB Expression QueryBatchResult)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-many (-[nondet]-> Number KB Expression QueryBatchResult))
+Warning: [Thread main] the declaration (: query-many-refs (-[nondet]-> Number KB Expression QueryBatchResult)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-many-refs (-[nondet]-> Number KB Expression QueryBatchResult))
+Warning: [Thread main] the declaration (: expand-proof (-[nondet]-> Proof Proof)) is a duplicate in &gc-group-pettachainer; the first declaration is (: expand-proof (-[nondet]-> Proof Proof))
+Warning: [Thread main] the declaration (: query-many-materialize (-[nondet]-> Number KB Expression QueryBatchResult)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-many-materialize (-[nondet]-> Number KB Expression QueryBatchResult))
+Warning: [Thread main] the declaration (: set-backward-query-metrics (-[det]-> Bool Bool)) is a duplicate in &gc-group-pettachainer; the first declaration is (: set-backward-query-metrics (-[det]-> Bool Bool))
+Warning: [Thread main] the declaration (: backward-query-metrics (-[det]-> Expression)) is a duplicate in &gc-group-pettachainer; the first declaration is (: backward-query-metrics (-[det]-> Expression))
+Warning: [Thread main] the declaration (: chainer-many (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult)))) is a duplicate in &gc-group-pettachainer; the first declaration is (: chainer-many (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult))))
+Warning: [Thread main] the declaration (: chainer-many-materialize (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult)))) is a duplicate in &gc-group-pettachainer; the first declaration is (: chainer-many-materialize (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult))))
+Q warmup-skipped
+Q !(add-atom &self (= (wk $x $u) (+ $x 1))) [['True']]
+Q !(add-atom &self (= (cl $u) done)) [['True']]
+Q !(add-atom &self (= (apply-unit $f) (if (== (get-metatype $f) Expression) (union-atom $f ( [['True']]
+Q !(add-atom &self (= (finally $w $c) (let $r (metta (apply-unit $w) %Undefined% &self) (let [['True']]
+Q !(add-atom &self (= (brand $t $x) $x)) [['True']]
+Q !(add-atom &self (= (the $t $x) $x)) [['True']]
+Q !(add-atom &self (= (data $a $b $c $d) ($a $b $c $d))) [['True']]
+Q !(chainer-reset!) [['(chainer-reset!)']]
+Q !(collapse (data a b)) [['((partial data (a b)))']]
+Q !(collapse (let ($x $y) (data a b) $x)) [['()']]
+Q !(collapse (get-type data)) [['(%Undefined%)']]
+Q !(collapse (data a b c d)) [['((a b c d))']]
+Q !(collapse (brand Statement (B b))) [['((B b))']]
+Q !(collapse (the TV (STV 1.0 0.9))) [['((STV 1.0 0.9))']]
+Q !(collapse (let ($x $y) (a b) $x)) [['(a)']]
+PREP TypeError cannot unpack non-iterable NoneType object
