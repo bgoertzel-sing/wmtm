@@ -79,12 +79,47 @@ def semparse_facts(atom_strs):
         if len(node) != 4 or node[0] != ":":
             continue
         c, tv = node[2], node[3]
+        if (isinstance(c, list) and len(c) == 3 and c[0] == "Member" and isinstance(c[1], str)
+                and isinstance(c[2], list) and len(c[2]) == 3 and c[2][0] == "Narrow" and isinstance(c[2][1], str)):
+            # P4 / F7: PeTTaChainer refuses a compound Member class ("a Member class must be a symbol"), so a
+            # narrowed class (Member x (Narrow pilot (Mod harbour))) is lowered to its base class (Member x pilot);
+            # the emitter's with_head twin states the same fact, which the dedupe below collapses.
+            c = ["Member", c[1], c[2][1]]
         if (isinstance(c, list) and len(c) == 3 and c[0] in SP_HEADS and all(isinstance(x, str) for x in c[1:])
                 and isinstance(tv, list) and len(tv) == 3):
             try:
-                out.append((c[0], c[1], c[2], float(tv[1]), float(tv[2])))
+                f = (c[0], c[1], c[2], float(tv[1]), float(tv[2]))
             except ValueError:
-                pass
+                continue
+            if f not in out:
+                out.append(f)
+    return out
+
+
+def _flat_member_rule(node) -> bool:
+    """True if every Member atom in an Implication rule names a symbol class (no compound Narrow class)."""
+    if isinstance(node, list):
+        if len(node) == 3 and node[0] == "Member" and not isinstance(node[2], str):
+            return False
+        return all(_flat_member_rule(x) for x in node)
+    return True
+
+
+def semparse_rules(atom_strs):
+    """P4: the parser's (: id (Implication P C) (CTV ...)) rules, as MeTTa strings, for the shadow KB.
+    A rule whose Member atoms name a compound (Narrow ...) class is skipped (F7: the engine refuses it)."""
+    from .semparse_adapter import split_toplevel, to_str
+    out = []
+    for _src, node, err in split_toplevel("\n".join(atom_strs or [])):
+        if err or not isinstance(node, list):
+            continue
+        if node and node[0] == "Interpretation" and len(node) == 3:
+            node = node[2]
+        if (len(node) == 4 and node[0] == ":" and isinstance(node[1], str) and isinstance(node[2], list)
+                and len(node[2]) == 3 and node[2][0] in ("Implication", "Equivalence") and _flat_member_rule(node[2])):
+            r = to_str(node)
+            if r not in out:
+                out.append(r)
     return out
 
 
@@ -260,7 +295,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         name_rep = {}
         for iid in list(cached):
             cached[iid], name_rep[iid] = _nr(cached[iid])
-    metta, facts, n_sp, n_unparsed, i = [], [], 0, 0, 0
+    metta, facts, n_sp, n_unparsed, i, n_rules = [], [], 0, 0, 0, 0
     src, fsrc = {}, []       # Track I provenance: KB label -> item id; (head, a, b, item id) per fact
     from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB
     gst = _pg.settings(cfg); gdec, lf = [], {}
@@ -281,6 +316,10 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
             else:  # only the binary facts the goals are built from: a 700-atom KB makes each query ~7-10 s
                 for (h, x, y, sv, cv) in fs:
                     metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); src["sp%d" % i] = it.id; lf["sp%d" % i] = "(%s %s %s)" % (h, x, y); i += 1
+                if cfg.get("shadow_rules", True):   # P4: the parser's Implication rules (flat Member classes only)
+                    for r in semparse_rules(cached[it.id]):
+                        if r not in metta:
+                            metta.append(r); n_rules += 1
             continue
         n_unparsed += 1   # Track K: no regex fallback; an item without cached semparse atoms adds no facts
     rel = {(h, a, b) for (h, a, b, _, _) in facts}
@@ -305,7 +344,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     else:
         goals = build_goals(rel, max_goals, skolem_goals); rank_info = None
     return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
-            "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts),
+            "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts), "rules": n_rules,
             "skolem_goals": skolem_goals, "goal_meta": goal_meta, "goal_rank": rank_info,
             "atom_src": src, "fact_src": fsrc, "label_fact": lf,
             "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec), "name_resolve": name_rep}

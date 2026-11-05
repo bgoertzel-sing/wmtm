@@ -166,6 +166,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `shadow_k` | `WMTM_PC_SHADOW_K` | int | `200` | How many top active-set items go to the shadow worker and to the parse feed. | `wmtm/parse_cache.py:341` `wmtm/parse_cache.py:371` |
 | `shadow_max_goals` | `WMTM_PC_SHADOW_MAX_GOALS` | int | `60` | The most goals the shadow worker queries in one run. | `wmtm/pc_shadow.py:249` |
 | `shadow_full_kb` | `WMTM_PC_SHADOW_FULL_KB` | bool | `false` | True: each item's whole parsed KB goes into PeTTa. False: only the binary facts the goals are built from, which is much faster. | `wmtm/pc_shadow.py:273` |
+| `shadow_rules` | `WMTM_PC_SHADOW_RULES` | bool | `true` | True: the parser's Implication/Equivalence rules whose Member atoms name symbol classes go into the shadow KB as well (P4). Rules over a compound `(Narrow ...)` class are skipped because PeTTaChainer refuses them (F7). | `wmtm/pc_shadow.py:319` |
 | `shadow_skolem_goals` | `WMTM_PC_SHADOW_SKOLEM_GOALS` | bool | `false` | True keeps goals about parser placeholder entities (`sk_*`). By default they are dropped. | `wmtm/pc_shadow.py:249` |
 | `shadow_goal_rank` | `WMTM_PC_SHADOW_GOAL_RANK` | bool | `true` | Track N: Design A ranked goal pool (off = Track M 2-step goals) | `wmtm/pc_shadow.py:282` |
 | `shadow_max_hops` | `WMTM_PC_SHADOW_MAX_HOPS` | int | `3` | Track N: longest chain in the pool (derivation steps) | `wmtm/pc_shadow.py:291` |
