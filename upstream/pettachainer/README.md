@@ -29,3 +29,17 @@ Version: upstream master 36b3fe6 (+ our dedup-import patch except where noted). 
   (`-[semidet]->` inside `-[semidet]->`), the declaration at PeTTaChainer 202b9379 `lib/collections.metta:2`, so petta_chainer cannot load under pymetta.
   Command: `<venv with pymetta==0.9.4+goalchainer.native.2>/bin/python -c "import metta,sys; print(metta.MeTTa().run(open(sys.argv[1]).read()))" py1_nested_annotated_arrow.metta`
   Expected: declaration accepted; `(fold-semidet add2 0 (Cons 1 (Cons 2 Nil)))` → 3. Actual: `EngineError: metta_add_atom/3: cannot honour the annotated arrow for fold-semidet ... (annotated arrows require a named function and a concrete top-level cardinality and effect ...)` from `metta/_runtime/engine/spaces/arrow_products.pl:58`.
+
+### PY1–PY5: pymetta 0.9.4+goalchainer.native.2 cannot load PeTTaChainer rT 202b9379
+Command for every row: `<venv with pymetta==0.9.4+goalchainer.native.2>/bin/python -c "import metta,sys; print(metta.MeTTa().run(open(sys.argv[1]).read()))" <repro>` (run in this directory). The shim column is what a scratch copy tried (not shipped; cos ruled out local engine shims).
+Option a = pymetta limitation (engine owner could relax it); option b = rT could change to fit pymetta.
+
+| ID | Repro | Refusal (actual) | rT 202b9379 file:line | What pymetta requires | Shim tried | Option |
+|---|---|---|---|---|---|---|
+| PY1 | `py1_nested_annotated_arrow.metta` | `metta_add_atom/3: cannot honour the annotated arrow for fold-semidet … nested products are not enforced` | `lib/collections.metta:2` (8 such declarations) | annotated arrow with concrete top-level effect, no nested annotated arrow | inner arrow → plain `->` | a (enforce/ignore nested products) or b (flatten) |
+| PY2 | `py2_variable_effect_arrow.metta` | `cannot honour the annotated arrow for foreach-flat … product variables … are not enforced` | `lib/collections.metta:14` | concrete effect, not `-[$e]->` | arrow → plain `->` | a (effect polymorphism) or b |
+| PY3 | `py3_quoted_import_list.metta` (+`py3_helper.pl`) | ``Type error: `atom' expected, found `['py3-a','py3-b']' (a list)`` | `bootstrap.metta:37` (`(quote (declare-natives! declare-forward!))`) | bare name list, no `quote` | drop the `quote` | b (one-token change) |
+| PY4 | `py4_reimport_yall.metta` (+`py4_helper_yall.pl`) | `loading_loudly/1 … No permission to import yall:(/)/3 into user (already imported from metta_engine)` | `prolog/runtime_helpers.pl:6` (`:- use_module(library(yall))`) | helper must not re-import a library the engine already imported into user | comment the directive out | a (tolerate idempotent import) or b (module-qualify) |
+| PY5 | `py5_two_sources_one_name.metta` (+`py3_helper.pl`, `py5_helper_second.pl`) | `refuse_other_sources_name/2: py3-a is already registered from …py3_helper.pl … (two Prolog sources claim one name)` | `declare-natives!` defined in `lib/natives.pl:4` and imported again via the runtime helper (`bootstrap.metta:33-37`) | one Prolog source per name | not shimmed (stopped here) | b (single owner) |
+
+Verified 2026-11-04 on this machine: each repro gives exactly the refusal above (PY3–PY5 load `(library lib_import)` first, as rT bootstrap.metta:6 does).
