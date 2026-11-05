@@ -21,8 +21,8 @@ Version: upstream master 36b3fe6 (+ our dedup-import patch except where noted). 
 - **PC5/PC7** not in scope (PC5 = missing native mem_inh / doc; PC7 fixed in 36b3fe6).
 
 ## Track P1 (rT 202b9379, 2026-11-04)
-- **PC5** – `pc5_modus_ponens_202b9379.metta`. Modus ponens from a premise with s<1 halves the conclusion confidence.
-  Command: `cd <PeTTaChainer@202b9379>/pettachainer/metta && cp <abs>/pc5_modus_ponens_202b9379.metta ./_pc5.metta && PATH=<swipl-9.3.36>/bin:$PATH <PeTTa@3681b9b>/run.sh ./_pc5.metta`
+- **PC8** – `pc8_modus_ponens_202b9379.metta`. Modus ponens from a premise with s<1 halves the conclusion confidence.
+  Command: `cd <PeTTaChainer@202b9379>/pettachainer/metta && cp <abs>/pc8_modus_ponens_202b9379.metta ./_pc8.metta && PATH=<swipl-9.3.36>/bin:$PATH <PeTTa@3681b9b>/run.sh ./_pc8.metta`
   Expected: (Q x) with s≈0.81 and c≈0.88 (as on rT 38b1473). Actual: `(STV 0.8325 0.4395)`. Control with premise s=1.0: `(STV 0.85 0.92)`.
   Effect: GoalChainer `tests/test_input_sensitivity.py::test_decision_depends_on_the_request` fails (wrong action ranking).
 - **PY1** – `py1_nested_annotated_arrow.metta`. pymetta 0.9.4+goalchainer.native.2 refuses a nested annotated arrow
