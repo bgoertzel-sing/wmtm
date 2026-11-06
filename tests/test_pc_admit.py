@@ -87,7 +87,8 @@ def test_pettachainer_mode_admits_with_provenance_and_replaces_python(tmp_path, 
     it = d["cat is a animal"]
     assert it.provenance["reasoner"] == "pettachainer" and it.provenance["stv"] == [0.9, 0.6]
     assert it.provenance["proof"] == "(inh_trans sp0 sp1)" and it.derived_from == ["s0", "s1"]
-    assert abs(it.attention.sti - 0.54) < 1e-6 or it.attention.sti <= 0.54   # initial STI = s*c (then decay)
+    # F1 §4: initial STI comes from relevance (base 1.0 with no request terms), not s*c = 0.54; one tick of decay
+    assert abs(it.attention.sti - 0.9) < 1e-6 and it.attention.sti > 0.54
     assert launches and launches[0].get("force") is True              # worker launched although pc_shadow off
 
 
@@ -298,7 +299,8 @@ def test_negation_unlikely_mode(tmp_path):
     assert "unlikely: cat is a animal" in by and "cat is a animal" not in by and info["dropped"]["negative"] == 0
     u = by["unlikely: cat is a animal"]
     assert u.provenance["polarity"] == "negative" and u.provenance["stv"] == [0.2, 0.6]
-    assert abs(u.initial_sti - 0.8 * 0.6) < 1e-9          # STI from the probability of "not"
+    # F1 §4: STI from relevance (no request: base 1.0), not s*c; the probability of "not" stays in provenance
+    assert abs(u.initial_sti - 1.0) < 1e-9
 
 
 def test_negation_threshold_configurable(tmp_path):

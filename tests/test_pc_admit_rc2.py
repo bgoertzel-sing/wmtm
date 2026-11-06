@@ -269,7 +269,21 @@ def test_automated_skips_forgotten_conclusion(tmp_path):
     from wmtm.forgetting_log import content_hash
     sf = _setup(tmp_path); _admit_doc(tmp_path)
     st = json.load(open(sf))
-    st["forgetting_log"] = {"max_records": 500, "records": [{"item_id": "x", "content_hash": content_hash("tabby_housecat is a vertebrate_animal")}]}
+    st["forgetting_log"] = {"max_records": 500, "records": [{"item_id": "x", "content_hash": content_hash("tabby_housecat is a vertebrate_animal"),
+                                                             "derived_from": ["s1", "s0"]}]}   # same derivation (order-free)
     json.dump(st, open(sf, "w"))
     ctx.fast_path_automated(sf)
     assert set(_pc_items(tmp_path)) == {"heavy_rainfall implies slippery_roads"} and _log(tmp_path)[-1]["dropped"]["known"] == 1
+
+
+def test_automated_readmits_forgotten_conclusion_new_derivation(tmp_path):
+    # F1 §4 condition 4: the same sentence was forgotten, but derived from OTHER sources -> new derivation, admitted.
+    # Negative control: test_automated_skips_forgotten_conclusion (same sources -> skipped).
+    from wmtm.forgetting_log import content_hash
+    sf = _setup(tmp_path); _admit_doc(tmp_path)
+    st = json.load(open(sf))
+    st["forgetting_log"] = {"max_records": 500, "records": [{"item_id": "x", "content_hash": content_hash("tabby_housecat is a vertebrate_animal"),
+                                                             "derived_from": ["s7", "s9"]}]}
+    json.dump(st, open(sf, "w"))
+    ctx.fast_path_automated(sf)
+    assert "tabby_housecat is a vertebrate_animal" in set(_pc_items(tmp_path)) and _log(tmp_path)[-1]["dropped"]["known"] == 0

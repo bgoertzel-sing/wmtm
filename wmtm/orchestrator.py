@@ -199,7 +199,7 @@ class WMTMOrchestrator:
 
     def _is_skipworthy(self, cand) -> bool:
         """Check if a candidate should be skipped (forgotten or duplicate)."""
-        if self.forget_log.is_forgotten(cand.content):
+        if self.forget_log.is_forgotten(cand.content, list(cand.derived_from or [])):   # F1 §4: derivation key
             if cand.initial_sti < self.forget_log_override_threshold:
                 return True
         return not self._is_novel(cand)
@@ -260,11 +260,12 @@ class WMTMOrchestrator:
             from .pc_admit import load_candidates
             from .candidate import InferenceCandidate
 
-            def known(text):   # same tests as _is_skipworthy (PeTTaChainer STI s*c < forget-log override threshold)
-                c = InferenceCandidate(content=text, confidence=0.0, derived_from=[], inference_type="pc_deduction")
-                return self.forget_log.is_forgotten(text) or not self._is_novel(c)
+            def known(text, srcs=()):   # same tests as _is_skipworthy; F1 §4: forgotten = this derivation (text + sources)
+                c = InferenceCandidate(content=text, confidence=0.0, derived_from=list(srcs), inference_type="pc_deduction")
+                return self.forget_log.is_forgotten(text, list(srcs)) or not self._is_novel(c)
             cands, info = load_candidates(cfg or {}, self.store, now,
-                                          consumed=(self.pc_admit_state or {}).get("consumed_run"), known=known)
+                                          consumed=(self.pc_admit_state or {}).get("consumed_run"), known=known,
+                                          context_rel=self.context_rel)
         except Exception as e:
             return None, {"skipped": "error:" + type(e).__name__, "admitted": 0}
         if cands is None:

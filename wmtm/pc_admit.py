@@ -110,7 +110,26 @@ def run_id(doc):
     return "%s/%s" % (doc.get("spec_ts"), doc.get("ts"))
 
 
-def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=None):
+def initial_sti(text, context_rel, cfg):
+    """F1 §4: a conclusion's starting STI comes from its relevance to the current request, not from s*c.
+    base + span * rel, rel in [0, 1] = IDF overlap of the text with the request terms / smax (context.request_relevance
+    scale).  base (reasoner_initial_sti, default 1.0) is well above ForgettingPolicy.derived_sti_threshold (0.10) after
+    one tick, so a low-confidence conclusion is never evicted in the cycle that admits it."""
+    base = float(cfg.get("reasoner_initial_sti") or 1.0)
+    span = float(cfg.get("reasoner_initial_sti_rel") or 4.0)
+    rel = 0.0
+    terms = (context_rel or {}).get("terms") or {}
+    smax = float((context_rel or {}).get("smax") or 0.0)
+    if terms and smax > 0:
+        try:
+            from .context import lexical_relevance
+            rel = min(1.0, lexical_relevance(text, terms) / smax)
+        except Exception:
+            rel = 0.0
+    return round(base + span * rel, 4)
+
+
+def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=None, context_rel=None):
     """Cycle side.  -> (candidates, info).  candidates is None when nothing may be admitted (info["skipped"]).
 
     consumed: run id already admitted from (rc2) -> skipped "already_consumed".
@@ -164,18 +183,22 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
         srcs = [x for x in r.get("sources") or [] if x in live]
         if not srcs:
             drop["no_live_source"] += 1; continue
-        if known is not None and known(text):
+        if known is not None and known(text, srcs):
             drop["known"] += 1; continue
         cand_facts.append(list(r.get("facts") or _LABEL.findall(str(r.get("proof")))))
         cands.append(InferenceCandidate(
             content=text, confidence=c, derived_from=srcs, inference_type="pc_deduction",
-            initial_sti=((1.0 - s) if neg else s) * c,
+            initial_sti=initial_sti(text, context_rel, cfg),
             provenance={"reasoner": "pettachainer", "goal": g, "stv": [s, c], "polarity": "negative" if neg else "positive", "proof": str(r["proof"])[:2000],
                         "run_ts": doc.get("spec_ts"), "query_s": r.get("s")}))
     # Track J: cap admitted conclusions per KB fact per cycle (best first)
     from . import parse_gate as _pg
     gst = _pg.settings(cfg)
-    order = sorted(range(len(cands)), key=lambda j: -cands[j].initial_sti)
+    # F1 §4: best first = most relevant, then the engine's answer weight s*c (was s*c alone)
+    def _w(cd):
+        s_, c_ = cd.provenance["stv"]
+        return ((1.0 - s_) if cd.provenance.get("polarity") == "negative" else s_) * c_
+    order = sorted(range(len(cands)), key=lambda j: (-cands[j].initial_sti, -_w(cands[j])))
     pairs = [(cands[j], cand_facts[j]) for j in order]
     cands, n_cap, over = _pg.cap_per_fact(pairs, gst)
     drop["per_fact_cap"] = n_cap
@@ -194,17 +217,22 @@ def admit_on_snapshot(snapshot, cfg, now=None):
     st = snapshot.get("pc_admit") or {}
     items = (snapshot.get("store") or {}).get("items") or {}
     present = {str(v.get("content", "")).lower().strip() for v in items.values()}
-    forgotten = {r.get("content_hash") for r in (snapshot.get("forgetting_log") or {}).get("records") or []}
+    recs = (snapshot.get("forgetting_log") or {}).get("records") or []
+    forgotten = set()
+    if recs:   # F1 §4: derivation keys (conclusion + sorted sources), old records computed from content_hash
+        from .forgetting_log import deriv_hash
+        forgotten = {deriv_hash("", r.get("derived_from") or [], r.get("content_hash")) for r in recs}
 
-    def known(text):
+    def known(text, srcs=()):
         t = text.lower().strip()
         if t in present:
             return True
         if forgotten:
-            import hashlib
-            return hashlib.md5(t.encode()).hexdigest()[:12] in forgotten     # = forgetting_log.content_hash
+            from .forgetting_log import deriv_hash
+            return deriv_hash(t, list(srcs)) in forgotten     # = ForgettingLog.is_forgotten(text, srcs)
         return False
-    cands, info = load_candidates(cfg, None, now, consumed=st.get("consumed_run"), live_ids=items.keys(), known=known)
+    cands, info = load_candidates(cfg, None, now, consumed=st.get("consumed_run"), live_ids=items.keys(), known=known,
+                                  context_rel=snapshot.get("context_rel"))
     if not cands:
         if cands is not None:
             info["skipped"] = "no_candidates"
