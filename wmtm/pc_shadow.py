@@ -117,6 +117,26 @@ def _forms(atom_strs, defs):
         yield _name_narrow(node, defs)
 
 
+def _derived_fact(it, live_ids):
+    """F1 §3: (head, a, b, s, c) for a reasoner-admitted conclusion, from its provenance goal and engine STV; None
+    if it has no usable provenance or any of its sources is no longer in the active set (sources withdrawn)."""
+    pv = getattr(it, "provenance", None) or {}
+    srcs = list(getattr(it, "derived_from", None) or [])
+    if not srcs or any(s not in live_ids for s in srcs):
+        return None
+    if pv.get("polarity") == "negative":
+        return None   # an "unlikely:" conclusion is not the goal fact
+    m = re.match(r"^\((\w+) (\S+) (\S+)\)$", str(pv.get("goal") or ""))
+    tv = pv.get("stv")
+    if not m or m.group(1) not in SP_HEADS or not (isinstance(tv, (list, tuple)) and len(tv) == 2):
+        return None
+    try:
+        sv, cv = min(1.0, max(0.0, float(tv[0]))), min(0.99, max(0.0, float(tv[1])))
+    except (TypeError, ValueError):
+        return None
+    return (m.group(1), m.group(2), m.group(3), sv, cv)
+
+
 def semparse_facts(atom_strs, defs=None):
     """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped).
     A narrowed Member class becomes its deterministic symbol (F7 design); defs (dict) receives the definitions."""
@@ -419,10 +439,23 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         for iid in list(cached):
             cached[iid], name_rep[iid] = _nr(cached[iid])
     metta, facts, n_sp, n_unparsed, i, n_rules = [], [], 0, 0, 0, 0
-    src, fsrc = {}, []       # Track I provenance: KB label -> item id; (head, a, b, item id) per fact
+    src, fsrc, dsrc = {}, [], {}   # F1 §3: dsrc = wm label -> source item ids of a re-entered conclusion
+
     from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB
     gst = _pg.settings(cfg); gdec, lf = [], {}
+    live_ids = {it.id for it in items}
+    n_derived, j = 0, 0
     for it in items:
+        if getattr(it, "source_type", "") == "derived":   # F1 §3: a conclusion is never parsed; it enters the KB
+            n_derived += 1                                 # with the engine's TV, only while all its sources are live
+            fact = _derived_fact(it, live_ids)
+            if fact is not None:
+                h, x, y, sv, cv = fact
+                lab = "wm%d" % j; j += 1
+                metta.append("(: %s (%s %s %s) (STV %.4f %.4f))" % (lab, h, x, y, sv, cv))
+                src[lab] = it.id; lf[lab] = "(%s %s %s)" % (h, x, y)
+                facts.append(fact); fsrc.append([h, x, y, it.id]); dsrc[lab] = list(it.derived_from)
+            continue
         if it.id in cached:
             n_sp += 1
             key = (it.id, len(cached[it.id]), hash(tuple(cached[it.id])))
@@ -473,7 +506,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
             "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts), "rules": n_rules,
             "skolem_goals": skolem_goals, "goal_meta": goal_meta, "goal_rank": rank_info,
-            "atom_src": src, "fact_src": fsrc, "label_fact": lf,
+            "atom_src": src, "fact_src": fsrc, "label_fact": lf, "derived_src": dsrc, "derived_items": n_derived,
             "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec), "name_resolve": name_rep}
 
 
@@ -575,6 +608,7 @@ def raw_item_from_dict(d):
     return {"id": d.get("id"), "content": d.get("content", ""), "sti": (d.get("attention") or {}).get("sti", 0.0),
             "tv_strength": d.get("tv_strength", 0.0), "tv_confidence": d.get("tv_confidence", 0.0),
             "source_type": d.get("source_type", "recalled"),
+            "derived_from": list(d.get("derived_from") or []), "provenance": d.get("provenance"),   # F1 §3
             "origin_ts": float(d.get("origin_timestamp") or 0.0) or float(d.get("created_at") or 0.0)}   # Track R: age
 
 
@@ -582,6 +616,7 @@ def raw_item(it):
     return {"id": it.id, "content": it.content, "sti": it.attention.sti,
             "tv_strength": getattr(it, "tv_strength", 0.0), "tv_confidence": getattr(it, "tv_confidence", 0.0),
             "source_type": getattr(it, "source_type", "recalled"),
+            "derived_from": list(getattr(it, "derived_from", None) or []), "provenance": getattr(it, "provenance", None),
             "origin_ts": float(getattr(it, "origin_timestamp", 0.0) or 0.0) or float(getattr(it, "created_at", 0.0) or 0.0)}
 
 
@@ -591,7 +626,8 @@ class _RawStore:
         from types import SimpleNamespace as NS
         self._items = [NS(id=r["id"], content=r["content"], attention=NS(sti=r.get("sti", 0.0)),
                           tv_strength=r.get("tv_strength", 0.0), tv_confidence=r.get("tv_confidence", 0.0),
-                          source_type=r.get("source_type", "recalled")) for r in raw]
+                          source_type=r.get("source_type", "recalled"), derived_from=list(r.get("derived_from") or []),
+                          provenance=r.get("provenance")) for r in raw]
     def get_active_set(self):
         return list(self._items)
 

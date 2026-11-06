@@ -487,7 +487,8 @@ def automated_hooks(state_dir, items_dict, cycle, cfg=None):
                 from . import parse_cache
                 out["feed"] = parse_cache.feed_rows(
                     [(d.get("id"), d.get("content", ""), (d.get("attention") or {}).get("sti", 0.0))
-                     + ((dict(d["source_meta"]),) if isinstance(d.get("source_meta"), dict) else ()) for d in top], cfg,
+                     + ((dict(d["source_meta"]),) if isinstance(d.get("source_meta"), dict) else ()) for d in top
+                     if d.get("source_type") != "derived"], cfg,   # F1 §3: conclusions are never re-parsed
                     skip_unchanged=True)
             except Exception:
                 pass
