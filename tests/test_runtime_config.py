@@ -27,9 +27,9 @@ def test_defaults_off_without_file(tmp_path):
     assert cfg["shadow_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "pc_shadow")
     assert cfg["semparse_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "semparse_cache")
     assert cfg["petta_dir"] == os.path.join(rc.VENDOR_ROOT, "petta-3681b9b")
-    assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-202b9379")
-    assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-1f1a7a6f", "templates", "generated", "PROMPT_CATALOG.txt")
-    assert cfg["semparse_hitl"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-1f1a7a6f") and cfg["semparse_mode"] == "catalog"
+    assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-bdae8d7e")
+    assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-f44d7b74", "templates", "generated", "PROMPT_CATALOG.txt")
+    assert cfg["semparse_hitl"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-f44d7b74") and cfg["semparse_mode"] == "catalog"
     assert cfg["swipl_bin"] == "" and cfg["llm_env_file"] == ""
 
 

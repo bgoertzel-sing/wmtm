@@ -138,10 +138,10 @@ needs_licence = pytest.mark.skipif(not os.path.isfile(_SPH), reason="MIT LICENSE
 
 
 def test_allowed_pins_default_unchanged():
-    """P4 rev2: 1f1a7a6f stays the default pin; f44d7b74 is an extra, opt-in pin with its own prompt sha."""
-    assert C.PIN.startswith("1f1a7a6f")
-    assert C.ALLOWED_PINS[C.PIN].startswith("e4c4a76c")
-    assert C.ALLOWED_PINS["f44d7b740aed240c834165672b6a862998ee4a12"].startswith("645bff3f")
+    """P4 rev3: f44d7b74 is the default pin; 1f1a7a6f stays accepted for rollback."""
+    assert C.PIN == "f44d7b740aed240c834165672b6a862998ee4a12"
+    assert C.ALLOWED_PINS[C.PIN].startswith("645bff3f")
+    assert C.ALLOWED_PINS["1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef"].startswith("e4c4a76c")
     from wmtm import runtime_config as rc
     assert rc.SEMPARSE_PROMPT_SHA256 == C.ALLOWED_PINS[C.PIN]
 
@@ -155,7 +155,7 @@ def test_verify_checkout_accepts_f44d7b74(tmp_path):
 @needs_licence
 def test_verify_checkout_refuses_unlisted_commit(tmp_path):
     root = _fake_checkout(tmp_path, "3ec15bd1" + "0" * 32, _SPH)
-    with pytest.raises(C.HitlPinError, match="need one of 1f1a7a6f, f44d7b74"):
+    with pytest.raises(C.HitlPinError, match="need one of f44d7b74, 1f1a7a6f"):
         C.verify_checkout(str(root))
 
 

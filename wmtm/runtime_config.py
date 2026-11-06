@@ -32,8 +32,8 @@ PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_ROOT = os.path.dirname(PKG_DIR)            # <...>/wmtm-<tag>  (or the repo checkout)
 VENDOR_ROOT = os.path.dirname(DIST_ROOT)        # <bot>/vendor      (when vendored)
 
-SEMPARSE_PIN = "1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef"     # semantic-parsing-hitl template-catalog line (MIT)
-SEMPARSE_PROMPT_SHA256 = "e4c4a76c7666d70f6d019fd7fea9391d91b01528f8f89132ae05d842fdd8207e"  # PROMPT_CATALOG.txt @1f1a7a6f
+SEMPARSE_PIN = "f44d7b740aed240c834165672b6a862998ee4a12"     # semantic-parsing-hitl (MIT), P4 re-pin
+SEMPARSE_PROMPT_SHA256 = "645bff3f5c3a0670d98a463d60d18e178d899c08c58f17ea4b3ff5a53b1d25b6"  # PROMPT_CATALOG.txt @f44d7b74 (P4 re-pin)
 SEMPARSE_LEGACY_PROMPT_SHA256 = "2ed18b934e28afac75b1d6c7c47b7b7413ed778c4c2916441274fb42933d9d1e"  # prompt.txt @3ec15bd1 (mode legacy)
 
 _V, _D = "vendor", "data"
@@ -157,10 +157,10 @@ SPEC = {
     "shadow_dir":          ("WMTM_PC_SHADOW_DIR", str, "", _D),
     "semparse_dir":        ("WMTM_SEMPARSE_DIR", str, "", _D),
     "petta_dir":           ("WMTM_PC_PETTA", str, "petta-3681b9b", _V),
-    "pettachainer_dir":    ("WMTM_PC_VENDOR", str, "pettachainer-202b9379", _V),
-    "semparse_hitl":       ("WMTM_SEMPARSE_HITL", str, "semparse-hitl-1f1a7a6f", _V),
+    "pettachainer_dir":    ("WMTM_PC_VENDOR", str, "pettachainer-bdae8d7e", _V),
+    "semparse_hitl":       ("WMTM_SEMPARSE_HITL", str, "semparse-hitl-f44d7b74", _V),
     "semparse_mode":       ("WMTM_SEMPARSE_MODE", str, "catalog", None),
-    "semparse_prompt":     ("SEMPARSE_PROMPT", str, "semparse-hitl-1f1a7a6f/templates/generated/PROMPT_CATALOG.txt", _V),
+    "semparse_prompt":     ("SEMPARSE_PROMPT", str, "semparse-hitl-f44d7b74/templates/generated/PROMPT_CATALOG.txt", _V),
     "semparse_prompt_sha256": ("WMTM_SEMPARSE_PROMPT_SHA256", str, SEMPARSE_PROMPT_SHA256, None),
     "swipl_bin":           ("WMTM_SWIPL_BIN", str, "", _V),
     "llm_env_file":        ("WMTM_LLM_ENV_FILE", str, "", _V),
