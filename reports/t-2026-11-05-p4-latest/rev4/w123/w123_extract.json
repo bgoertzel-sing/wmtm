@@ -1,0 +1,180 @@
+{
+ "source": "spec_B_full.json (same spec as rev3/bdae8d7e run); atoms only, no note text",
+ "premises": {
+  "sp27": {
+   "src": "ep-note-20261104T151833Z",
+   "fact": "(Member sk_coverage_1__i_ep_note_20261104T151833Z gain__nw_a3ba169ff4)",
+   "gate_rejected": false
+  },
+  "sp26": {
+   "src": "ep-note-20261104T151833Z",
+   "fact": "(Member sk_coverage_1__i_ep_note_20261104T151833Z gain)",
+   "gate_rejected": false
+  },
+  "sp121": {
+   "src": "ep-note-20261103T203949Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261103T203949Z bundle__nw_55d808a06f)",
+   "gate_rejected": false
+  },
+  "sp120": {
+   "src": "ep-note-20261103T203949Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261103T203949Z bundle)",
+   "gate_rejected": false
+  },
+  "sp232": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_commit_1__i_ep_note_20261028T185132Z commit__nw_37671a54d2)",
+   "gate_rejected": false
+  },
+  "sp231": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_commit_1__i_ep_note_20261028T185132Z commit)",
+   "gate_rejected": false
+  },
+  "sp235": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_commit_2__i_ep_note_20261028T185132Z commit__nw_9faa872aae)",
+   "gate_rejected": false
+  },
+  "sp234": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_commit_2__i_ep_note_20261028T185132Z commit)",
+   "gate_rejected": false
+  },
+  "sp240": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_output_1__i_ep_note_20261028T185132Z output__nw_75b08ab768)",
+   "gate_rejected": false
+  },
+  "sp239": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_output_1__i_ep_note_20261028T185132Z output)",
+   "gate_rejected": false
+  },
+  "sp172": {
+   "src": "ep-note-20261103T004843Z",
+   "fact": "(Member sk_tree_1__i_ep_note_20261103T004843Z tree__nw_c435aca35a)",
+   "gate_rejected": false
+  },
+  "sp171": {
+   "src": "ep-note-20261103T004843Z",
+   "fact": "(Member sk_tree_1__i_ep_note_20261103T004843Z tree)",
+   "gate_rejected": false
+  },
+  "sp50": {
+   "src": "ep-note-20261104T051320Z",
+   "fact": "(Member sk_diff_1__i_ep_note_20261104T051320Z diff__nw_935b46b959)",
+   "gate_rejected": false
+  },
+  "sp49": {
+   "src": "ep-note-20261104T051320Z",
+   "fact": "(Member sk_diff_1__i_ep_note_20261104T051320Z diff)",
+   "gate_rejected": false
+  },
+  "sp205": {
+   "src": "ep-note-20261028T185959Z",
+   "fact": "(Member sk_check_py_1__i_ep_note_20261028T185959Z check_py__nw_f28383ce3a)",
+   "gate_rejected": false
+  },
+  "sp204": {
+   "src": "ep-note-20261028T185959Z",
+   "fact": "(Member sk_check_py_1__i_ep_note_20261028T185959Z check_py)",
+   "gate_rejected": false
+  },
+  "sp131": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle__nw_f10e7aa1ad)",
+   "gate_rejected": false
+  },
+  "sp133": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle__nw_ec97102765)",
+   "gate_rejected": false
+  },
+  "sp135": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle__nw_b5c34d67f4)",
+   "gate_rejected": false
+  },
+  "sp134": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle__nw_70fead3df8)",
+   "gate_rejected": false
+  },
+  "sp132": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle__nw_45e8b22875)",
+   "gate_rejected": false
+  },
+  "sp130": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle)",
+   "gate_rejected": false
+  },
+  "sp241": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_config_1__i_ep_note_20261028T185132Z config)",
+   "gate_rejected": false
+  },
+  "sp242": {
+   "src": "ep-note-20261028T185132Z",
+   "fact": "(Member sk_config_1__i_ep_note_20261028T185132Z config__nw_b1a247bbd8)",
+   "gate_rejected": false
+  },
+  "sp89": {
+   "src": "ep-note-20261028T153222Z",
+   "fact": "(Member sk_note_2__i_ep_note_20261028T153222Z note__nw_1a426631a3)",
+   "gate_rejected": false
+  },
+  "sp88": {
+   "src": "ep-note-20261028T153222Z",
+   "fact": "(Member sk_note_2__i_ep_note_20261028T153222Z note)",
+   "gate_rejected": false
+  },
+  "sp138": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status branch__nw_50b94ee13a)",
+   "gate_rejected": false
+  },
+  "sp140": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status branch__nw_af7c55181b)",
+   "gate_rejected": false
+  },
+  "sp139": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status branch__nw_a33c0de6a2)",
+   "gate_rejected": false
+  },
+  "sp137": {
+   "src": "ep-note-20261028T190214Z",
+   "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "gate_rejected": false
+  }
+ },
+ "neg_goals": [],
+ "neg_atom_count": 6,
+ "gate_rejected_count": 1,
+ "sample": [
+  "ep-note-20261028T121808Z",
+  "ep-note-20261028T122745Z",
+  "ep-note-20261028T153222Z",
+  "ep-note-20261028T183317Z",
+  "ep-note-20261028T185132Z",
+  "ep-note-20261028T185959Z",
+  "ep-note-20261028T190214Z",
+  "ep-note-20261103T004843Z",
+  "ep-note-20261103T203949Z",
+  "ep-note-20261104T043925Z",
+  "ep-note-20261104T045724Z",
+  "ep-note-20261104T051320Z",
+  "ep-note-20261104T051925Z",
+  "ep-note-20261104T151833Z",
+  "ep-note-20261104T154242Z",
+  "ep-note-20261104T165705Z",
+  "ep-note-20261104T181709Z",
+  "ep-note-20261104T193449Z",
+  "ep-note-20261104T193740Z",
+  "ep-note-20261104T194242Z"
+ ]
+}

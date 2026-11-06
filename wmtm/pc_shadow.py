@@ -154,7 +154,7 @@ def semparse_rules(atom_strs, defs=None):
     for node in _forms(atom_strs, defs):
         if (isinstance(node[1], str) and isinstance(node[2], list) and len(node[2]) == 3
                 and node[2][0] == "Implication" and _flat_member_rule(node[2])):
-            # P4 rev3 (review 2 finding 6): Equivalence is not passed through; PeTTaChainer bdae8d7e rejects it
+            # STOPGAP(upstream: PC-EQ1 Equivalence add rejected) P4 rev3 (review 2 finding 6): Equivalence is not passed through; PeTTaChainer bdae8d7e rejects it
             # (fact_without_free_variables), which would be a silent add failure.
             r = to_str(node)
             if r not in out:

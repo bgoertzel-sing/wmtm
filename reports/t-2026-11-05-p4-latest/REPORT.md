@@ -26,3 +26,30 @@ From result 1 onward, B returned 0 goals. I explained it by the parse gate rejec
 - Full wmtm suite at HEAD on PeTTa 3681b9b and PeTTaChainer bdae8d7e: 753 passed, 25 skipped (`rev3/gates/pytest_full.log`). Skips depend on the environment.
 - P4 rev3 subset: 5 passed (`rev3/gates/pytest_p4_rev3.txt`).
 - Commits: `rev3/commits.txt` (base b317ff1; rev3 = 9 commits on 0875c96).
+
+---
+
+# Result 4 (rev4): fixes for review 3 (reviewer.claude)
+
+## Summary (rev4)
+
+Review 3 failed rev3 on five findings. Rev4 fixes all five. Note text is no longer in git: the evidence commit was redone (bd0c2e7), and no reachable commit contains raw_spec.json. The proof-kind analysis is also corrected. B's answers are not antecedent completions. Each one is the parser's own rule applied directly (mem_inh) to an asserted fact. The low confidence (0.2017) comes from the engine revising that premise with an estimate it gets by inverting an nwdef defining rule from a 0.5/0.0 prior. With the nwdef rules removed, the same goals come out at 0.9/0.7 by the direct step. So the question to andy changes. It is no longer "do antecedent completions count". It is whether the nwdef defining rules should go into the shadow KB at all, given that they lower the confidence of direct answers (upstream R2 behaviour).
+
+## One row per review 3 finding
+
+| # | Review 3 finding | Rev4 change | Evidence |
+|---|---|---|---|
+| 1 | Note text (`content`) in rev3/raw_spec.json is committed | Evidence commit redone as bd0c2e7 without raw_spec.json; no reachable commit has it; no report json/jsonl has a "content" key (the word appears only as a field name in rev2_evidence/ab/build_cache.py) | check.py R3-F1 (2 checks) |
+| 2 | Proof-kind analysis wrong ("antecedent completion, no direct chain") | rev4/PROOF_KINDS.md replaces rev3's: 12 B answers = direct mem_inh step on a premise revised with an inverted nwdef estimate; nwdef A/B: full 12/13 at 0.9995/0.2017, nonwdef 12/13 at 0.9/0.7 by direct parser implication; minimal KB min_nw 0.9884/0.0214 vs min_no 0.9/0.7 | rev4/PROOF_KINDS.md, rev4/nwdef_ab/{full,nonwdef,min_nw,min_no} |
+| 3 | Criterion 4 diff stale; no W1-W3 for rev3 B | rev4/ab/AB_DIFF_rev4.json: 17 rows, a reason per row, none "B pool 0"; rev4/w123/B_W123.json: 12 proved B goals, W1/W2/W3 all clear (script w123_B.py) | rev4/ab/, rev4/w123/ |
+| 4 | Stopgap bullet not answered (PC3, R1-R7); Equivalence drop unmarked | rev4/UPSTREAM_OVERLAP.md: PC3 and R1-R8 (LIST-roman.md on bdae8d7e) each with a measured shape count. Only R2 affects wmtm (60/132 CTV rules; it is the nwdef effect above). R3 shape present but A/B arm nor3 shows no effect. R4 possible, not established (1 goal times out at 10 s). Others not reachable. Equivalence drop marked `STOPGAP(upstream: PC-EQ1 ...)` in wmtm/pc_shadow.py, row in docs/STOPGAPS.md | rev4/UPSTREAM_OVERLAP.md, rev4/r3_ab/* |
+| 5 | Gates are rev2 runs | Full suite re-run at rev4 tree on PeTTa 3681b9b + PeTTaChainer bdae8d7e (WMTM_PC_PETTA/WMTM_PC_VENDOR/WMTM_SWIPL_BIN set): 753 passed, 25 skipped (skips depend on the environment: hitl checkout, PETTA_PARSER). GoalChainer run stands per review (does not load wmtm) | rev4/gates/pytest_full.log |
+| 6 | Notes | W4 is still judged by the worker, not blind (stated). No change | - |
+
+## Open decision for andy
+
+Should the nwdef defining rules stay in the shadow KB? With them, every direct answer drops from c=0.7 to c≈0.20 (R2 upstream). Without them, B gives the same 12/13 goals at 0.9/0.7, but F7 class symbols lose their defining link. Recommendation: leave them out of the shadow KB (rules only, `shadow_rules`) until R2 is fixed upstream.
+
+## Check
+
+`python3 check.py` from this dir: 26 PASS, RESULT ALL PASS (includes the rev4 checks R3-F1..F5 and SHA256SUMS).
