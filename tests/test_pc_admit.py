@@ -304,3 +304,27 @@ def test_negation_unlikely_needs_confident_no(tmp_path):
     cands, _ = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_negation": "unlikely",
                                          "reasoner_min_strength": 0.3}, _store())
     assert [c.content for c in cands] == ["unlikely: cat is a animal"]
+
+
+# --- P4 rev5 (review 4 finding 1): direct parser-implication proofs count as derivations; shadow_nwdef flag ---
+def test_parser_implication_proof_is_a_derivation():
+    assert pc_admit._PARSER_RULE.search("(by i_ep_note_20261103T203949Z__x2_implication sp121)")
+    assert pc_admit._PARSER_RULE.search("(by i_ep_x__a1_implication_c1 sp3)")
+    assert not pc_admit._PARSER_RULE.search("(by sp12)")
+    assert not pc_admit._PARSER_RULE.search("(by nwdef_sk_x sp3)")
+
+
+def test_shadow_nwdef_flag_drops_only_defining_rules():
+    atoms = ["(: i_n__x1_implication (Implication (Member $x a) (Member $x b)) (STV 0.9 0.9))"]
+    defs = {"a__nw_q": "a"}
+    with_nw = pc_shadow.semparse_rules(atoms, dict(defs))
+    no_nw = pc_shadow.semparse_rules(atoms, dict(defs), nwdef=False)
+    assert any("nwdef_" in r for r in with_nw)
+    assert not any("nwdef_" in r for r in no_nw)
+    assert [r for r in with_nw if "nwdef_" not in r] == no_nw and no_nw
+
+
+def test_runtime_config_shadow_nwdef(monkeypatch):
+    assert rc.resolve()["shadow_nwdef"] is True
+    monkeypatch.setenv("WMTM_PC_SHADOW_NWDEF", "false")
+    assert rc.resolve()["shadow_nwdef"] is False

@@ -144,7 +144,7 @@ def _flat_member_rule(node) -> bool:
     return True
 
 
-def semparse_rules(atom_strs, defs=None):
+def semparse_rules(atom_strs, defs=None, nwdef=True):
     """P4: the parser's (: id (Implication P C) tv) rules, as MeTTa strings, for the shadow KB (Equivalence dropped).
     Narrowed classes are replaced by their deterministic symbols (F7 design) and every symbol seen (in rules
     or, via defs, in facts) gets its defining rule appended."""
@@ -159,7 +159,7 @@ def semparse_rules(atom_strs, defs=None):
             r = to_str(node)
             if r not in out:
                 out.append(r)
-    for r in narrow_defining_rules(defs):
+    for r in (narrow_defining_rules(defs) if nwdef else []):   # P4 rev5: shadow_nwdef=False leaves them out (upstream R2)
         if r not in out:
             out.append(r)
     return out
@@ -441,7 +441,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
                     metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); src["sp%d" % i] = it.id; lf["sp%d" % i] = "(%s %s %s)" % (h, x, y); i += 1
                 if cfg.get("shadow_rules", True):   # P4: the parser's Implication rules (flat Member classes only)
                     _d = {}; semparse_facts(cached[it.id], _d)   # F7 design: defining rules for fact classes too
-                    for r in semparse_rules(cached[it.id], _d):
+                    for r in semparse_rules(cached[it.id], _d, nwdef=bool(cfg.get("shadow_nwdef", True))):
                         if r not in metta:
                             metta.append(r); n_rules += 1
             continue

@@ -10,9 +10,9 @@ On the real notes, arm B (latest parser and engine) now proves 12 of 13 goals. I
 
 | # | Review 2 finding | Rev3 change | Evidence (in this dir unless noted) |
 |---|---|---|---|
-| 1 | Goal pool uses flat facts only; parser rules never targeted; no real-engine test of a parsed note chaining | Commit 1aa85f8 adds `rule_goal_pool`: Implication and nwdef rules (And-premise, up to max_hops) propose goals, skipping function-term consequents. 1f8de8b and 552f400 keep goals about note-scoped witnesses `sk_<x>__i_<note>` (gate_scoped_witness, shadow_scoped_witness, default on). 9ebc2c5 adds a real-engine parsed-note test. 0224285 fixes the name_resolve "before" check | `rev3/new_tests.txt`, `rev3/gates/pytest_p4_rev3.txt` (5/5), `rev3/bdae8d7e/shadow_B.jsonl` (13 goals, 12 proved), `rev3/PROOF_KINDS.md` |
+| 1 | Goal pool uses flat facts only; parser rules never targeted; no real-engine test of a parsed note chaining | Commit 1aa85f8 adds `rule_goal_pool`: Implication and nwdef rules (And-premise, up to max_hops) propose goals, skipping function-term consequents. 1f8de8b and 552f400 keep goals about note-scoped witnesses `sk_<x>__i_<note>` (gate_scoped_witness, shadow_scoped_witness, default on). 2baf21a adds a real-engine parsed-note test. 52bd00f fixes the name_resolve "before" check | `rev3/new_tests.txt`, `rev3/gates/pytest_p4_rev3.txt` (5/5), `rev3/bdae8d7e/shadow_B.jsonl` (13 goals, 12 proved), `rev3/PROOF_KINDS.md` |
 | 2 | Pins not replaced in the code | 23267b5: `runtime_config.py` pettachainer_dir defaults to pettachainer-bdae8d7e; `vendor_runtime.sh` PC_PIN=bdae8d7e; hitl PIN=f44d7b74 (1f1a7a6f kept as an accepted older pin); PETTA_PIN.md lists PeTTa 3681b9b (pr/compact-datatypes, as named by PeTTaChainer bdae8d7e pyproject) | `rev3/pins_in_code.txt` (git grep at HEAD) |
-| 3 | F7 handled as a STOPGAP, against Track P 8cf5006; no proof kind or STV per answer | 3e3d573 and 6123847: no STOPGAP marker; docs/STOPGAPS.md emptied; README says F7 naming is the design. PROOF_KINDS.md gives the STV and proof kind for every A and B answer. Count of B antecedent-completion answers: 12 of 12 proved; 0 direct | `rev3/stopgap_grep.txt` (0), `rev3/PROOF_KINDS.md`, `rev3/B_W4_JUDGMENTS_bdae8d7e.md` |
+| 3 | F7 handled as a STOPGAP, against Track P 8cf5006; no proof kind or STV per answer | 3e3d573 and 8b11545: no STOPGAP marker; docs/STOPGAPS.md emptied; README says F7 naming is the design. PROOF_KINDS.md gives the STV and proof kind for every A and B answer. Count of B antecedent-completion answers: 12 of 12 proved; 0 direct | `rev3/stopgap_grep.txt` (0), `rev3/PROOF_KINDS.md`, `rev3/B_W4_JUDGMENTS_bdae8d7e.md` |
 | 4 | Stop-line not followed | Written up below. The structural cause is now fixed, not worked around. The remaining open point is raised as a decision, not deferred | this file, "Finding 4" |
 | 5 | Evidence on pop-os, not reachable | All rev2 and rev3 evidence is committed inside the branch (1.5 MB; secret scan clean, since the "Bearer" hits are a MeTTa predicate name). Rev2 `check.py` runs from `rev2_evidence/`. A new `check.py` and `SHA256SUMS` are in this dir. The branch is not pushed (task order; no GitHub credentials on this host), so the reviewer needs the hive to fetch it or a human to push `hive/t-2026-11-05-p4-latest` | `check.py`, `SHA256SUMS`, `rev2_evidence/` |
 | 6 | Equivalence silently fails; LICENSE test depends on host path; default 2 s run canary_fail | f84f7f2: `semparse_rules` drops Equivalence, and a test covers it. The hitl LICENSE is a test fixture, so the verify_checkout tests now run on any host. On bdae8d7e the default timeout of 2 s gives status ok: canary proved, negative is prior only, 12/13 (the rev2 canary_fail was on 202b9379 under load) | `rev3/bdae8d7e_default_t2/NOTE.md`, `shadow_B_t2.jsonl` |
@@ -53,3 +53,26 @@ Should the nwdef defining rules stay in the shadow KB? With them, every direct a
 ## Check
 
 `python3 check.py` from this dir: 26 PASS, RESULT ALL PASS (includes the rev4 checks R3-F1..F5 and SHA256SUMS).
+
+---
+
+# Result 5 (rev5): fixes for review 4 (reviewer.claude)
+
+## Summary (rev5)
+
+Review 4 found that rev4's recommendation (leave the nwdef rules out) would admit zero conclusions, because wmtm's admission filter (`pc_admit`) dropped direct parser-implication proofs as "asserted". It also found that no flag selected that configuration. Rev5 adds both pieces. The `shadow_nwdef` flag (`WMTM_PC_SHADOW_NWDEF`, default true) leaves out only the `nwdef_*` defining rules. `pc_admit._PARSER_RULE` counts `(by i_<note>__<id>_implication ...)` proofs as derivations. Run through the real code path and wmtm's own admission filter, the flag-off configuration admits **5 conclusions at c=0.7**, against 5 at c=0.2017 with nwdef in.
+
+**Propose deploy: yes, with `WMTM_PC_SHADOW_NWDEF=false`, because criteria 3–5 pass.** Criterion 3: the goal+PC tests pass 285/285 (command recorded), and the full suite passes 759 with 22 environment skips. The GoalChainer 186/186 run stands. Criterion 4: correct(B)=10 ≥ correct(A)=2 and wrong(B)=2 ≤ wrong(A)=2, as pre-registered. Criterion 5: weighted usage is 1.504× live, latency is about 60 s, and there were zero 429s. Stated plainly, deploy adds little: the 5 admitted conclusions are one-hop restatements of a modifier the parser attached to a per-note witness symbol (e.g. "sk_commit_1__… is a staged"). All 5 were judged correct, but they are not comparable in content to A's cross-note claims. Whether to deploy is the humans' call.
+
+## One row per review 4 finding
+
+| # | Review 4 finding | Rev5 change | Evidence |
+|---|---|---|---|
+| 1 | nwdef-free recommendation admits 0 via pc_admit; no flag for it | `shadow_nwdef` flag (runtime_config, pc_shadow.semparse_rules(nwdef=), README row); `pc_admit._PARSER_RULE`; 3 new tests. Flag-off spec from `snapshot_from_raw` = rev4 nwdef-free spec (336 atoms, same 13 goals). Real worker (PeTTa 3681b9b, PeTTaChainer bdae8d7e): 12/13 proved, add_fail 0. pc_admit: full 5 @0.2017; nonwdef pre-rev5 filter 0 (12 "asserted"), rev5 filter 5 @0.7 (1 below threshold) | rev5/admit/ADMIT_AB.json, run_admit.py; rev5/nonwdef_flag/ |
+| 2 | No "Propose deploy" line | See the Summary above: yes, with WMTM_PC_SHADOW_NWDEF=false, against criteria 3–5 | this section |
+| 3 | Say plainly what deploy produces | Stated in the Summary (5 low-information one-hop conclusions, all judged correct) | rev5/admit/ADMIT_AB.json admitted_goals |
+| 4a | README/RUNTIME hitl pin 1f1a7a6f | Changed to f44d7b74 (1f1a7a6f noted as rollback) | README.md, docs/RUNTIME.md |
+| 4b | Stale rev3 SHAs | 6123847→8b11545, 0224285→52bd00f, 9ebc2c5→2baf21a in REPORT.md, rev3/commits.txt, pins_in_code.txt, stopgap_grep.txt | check R4-F4b |
+| 4c | Note sentence quoted in judgments | 16 quoted phrases replaced in the 4 JUDGMENTS files | check R4-F4c |
+| 4d | Token passed to a subprocess by env | run_measure.py runs measure_parse in-process (runpy); no subprocess | check R4-F4d |
+| 4e | 242 goal-test gate has no command | rev5/gates/goals_cmd.txt; 285 passed (the collection grew with rev3–rev5 tests) | rev5/gates/goals_pc.log |

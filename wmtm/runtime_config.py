@@ -131,6 +131,7 @@ SPEC = {
     "shadow_max_goals":    ("WMTM_PC_SHADOW_MAX_GOALS", int, 60, None),
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),
     "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
+    "shadow_nwdef":        ("WMTM_PC_SHADOW_NWDEF", bool, True, None),           # P4 rev5: add nwdef_* defining rules for narrowed classes (False: leave out, upstream R2 lowers c)
     "shadow_skolem_goals": ("WMTM_PC_SHADOW_SKOLEM_GOALS", bool, False, None),
     "shadow_scoped_witness_goals": ("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> goals allowed
     "shadow_goal_rank":    ("WMTM_PC_SHADOW_GOAL_RANK", bool, True, None),       # Track N: Design A ranked goal pool (off = Track M 2-step goals)

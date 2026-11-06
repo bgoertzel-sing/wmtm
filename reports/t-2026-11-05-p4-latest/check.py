@@ -59,6 +59,22 @@ chk("R3-F4: UPSTREAM_OVERLAP covers PC3 and R1-R8", all(("| %s" % k) in uo for k
 chk("R3-F4: STOPGAP(upstream: PC-EQ1) marker in code and STOPGAPS.md", "STOPGAP(upstream: PC-EQ1" in ps and "PC-EQ1" in open(os.path.join(root, "docs/STOPGAPS.md")).read())
 f4 = open("rev4/gates/pytest_full.log").read().strip().splitlines()[-1]
 chk("R3-F5: rev4 full suite 0 failed", "failed" not in f4 and "passed" in f4, f4.strip("= "))
+# --- P4 rev5 (review 4 findings) ---
+ab = json.load(open("rev5/admit/ADMIT_AB.json"))
+chk("R4-F1: pc_admit admits 5 for nwdef-free flag run (pre-rev5 filter 0)", ab["nonwdef_flag"]["rev5"]["candidates"] == 5 and ab["nonwdef_flag"]["pre_rev5"]["candidates"] == 0 and set(ab["nonwdef_flag"]["rev5"]["admitted_conf"]) == {0.7})
+pa = open(os.path.join(root, "wmtm/pc_admit.py")).read(); rcf = open(os.path.join(root, "wmtm/runtime_config.py")).read()
+chk("R4-F1: shadow_nwdef flag + _PARSER_RULE in code", "_PARSER_RULE" in pa and "WMTM_PC_SHADOW_NWDEF" in rcf and "nwdef=" in ps)
+chk("R4-F2: explicit Propose deploy line", "**Propose deploy: yes" in open("REPORT.md").read())
+rd = open(os.path.join(root, "README.md")).read() + open(os.path.join(root, "docs/RUNTIME.md")).read()
+chk("R4-F4a: no semparse-hitl-1f1a7a6f default in docs", "semparse-hitl-1f1a7a6f" not in rd)
+st = open("REPORT.md").read().split("# Result 5 (rev5)")[0] + "".join(open(f).read() for f in ("rev3/commits.txt", "rev3/pins_in_code.txt", "rev3/stopgap_grep.txt"))   # rev5 section names the old SHAs in its mapping row
+chk("R4-F4b: no stale rev3 SHAs", not any(x in st for x in ("6123847", "0224285", "9ebc2c5")))
+jq = [f for f in ("rev3/B_W4_JUDGMENTS.md", "rev3/B_W4_JUDGMENTS_bdae8d7e.md", "rev3/P3_W4_JUDGMENTS.md", "rev2_evidence/ab/P3_W4_JUDGMENTS.md") if re.search(r'"[^"\n|]{3,}"', open(f).read())]
+chk("R4-F4c: no quoted note phrases in judgments", not jq, ",".join(jq))
+chk("R4-F4d: run_measure.py starts no subprocess", "subprocess.call" not in open("rev2_evidence/budget/run_measure.py").read())
+g5 = open("rev5/gates/goals_pc.log").read(); f5 = open("rev5/gates/pytest_full.log").read()
+chk("R4-F4e: goal gate command recorded, 0 failed", os.path.exists("rev5/gates/goals_cmd.txt") and "passed" in g5 and "failed" not in g5 and "rc=0" in g5)
+chk("R4: rev5 full suite 0 failed", "failed" not in f5 and "rc=0" in f5)
 if os.path.exists("SHA256SUMS"):
     r = subprocess.run(["sha256sum", "--quiet", "-c", "SHA256SUMS"], capture_output=True, text=True)
     chk("SHA256SUMS verify", r.returncode == 0, r.stdout[-300:])

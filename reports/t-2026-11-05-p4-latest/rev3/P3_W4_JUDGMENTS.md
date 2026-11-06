@@ -3,5 +3,5 @@ Caveat: the arm summaries (stv) were already visible before this file was writte
 #0 (Member hive_t_2026_10_28_goalchainer_v2_status branch): WRONG. The source says the *branch* hive/t-... is a branch; the task id itself is not a branch. Parse conflates task id with branch name.
 #1 (Inheritance chat_send valid) from 185132Z+185959Z: WRONG as unconditional fact. Sources say a send is valid ONLY while a request is open; the condition was dropped by the parse.
 #2 (Inheritance hive_progress_report report): CORRECT (trivially true).
-#3 (Member turn_without_send_entry entry): CORRECT (the LTM entry "Turn w/o send=MY error" is an entry).
+#3 (Member turn_without_send_entry entry): CORRECT (the LTM entry [note phrase removed, rev5] is an entry).
 #4 (Inheritance chat_send valid) from 185959Z only: WRONG, same reason as #1.
