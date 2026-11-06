@@ -23,3 +23,40 @@ def test_and_premise_and_two_hops():
 def test_function_term_consequent_skipped():
     rules = ["(: r (Implication (Member $y skip) (Member (sk_depend__n $y) depend)) (STV 0.9 0.7))"]
     assert ps.rule_goal_pool({("Member", "s", "skip")}, rules, 3) == {}
+
+
+# --- review 2 finding 1: real-engine test of a PARSED note chaining (no fake "x is a y" parser) ---
+import json, os, subprocess, sys
+import pytest
+from wmtm import runtime_config as rc
+from wmtm.store import WMTMStore
+
+_FIX = os.path.join(os.path.dirname(__file__), "fixtures", "p4_note_190214Z", "parse.json")
+_CFG = rc.resolve()   # vendor paths; override with WMTM_PC_PETTA / WMTM_PC_VENDOR / WMTM_SWIPL_BIN
+HAVE_PC = os.path.isdir(os.path.join(_CFG["petta_dir"], "python")) and os.path.isdir(os.path.join(_CFG["pettachainer_dir"], "pettachainer"))
+GOAL = "(Member sk_bundle_1__i_ep_note_20261028T190214Z acl_d)"   # B #9, hand-judged CORRECT
+
+
+def _parsed_store(monkeypatch):
+    fx = json.load(open(_FIX))
+    st = WMTMStore(); st.admit(fx["item_id"], "note 190214Z", source_type="recalled", initial_sti=1.0)
+    monkeypatch.setattr(ps, "_cache_lookup", lambda items, *a, **k: {it.id: list(fx["atoms"]) for it in items})
+    return st
+
+
+def test_parsed_note_proposes_rule_goal(monkeypatch):
+    spec = ps.build_snapshot(_parsed_store(monkeypatch), cycle=1)
+    assert spec["goal_rank"]["pool"] > 0 and GOAL in spec["goals"]
+
+
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+def test_parsed_note_chains_on_real_engine(monkeypatch, tmp_path):
+    spec = ps.build_snapshot(_parsed_store(monkeypatch), cycle=1)
+    sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow.jsonl"
+    code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out), "--timeout", "10"],
+                          env=rc.worker_env(_CFG), cwd=rc.DIST_ROOT, timeout=300).returncode
+    rec = json.loads(out.read_text().strip().splitlines()[-1])
+    assert code == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
+    q = {x["goal"]: x for x in rec["queries"]}
+    proof = q[GOAL].get("proof") or ""
+    assert q[GOAL]["ok"] and q[GOAL].get("stv") and ("nwdef" in proof or "implication" in proof)
