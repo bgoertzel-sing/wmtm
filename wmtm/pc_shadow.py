@@ -254,6 +254,78 @@ def goal_pool(rel, max_hops=3, skolem_goals=False, max_pool=MAX_POOL):
     return pool
 
 
+def _parse_rules(rule_strs):
+    """P4 rev3: (id, [premise atoms], consequent) for parser/defining Implication rules whose premises are binary
+    atoms over symbols/variables (a single atom or an And of them) and whose consequent is one binary atom.
+    Other shapes (Not/Directive/Can consequents, function terms) cannot yield a nameable goal and are skipped."""
+    from .semparse_adapter import split_toplevel
+    out = []
+    for _src, node, err in split_toplevel("\n".join(rule_strs or [])):
+        if err or not (isinstance(node, list) and len(node) == 4 and node[0] == ":"):
+            continue
+        r = node[2]
+        if not (isinstance(r, list) and len(r) == 3 and r[0] == "Implication"):
+            continue
+        prem, con = r[1], r[2]
+        prems = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
+        flat = lambda a: isinstance(a, list) and len(a) == 3 and all(isinstance(x, str) for x in a)
+        if prems and all(flat(a) for a in prems) and flat(con):
+            out.append((node[1], [tuple(a) for a in prems], tuple(con)))
+    return out
+
+
+def _match(prems, facts_by_head, env=None):
+    env = env or {}
+    if not prems:
+        yield env; return
+    h, a, b = prems[0]
+    for (fa, fb) in facts_by_head.get(h, ()):
+        e = dict(env); ok = True
+        for pat, val in ((a, fa), (b, fb)):
+            if pat.startswith("$"):
+                if e.setdefault(pat, val) != val: ok = False
+            elif pat != val:
+                ok = False
+        if ok:
+            yield from _match(prems[1:], facts_by_head, e)
+
+
+def rule_goal_pool(rel, rule_strs, max_hops=3, skolem_goals=False, max_pool=MAX_POOL, pool=None):
+    """P4 rev3: goals from the parser's Implication rules (and the Narrow defining rules), forward-chained up to
+    max_hops rule applications over the KB facts.  -> {(head, a, c): (hops, [chain])} merged into pool; a chain
+    entry is a premise fact (head, a, b) or ("Rule", rule_id, "").  Goal kind is "rule" (vs fact-chain)."""
+    pool = {} if pool is None else pool
+    rules = _parse_rules(rule_strs)
+    known = {t: (0, [t]) for t in rel}
+    for _ in range(max(1, int(max_hops))):
+        fbh = {}
+        for (h, a, b) in known:
+            fbh.setdefault(h, []).append((a, b))
+        new = {}
+        for rid, prems, con in rules:
+            for env in _match(list(prems), fbh):
+                t = (con[0],) + tuple(env.get(x, x) if x.startswith("$") else x for x in con[1:])
+                if any(x.startswith("$") for x in t[1:]) or t in known or t in new:
+                    continue
+                ps = [tuple(env.get(x, x) if x.startswith("$") else x for x in p) for p in prems]
+                hops = 1 + max(known[p][0] for p in ps)
+                chain = [c for p in ps for c in known[p][1]] + [("Rule", rid, "")]
+                new[t] = (hops, chain)
+        if not new:
+            break
+        known.update(new)
+        for t, (hops, chain) in new.items():
+            if t in rel or t[1] == t[2] or hops > max_hops:
+                continue
+            if not skolem_goals and (is_skolem(t[1]) or is_skolem(t[2])):
+                continue
+            if t not in pool or hops < pool[t][0]:
+                if t not in pool and len(pool) >= max_pool:
+                    continue
+                pool[t] = (hops, chain)
+    return pool
+
+
 def request_terms(facts_by_item, user_items, rel):
     """(entities, tokens) of the current user request: entities from the parse of source_type=user items plus
     their 1-hop KB neighbours; tokens from the request text (so an unparsed request still anchors by name)."""
@@ -375,6 +447,9 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         users = [it for it in items if getattr(it, "source_type", "") == "user"]
         req = request_terms(fbi, users, rel)
         pool = goal_pool(rel, int(cfg.get("shadow_max_hops") or 3), skolem_goals)
+        if cfg.get("shadow_rules", True):   # P4 rev3: parser Implication + defining rules also propose goals
+            rule_goal_pool(rel, [a for a in metta if "(Implication" in a], int(cfg.get("shadow_max_hops") or 3),
+                           skolem_goals, pool=pool)
         ranked = rank_goals(pool, rel, req, fsti, max_goals, int(cfg.get("shadow_min_hops") or 1),
                             _weights(cfg.get("shadow_goal_weights")))
         goals = [g for g, _ in ranked]
