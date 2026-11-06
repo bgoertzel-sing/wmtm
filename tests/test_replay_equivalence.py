@@ -71,7 +71,8 @@ def _inputs(dataset):
 # Track L: reasoner off (see orig-tree note below).  Track P: the rc2 recall/context behaviour (the original glue
 # has no fresh-recall protection, relevance ranking or request item); tests/test_track_p.py covers the new one.
 _REPLAY_ENV = {"WMTM_REASONER": "off", "WMTM_CLEANUP_PROTECT_RECENT": "0", "WMTM_CONTEXT_RANK": "0",
-               "WMTM_REQUEST_ITEM": "0"}
+               "WMTM_REQUEST_ITEM": "0",
+               "WMTM_FORGET_ONE_RULE": "0"}   # F1 §9: the 83ea611 glue never logged stale-cleanup evictions
 
 
 def _replay(tmp_path, orig_src, steps, state, journal, mode):
@@ -165,7 +166,14 @@ def test_known_answer_canary(tmp_path, orig_src, impl):
     sti1 = st1["store"]["items"]["ep-note-20261015T180000Z"]["attention"]["sti"]
     st2 = json.loads(r[2]["files"]["memory/_wmtm_state.json"])
     sti2 = st2["store"]["items"]["ep-note-20261015T180000Z"]["attention"]["sti"]
-    assert abs(sti2 - sti1 * 0.9) < 1e-9             # fast path: exactly one 0.9 decay
+    if impl == "orig":
+        assert abs(sti2 - sti1 * 0.9) < 1e-9         # fast path: exactly one 0.9 decay
+    else:
+        # F1 §9: the fast path applies the cycle's rule: one 0.9 decay, plus the cycle's reinforce (+2.0, 5% to ATI)
+        # if the item was used in the snapshot's cycle (passive use of displayed items after the user turn)
+        rec = (st1.get("utility") or {}).get("records", {}).get("ep-note-20261015T180000Z") or {}
+        used = rec.get("use_count", 0) > 0 and rec.get("last_use_tick") == st1["cycle"]
+        assert abs(sti2 - (sti1 * 0.9 + (1.9 if used else 0.0))) < 1e-9
     assert st2["cycle"] == st1["cycle"] + 1
     assert "zebra-quartz-41" in r[2]["out"][-1]["content"]
     b4 = r[3]["out"][-1]["content"]

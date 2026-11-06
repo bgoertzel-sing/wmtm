@@ -365,3 +365,62 @@ def test_feed_llm_without_base_url_is_llm_error(monkeypatch):
     with pytest.raises(RuntimeError, match="BASE_URL"):
         llm("s", "u")
     assert llm.last_usage is None
+
+
+# OpenClaw gateway shape (probe 2026-11-05): no cache_creation_input_tokens; total_tokens carries cache-write.
+GW_OPENCLAW_USAGE = {"prompt_tokens": 2132, "completion_tokens": 9, "total_tokens": 3488,
+                     "prompt_tokens_details": {"cached_tokens": 2128}}
+
+
+@needs_hitl
+def test_gateway_cache_write_from_total(monkeypatch):
+    """cache_write = total - prompt - completion when the gateway omits it (toOpenAiChatCompletionsUsage)."""
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    gw = _FakeGateway("hello", GW_OPENCLAW_USAGE)
+    try:
+        llm = P.gateway_llm(gw.base_url, model="openclaw/x", hitl=HITL)
+        assert llm("SYS", "USER") == "hello"
+    finally:
+        gw.close()
+    u = llm.last_usage
+    assert (u["cache_read"], u["cache_write"], u["uncached_input"], u["output"]) == (2128, 1347, 4, 9)
+    assert u["cache_write_source"] == "gateway_total_minus_prompt_completion"
+    assert u["prompt_tokens"] == 2132 + 1347 and u["total_tokens"] == 3488
+    assert M.weighted({k: u.get(k) for k in M.WEIGHTS}) is not None
+
+
+def test_gateway_usage_rules():
+    split = P.split_usage({"input": 100, "cached": 60, "cache_write": None, "output": 5})
+    assert P.gateway_usage(split, {"total_tokens": 125})["cache_write"] == 20
+    assert P.gateway_usage(split, {"total_tokens": 125})["uncached_input"] == 40
+    neg = P.gateway_usage(split, {"total_tokens": 90})                  # gap < 0: stays unknown
+    assert neg["cache_write"] is None and neg["uncached_input"] is None
+    assert P.gateway_usage(split, {})["cache_write"] is None            # no total: stays unknown
+    rep = P.gateway_usage(P.split_usage({"input": 100, "cached": 60, "cache_write": 10, "output": 5}),
+                          {"total_tokens": 999})
+    assert rep["cache_write"] == 10 and rep["cache_write_source"] == "reported"
+    assert P.gateway_usage(None, {"total_tokens": 1}) is None
+
+
+def test_baseline_tokens_uses_total_tokens_p2_overlap():
+    """t-2026-11-05-p3-join-ab (cos answer 3): live rows without a cache split use p2-real-notes' rule
+    ui=min(4,P), cache_read=P-ui, cache_write=T-P-C, output=C.  Reproduces p2's baseline_per_note.csv exactly
+    for the 4 notes shared with the P3 pilot (live parse_log P,C,T)."""
+    cases = [((4, 4305, 94094), 133760.25), ((4, 5838, 95676), 141486.5),
+             ((2132, 6992, 96742), 144699.3), ((2132, 11531, 101515), 167686.8)]
+    for (P, C, T), want in cases:
+        row = {"hash": "h", "status": "ok", "prompt_tokens": P, "completion_tokens": C, "total_tokens": T}
+        t = M.baseline_tokens(row)
+        assert t["cache_write"] == T - P - C and t["cache_read"] == P - min(4, P)
+        b = {**t, "cache_split_known": True, "weighted": M.weighted(t)}
+        assert abs(M.live_weighted(b, "cache_write") - want) <= 0.05   # weighted() rounds to 0.1; p2 kept 2 dp
+        assert M.live_weighted(b, "uncached_input") == M.live_weighted(b, "cache_write")
+
+
+def test_load_baseline_split_known_from_total(tmp_path):
+    import json
+    d = tmp_path / "spk1"; d.mkdir()
+    (d / "parse_log.jsonl").write_text(json.dumps({"hash": "e5118c2f", "status": "ok", "secs": 1.0,
+        "prompt_tokens": 4, "completion_tokens": 4305, "total_tokens": 94094}) + "\n")
+    b = M.load_baseline(str(tmp_path))["e5118c2f"]
+    assert b["cache_split_known"] and b["cache_write"] == 89785 and abs(b["weighted"] - 133760.25) <= 0.05

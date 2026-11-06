@@ -1,7 +1,7 @@
 """Track G shadow worker: ``python -m wmtm.workers.pc_shadow --spec S --out O [--config C]``.
 
 Launched detached by wmtm/pc_shadow.py; never waited on.  Outer process: builds the snapshot from the raw spec
-(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa v1.0.6 + PeTTaChainer 36b3fe6 dedup-patched,
+(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa rT 3681b9b + PeTTaChainer rT 202b9379,
 paths from the runtime config), which loads transitivity rules + mem_inh + snapshot atoms + Grace canary facts and
 answers one goal per stdin line.  Each query has a hard timeout (default 2 s) enforced by SIGKILL of the child's
 process group; the queries share a budget (default 20 s).  Address space is capped (worker_mem_mb, inherited by the
@@ -10,7 +10,7 @@ not, through this exact path, else the record is marked canary_fail and no goal 
 structurally checked.  One JSONL line appended to --out per run (size-capped, rotated to .1); the spec file is
 deleted afterwards.
 """
-import argparse, json, os, sys, time, signal, select, subprocess
+import argparse, json, os, re, sys, time, signal, select, subprocess
 
 from wmtm import runtime_config as rc
 
@@ -24,7 +24,7 @@ ap.add_argument("--vendor", default=None, help="PeTTaChainer dir (contains petta
 ap.add_argument("--steps", type=int, default=None)
 ap.add_argument("--timeout", type=float, default=None)
 ap.add_argument("--budget", type=float, default=None)
-ap.add_argument("--warm-timeout", type=float, default=60.0)
+ap.add_argument("--warm-timeout", type=float, default=None)   # F1 §11: default from shadow_warm_timeout_s
 ap.add_argument("--keep-spec", action="store_true")
 a = ap.parse_args()
 CFG = rc.load_worker_config(a.config) if a.config else rc.resolve()
@@ -33,13 +33,14 @@ a.vendor = a.vendor or CFG["pettachainer_dir"]
 a.steps = a.steps if a.steps is not None else int(CFG["shadow_steps"])
 a.timeout = a.timeout if a.timeout is not None else float(CFG["shadow_timeout_s"])
 a.budget = a.budget if a.budget is not None else float(CFG["shadow_budget_s"])
+a.warm_timeout = a.warm_timeout if a.warm_timeout is not None else float(CFG.get("shadow_warm_timeout_s") or 120.0)
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb")) if not a.inner else None
 PRIO_GUARD = rc.PriorityGuard(CFG) if not a.inner else None   # set in the child itself; re-asserted on it + the PeTTa child
 PRIO = PRIO_GUARD.start() if PRIO_GUARD else None
 RULES = [
-    "(: mem_inh (Implication (Premises (Member $x $a) (Inheritance $a $b)) (Conclusions (Member $x $b))) (STV 1.0 0.99))",
-    "(: inh_trans (Implication (Premises (Inheritance $a $b) (Inheritance $b $c)) (Conclusions (Inheritance $a $c))) (STV 1.0 0.99))",
-    "(: imp_trans (Implication (Premises (Implies $a $b) (Implies $b $c)) (Conclusions (Implies $a $c))) (STV 1.0 0.99))",
+    "(: mem_inh (Implication (And (Member $x $a) (Inheritance $a $b)) (Member $x $b)) (STV 1.0 0.99))",
+    "(: inh_trans (Implication (And (Inheritance $a $b) (Inheritance $b $c)) (Inheritance $a $c)) (STV 1.0 0.99))",
+    "(: imp_trans (Implication (And (Implies $a $b) (Implies $b $c)) (Implies $a $c)) (STV 1.0 0.99))",
 ]
 CANARY = ["(: cf (Member grace pilot) (STV 1.0 0.99))", "(: cg (Inheritance pilot person) (STV 1.0 0.99))"]
 CANARY_GOAL, NEG_GOAL = "(Member grace person)", "(Member grace robot)"
@@ -114,9 +115,16 @@ def ask(w, g, tmo):
     if not isinstance(r, list) or not all(isinstance(x, str) for x in r):
         w.kill(); return None, {"goal": g, "s": dt, "timeout": False, "ok": False, "structural_fail": True}
     head = g.split()[0].lstrip("(")
-    ok = any(head in x for x in r)
+    # rT 202b9379: a ground root with no derivation answers its population prior, "(: (population-prior ..) G TV)".
+    # That is a base rate, not a proof of G (never materialized upstream, core_contract.md:165), so it never counts as ok.
+    prior = [x for x in r if head in x and re.match(r"\(:\s*\(population-prior\b", x.strip())]
+    derived = [x for x in r if head in x and x not in prior]
+    ok = bool(derived)
     rec = {"goal": g, "s": dt, "timeout": False, "ok": ok, "n": len(r)}
-    if r and not ok: rec["structural_fail"] = True
+    if prior:
+        rec["prior"] = prior[0][:500]
+    if r and not ok and not prior: rec["structural_fail"] = True
+    r = derived or r
     if ok:
         tv = parse_stv(r)
         if tv: rec["stv"] = [round(tv[0], 4), round(tv[1], 4)]

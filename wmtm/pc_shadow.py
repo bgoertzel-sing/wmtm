@@ -67,30 +67,134 @@ def _cache_lookup(items, cache_dir=None, context=False, speaker=False):
     return out
 
 
-def semparse_facts(atom_strs):
-    """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped)."""
+# F7 design (Track P README 8cf5006, binding for P4): a narrowed Member class such as (Narrow pilot (Mod harbour))
+# is named by a deterministic symbol plus a defining rule.  This is the design, not a stopgap.
+def narrow_symbol(node) -> str:
+    """Deterministic class symbol for a (Narrow base R...) class: <base>__nw_<sha1(form)[:10]>."""
+    import hashlib
+    from .semparse_adapter import to_str
+    base = node[1] if isinstance(node[1], str) else narrow_symbol(node[1])
+    return "%s__nw_%s" % (base, hashlib.sha1(to_str(node).encode()).hexdigest()[:10])
+
+
+def _is_narrow(n) -> bool:
+    return (isinstance(n, list) and len(n) >= 3 and n[0] == "Narrow"
+            and (isinstance(n[1], str) or _is_narrow(n[1])))
+
+
+def _name_narrow(node, defs):
+    """F7 design: replace every narrowed Member class by its deterministic symbol; defs collects
+    symbol -> (base symbol, narrow form) so each symbol gets its defining rule."""
+    if isinstance(node, list):
+        if len(node) == 3 and node[0] == "Member" and _is_narrow(node[2]):
+            return ["Member", _name_narrow(node[1], defs), _narrow_to_sym(node[2], defs)]
+        return [_name_narrow(x, defs) for x in node]
+    return node
+
+
+def _narrow_to_sym(n, defs):
+    base = n[1] if isinstance(n[1], str) else _narrow_to_sym(n[1], defs)
+    sym = narrow_symbol(n)
+    defs.setdefault(sym, base)
+    return sym
+
+
+def narrow_defining_rules(defs):
+    """F7 design: (Member $x <sym>) implies (Member $x <base>) for every named narrowed class."""
+    return ["(: nwdef_%s (Implication (Member $x %s) (Member $x %s)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))"
+            % (sym, sym, base) for sym, base in sorted(defs.items())]
+
+
+def _forms(atom_strs, defs):
     from .semparse_adapter import split_toplevel
-    out = []
-    for src, node, err in split_toplevel("\n".join(atom_strs)):
+    for _src, node, err in split_toplevel("\n".join(atom_strs or [])):
         if err or not isinstance(node, list):
             continue
         if node and node[0] == "Interpretation" and len(node) == 3:
             node = node[2]
-        if len(node) != 4 or node[0] != ":":
+        if not (isinstance(node, list) and len(node) == 4 and node[0] == ":"):
             continue
+        yield _name_narrow(node, defs)
+
+
+def _derived_fact(it, live_ids):
+    """F1 §3: (head, a, b, s, c) for a reasoner-admitted conclusion, from its provenance goal and engine STV; None
+    if it has no usable provenance or any of its sources is no longer in the active set (sources withdrawn)."""
+    pv = getattr(it, "provenance", None) or {}
+    srcs = list(getattr(it, "derived_from", None) or [])
+    if not srcs or any(s not in live_ids for s in srcs):
+        return None
+    if pv.get("polarity") == "negative":
+        return None   # an "unlikely:" conclusion is not the goal fact
+    m = re.match(r"^\((\w+) (\S+) (\S+)\)$", str(pv.get("goal") or ""))
+    tv = pv.get("stv")
+    if not m or m.group(1) not in SP_HEADS or not (isinstance(tv, (list, tuple)) and len(tv) == 2):
+        return None
+    try:
+        sv, cv = min(1.0, max(0.0, float(tv[0]))), min(0.99, max(0.0, float(tv[1])))
+    except (TypeError, ValueError):
+        return None
+    return (m.group(1), m.group(2), m.group(3), sv, cv)
+
+
+def semparse_facts(atom_strs, defs=None):
+    """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped).
+    A narrowed Member class becomes its deterministic symbol (F7 design); defs (dict) receives the definitions."""
+    defs = {} if defs is None else defs
+    out = []
+    for node in _forms(atom_strs, defs):
         c, tv = node[2], node[3]
         if (isinstance(c, list) and len(c) == 3 and c[0] in SP_HEADS and all(isinstance(x, str) for x in c[1:])
                 and isinstance(tv, list) and len(tv) == 3):
             try:
-                out.append((c[0], c[1], c[2], float(tv[1]), float(tv[2])))
+                f = (c[0], c[1], c[2], float(tv[1]), float(tv[2]))
             except ValueError:
-                pass
+                continue
+            if f not in out:
+                out.append(f)
     return out
 
 
+def _flat_member_rule(node) -> bool:
+    """True if every Member atom in a rule names a symbol class (after Narrow naming)."""
+    if isinstance(node, list):
+        if len(node) == 3 and node[0] == "Member" and not isinstance(node[2], str):
+            return False
+        return all(_flat_member_rule(x) for x in node)
+    return True
+
+
+def semparse_rules(atom_strs, defs=None, nwdef=True):
+    """P4: the parser's (: id (Implication P C) tv) rules, as MeTTa strings, for the shadow KB (Equivalence dropped).
+    Narrowed classes are replaced by their deterministic symbols (F7 design) and every symbol seen (in rules
+    or, via defs, in facts) gets its defining rule appended."""
+    from .semparse_adapter import to_str
+    defs = {} if defs is None else defs
+    out = []
+    for node in _forms(atom_strs, defs):
+        if (isinstance(node[1], str) and isinstance(node[2], list) and len(node[2]) == 3
+                and node[2][0] == "Implication" and _flat_member_rule(node[2])):
+            # STOPGAP(upstream: PC-EQ1 Equivalence add rejected) P4 rev3 (review 2 finding 6): Equivalence is not passed through; PeTTaChainer bdae8d7e rejects it
+            # (fact_without_free_variables), which would be a silent add failure.
+            r = to_str(node)
+            if r not in out:
+                out.append(r)
+    for r in (narrow_defining_rules(defs) if nwdef else []):   # P4 rev5: shadow_nwdef=False leaves them out (upstream R2)
+        if r not in out:
+            out.append(r)
+    return out
+
+
+_SCOPED_WITNESS = re.compile(r"^sk_[A-Za-z0-9_\-]*__i_[A-Za-z0-9_]+$")
+SCOPED_WITNESS_GOALS = True     # P4 rev3: set from cfg shadow_scoped_witness_goals in build_snapshot
+
+
 def is_skolem(term) -> bool:
-    """Parser-invented per-item placeholder entity (sk_* witness, scoped as sk_<x>__<item>)."""
-    return isinstance(term, str) and term.startswith("sk_")
+    """Parser-invented placeholder entity (sk_* witness).  P4 rev3: a note-scoped witness sk_<x>__i_<note> is a
+    real per-note entity, so it is not treated as a placeholder for goals while SCOPED_WITNESS_GOALS is on."""
+    if not (isinstance(term, str) and term.startswith("sk_")):
+        return False
+    return not (SCOPED_WITNESS_GOALS and _SCOPED_WITNESS.match(term))
 
 
 def goal_has_skolem(goal: str) -> bool:
@@ -179,6 +283,78 @@ def goal_pool(rel, max_hops=3, skolem_goals=False, max_pool=MAX_POOL):
     return pool
 
 
+def _parse_rules(rule_strs):
+    """P4 rev3: (id, [premise atoms], consequent) for parser/defining Implication rules whose premises are binary
+    atoms over symbols/variables (a single atom or an And of them) and whose consequent is one binary atom.
+    Other shapes (Not/Directive/Can consequents, function terms) cannot yield a nameable goal and are skipped."""
+    from .semparse_adapter import split_toplevel
+    out = []
+    for _src, node, err in split_toplevel("\n".join(rule_strs or [])):
+        if err or not (isinstance(node, list) and len(node) == 4 and node[0] == ":"):
+            continue
+        r = node[2]
+        if not (isinstance(r, list) and len(r) == 3 and r[0] == "Implication"):
+            continue
+        prem, con = r[1], r[2]
+        prems = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
+        flat = lambda a: isinstance(a, list) and len(a) == 3 and all(isinstance(x, str) for x in a)
+        if prems and all(flat(a) for a in prems) and flat(con):
+            out.append((node[1], [tuple(a) for a in prems], tuple(con)))
+    return out
+
+
+def _match(prems, facts_by_head, env=None):
+    env = env or {}
+    if not prems:
+        yield env; return
+    h, a, b = prems[0]
+    for (fa, fb) in facts_by_head.get(h, ()):
+        e = dict(env); ok = True
+        for pat, val in ((a, fa), (b, fb)):
+            if pat.startswith("$"):
+                if e.setdefault(pat, val) != val: ok = False
+            elif pat != val:
+                ok = False
+        if ok:
+            yield from _match(prems[1:], facts_by_head, e)
+
+
+def rule_goal_pool(rel, rule_strs, max_hops=3, skolem_goals=False, max_pool=MAX_POOL, pool=None):
+    """P4 rev3: goals from the parser's Implication rules (and the Narrow defining rules), forward-chained up to
+    max_hops rule applications over the KB facts.  -> {(head, a, c): (hops, [chain])} merged into pool; a chain
+    entry is a premise fact (head, a, b) or ("Rule", rule_id, "").  Goal kind is "rule" (vs fact-chain)."""
+    pool = {} if pool is None else pool
+    rules = _parse_rules(rule_strs)
+    known = {t: (0, [t]) for t in rel}
+    for _ in range(max(1, int(max_hops))):
+        fbh = {}
+        for (h, a, b) in known:
+            fbh.setdefault(h, []).append((a, b))
+        new = {}
+        for rid, prems, con in rules:
+            for env in _match(list(prems), fbh):
+                t = (con[0],) + tuple(env.get(x, x) if x.startswith("$") else x for x in con[1:])
+                if any(x.startswith("$") for x in t[1:]) or t in known or t in new:
+                    continue
+                ps = [tuple(env.get(x, x) if x.startswith("$") else x for x in p) for p in prems]
+                hops = 1 + max(known[p][0] for p in ps)
+                chain = [c for p in ps for c in known[p][1]] + [("Rule", rid, "")]
+                new[t] = (hops, chain)
+        if not new:
+            break
+        known.update(new)
+        for t, (hops, chain) in new.items():
+            if t in rel or t[1] == t[2] or hops > max_hops:
+                continue
+            if not skolem_goals and (is_skolem(t[1]) or is_skolem(t[2])):
+                continue
+            if t not in pool or hops < pool[t][0]:
+                if t not in pool and len(pool) >= max_pool:
+                    continue
+                pool[t] = (hops, chain)
+    return pool
+
+
 def request_terms(facts_by_item, user_items, rel):
     """(entities, tokens) of the current user request: entities from the parse of source_type=user items plus
     their 1-hop KB neighbours; tokens from the request text (so an unparsed request still anchors by name)."""
@@ -247,6 +423,8 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     cfg = cfg or rc.resolve()
     k = int(k or cfg["shadow_k"])
     max_goals = int(cfg["shadow_max_goals"]); skolem_goals = bool(cfg["shadow_skolem_goals"])
+    global SCOPED_WITNESS_GOALS
+    SCOPED_WITNESS_GOALS = bool(cfg.get("shadow_scoped_witness_goals", True))
     items = store.get_active_set()[:k]
     if cfg.get("speaker_link"):
         cached = _cache_lookup(items, cfg["semparse_dir"], context=bool(cfg.get("semparse_context")), speaker=True)
@@ -254,11 +432,30 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         cached = _cache_lookup(items, cfg["semparse_dir"], context=True)
     else:
         cached = _cache_lookup(items, cfg["semparse_dir"])
-    metta, facts, n_sp, n_unparsed, i = [], [], 0, 0, 0
-    src, fsrc = {}, []       # Track I provenance: KB label -> item id; (head, a, b, item id) per fact
+    name_rep = None
+    if cfg.get("name_resolve"):           # P3 Deviation 6: named witnesses -> deterministic symbols, before the gate
+        from .name_resolve import resolve as _nr
+        name_rep = {}
+        for iid in list(cached):
+            cached[iid], name_rep[iid] = _nr(cached[iid])
+    metta, facts, n_sp, n_unparsed, i, n_rules = [], [], 0, 0, 0, 0
+    src, fsrc, dsrc = {}, [], {}   # F1 §3: dsrc = wm label -> source item ids of a re-entered conclusion
+
     from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB
     gst = _pg.settings(cfg); gdec, lf = [], {}
+    live_ids = {it.id for it in items}
+    n_derived, j = 0, 0
     for it in items:
+        if getattr(it, "source_type", "") == "derived":   # F1 §3: a conclusion is never parsed; it enters the KB
+            n_derived += 1                                 # with the engine's TV, only while all its sources are live
+            fact = _derived_fact(it, live_ids)
+            if fact is not None:
+                h, x, y, sv, cv = fact
+                lab = "wm%d" % j; j += 1
+                metta.append("(: %s (%s %s %s) (STV %.4f %.4f))" % (lab, h, x, y, sv, cv))
+                src[lab] = it.id; lf[lab] = "(%s %s %s)" % (h, x, y)
+                facts.append(fact); fsrc.append([h, x, y, it.id]); dsrc[lab] = list(it.derived_from)
+            continue
         if it.id in cached:
             n_sp += 1
             key = (it.id, len(cached[it.id]), hash(tuple(cached[it.id])))
@@ -275,6 +472,11 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
             else:  # only the binary facts the goals are built from: a 700-atom KB makes each query ~7-10 s
                 for (h, x, y, sv, cv) in fs:
                     metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); src["sp%d" % i] = it.id; lf["sp%d" % i] = "(%s %s %s)" % (h, x, y); i += 1
+                if cfg.get("shadow_rules", True):   # P4: the parser's Implication rules (flat Member classes only)
+                    _d = {}; semparse_facts(cached[it.id], _d)   # F7 design: defining rules for fact classes too
+                    for r in semparse_rules(cached[it.id], _d, nwdef=bool(cfg.get("shadow_nwdef", True))):
+                        if r not in metta:
+                            metta.append(r); n_rules += 1
             continue
         n_unparsed += 1   # Track K: no regex fallback; an item without cached semparse atoms adds no facts
     rel = {(h, a, b) for (h, a, b, _, _) in facts}
@@ -289,6 +491,9 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         users = [it for it in items if getattr(it, "source_type", "") == "user"]
         req = request_terms(fbi, users, rel)
         pool = goal_pool(rel, int(cfg.get("shadow_max_hops") or 3), skolem_goals)
+        if cfg.get("shadow_rules", True):   # P4 rev3: parser Implication + defining rules also propose goals
+            rule_goal_pool(rel, [a for a in metta if "(Implication" in a], int(cfg.get("shadow_max_hops") or 3),
+                           skolem_goals, pool=pool)
         ranked = rank_goals(pool, rel, req, fsti, max_goals, int(cfg.get("shadow_min_hops") or 1),
                             _weights(cfg.get("shadow_goal_weights")))
         goals = [g for g, _ in ranked]
@@ -299,10 +504,10 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     else:
         goals = build_goals(rel, max_goals, skolem_goals); rank_info = None
     return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
-            "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts),
+            "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts), "rules": n_rules,
             "skolem_goals": skolem_goals, "goal_meta": goal_meta, "goal_rank": rank_info,
-            "atom_src": src, "fact_src": fsrc, "label_fact": lf,
-            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec)}
+            "atom_src": src, "fact_src": fsrc, "label_fact": lf, "derived_src": dsrc, "derived_items": n_derived,
+            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec), "name_resolve": name_rep}
 
 
 def _cleanup_specs(out_dir, max_age=3600):
@@ -403,6 +608,7 @@ def raw_item_from_dict(d):
     return {"id": d.get("id"), "content": d.get("content", ""), "sti": (d.get("attention") or {}).get("sti", 0.0),
             "tv_strength": d.get("tv_strength", 0.0), "tv_confidence": d.get("tv_confidence", 0.0),
             "source_type": d.get("source_type", "recalled"),
+            "derived_from": list(d.get("derived_from") or []), "provenance": d.get("provenance"),   # F1 §3
             "origin_ts": float(d.get("origin_timestamp") or 0.0) or float(d.get("created_at") or 0.0)}   # Track R: age
 
 
@@ -410,6 +616,7 @@ def raw_item(it):
     return {"id": it.id, "content": it.content, "sti": it.attention.sti,
             "tv_strength": getattr(it, "tv_strength", 0.0), "tv_confidence": getattr(it, "tv_confidence", 0.0),
             "source_type": getattr(it, "source_type", "recalled"),
+            "derived_from": list(getattr(it, "derived_from", None) or []), "provenance": getattr(it, "provenance", None),
             "origin_ts": float(getattr(it, "origin_timestamp", 0.0) or 0.0) or float(getattr(it, "created_at", 0.0) or 0.0)}
 
 
@@ -419,7 +626,8 @@ class _RawStore:
         from types import SimpleNamespace as NS
         self._items = [NS(id=r["id"], content=r["content"], attention=NS(sti=r.get("sti", 0.0)),
                           tv_strength=r.get("tv_strength", 0.0), tv_confidence=r.get("tv_confidence", 0.0),
-                          source_type=r.get("source_type", "recalled")) for r in raw]
+                          source_type=r.get("source_type", "recalled"), derived_from=list(r.get("derived_from") or []),
+                          provenance=r.get("provenance")) for r in raw]
     def get_active_set(self):
         return list(self._items)
 

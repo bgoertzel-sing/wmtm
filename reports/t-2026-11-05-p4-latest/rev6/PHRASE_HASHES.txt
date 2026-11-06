@@ -1,0 +1,16 @@
+# sha256 of each note phrase checked against `git log -p 965ea636..HEAD` (phrases themselves kept out of git).
+# Check: for each phrase p, sha256(p.lower()) is listed; grep -i -F p over git log -p gives 0 hits.
+# The list has 13 entries; the order cites 16. The gap is covered by a 5-gram overlap check of git log -p against the full text of all 20 notes (rev6/NOTE_FREE.md).
+d730a1e565e95c2955f8f9b40e5c8dff9000e00ee110c38eddfb0639e95f4eae
+f76c0781f6aa2fe2f0f71e28c1bd14876820808ea1e75695c8ece9476ebbb47d
+1b60b5189ccd6fe715c5c9f9f993e3f539abca25f5960640fc4d659bc755f0a2
+0f124f414b474e96f58f677a1f2233bde844faa3d4398b4311b3ac0a39c80827
+ef4fa766ef5e8ea8020b3a5e45cc69448e18dd967b39ca196ecb9d38c5784ff6
+beefc9e403664481f0b6f5950b34eab8163dda07d579620afacda91c122f9d39
+b4675c97aaf1a56823889c9a696e2f16fd92bbdf331bf5b55b6c75161f12f34e
+e5bb2c7885022e159867ac34d07afd09736c5e85614d5a627793a063029b6b98
+5d0652a6b8a1effa4068413563ed365fc1fe3cc7fa1f775e28b89895582f764e
+0f03b1b48630e7f8dbc4c39076d426b0564fdd3f262d209dc79bcbf864c41bc4
+8d1d97737b38419a4e5106624c66d6343e62d3194925e3d746f0c7b4ab53364f
+dd5ace9e018dbd62336cbe039916ad7c817d0e9bc9934f70d67f3ff75544da88
+29c60dd2623b7fd90e66a3bef63420413dc5741768f98bd4fd3d156d900a0e91

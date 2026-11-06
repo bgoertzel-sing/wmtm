@@ -102,7 +102,7 @@ def _run_worker(tmp_path, spec, *extra):
     return code, json.loads(out.read_text().strip().splitlines()[-1]), sp
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_integration_synthetic(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     rc, rec, sp = _run_worker(tmp_path, spec)
@@ -114,15 +114,53 @@ def test_integration_synthetic(tmp_path):
     assert not sp.exists()                                    # spec deleted
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_fault_timeout_is_canary_fail_not_hang(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     t = time.time(); rc, rec, _ = _run_worker(tmp_path, spec, "--timeout", "0.0001")
-    assert rc == 3 and rec["status"] == "canary_fail" and rec["queries"] == [] and time.time() - t < 60
+    # 120 s: proves "no hang" while leaving margin for ~20 s 202b9379 warm-up on a loaded 4-core box (review 6: 62 s at 60 s limit)
+    assert rc == 3 and rec["status"] == "canary_fail" and rec["queries"] == [] and time.time() - t < 120
 
 
-@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa v1.0.6 / PeTTaChainer not present")
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
 def test_fault_bad_vendor_is_warm_fail(tmp_path):
     spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
     rc, rec, _ = _run_worker(tmp_path, spec, "--vendor", str(tmp_path / "nope"), "--warm-timeout", "20")
     assert rc == 3 and rec["status"] == "warm_fail"
+
+
+# F1 §3: a reasoner conclusion is never re-parsed; it enters the KB with the engine TV and its sources
+def _derived_store(srcs=("s0", "s1"), polarity="positive"):
+    st = _store(SYN)
+    st.admit("d0", "cat is a animal", source_type="derived", derived_from=list(srcs), initial_sti=0.5,
+             provenance={"reasoner": "pettachainer", "goal": "(Inheritance cat animal)", "stv": [0.81, 0.73],
+                         "polarity": polarity, "proof": "(r sp0 sp1)"})
+    return st
+
+
+def test_derived_enters_kb_with_engine_tv_and_sources():
+    from wmtm import parse_cache
+    st = _derived_store()
+    spec = pc_shadow.build_snapshot(st, cycle=1, k=200)
+    assert "(: wm0 (Inheritance cat animal) (STV 0.8100 0.7300))" in spec["atoms"]
+    assert spec["atom_src"]["wm0"] == "d0" and spec["derived_src"] == {"wm0": ["s0", "s1"]}
+    assert spec["derived_items"] == 1 and spec["semparse_items"] == 4 and spec["unparsed_items"] == 0
+    assert "d0" not in [r[0] for r in parse_cache.top_k_rows(st, 200)]   # never queued for re-parsing
+
+
+def test_derived_dropped_when_a_source_is_withdrawn():
+    spec = pc_shadow.build_snapshot(_derived_store(srcs=("s0", "gone")), cycle=1, k=200)
+    assert not any(" wm" in a or "(: wm" in a for a in spec["atoms"]) and spec["derived_src"] == {}
+    assert spec["derived_items"] == 1
+
+
+def test_derived_negative_conclusion_not_a_fact():
+    spec = pc_shadow.build_snapshot(_derived_store(polarity="negative"), cycle=1, k=200)
+    assert spec["derived_src"] == {}
+
+
+def test_derived_survives_raw_roundtrip():
+    st = _derived_store()
+    raw = [pc_shadow.raw_item(it) for it in st.get_active_set()]
+    spec = pc_shadow.build_snapshot(pc_shadow._RawStore(raw), cycle=1, k=200)
+    assert spec["derived_src"] == {"wm0": ["s0", "s1"]}

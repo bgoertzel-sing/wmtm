@@ -86,7 +86,9 @@ def upstream_llm(provider: str = "anthropic", model: str = None, hitl: str = Non
 
     def call(system: str, user: str) -> str:
         call.last_usage = None
+        call.last_raw_usage = None
         r = prov.complete(system, user, m)
+        call.last_raw_usage = getattr(r, "raw_usage", None)
         call.last_usage = split_usage(r.usage)
         return r.text
 
@@ -102,7 +104,41 @@ def gateway_llm(base_url: str, model: str = None, hitl: str = None, flags=(), to
     """answer 7: llm(system, user) through an OpenAI-compatible gateway (e.g. http://127.0.0.1:18789/v1, model
     openclaw/<agent>) using upstream's own ``chat-completions`` provider (our upstream patch 0003, --base-url /
     --api-key-env); no WMTM-local provider code."""
-    call = upstream_llm("chat-completions", model=model, hitl=hitl, workdir=workdir,
-                        flags=["--base-url", base_url, "--api-key-env", token_env] + list(flags))
-    call.base_url = base_url
+    inner = upstream_llm("chat-completions", model=model, hitl=hitl, workdir=workdir,
+                         flags=["--base-url", base_url, "--api-key-env", token_env] + list(flags))
+
+    def call(system: str, user: str) -> str:
+        call.last_usage = None
+        try:
+            return inner(system, user)
+        finally:
+            call.last_usage = gateway_usage(inner.last_usage, getattr(inner, "last_raw_usage", None))
+
+    for k in ("model", "provider", "module", "args"):
+        setattr(call, k, getattr(inner, k))
+    call.last_usage, call.base_url, call.inner = None, base_url, inner
     return call
+
+
+def gateway_usage(split: dict, raw: dict) -> dict:
+    """OpenClaw gateway Chat Completions usage -> adapter split with cache_write recovered.
+
+    The gateway (dist usage-*.mjs toOpenAiChatCompletionsUsage) sends prompt_tokens = input + cacheRead,
+    cached_tokens = cacheRead and total_tokens = max(prompt + completion, input + output + cacheRead + cacheWrite);
+    it never sends cache_write. So cache_write = total - prompt - completion. Applied only when the server sent
+    no cache_write, all three counts are present and the gap is >= 0; otherwise the split is left unchanged
+    (review-4 #1: unknown stays None). cache_write_source records which rule gave the value."""
+    if split is None:
+        return None
+    out = dict(split, cache_write_source="reported" if split.get("cache_write") is not None else None)
+    raw = raw or {}
+    tot, inp, o = raw.get("total_tokens"), split.get("prompt_tokens"), split.get("output")
+    if split.get("cache_write") is None and None not in (tot, inp, o) and tot - inp - o >= 0:
+        wr = tot - inp - o
+        rd = split.get("cache_read")
+        out.update(cache_write=wr, cache_write_source="gateway_total_minus_prompt_completion")
+        # gateway prompt_tokens excludes cache-write, so uncached input = prompt - cache_read
+        out["uncached_input"] = None if rd is None else max(0, inp - rd)
+        out["prompt_tokens"] = inp + wr
+        out["total_tokens"] = tot
+    return out
