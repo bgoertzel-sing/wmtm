@@ -1,0 +1,14 @@
+{
+ "windows": {
+  "canary": [
+   1793913475,
+   1793913504
+  ],
+  "rest": [
+   1793913563,
+   1793916939
+  ]
+ },
+ "pad_s": 60,
+ "window_rule": "hashes_<run>.txt mtime (written before first parse call) .. summary.json mtime +1s"
+}

@@ -1,0 +1,5 @@
+6123847d06d9455a7bfcbd0a23384e19df998936
+HEAD:scripts/vendor_runtime.sh:14:PC_PIN=bdae8d7ee0bc38ef93528ea3e9d3dcc47c5b8c95
+HEAD:scripts/vendor_runtime.sh:23:d="$DEST/pettachainer-bdae8d7e"; [ ! -e "$d" ] || { echo "exists: $d" >&2; exit 1; }
+HEAD:wmtm/runtime_config.py:162:    "pettachainer_dir":    ("WMTM_PC_VENDOR", str, "pettachainer-bdae8d7e", _V),
+HEAD:wmtm/semparse_catalog.py:27:PIN = "f44d7b740aed240c834165672b6a862998ee4a12"          # default upstream commit (P4 re-pin, Man Hin latest 2026-11-05)

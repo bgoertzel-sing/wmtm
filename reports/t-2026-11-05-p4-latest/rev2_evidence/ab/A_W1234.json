@@ -1,0 +1,6 @@
+{
+ "goals": 4,
+ "correct": 2,
+ "wrong": 2,
+ "source": "ab/P3_W4_JUDGMENTS.md (P3 hand judgments: chat_send valid WRONG, goalchainer_v2_status branch WRONG, hive_progress_report CORRECT, turn_without_send_entry CORRECT)"
+}

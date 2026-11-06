@@ -1,0 +1,12 @@
+6123847d06d9455a7bfcbd0a23384e19df998936 P4 rev3: README shadow_rules row - F7 naming is the design, Equivalence dropped (review 2 findings 3, 6)
+022428541a9c71d5f97a84e6ebe5a344c87e37e9 P4 rev3: name_resolve 'before' check allows in-note scoped-witness goals; v060 real-worker test pins goal_engine=native
+9ebc2c59890fe195cfb13ef57df500c3c33de1d6 P4 rev3: real-engine parsed-note chaining test (review 2 finding 1), default-timeout bdae8d7e run, proof kinds
+f84f7f2dbb0317f65083b0e2ef4cad855e57152f P4 rev3: Equivalence rules not passed to shadow KB + test; hitl LICENSE as test fixture (host-independent); docs re-pin PeTTaChainer bdae8d7e (review 2 findings 2, 6)
+1f8de8b2266efebce3f4fb688955866a7db43ee3 P4 rev3: goals about note-scoped witnesses sk_<x>__i_<note> kept by default (shadow_scoped_witness_goals); unscoped sk_* still follow shadow_skolem_goals
+552f4002293e9544dcccacc63fac0cfadcbf7aaf P4 rev3: parse gate passes note-scoped witnesses sk_<x>__i_<note> (gate_scoped_witness, default on); unscoped sk_* still placeholder_subject
+3e3d5733ef063bddf79e8c1ed01b5945f9a91162 P4 rev3: F7 naming is the design (Track P 8cf5006), not a STOPGAP; STOPGAPS.md emptied (review 2 finding 3)
+23267b5ceb7d7710d0f1e2eb6e0160d19bb30221 P4 rev3: re-pin in code - PeTTaChainer bdae8d7e, semantic-parsing-hitl f44d7b74 default (1f1a7a6f rollback-only) (review 2 finding 2)
+1aa85f80883eff49163f354e9aaa6fefb254d88d P4 rev3: rule_goal_pool - parser Implication + defining rules propose goals (review 2 finding 1)
+0875c96b2f726f5b0a527326a135281a57fb015d semparse_catalog: accept f44d7b74 as opt-in hitl pin (prompt sha 645bff3f); 1f1a7a6f stays default (P4 rev2 R2)
+f963032afe36239eff7285f697f48e9a587945f7 P4 rev2: Narrow classes -> deterministic symbols + defining rules (STOPGAP(upstream: F7)), docs/STOPGAPS.md, name_resolve on by default
+7715da574bdb2e8ea8cee204106ef98bbffcf5ca P4: lower (Member x (Narrow c R)) to base class (F7), add parser Implication rules to shadow KB (WMTM_PC_SHADOW_RULES)

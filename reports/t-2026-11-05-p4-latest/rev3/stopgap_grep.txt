@@ -1,0 +1,2 @@
+git grep STOPGAP(upstream: F7) at HEAD 6123847 (excluding reports/ and docs/STOPGAPS.md):
+0
