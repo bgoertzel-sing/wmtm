@@ -111,9 +111,17 @@ def test_scratch_orchestrator_never_fires_from_flags(tmp_path, monkeypatch):
 def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
     rel = {("Member", "sk_req_1__i_n1", "request"), ("Inheritance", "request", "message"),
            ("Member", "alice_x", "request")}
-    g = pc_shadow.build_goals(rel)
-    assert "(Member alice_x message)" in g and not any("sk_" in x for x in g)
-    assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_goals(rel, skolem_goals=True)
+    # P4 rev3: note-scoped witnesses are real entities for goals by default; switch off to drop them again
+    assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_goals(rel)
+    pc_shadow.SCOPED_WITNESS_GOALS = False
+    try:
+        g = pc_shadow.build_goals(rel)
+        assert "(Member alice_x message)" in g and not any("sk_" in x for x in g)
+        assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_goals(rel, skolem_goals=True)
+    finally:
+        pc_shadow.SCOPED_WITNESS_GOALS = True
+    rel2 = {("Member", "sk_req_1", "request"), ("Inheritance", "request", "message")}
+    assert not any("sk_" in x for x in pc_shadow.build_goals(rel2))     # unscoped sk_* still dropped
     # end to end through a cached parse: the skolem fact is in the KB, its goal is not asked
     c = pcm.ParseCache(str(tmp_path / "c"), per_hour=5)
     monkeypatch.setenv("WMTM_SEMPARSE_DIR", c.d)
@@ -139,6 +147,9 @@ def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
     monkeypatch.setenv("WMTM_GATE", "0")
     spec = pc_shadow.build_snapshot(st, cycle=1)
     assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])      # fact kept (gate off)
+    assert "(Member zed message)" in spec["goals"] and "(Member sk_req_1__i_n1 message)" in spec["goals"]   # P4 rev3 default
+    monkeypatch.setenv("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", "0")
+    spec = pc_shadow.build_snapshot(st, cycle=1)
     assert "(Member zed message)" in spec["goals"] and not any("sk_" in x for x in spec["goals"])
     monkeypatch.setenv("WMTM_PC_SHADOW_SKOLEM_GOALS", "1")
     assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_snapshot(st, cycle=1)["goals"]

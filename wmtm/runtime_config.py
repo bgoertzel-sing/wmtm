@@ -132,6 +132,7 @@ SPEC = {
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),
     "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
     "shadow_skolem_goals": ("WMTM_PC_SHADOW_SKOLEM_GOALS", bool, False, None),
+    "shadow_scoped_witness_goals": ("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> goals allowed
     "shadow_goal_rank":    ("WMTM_PC_SHADOW_GOAL_RANK", bool, True, None),       # Track N: Design A ranked goal pool (off = Track M 2-step goals)
     "shadow_max_hops":     ("WMTM_PC_SHADOW_MAX_HOPS", int, 3, None),            # Track N: longest chain in the pool (derivation steps)
     "shadow_min_hops":     ("WMTM_PC_SHADOW_MIN_HOPS", int, 1, None),            # Track N: only ask goals needing >= N steps

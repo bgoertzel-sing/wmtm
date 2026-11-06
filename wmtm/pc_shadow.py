@@ -163,9 +163,16 @@ def semparse_rules(atom_strs, defs=None):
     return out
 
 
+_SCOPED_WITNESS = re.compile(r"^sk_[A-Za-z0-9_\-]*__i_[A-Za-z0-9_]+$")
+SCOPED_WITNESS_GOALS = True     # P4 rev3: set from cfg shadow_scoped_witness_goals in build_snapshot
+
+
 def is_skolem(term) -> bool:
-    """Parser-invented per-item placeholder entity (sk_* witness, scoped as sk_<x>__<item>)."""
-    return isinstance(term, str) and term.startswith("sk_")
+    """Parser-invented placeholder entity (sk_* witness).  P4 rev3: a note-scoped witness sk_<x>__i_<note> is a
+    real per-note entity, so it is not treated as a placeholder for goals while SCOPED_WITNESS_GOALS is on."""
+    if not (isinstance(term, str) and term.startswith("sk_")):
+        return False
+    return not (SCOPED_WITNESS_GOALS and _SCOPED_WITNESS.match(term))
 
 
 def goal_has_skolem(goal: str) -> bool:
@@ -394,6 +401,8 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     cfg = cfg or rc.resolve()
     k = int(k or cfg["shadow_k"])
     max_goals = int(cfg["shadow_max_goals"]); skolem_goals = bool(cfg["shadow_skolem_goals"])
+    global SCOPED_WITNESS_GOALS
+    SCOPED_WITNESS_GOALS = bool(cfg.get("shadow_scoped_witness_goals", True))
     items = store.get_active_set()[:k]
     if cfg.get("speaker_link"):
         cached = _cache_lookup(items, cfg["semparse_dir"], context=bool(cfg.get("semparse_context")), speaker=True)
