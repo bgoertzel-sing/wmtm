@@ -107,7 +107,22 @@ def test_admission_filters(tmp_path):
             {"goal": "(Inheritance a b)", "stv": "x", "proof": "(inh_trans p)", "sources": ["s0"]}]
     _admit_doc(tmp_path, rows)
     cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path)}, _store())
-    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "below_threshold": 0, "bad": 3, "known": 0, "negative": 1, "per_fact_cap": 0}
+    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "bad": 3, "known": 0, "negative": 1, "per_fact_cap": 0}
+
+
+def test_low_confidence_is_admitted(tmp_path):
+    """F1 item 3: an answer at c<0.05 is still an answer (no MIN_CONFIDENCE drop); the max_admit cap still holds."""
+    low = dict(R_CAT, stv=[0.9, 0.042])                         # c=0.042, like the flag-off acl_d answer
+    _admit_doc(tmp_path, [low])
+    cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 5}, _store())
+    assert [c.content for c in cands] == ["cat is a animal"], info["dropped"]
+    assert cands[0].confidence == pytest.approx(0.042) and cands[0].provenance["stv"] == [0.9, 0.042]
+    assert "below_threshold" not in info["dropped"]
+    rows = [{"goal": "(Inheritance a%d b)" % i, "stv": [0.9, 0.01], "proof": "(inh_trans sp%d)" % i, "sources": ["s0"]}
+            for i in range(12)]
+    _admit_doc(tmp_path, rows)
+    cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 5}, _store())
+    assert len(cands) == 5 and info["candidates"] == 5           # cap kept
 
 
 def test_max_admit_cap(tmp_path):

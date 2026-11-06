@@ -23,7 +23,8 @@ import json, os, re, time
 ADMIT_FILE = "admit.json"
 ADMIT_LOG = "admit_log.jsonl"
 REASONERS = ("pettachainer", "off")
-MIN_STRENGTH, MIN_CONFIDENCE = 0.1, 0.05      # admission threshold (same as the removed Python PLN engine)
+# F1 item 3 (t-2026-11-06-wmtm-f1-memory): no confidence cutoff.  A low-confidence engine answer is still an answer
+# (Roman), so nothing is dropped for c alone; reasoner_max_admit (best first) bounds how many enter per run.
 _RULE = re.compile(r"\b(?:inh_trans|imp_trans|mem_inh)\b")   # proof used a derivation rule
 _PARSER_RULE = re.compile(r"\(by i_\w+?__\w*implication\w*\b")   # P4 rev5: direct step through a parser Implication rule (<note>__<id>) is a derivation too
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
@@ -140,7 +141,7 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
     if doc.get("status") != "ok" or not doc.get("canary_ok"):
         return None, dict(info, skipped="run_" + str(doc.get("status") or "unknown"))
     live = set(live_ids) if live_ids is not None else {it.id for it in store.get_active_set()}
-    cands, cand_facts, drop = [], [], {"asserted": 0, "no_live_source": 0, "below_threshold": 0, "bad": 0, "known": 0,
+    cands, cand_facts, drop = [], [], {"asserted": 0, "no_live_source": 0, "bad": 0, "known": 0,
                                        "negative": 0}
     min_s, neg_mode = min_strength(cfg), negation_mode(cfg)
     for r in doc["results"]:
@@ -154,8 +155,6 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
             # proved straight from asserted facts (or their revision): already in WMTM, not a new conclusion
             drop["asserted"] += 1; continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))
-        if c < MIN_CONFIDENCE:
-            drop["below_threshold"] += 1; continue
         # Track O: strength is a probability.  s < reasoner_min_strength means "probably not", never a weak yes.
         neg = s < min_s
         if neg:
