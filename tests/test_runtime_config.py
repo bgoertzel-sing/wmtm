@@ -129,8 +129,13 @@ def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
     llm = LLM(); pcm.process_queue(c, llm, adapter=SemParseAdapter(llm, loader=None, system="SYS", mode="legacy"))
     st = WMTMStore(); st.admit("n1", text, source_type="recalled", initial_sti=1.0)
     spec = pc_shadow.build_snapshot(st, cycle=1)
-    # Track J: the parse gate (default on) rejects placeholder-subject facts before the KB, and logs them
+    # P4 rev3: a note-scoped witness (sk_req_1__i_n1) passes the gate by default (gate_scoped_witness)
+    assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])
+    # Track J: with scoped witnesses off, the gate rejects placeholder-subject facts before the KB, and logs them
+    monkeypatch.setenv("WMTM_GATE_SCOPED_WITNESS", "0")
+    spec = pc_shadow.build_snapshot(st, cycle=1)
     assert not any("sk_req_1" in a for a in spec["atoms"]) and spec["gate"]["rejected"].get("placeholder_subject") == 1
+    monkeypatch.delenv("WMTM_GATE_SCOPED_WITNESS")
     monkeypatch.setenv("WMTM_GATE", "0")
     spec = pc_shadow.build_snapshot(st, cycle=1)
     assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])      # fact kept (gate off)

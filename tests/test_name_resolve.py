@@ -39,7 +39,9 @@ def test_resolved_fact_passes_gate():
     a, _ = nr.resolve(_note("n1", ['Name sk_github_1__i_n1 "GitHub"', 'Inheritance sk_github_1__i_n1 forge']))
     st = pg.settings()
     raw = semparse_facts(_note("n1", ['Name sk_github_1__i_n1 "GitHub"', 'Inheritance sk_github_1__i_n1 forge']))
-    assert pg.gate_facts(raw, {}, st, "n1")[0] == []      # before: placeholder_subject
+    st0 = dict(st, scoped_witness=False)
+    assert pg.gate_facts(raw, {}, st0, "n1")[0] == []     # before (scoped witnesses off): placeholder_subject
+    assert [f[:3] for f in pg.gate_facts(raw, {}, st, "n1")[0]] == [("Inheritance", "sk_github_1__i_n1", "forge")]
     kept, _ = pg.gate_facts(semparse_facts(a), {}, st, "n1")
     assert [f[:3] for f in kept] == [("Inheritance", "github", "forge")]
 

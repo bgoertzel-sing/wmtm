@@ -110,6 +110,7 @@ SPEC = {
     "admit_log_max_bytes": ("WMTM_ADMIT_LOG_MAX_BYTES", int, 1_000_000, None),   # <shadow_dir>/admit_log.jsonl (+ .1)
     # Track J parse-quality gate (wmtm/parse_gate.py); applies to PeTTaChainer conclusions only
     "gate_on":             ("WMTM_GATE", bool, True, None),
+    "gate_scoped_witness": ("WMTM_GATE_SCOPED_WITNESS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> passes the placeholder rule
     "gate_min_conf":       ("WMTM_GATE_MIN_CONF", float, 0.3, None),
     "gate_broad_terms":    ("WMTM_GATE_BROAD_TERMS", str, "thing,things,entity,entities,object,objects,something,anything,everything,stuff,item,items,concept,trivial,important,relevant,useful,ok,fine,good,bad", None),
     "gate_placeholder_terms": ("WMTM_GATE_PLACEHOLDERS", str, "it,this,that,they,them,thing,something,someone,somebody,x,y,z", None),
