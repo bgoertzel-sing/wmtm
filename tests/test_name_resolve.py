@@ -64,7 +64,9 @@ def test_real_engine_resolved_cross_note_fact_derives(tmp_path, monkeypatch):
         st.admit(n, "note " + n, source_type="recalled", initial_sti=1.0 - k * 0.01)
     monkeypatch.setattr(pc_shadow, "_cache_lookup", lambda items, *a, **kw: {it.id: _note(it.id, notes[it.id]) for it in items})
     cfg = dict(_CFG, name_resolve=False)
-    assert pc_shadow.build_snapshot(st, cycle=1, cfg=cfg)["goals"] == []            # before: every subject is sk_
+    before = pc_shadow.build_snapshot(st, cycle=1, cfg=cfg)["goals"]
+    # before: no cross-note link (P4 rev3 keeps in-note goals about scoped witnesses sk_<x>__i_<note>)
+    assert "(Inheritance github service)" not in before and all("__i_" in g for g in before)
     cfg["name_resolve"] = True
     spec = pc_shadow.build_snapshot(st, cycle=1, cfg=cfg)
     assert "(Inheritance github service)" in spec["goals"]

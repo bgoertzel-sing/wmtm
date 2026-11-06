@@ -334,7 +334,7 @@ def test_worker_runs_goal_engine_after_canary(tmp_path, monkeypatch):
     spec = {"cycle": 7, "ts": time.time(), "k": 5, "atoms": [], "goals": [], "source": "cycle",
             "raw_items": [dict(_it(1, QUESTION), origin_ts=time.time() - 2 * D)]}
     sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow" / "shadow.jsonl"
-    env = dict(rc.worker_env(_RC), WMTM_GOALCHAINER="1", WMTM_RUNTIME_DIR=str(tmp_path / "rt"),
+    env = dict(rc.worker_env(_RC), WMTM_GOALCHAINER="1", WMTM_GOAL_ENGINE="native", WMTM_RUNTIME_DIR=str(tmp_path / "rt"),
                WMTM_SPEAKER_MAP=json.dumps(MAP), WMTM_SPEAKER_SELF="botty", WMTM_GOAL_REQUESTS_DIR=str(chan),
                WMTM_SEMPARSE_DIR=str(tmp_path / "sp"))
     subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out)],
