@@ -67,8 +67,8 @@ def _cache_lookup(items, cache_dir=None, context=False, speaker=False):
     return out
 
 
-# STOPGAP(upstream: F7 PeTTaChainer "a Member class must be a symbol") -- remove when PeTTaChainer accepts a
-# compound Member class such as (Narrow pilot (Mod harbour)); listed in docs/STOPGAPS.md.
+# F7 design (Track P README 8cf5006, binding for P4): a narrowed Member class such as (Narrow pilot (Mod harbour))
+# is named by a deterministic symbol plus a defining rule.  This is the design, not a stopgap.
 def narrow_symbol(node) -> str:
     """Deterministic class symbol for a (Narrow base R...) class: <base>__nw_<sha1(form)[:10]>."""
     import hashlib
@@ -83,7 +83,7 @@ def _is_narrow(n) -> bool:
 
 
 def _name_narrow(node, defs):
-    """STOPGAP(upstream: F7): replace every narrowed Member class by its deterministic symbol; defs collects
+    """F7 design: replace every narrowed Member class by its deterministic symbol; defs collects
     symbol -> (base symbol, narrow form) so each symbol gets its defining rule."""
     if isinstance(node, list):
         if len(node) == 3 and node[0] == "Member" and _is_narrow(node[2]):
@@ -100,7 +100,7 @@ def _narrow_to_sym(n, defs):
 
 
 def narrow_defining_rules(defs):
-    """STOPGAP(upstream: F7): (Member $x <sym>) implies (Member $x <base>) for every named narrowed class."""
+    """F7 design: (Member $x <sym>) implies (Member $x <base>) for every named narrowed class."""
     return ["(: nwdef_%s (Implication (Member $x %s) (Member $x %s)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))"
             % (sym, sym, base) for sym, base in sorted(defs.items())]
 
@@ -119,7 +119,7 @@ def _forms(atom_strs, defs):
 
 def semparse_facts(atom_strs, defs=None):
     """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped).
-    A narrowed Member class becomes its deterministic symbol (STOPGAP F7); defs (dict) receives the definitions."""
+    A narrowed Member class becomes its deterministic symbol (F7 design); defs (dict) receives the definitions."""
     defs = {} if defs is None else defs
     out = []
     for node in _forms(atom_strs, defs):
@@ -146,7 +146,7 @@ def _flat_member_rule(node) -> bool:
 
 def semparse_rules(atom_strs, defs=None):
     """P4: the parser's (: id (Implication|Equivalence P C) tv) rules, as MeTTa strings, for the shadow KB.
-    Narrowed classes are replaced by their deterministic symbols (STOPGAP F7) and every symbol seen (in rules
+    Narrowed classes are replaced by their deterministic symbols (F7 design) and every symbol seen (in rules
     or, via defs, in facts) gets its defining rule appended."""
     from .semparse_adapter import to_str
     defs = {} if defs is None else defs
@@ -429,7 +429,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
                 for (h, x, y, sv, cv) in fs:
                     metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); src["sp%d" % i] = it.id; lf["sp%d" % i] = "(%s %s %s)" % (h, x, y); i += 1
                 if cfg.get("shadow_rules", True):   # P4: the parser's Implication rules (flat Member classes only)
-                    _d = {}; semparse_facts(cached[it.id], _d)   # STOPGAP(upstream: F7): defining rules for fact classes too
+                    _d = {}; semparse_facts(cached[it.id], _d)   # F7 design: defining rules for fact classes too
                     for r in semparse_rules(cached[it.id], _d):
                         if r not in metta:
                             metta.append(r); n_rules += 1

@@ -1,5 +1,5 @@
 """P4: nested parser forms - Narrow classes named by deterministic symbols plus defining rules
-(STOPGAP(upstream: F7)), and Implication/Equivalence rules in the shadow KB."""
+(F7 design, Track P 8cf5006), and Implication/Equivalence rules in the shadow KB."""
 from wmtm import pc_shadow
 
 R1 = "(: r1 (Implication (Member $x pilot) (Member $x person)) (CTV (STV 0.95 0.9) (STV 0.0 0.0)))"
