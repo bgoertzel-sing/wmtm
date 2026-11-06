@@ -214,6 +214,13 @@ class ParseCache:
                                          "prompt_sha": cost.get("prompt_sha"),
                                          **{k: cost[k] for k in ("cache_version", "context_ids", "speaker", "speaker_source", "queries")
                                             if k in cost}}) + "\n")
+                if status == "ok" and atoms:          # P3: wmtm's cross-note registry of unnamed entities
+                    from .semparse_adapter import safe_id
+                    from .sk_registry import SkRegistry
+                    try:
+                        SkRegistry(self.d).note(safe_id(q["item_id"]), h, atoms, cost.get("ts"))
+                    except OSError:                    # the registry is advisory; never lose the cache entry
+                        pass
                 qq.pop(h, None)
                 self.compact()
             self._save_queue(qq)

@@ -1,0 +1,324 @@
+[
+ {
+  "side": "A only",
+  "goal": "(Inheritance chat_send valid)",
+  "A_stv": [
+   0.92,
+   0.83
+  ],
+  "A_W4": "WRONG",
+  "B_status": "absent",
+  "B_subject_atoms": 0,
+  "gate_rejected": null,
+  "why": "latest parser produced no atom with subject chat_send; nothing to derive from"
+ },
+ {
+  "side": "A, also B fact",
+  "goal": "(Member hive_task_ref_ca2632 branch)",
+  "A_stv": [
+   1.0,
+   0.99
+  ],
+  "A_W4": "WRONG",
+  "B_status": "fact",
+  "B_subject_atoms": 5,
+  "gate_rejected": null,
+  "why": "asserted as a B fact (not a query goal in B); B has the same claim without inference"
+ },
+ {
+  "side": "A only",
+  "goal": "(Inheritance hive_progress_report report)",
+  "A_stv": [
+   1.0,
+   0.99
+  ],
+  "A_W4": "CORRECT",
+  "B_status": "absent",
+  "B_subject_atoms": 0,
+  "gate_rejected": null,
+  "why": "latest parser produced no atom with subject hive_progress_report; nothing to derive from"
+ },
+ {
+  "side": "A only",
+  "goal": "(Member turn_without_send_entry entry)",
+  "A_stv": [
+   1.0,
+   0.99
+  ],
+  "A_W4": "CORRECT",
+  "B_status": "absent",
+  "B_subject_atoms": 0,
+  "gate_rejected": null,
+  "why": "latest parser produced no atom with subject turn_without_send_entry; nothing to derive from"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp26",
+   "sp27"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp120",
+   "sp121"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp231",
+   "sp232"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp234",
+   "sp235"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp239",
+   "sp240"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp171",
+   "sp172"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_diff_1__i_ep_note_20261104T051320Z tested)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp49",
+   "sp50"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp204",
+   "sp205"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acl_d)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": null,
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp130",
+   "sp131",
+   "sp132",
+   "sp133",
+   "sp134",
+   "sp135"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+  "B_stv": [
+   0.9097,
+   0.1008
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp241",
+   "sp242"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp88",
+   "sp89"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member sk_config_1__i_ep_note_20261028T185959Z effective)",
+  "B_stv": null,
+  "B_ok": false,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": null,
+  "W2": null,
+  "W3": null,
+  "premises": null,
+  "why": "timeout at 2 s; not proved"
+ },
+ {
+  "side": "B only",
+  "goal": "(Member hive_task_ref_ca2632 local)",
+  "B_stv": [
+   0.9995,
+   0.2017
+  ],
+  "B_ok": true,
+  "nonwdef_stv": [
+   0.9,
+   0.7
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": [],
+  "premises": [
+   "sp137",
+   "sp138",
+   "sp139",
+   "sp140"
+  ],
+  "why": "direct parser implication from asserted premise, confidence lowered by nwdef revision (rev4/PROOF_KINDS.md)"
+ }
+]

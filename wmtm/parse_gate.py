@@ -64,7 +64,7 @@ def settings(cfg=None) -> dict:
             "hedged": _csv(g("gate_hedged_quantifiers")), "negative": _csv(g("gate_negative_quantifiers")),
             "broad_action": act("gate_broad_action"), "hedged_action": act("gate_hedged_action"),
             "identifier_action": act("gate_identifier_action"), "id_bad": _csv(g("gate_identifier_bad_categories")),
-            "discount": min(1.0, max(0.0, float(g("gate_discount")))),
+            "discount": min(1.0, max(0.0, float(g("gate_discount")))), "scoped_witness": bool(g("gate_scoped_witness")),
             "max_per_fact": max(0, int(g("gate_max_per_fact"))), "review_min": max(1, int(g("gate_review_min")))}
 
 
@@ -83,8 +83,16 @@ def quantifiers(atom_strs) -> dict:
     return out
 
 
+_SCOPED_SK = re.compile(r"^sk_[a-z0-9_\-]*__i_[a-z0-9_]+$")
+
+
 def is_placeholder(term, st) -> bool:
+    """P4 rev3: a note-scoped witness (sk_<x>__i_<note>, see sk_registry) is a real per-note entity that the
+    parser's Implication rules quantify over, so it passes when gate_scoped_witness is on (default).  Unscoped
+    sk_* and pronoun-like words stay placeholders."""
     t = str(term).lower()
+    if st.get("scoped_witness", True) and _SCOPED_SK.match(t):
+        return False
     return t.startswith("sk_") or t in st["placeholders"]
 
 
