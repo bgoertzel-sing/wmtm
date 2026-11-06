@@ -137,7 +137,7 @@ separately and keeps that boundary:
   withdrawn actions?
 - Should the motivation stream persist across runs? WMTM uses one per run, because it reports no host attempts yet.
 
-## Known engine limits (PeTTaChainer rT 202b9379)
+## Known engine limits (observed on PeTTaChainer rT 202b9379; current pin bdae8d7e)
 
 - **PC3, And-elimination confidence.** A stored `(And A B)` derives its conjuncts, but the confidence is conservatively 0
   under 202b9379: conjuncts `c≈3.7e-16`, and the stored And itself `c=0.0`. The cause is that the `polynomial_answer`

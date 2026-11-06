@@ -145,7 +145,7 @@ def _flat_member_rule(node) -> bool:
 
 
 def semparse_rules(atom_strs, defs=None):
-    """P4: the parser's (: id (Implication|Equivalence P C) tv) rules, as MeTTa strings, for the shadow KB.
+    """P4: the parser's (: id (Implication P C) tv) rules, as MeTTa strings, for the shadow KB (Equivalence dropped).
     Narrowed classes are replaced by their deterministic symbols (F7 design) and every symbol seen (in rules
     or, via defs, in facts) gets its defining rule appended."""
     from .semparse_adapter import to_str
@@ -153,7 +153,9 @@ def semparse_rules(atom_strs, defs=None):
     out = []
     for node in _forms(atom_strs, defs):
         if (isinstance(node[1], str) and isinstance(node[2], list) and len(node[2]) == 3
-                and node[2][0] in ("Implication", "Equivalence") and _flat_member_rule(node[2])):
+                and node[2][0] == "Implication" and _flat_member_rule(node[2])):
+            # P4 rev3 (review 2 finding 6): Equivalence is not passed through; PeTTaChainer bdae8d7e rejects it
+            # (fact_without_free_variables), which would be a silent add failure.
             r = to_str(node)
             if r not in out:
                 out.append(r)

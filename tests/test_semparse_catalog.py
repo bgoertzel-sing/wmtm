@@ -133,7 +133,9 @@ def _fake_checkout(tmp_path, commit, licence_from=None):
     return root
 
 
-_SPH = "/home/openclaw/scratch/p4/sph/LICENSE"
+# review 2 finding 6: the MIT LICENSE of semantic-parsing-hitl (c) leungmanhin is vendored as a fixture so these
+# tests run on every host, not only pop-os.
+_SPH = os.path.join(os.path.dirname(__file__), "fixtures", "hitl_licence", "LICENSE")
 needs_licence = pytest.mark.skipif(not os.path.isfile(_SPH), reason="MIT LICENSE copy not available")
 
 

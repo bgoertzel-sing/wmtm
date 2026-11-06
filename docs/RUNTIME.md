@@ -262,7 +262,7 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `shadow_skolem_goals` | `WMTM_PC_SHADOW_SKOLEM_GOALS` | false | also ask goals about parser-invented `sk_*` placeholder entities (their facts are always kept) |
 | `runtime_dir` | `WMTM_RUNTIME_DIR` | `<state_dir>/_wmtm_shadow` | worker data (`pc_shadow/`, `semparse_cache/`) |
 | `petta_dir` | `WMTM_PC_PETTA` | `<vendor>/petta-3681b9b` | PeTTa checkout (has `python/`) |
-| `pettachainer_dir` | `WMTM_PC_VENDOR` | `<vendor>/pettachainer-202b9379` | dir containing `pettachainer/` |
+| `pettachainer_dir` | `WMTM_PC_VENDOR` | `<vendor>/pettachainer-bdae8d7e` | dir containing `pettachainer/` |
 | `semparse_prompt` | `SEMPARSE_PROMPT` | `<vendor>/semparse-hitl-1f1a7a6f/templates/generated/PROMPT_CATALOG.txt` | must match `semparse_prompt_sha256` |
 | `swipl_bin` | `WMTM_SWIPL_BIN` | (PATH) | prepended to the workers' PATH |
 | `llm_env_file` | `WMTM_LLM_ENV_FILE` | (none) | env file with `BASE_URL`, `LLM_MODEL`, `AI_API_KEY`; read by the parse worker, never copied |
@@ -309,7 +309,7 @@ paths (swipl, the env file) only in the deployed flags file.
 ```
 <bot>/vendor/wmtm-v0.7.0-rc2/          git archive of this repo (wmtm/ incl. wmtm/workers/), VERSION, MANIFEST.sha256
 <bot>/vendor/petta-3681b9b/            scripts/vendor_runtime.sh
-<bot>/vendor/pettachainer-202b9379/
+<bot>/vendor/pettachainer-bdae8d7e/
 <bot>/vendor/semparse-hitl-1f1a7a6f/   scripts/fetch_semparse_hitl.sh (MIT; templates + LICENSE)
 <bot>/memory/_wmtm_flags.json          flags (deploy-time, machine-specific)
 <runtimes>/goalchainer-v2-<tag>/       v0.7: GoalChainer v2 environment, OUTSIDE the bot tree (docs/GOALS_V2.md)

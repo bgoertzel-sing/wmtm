@@ -58,3 +58,10 @@ def test_rules_ignore_facts_and_garbage():
 
 def test_narrow_with_nonsymbol_base_not_named():
     assert pc_shadow.semparse_facts(["(: f (Member a (Narrow (X y) (Mod h))) (STV 1.0 0.9))"]) == []
+
+
+def test_equivalence_rules_dropped():
+    # review 2 finding 6: bdae8d7e rejects Equivalence (fact_without_free_variables); never pass it to the KB
+    eq = "(: e1 (Equivalence (Member $x pilot) (Member $x flyer)) (STV 0.9 0.9))"
+    assert pc_shadow.semparse_rules([eq]) == []
+    assert pc_shadow.semparse_rules([eq, R1]) == [R1]
