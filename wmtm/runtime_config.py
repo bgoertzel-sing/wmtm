@@ -143,6 +143,7 @@ SPEC = {
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),
     "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
     # Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour.
+    "forget_one_rule":     ("WMTM_FORGET_ONE_RULE", bool, True, None),   # F1 §9: every path records evictions in the forgetting log
     "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
     "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
     "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds

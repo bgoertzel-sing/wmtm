@@ -298,7 +298,7 @@ class WMTM:
                         pass
 
             if self._budget_ok():
-                _ctx.cleanup_stale_items(store, orch.cycle_count, protect=protect)
+                orch.stale_cleanup(protect=protect, record=_ctx.setting(pcfg, "forget_one_rule"))   # F1 §9
             if recalled_now and _ctx.setting(pcfg, "context_rank"):
                 orch.context_rel = _ctx.request_relevance(store, self._recall_bridge, user_msg, recall_scores,
                                                           stim_scores, orch.cycle_count)
@@ -322,10 +322,12 @@ class WMTM:
                 adm["info"] = self._admit_outside_cycle(orch)
                 t = lap("admit_s", t)
             if adm["path"] == "budget-skipped" and self._budget_ok():
-                evicted = store.tick()
-                for ev in evicted:
-                    orch.forget_log.record(ev, orch._cycle)
-                orch.utility.tick(store, orch._cycle)
+                if _ctx.setting(pcfg, "forget_one_rule"):
+                    orch.forget_phase()                      # F1 §9: same rule as cycle() and the fast path
+                else:
+                    for ev in store.tick():
+                        orch.forget_log.record(ev, orch._cycle)
+                    orch.utility.tick(store, orch._cycle)
                 orch._cycle += 1
                 t = lap("tick_s", t)
 

@@ -179,6 +179,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `shadow_budget_s` | `WMTM_PC_SHADOW_BUDGET` | float | `20.0` | Shadow worker: total seconds for all goal queries in one run. Goals still waiting when it runs out are skipped. | `wmtm/workers/pc_shadow.py:35` |
 | `shadow_steps` | `WMTM_PC_SHADOW_STEPS` | int | `30` | Shadow worker: PeTTa step limit for each query. | `wmtm/workers/pc_shadow.py:33` |
 | `shadow_min_interval_s` | `WMTM_PC_SHADOW_MIN_INTERVAL` | float | `300.0` | The fewest seconds between two shadow-worker launches. 0 means no limit. | `wmtm/pc_shadow.py:341` |
+| `forget_one_rule` | `WMTM_FORGET_ONE_RULE` | bool | `true` | F1 §9: every path (cycle, user-turn stale cleanup, automated fast path) records its evictions in the forgetting log; off = the 83ea611 behaviour (replay harness only) | `wmtm/runtime_config.py:146` |
 | `cleanup_protect_recent` | `WMTM_CLEANUP_PROTECT_RECENT` | bool | `true` | Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour. stale cleanup spares fresh recalls | `wmtm/context.py:676` |
 | `cleanup_grace_turns` | `WMTM_CLEANUP_GRACE_TURNS` | int | `10` | ... recalled/relevant within N cycles | `wmtm/context.py:678` |
 | `cleanup_grace_s` | `WMTM_CLEANUP_GRACE_S` | float | `1800.0` | ... or within N seconds | `wmtm/context.py:679` |

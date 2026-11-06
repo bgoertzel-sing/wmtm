@@ -405,24 +405,8 @@ class WMTMOrchestrator:
         gc_admitted = self._run_goalchainer_phase()
         result.gc_admitted = len(gc_admitted)
 
-        # 4. Tick: decay + age
-        evicted_by_tick = self.store.tick()
-        for ev in evicted_by_tick:
-            self.forget_log.record(ev, self._cycle)
-
-        # 5. Utility tracking
-        self.utility.tick(self.store, self._cycle)
-
-        # 5b. Reinforce used items
-        self._reinforce()
-
-        # 6. Forgetting policy
-        evicted_by_policy = self.forgetting.evaluate(self.store)
-        for ev in evicted_by_policy:
-            self.forget_log.record(ev, self._cycle)
-            self.utility.remove(ev.id)
-
-        result.evicted = len(evicted_by_tick) + len(evicted_by_policy)
+        # 4-6. Tick, utility, reinforce, forgetting policy (F1 §9: the same rule the automated fast path applies)
+        result.evicted = len(self.forget_phase())
 
         # 7. Writeback
         self._do_writeback(append_fn, result, _cfg)
@@ -436,6 +420,33 @@ class WMTMOrchestrator:
         self._cycle += 1
         return result
 
+
+    def forget_phase(self) -> list:
+        """F1 §9: the one eviction/forgetting rule of a turn, shared by cycle() and the automated fast path.
+
+        Tick (decay + age, STI floor), utility tick, reinforce used items, forgetting policy.  Every eviction is
+        recorded in the forgetting log (and its utility record dropped).  -> evicted items."""
+        evicted = []
+        for ev in self.store.tick():
+            self.forget_log.record(ev, self._cycle)
+            evicted.append(ev)
+        self.utility.tick(self.store, self._cycle)
+        self._reinforce()
+        for ev in self.forgetting.evaluate(self.store):
+            self.forget_log.record(ev, self._cycle)
+            self.utility.remove(ev.id)
+            evicted.append(ev)
+        return evicted
+
+    def stale_cleanup(self, protect=None, record=True) -> list:
+        """F1 §9: wall-clock stale cleanup (context.cleanup_stale_items) with each eviction recorded in the
+        forgetting log, on every path.  -> evicted items."""
+        from .context import cleanup_stale_items
+        evicted = cleanup_stale_items(self.store, self._cycle, protect=protect) or []
+        for ev in (evicted if record else []):
+            self.forget_log.record(ev, self._cycle)
+            self.utility.remove(ev.id)
+        return evicted
 
     def _goal_lifecycle_check(self) -> None:
         """Check active goals for expiry and update goal store."""

@@ -202,8 +202,12 @@ def cleanup_stale_items(store, cycle_count, max_zero_utility_cycles=10, protect=
                 to_evict.append(item.id)
                 continue
     
-    for item_id in set(to_evict):
-        store.evict(item_id)
+    evicted = []
+    for item_id in sorted(set(to_evict)):
+        ev = store.evict(item_id)
+        if ev is not None:
+            evicted.append(ev)
+    return evicted                      # F1 §9: callers record these in the forgetting log
 
 def is_operational_noise(content):
     """Return True if content is clearly operational noise, not useful knowledge.
@@ -580,72 +584,97 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
         else:
             context = _render_rc2_from_dicts(items_dict, now, cycle)
 
-        # Minimal state update: decay STI, increment cycle, cleanup stale items
-        # F23: Wall-clock cleanup in fast path. Without this, stale items
-        # persist forever because cleanup only ran in the full path (real
-        # user messages), and nearly all cycles are automated.
-        evict_ids = []
-        for item_id, item_data in items_dict.items():
-            att = item_data.get("attention", {})
-            decay = att.get("sti_decay", 0.9)
-            att["sti"] = att.get("sti", 0) * decay
+        if setting(cfg, "forget_one_rule"):
+            # F1 §9: the same eviction/forgetting rule as a user turn (orchestrator.stale_cleanup + forget_phase):
+            # STI floor, derived thresholds, utility, policy, wall-clock tiers; every eviction in the forgetting log.
+            # Costs one engine import (~15 ms) per automated turn.
+            from .orchestrator import WMTMOrchestrator
+            from .store import WMTMStore
+            orch = WMTMOrchestrator(WMTMStore(), use_goalchainer=False)
+            snap_in = dict(snapshot)
+            st_in = dict(snapshot.get("store") or {})
+            st_in.setdefault("capacity", orch.store.capacity)      # minimal/legacy states lack capacity/tick
+            st_in.setdefault("tick", 0)
+            st_in.setdefault("items", items_dict)
+            snap_in["store"] = st_in
+            orch.restore_state(snap_in)
+            orch._cycle = cycle
+            evicted = orch.stale_cleanup(protect=protect) + orch.forget_phase()
+            new = orch.snapshot_state()
+            for k in ("store", "utility", "forgetting_log"):
+                if k in new:
+                    snapshot[k] = new[k]
+            items_dict = snapshot["store"].get("items", {})
+            crel = snapshot.get("context_rel")
+            if evicted and isinstance(crel, dict) and isinstance(crel.get("scores"), dict):
+                for ev in evicted:
+                    crel["scores"].pop(ev.id, None)
+        else:
+            # Minimal state update: decay STI, increment cycle, cleanup stale items
+            # F23: Wall-clock cleanup in fast path. Without this, stale items
+            # persist forever because cleanup only ran in the full path (real
+            # user messages), and nearly all cycles are automated.
+            evict_ids = []
+            for item_id, item_data in items_dict.items():
+                att = item_data.get("attention", {})
+                decay = att.get("sti_decay", 0.9)
+                att["sti"] = att.get("sti", 0) * decay
 
-            # F25+F26b: Wall-clock staleness check.
-            # Priority: origin_timestamp > ID-parsed date > created_at.
-            # origin_timestamp is the journal entry's real date; created_at is the
-            # re-admission time. F26b adds ID-based date parsing as fallback for
-            # items admitted before F25 (no origin_timestamp in state file).
-            created = item_data.get("created_at", 0)
-            origin_ts = item_data.get("origin_timestamp", 0)
-            util = item_data.get("utility", 0)
-            is_recalled = item_data.get("source_type") == "recalled"
+                # F25+F26b: Wall-clock staleness check.
+                # Priority: origin_timestamp > ID-parsed date > created_at.
+                # origin_timestamp is the journal entry's real date; created_at is the
+                # re-admission time. F26b adds ID-based date parsing as fallback for
+                # items admitted before F25 (no origin_timestamp in state file).
+                created = item_data.get("created_at", 0)
+                origin_ts = item_data.get("origin_timestamp", 0)
+                util = item_data.get("utility", 0)
+                is_recalled = item_data.get("source_type") == "recalled"
 
-            # F26b: Parse date from item ID when origin_timestamp is missing
-            if origin_ts <= 0:
-                origin_ts = parse_item_id_timestamp(item_id)
+                # F26b: Parse date from item ID when origin_timestamp is missing
+                if origin_ts <= 0:
+                    origin_ts = parse_item_id_timestamp(item_id)
 
-            # Use the oldest known timestamp for age calculation
-            effective_ts = created
-            if origin_ts > 0:
-                effective_ts = min(origin_ts, created) if created > 0 else origin_ts
+                # Use the oldest known timestamp for age calculation
+                effective_ts = created
+                if origin_ts > 0:
+                    effective_ts = min(origin_ts, created) if created > 0 else origin_ts
             
-            if effective_ts > 0:
-                age_hours = (now - effective_ts) / 3600.0
-            else:
-                age_hours = float('inf')
+                if effective_ts > 0:
+                    age_hours = (now - effective_ts) / 3600.0
+                else:
+                    age_hours = float('inf')
 
-            # Track P: spare items recalled for / matching a recent real request (not noise: see cleanup_stale_items)
-            if protect and is_recent_recall(item_data.get("recalled_at", 0.0), item_data.get("recalled_cycle", -1),
-                                            cycle, now, protect):
-                continue
+                # Track P: spare items recalled for / matching a recent real request (not noise: see cleanup_stale_items)
+                if protect and is_recent_recall(item_data.get("recalled_at", 0.0), item_data.get("recalled_cycle", -1),
+                                                cycle, now, protect):
+                    continue
 
-            # Same thresholds as _cleanup_stale_items:
-            if is_recalled:
-                # 14-day hard cap for recalled items with utility < 5.0
-                if age_hours >= 336.0 and util < 5.0:
-                    evict_ids.append(item_id)
-                # F26b: 7-day threshold for low-utility recalled items
-                # (was missing from fast path — only _cleanup_stale_items had it)
-                elif util < 3.0 and age_hours >= 168.0:
-                    evict_ids.append(item_id)
-                # 48h zero-utility recalled items
-                elif util <= 0.0 and age_hours >= 48.0:
-                    evict_ids.append(item_id)
-            else:
-                # 72h hard cap for derived items with utility < 5.0
-                if age_hours >= 72.0 and util < 5.0:
-                    evict_ids.append(item_id)
-                # 1h zero-utility derived items
-                elif util <= 0.0 and age_hours >= 1.0:
-                    evict_ids.append(item_id)
+                # Same thresholds as _cleanup_stale_items:
+                if is_recalled:
+                    # 14-day hard cap for recalled items with utility < 5.0
+                    if age_hours >= 336.0 and util < 5.0:
+                        evict_ids.append(item_id)
+                    # F26b: 7-day threshold for low-utility recalled items
+                    # (was missing from fast path — only _cleanup_stale_items had it)
+                    elif util < 3.0 and age_hours >= 168.0:
+                        evict_ids.append(item_id)
+                    # 48h zero-utility recalled items
+                    elif util <= 0.0 and age_hours >= 48.0:
+                        evict_ids.append(item_id)
+                else:
+                    # 72h hard cap for derived items with utility < 5.0
+                    if age_hours >= 72.0 and util < 5.0:
+                        evict_ids.append(item_id)
+                    # 1h zero-utility derived items
+                    elif util <= 0.0 and age_hours >= 1.0:
+                        evict_ids.append(item_id)
 
-        for eid in evict_ids:
-            del items_dict[eid]
-        crel = snapshot.get("context_rel")
-        if evict_ids and isinstance(crel, dict) and isinstance(crel.get("scores"), dict):
             for eid in evict_ids:
-                crel["scores"].pop(eid, None)
-
+                del items_dict[eid]
+            crel = snapshot.get("context_rel")
+            if evict_ids and isinstance(crel, dict) and isinstance(crel.get("scores"), dict):
+                for eid in evict_ids:
+                    crel["scores"].pop(eid, None)
         snapshot["cycle"] = cycle + 1
 
         # Save updated state
