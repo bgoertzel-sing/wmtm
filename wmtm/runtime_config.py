@@ -141,6 +141,10 @@ SPEC = {
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),
     "shadow_budget_s":     ("WMTM_PC_SHADOW_BUDGET", float, 20.0, None),
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),
+    # F1 §11: warm-up limit of the inner PeTTaChainer child.  Measured on pop-os (8 cores) at worker priority
+    # (nice 19 + SCHED_IDLE): idle p50 3.0 s / max 3.4 s; 8 CPU spinners (load1 3.9-12.3) n=10 max 54.4 s, review 6
+    # saw 62 s at the old 60 s limit.  120 s = ~2x the loaded worst case.
+    "shadow_warm_timeout_s": ("WMTM_PC_SHADOW_WARM_TIMEOUT", float, 120.0, None),
     "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
     # Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour.
     "forget_one_rule":     ("WMTM_FORGET_ONE_RULE", bool, True, None),   # F1 §9: every path records evictions in the forgetting log
