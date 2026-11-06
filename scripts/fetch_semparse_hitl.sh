@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fetch leungmanhin/semantic-parsing-hitl pinned by commit 1f1a7a6f (template catalog line) into DEST
+# Fetch leungmanhin/semantic-parsing-hitl pinned by commit f44d7b74 (P4 re-pin) into DEST
 # (default: <repo>/.semparse-hitl, gitignored).  Upstream is MIT-licensed at this pin; LICENSE is copied
 # alongside and checked.  Copies templates/ (tmpl, catalog, generated/PROMPT_CATALOG.txt, rules.yaml), semantic-parse.py
 # (the upstream providers, used by wmtm.semparse_provider / tools/measure_parse.py) + LICENSE,
@@ -9,11 +9,11 @@
 set -euo pipefail
 W="$(cd "$(dirname "$0")/.." && pwd)"; D="${1:-$W/.semparse-hitl}"
 REPO=https://github.com/leungmanhin/semantic-parsing-hitl
-PIN=1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef
-SHA_PROMPT=e4c4a76c7666d70f6d019fd7fea9391d91b01528f8f89132ae05d842fdd8207e   # templates/generated/PROMPT_CATALOG.txt
+PIN=f44d7b740aed240c834165672b6a862998ee4a12
+SHA_PROMPT=645bff3f5c3a0670d98a463d60d18e178d899c08c58f17ea4b3ff5a53b1d25b6   # templates/generated/PROMPT_CATALOG.txt
 SHA_SEEDED=c2ef51866d157e19245622ba0dcc2a357061134a8a6477001665aa9adb3f5e86   # templates/generated/seeded_rules.metta
 SHA_LICENSE=586023696f36ad863849d2b96648022c589acdd12b27c7b15e51356343077d4c  # MIT, (c) 2026 leungmanhin
-SHA_PARSER=5090806d9b24d159a999c1c924c15ca759fd0f40afd5b477cbcde1dead53747a   # semantic-parse.py (providers)
+SHA_PARSER=f976114bc735f507ce7cd334fec2188c93f79e0681aa2dc809c52e2b5b4f899b   # semantic-parse.py (providers)
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 if [ -n "${SEMPARSE_SRC:-}" ]; then SRC="$SEMPARSE_SRC"; else
   git clone -q "$REPO" "$TMP/src"; SRC="$TMP/src"; fi

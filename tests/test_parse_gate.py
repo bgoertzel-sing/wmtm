@@ -23,7 +23,7 @@ def test_quantifiers_parsed():
 def test_rules():
     keep = ("Inheritance", "cat", "mammal", 0.9, 0.9)
     assert pg.check_fact(keep, None, ST) == (keep, None, "keep")
-    assert pg.check_fact(("Inheritance", "sk_x__i", "mammal", 0.9, 0.9), None, ST)[1] == "placeholder_subject"
+    assert pg.check_fact(("Inheritance", "sk_x", "mammal", 0.9, 0.9), None, ST)[1] == "placeholder_subject"
     assert pg.check_fact(("Inheritance", "it", "mammal", 0.9, 0.9), None, ST)[1] == "placeholder_subject"
     assert pg.check_fact(("Inheritance", "cat", "mammal", 0.9, 0.1), None, ST)[1] == "low_confidence"
     assert pg.check_fact(("Inheritance", "request", "open", 0.9, 0.9), "no", ST)[1] == "negative_quantifier"
@@ -105,3 +105,10 @@ def test_identifier_category_track_m():
     d = pg.check_fact(("Member", "0a1b2c3", "branch", 0.9, 0.9), None, dict(ST, identifier_action="discount"))
     assert d[1:] == ("identifier_category", "discount") and d[0][3] == 0.45
     assert pg.check_fact(("Member", "0a1b2c3", "branch", 0.9, 0.9), None, dict(ST, identifier_action="keep"))[1] is None
+
+
+def test_scoped_witness_passes_unscoped_rejected():
+    """P4 rev3: sk_<x>__i_<note> is a per-note entity (passes); bare sk_* and pronouns stay placeholders."""
+    assert pg.check_fact(("Member", "sk_commit_1__i_ep_note_20261028t185132z", "commit", 0.9, 0.9), None, ST)[1] is None
+    assert pg.check_fact(("Member", "sk_commit_1", "commit", 0.9, 0.9), None, ST)[1] == "placeholder_subject"
+    assert pg.check_fact(("Member", "sk_c_1__i_n1", "commit", 0.9, 0.9), None, dict(ST, scoped_witness=False))[1] == "placeholder_subject"

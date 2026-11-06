@@ -25,6 +25,7 @@ ADMIT_LOG = "admit_log.jsonl"
 REASONERS = ("pettachainer", "off")
 MIN_STRENGTH, MIN_CONFIDENCE = 0.1, 0.05      # admission threshold (same as the removed Python PLN engine)
 _RULE = re.compile(r"\b(?:inh_trans|imp_trans|mem_inh)\b")   # proof used a derivation rule
+_PARSER_RULE = re.compile(r"\(by i_\w+?__\w*implication\w*\b")   # P4 rev5: direct step through a parser Implication rule (<note>__<id>) is a derivation too
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
 _GOAL = re.compile(r"^\((Inheritance|Member|Implies|Similarity|Evaluation) (\S+) (\S+)\)$")
 _TEXT = {"Inheritance": "{} is a {}", "Member": "{} is a {}", "Implies": "{} implies {}",
@@ -149,7 +150,7 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
             drop["bad"] += 1; continue
         if not text or not r.get("proof"):
             drop["bad"] += 1; continue
-        if not _RULE.search(str(r.get("proof"))):
+        if not (_RULE.search(str(r.get("proof"))) or _PARSER_RULE.search(str(r.get("proof")))):
             # proved straight from asserted facts (or their revision): already in WMTM, not a new conclusion
             drop["asserted"] += 1; continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))

@@ -1,0 +1,143 @@
+{
+ "full": {
+  "results": 12,
+  "pre_rev5": {
+   "candidates": 5,
+   "dropped": {
+    "asserted": 0,
+    "no_live_source": 0,
+    "below_threshold": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "admitted_goals": [
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)"
+   ],
+   "admitted_conf": [
+    0.2017,
+    0.2017,
+    0.2017,
+    0.2017,
+    0.2017
+   ]
+  },
+  "rev5": {
+   "candidates": 5,
+   "dropped": {
+    "asserted": 0,
+    "no_live_source": 0,
+    "below_threshold": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "admitted_goals": [
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)"
+   ],
+   "admitted_conf": [
+    0.2017,
+    0.2017,
+    0.2017,
+    0.2017,
+    0.2017
+   ]
+  }
+ },
+ "nonwdef": {
+  "results": 12,
+  "pre_rev5": {
+   "candidates": 0,
+   "dropped": {
+    "asserted": 12,
+    "no_live_source": 0,
+    "below_threshold": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "admitted_goals": [],
+   "admitted_conf": []
+  },
+  "rev5": {
+   "candidates": 5,
+   "dropped": {
+    "asserted": 0,
+    "no_live_source": 0,
+    "below_threshold": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "admitted_goals": [
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)"
+   ],
+   "admitted_conf": [
+    0.7,
+    0.7,
+    0.7,
+    0.7,
+    0.7
+   ]
+  }
+ },
+ "nonwdef_flag": {
+  "results": 12,
+  "pre_rev5": {
+   "candidates": 0,
+   "dropped": {
+    "asserted": 11,
+    "no_live_source": 0,
+    "below_threshold": 1,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "admitted_goals": [],
+   "admitted_conf": []
+  },
+  "rev5": {
+   "candidates": 5,
+   "dropped": {
+    "asserted": 0,
+    "no_live_source": 0,
+    "below_threshold": 1,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "admitted_goals": [
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)"
+   ],
+   "admitted_conf": [
+    0.7,
+    0.7,
+    0.7,
+    0.7,
+    0.7
+   ]
+  }
+ }
+}

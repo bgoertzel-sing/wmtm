@@ -26,10 +26,10 @@ def test_defaults_off_without_file(tmp_path):
     assert cfg["runtime_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR)
     assert cfg["shadow_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "pc_shadow")
     assert cfg["semparse_dir"] == str(tmp_path / rc.RUNTIME_SUBDIR / "semparse_cache")
-    assert cfg["petta_dir"] == os.path.join(rc.VENDOR_ROOT, "petta-v1.0.6")
-    assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-36b3fe6-dedup")
-    assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-1f1a7a6f", "templates", "generated", "PROMPT_CATALOG.txt")
-    assert cfg["semparse_hitl"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-1f1a7a6f") and cfg["semparse_mode"] == "catalog"
+    assert cfg["petta_dir"] == os.path.join(rc.VENDOR_ROOT, "petta-3681b9b")
+    assert cfg["pettachainer_dir"] == os.path.join(rc.VENDOR_ROOT, "pettachainer-bdae8d7e")
+    assert cfg["semparse_prompt"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-f44d7b74", "templates", "generated", "PROMPT_CATALOG.txt")
+    assert cfg["semparse_hitl"] == os.path.join(rc.VENDOR_ROOT, "semparse-hitl-f44d7b74") and cfg["semparse_mode"] == "catalog"
     assert cfg["swipl_bin"] == "" and cfg["llm_env_file"] == ""
 
 
@@ -111,9 +111,17 @@ def test_scratch_orchestrator_never_fires_from_flags(tmp_path, monkeypatch):
 def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
     rel = {("Member", "sk_req_1__i_n1", "request"), ("Inheritance", "request", "message"),
            ("Member", "alice_x", "request")}
-    g = pc_shadow.build_goals(rel)
-    assert "(Member alice_x message)" in g and not any("sk_" in x for x in g)
-    assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_goals(rel, skolem_goals=True)
+    # P4 rev3: note-scoped witnesses are real entities for goals by default; switch off to drop them again
+    assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_goals(rel)
+    pc_shadow.SCOPED_WITNESS_GOALS = False
+    try:
+        g = pc_shadow.build_goals(rel)
+        assert "(Member alice_x message)" in g and not any("sk_" in x for x in g)
+        assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_goals(rel, skolem_goals=True)
+    finally:
+        pc_shadow.SCOPED_WITNESS_GOALS = True
+    rel2 = {("Member", "sk_req_1", "request"), ("Inheritance", "request", "message")}
+    assert not any("sk_" in x for x in pc_shadow.build_goals(rel2))     # unscoped sk_* still dropped
     # end to end through a cached parse: the skolem fact is in the KB, its goal is not asked
     c = pcm.ParseCache(str(tmp_path / "c"), per_hour=5)
     monkeypatch.setenv("WMTM_SEMPARSE_DIR", c.d)
@@ -129,11 +137,19 @@ def test_skolem_goals_filtered_but_facts_kept(tmp_path, monkeypatch):
     llm = LLM(); pcm.process_queue(c, llm, adapter=SemParseAdapter(llm, loader=None, system="SYS", mode="legacy"))
     st = WMTMStore(); st.admit("n1", text, source_type="recalled", initial_sti=1.0)
     spec = pc_shadow.build_snapshot(st, cycle=1)
-    # Track J: the parse gate (default on) rejects placeholder-subject facts before the KB, and logs them
+    # P4 rev3: a note-scoped witness (sk_req_1__i_n1) passes the gate by default (gate_scoped_witness)
+    assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])
+    # Track J: with scoped witnesses off, the gate rejects placeholder-subject facts before the KB, and logs them
+    monkeypatch.setenv("WMTM_GATE_SCOPED_WITNESS", "0")
+    spec = pc_shadow.build_snapshot(st, cycle=1)
     assert not any("sk_req_1" in a for a in spec["atoms"]) and spec["gate"]["rejected"].get("placeholder_subject") == 1
+    monkeypatch.delenv("WMTM_GATE_SCOPED_WITNESS")
     monkeypatch.setenv("WMTM_GATE", "0")
     spec = pc_shadow.build_snapshot(st, cycle=1)
     assert any("(Member sk_req_1__i_n1 request)" in a for a in spec["atoms"])      # fact kept (gate off)
+    assert "(Member zed message)" in spec["goals"] and "(Member sk_req_1__i_n1 message)" in spec["goals"]   # P4 rev3 default
+    monkeypatch.setenv("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", "0")
+    spec = pc_shadow.build_snapshot(st, cycle=1)
     assert "(Member zed message)" in spec["goals"] and not any("sk_" in x for x in spec["goals"])
     monkeypatch.setenv("WMTM_PC_SHADOW_SKOLEM_GOALS", "1")
     assert "(Member sk_req_1__i_n1 message)" in pc_shadow.build_snapshot(st, cycle=1)["goals"]

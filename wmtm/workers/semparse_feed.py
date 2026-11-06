@@ -4,7 +4,7 @@ Launched detached by wmtm/parse_cache.py; never waited on.  Drains the parse que
 Track C SemParseAdapter: LLM via the existing OpenAI-compatible gateway through Man Hin's upstream chat-completions
 provider (parse_cache.gateway_llm_usage; BASE_URL / LLM_MODEL / AI_API_KEY from the
 environment, else from the env file named by ``llm_env_file``; the file is only read, never copied), load check in
-PeTTaChainer (PeTTa v1.0.6 + PeTTaChainer 36b3fe6 dedup-patched, paths from the runtime config).
+PeTTaChainer (PeTTa rT 3681b9b + PeTTaChainer rT 202b9379, paths from the runtime config).
 
 Gates before any LLM spend:
   * mode ``semparse_mode`` (default "catalog"): the hitl checkout ``semparse_hitl`` must be semantic-parsing-hitl
@@ -83,7 +83,7 @@ try:
         os.environ["PETTA_PATH"] = a.petta
         from pettachainer.pettachainer import PeTTaChainer
         loader = PeTTaChainer()
-        for s in ["(: mem_inh (Implication (Premises (Member $x $a) (Inheritance $a $b)) (Conclusions (Member $x $b))) (STV 1.0 0.99))",
+        for s in ["(: mem_inh (Implication (And (Member $x $a) (Inheritance $a $b)) (Member $x $b)) (STV 1.0 0.99))",
                   "(: cf (Member grace pilot) (STV 1.0 0.99))", "(: cg (Inheritance pilot person) (STV 1.0 0.99))"]:
             loader.add_atom(s)
         pos = str(loader.query("(: $prf (Member grace person) $tv)", steps=30, timeout_sec=0))

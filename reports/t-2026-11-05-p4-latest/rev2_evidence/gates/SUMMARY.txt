@@ -1,0 +1,3 @@
+GC gate: /tmp/p1_verify/gc2/src @5c6ecda6, external/PeTTaChainer @38b147345a3d195637377a9d0f6017e2f50aa105
+186 passed in 123.92s (0:02:03)
+strace openat PeTTaChainer (non-ENOENT): 1334, all under /tmp/p1_verify/gc2/src/external/PeTTaChainer; bdae8d7 paths: 0

@@ -123,3 +123,45 @@ def test_adapter_catalog_span_finding_is_partial_and_logged(tmp_path):
     assert any("span-not-verbatim" in why for _, why in res.rejected)
     recs = [json.loads(l) for l in log.read_text().splitlines()]
     assert any(r["item_id"] == "note-9" and "span-not-verbatim" in r["reason"] for r in recs)
+
+
+def _fake_checkout(tmp_path, commit, licence_from=None):
+    root = tmp_path / ("hitl-" + commit[:8]); (root / "templates" / "tmpl").mkdir(parents=True)
+    (root / "VERSION").write_text("commit=%s\n" % commit)
+    if licence_from:
+        (root / "LICENSE").write_bytes(open(licence_from, "rb").read())
+    return root
+
+
+# review 2 finding 6: the MIT LICENSE of semantic-parsing-hitl (c) leungmanhin is vendored as a fixture so these
+# tests run on every host, not only pop-os.
+_SPH = os.path.join(os.path.dirname(__file__), "fixtures", "hitl_licence", "LICENSE")
+needs_licence = pytest.mark.skipif(not os.path.isfile(_SPH), reason="MIT LICENSE copy not available")
+
+
+def test_allowed_pins_default_unchanged():
+    """P4 rev3: f44d7b74 is the default pin; 1f1a7a6f stays accepted for rollback."""
+    assert C.PIN == "f44d7b740aed240c834165672b6a862998ee4a12"
+    assert C.ALLOWED_PINS[C.PIN].startswith("645bff3f")
+    assert C.ALLOWED_PINS["1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef"].startswith("e4c4a76c")
+    from wmtm import runtime_config as rc
+    assert rc.SEMPARSE_PROMPT_SHA256 == C.ALLOWED_PINS[C.PIN]
+
+
+@needs_licence
+def test_verify_checkout_accepts_f44d7b74(tmp_path):
+    root = _fake_checkout(tmp_path, "f44d7b740aed240c834165672b6a862998ee4a12", _SPH)
+    assert C.verify_checkout(str(root)) == str(root)
+
+
+@needs_licence
+def test_verify_checkout_refuses_unlisted_commit(tmp_path):
+    root = _fake_checkout(tmp_path, "3ec15bd1" + "0" * 32, _SPH)
+    with pytest.raises(C.HitlPinError, match="need one of f44d7b74, 1f1a7a6f"):
+        C.verify_checkout(str(root))
+
+
+def test_verify_checkout_refuses_f44d7b74_without_licence(tmp_path):
+    root = _fake_checkout(tmp_path, "f44d7b740aed240c834165672b6a862998ee4a12")
+    with pytest.raises(C.HitlPinError, match="no LICENSE"):
+        C.verify_checkout(str(root))

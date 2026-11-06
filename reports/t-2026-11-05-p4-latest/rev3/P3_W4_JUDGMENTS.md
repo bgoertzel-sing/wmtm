@@ -1,0 +1,7 @@
+# W4 hand judgments (written 2026-11-05T01:39:41-07:00), keyed by the shuffled ids #0-#4 (seed 20261105). Arm labels are not used here.
+Caveat: the arm summaries (stv) were already visible before this file was written, so the blinding is partial. This is recorded, not hidden.
+#0 (Member hive_task_ref_ca2632 branch): WRONG. The source says the *branch* hive/t-... is a branch; the task id itself is not a branch. Parse conflates task id with branch name.
+#1 (Inheritance chat_send valid) from 185132Z+185959Z: WRONG as unconditional fact. Sources say a send is valid ONLY under a condition (an open request); the condition was dropped by the parse.
+#2 (Inheritance hive_progress_report report): CORRECT (trivially true).
+#3 (Member turn_without_send_entry entry): CORRECT (the LTM entry [note phrase removed, rev5] is an entry).
+#4 (Inheritance chat_send valid) from 185959Z only: WRONG, same reason as #1.

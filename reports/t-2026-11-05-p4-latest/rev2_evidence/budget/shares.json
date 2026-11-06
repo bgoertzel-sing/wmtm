@@ -1,0 +1,30 @@
+{
+ "canary": {
+  "calls_by_agent": {
+   "protocosmo2": 7,
+   "main": 1
+  },
+  "parse_calls": 1,
+  "matched": 1,
+  "unmatched": [],
+  "parse_weighted": 198211.8,
+  "protocosmo2_weighted": 411810.8,
+  "all_agents_weighted": 788157.9,
+  "parse_share_of_protocosmo2": 0.481,
+  "parse_share_of_all": 0.251
+ },
+ "rest": {
+  "calls_by_agent": {
+   "protocosmo2": 222,
+   "main": 3
+  },
+  "parse_calls": 19,
+  "matched": 19,
+  "unmatched": [],
+  "parse_weighted": 4271482.9,
+  "protocosmo2_weighted": 9898925.3,
+  "all_agents_weighted": 10556198.8,
+  "parse_share_of_protocosmo2": 0.432,
+  "parse_share_of_all": 0.405
+ }
+}

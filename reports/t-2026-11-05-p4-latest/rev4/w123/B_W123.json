@@ -1,0 +1,212 @@
+[
+ {
+  "goal": "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp26",
+   "sp27"
+  ],
+  "sources": [
+   "ep-note-20261104T151833Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp120",
+   "sp121"
+  ],
+  "sources": [
+   "ep-note-20261103T203949Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp231",
+   "sp232"
+  ],
+  "sources": [
+   "ep-note-20261028T185132Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp234",
+   "sp235"
+  ],
+  "sources": [
+   "ep-note-20261028T185132Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp239",
+   "sp240"
+  ],
+  "sources": [
+   "ep-note-20261028T185132Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp171",
+   "sp172"
+  ],
+  "sources": [
+   "ep-note-20261103T004843Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_diff_1__i_ep_note_20261104T051320Z tested)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp49",
+   "sp50"
+  ],
+  "sources": [
+   "ep-note-20261104T051320Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp204",
+   "sp205"
+  ],
+  "sources": [
+   "ep-note-20261028T185959Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acl_d)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp130",
+   "sp131",
+   "sp132",
+   "sp133",
+   "sp134",
+   "sp135"
+  ],
+  "sources": [
+   "ep-note-20261028T190214Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+  "stv": [
+   0.9097,
+   0.1008
+  ],
+  "premises": [
+   "sp241",
+   "sp242"
+  ],
+  "sources": [
+   "ep-note-20261028T185132Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp88",
+   "sp89"
+  ],
+  "sources": [
+   "ep-note-20261028T153222Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member hive_task_ref_ca2632 local)",
+  "stv": [
+   0.9995,
+   0.2017
+  ],
+  "premises": [
+   "sp137",
+   "sp138",
+   "sp139",
+   "sp140"
+  ],
+  "sources": [
+   "ep-note-20261028T190214Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ }
+]

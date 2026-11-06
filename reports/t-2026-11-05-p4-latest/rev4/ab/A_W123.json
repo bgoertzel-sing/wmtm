@@ -1,0 +1,54 @@
+[
+ {
+  "goal": "(Inheritance chat_send valid)",
+  "stv": [
+   0.92,
+   0.83
+  ],
+  "sources": [
+   "ep-note-20261028T185959Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member hive_task_ref_ca2632 branch)",
+  "stv": [
+   1.0,
+   0.99
+  ],
+  "sources": [
+   "ep-note-20261028T190214Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Inheritance hive_progress_report report)",
+  "stv": [
+   1.0,
+   0.99
+  ],
+  "sources": [
+   "ep-note-20261104T181709Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ },
+ {
+  "goal": "(Member turn_without_send_entry entry)",
+  "stv": [
+   1.0,
+   0.99
+  ],
+  "sources": [
+   "ep-note-20261028T185959Z"
+  ],
+  "W1": false,
+  "W2": false,
+  "W3": []
+ }
+]

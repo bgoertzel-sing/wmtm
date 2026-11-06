@@ -1,0 +1,5 @@
+tests/test_p4_rule_goals.py:10:def test_parsed_rule_proposes_goal():
+tests/test_p4_rule_goals.py:16:def test_and_premise_and_two_hops():
+tests/test_p4_rule_goals.py:23:def test_function_term_consequent_skipped():
+tests/test_p4_rule_goals.py:47:def test_parsed_note_proposes_rule_goal(monkeypatch):
+tests/test_p4_rule_goals.py:53:def test_parsed_note_chains_on_real_engine(monkeypatch, tmp_path):
