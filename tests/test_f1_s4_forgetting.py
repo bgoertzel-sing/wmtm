@@ -5,7 +5,8 @@
     in the cycle that admits it."""
 import json, time
 from wmtm import pc_admit, pc_shadow
-from wmtm.forgetting_log import ForgettingLog, content_hash, deriv_hash
+from wmtm import forgetting_log as FL
+from wmtm.forgetting_log import ForgettingLog, content_hash
 from wmtm.store import WMTMStore
 from wmtm.orchestrator import WMTMOrchestrator
 
@@ -66,7 +67,8 @@ def test_derivation_key_survives_roundtrip_without_format_change():
     assert "deriv_hash" not in d["records"][0]                  # persisted state format unchanged
     back = ForgettingLog.from_dict(d)
     assert back.is_forgotten("cat is a animal", ["s0", "s1"]) and not back.is_forgotten("cat is a animal", ["s9"])
-    assert deriv_hash("cat is a animal", ["s0", "s1"]) == deriv_hash("", ["s1", "s0"], content_hash("cat is a animal"))
+    assert hasattr(FL, "deriv_hash"), "no derivation key in wmtm.forgetting_log"
+    assert FL.deriv_hash("cat is a animal", ["s0", "s1"]) == FL.deriv_hash("", ["s1", "s0"], content_hash("cat is a animal"))
 
 
 def test_cycle_readmits_forgotten_conclusion_from_new_sources(tmp_path, monkeypatch):
