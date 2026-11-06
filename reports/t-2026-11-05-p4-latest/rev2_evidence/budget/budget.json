@@ -1,0 +1,12 @@
+{
+ "n_paired": 20,
+ "ratio_of_medians": 1.504,
+ "max_ratio": 1.693,
+ "median_latency_b": 60.27,
+ "median_latency_live": 64.0,
+ "filled_as_0": [],
+ "usage_gate_2x": true,
+ "latency_gate": true,
+ "canary_summary_mtime_utc": "2026-11-05T21:18:23.721299",
+ "rest_summary_mtime_utc": "2026-11-05T22:15:38.968576"
+}

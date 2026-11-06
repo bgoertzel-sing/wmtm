@@ -1,0 +1,13 @@
+{
+ "nwdef_rules": 74,
+ "atoms_using_nw_symbols": 25,
+ "raw_Narrow_left": 0,
+ "examples": [
+  "(: nwdef_result__nw_9ac60a4a3c (Implication (Member $x result__nw_9ac60a4a3c) (Member $x result)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))",
+  "(: nwdef_result__nw_b5881f6f23 (Implication (Member $x result__nw_b5881f6f23) (Member $x result)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))",
+  "(: nwdef_result__nw_f0df2db8bc (Implication (Member $x result__nw_f0df2db8bc) (Member $x result)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))",
+  "(: i_ep_note_20261104T151833Z__c1_implication (Implication (Member sk_coverage_1__i_ep_note_20261104T151833Z gain__nw_a3ba169ff4) (Member sk_coverage_1__i_ep_note_20261104T151833Z shown)) (STV 0.9 0.7))",
+  "(: i_ep_note_20261104T051320Z__x6_implication (Implication (Member sk_diff_1__i_ep_note_20261104T051320Z diff__nw_935b46b959) (Member sk_diff_1__i_ep_note_20261104T051320Z tested)) (STV 0.9 0.7))",
+  "(: i_ep_note_20261028T122745Z__a1_implication_c1 (Implication (Member $y diff__nw_98fb7fff75) (Member (sk_truncate__i_ep_note_20261028T122745Z $y) truncate)) (STV 1.0 0.99))"
+ ]
+}

@@ -1,0 +1,3 @@
+# run_measure.py was rewritten after the measurement
+
+The budget numbers in this directory were measured with the version of `run_measure.py` committed at f58f9a5 (P4 rev2 evidence). That exact file is kept here as `run_measure_at_f58f9a5.py.txt` (byte-identical to `git show f58f9a5:reports/t-2026-11-05-p4-latest/rev2_evidence/budget/run_measure.py`; f58f9a5 itself is on the P4 branch, which is held from publishing, so the copy is what a reader can check). P4 rev5 (review 4 finding 4) rewrote it afterwards so the gateway token is never passed to a child process, and the P4 follow-up dropped its unused `subprocess` import. The current file was NOT the one that produced the numbers; the measured logic (tools/measure_parse.py, same arguments) is unchanged.

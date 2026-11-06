@@ -1,0 +1,36 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_s10_tied_candidates_declare_equal_expectations_in_both_orders ______
+
+    def test_s10_tied_candidates_declare_equal_expectations_in_both_orders():
+        """Condition 10 (v2 ties, engine-free half): two equally urgent questions to different people declare equal
+        expected changes, whatever the list order.  Control (TIE_STEP restored): the first in the list is declared
+        slightly larger, so list order decides."""
+        for items in ORDERS:
+            p = engine.prepare_v2(items, {"speaker_map": MAP, "speaker_self": "botty"}, {"autonomous": False}, now=NOW)
+            cands = list(p["amap"].values())
+            ch = v2.expectations(cands, p["est"], p["st"], NOW)
+            ask = {c["who"]: x for c, x in zip(cands, ch) if c["action"] == "ClarifyQuestion"}
+>           assert set(ask) == {"quill", "wren"} and ask["quill"] == ask["wren"]
+E           AssertionError: assert ({'quill', 'wren'} == {'quill', 'wren'}
+E             
+E             Use -v to get more diff and 0.1488446463724699 == 0.14884449752782353)
+
+tests/test_f2_context_goals.py:254: AssertionError
+_______________ test_s10_real_v2_escalates_a_tie_in_both_orders ________________
+
+    @pytest.mark.skipif(not (GC2 and os.path.exists(GC2)), reason="WMTM_TEST_GC2_PYTHON not set")
+    def test_s10_real_v2_escalates_a_tie_in_both_orders():
+        """Condition 10 (v2 ties, real GoalChainer v2): the tie escalates to a human in both orders; nothing is proposed.
+        Control (TIE_STEP restored): v2 proposes the ClarifyQuestion that comes first in the list."""
+        cfg = {"goal_v2_python": GC2, "goal_v2_runner": "", "speaker_map": MAP, "speaker_self": "botty"}
+        for items in ORDERS:
+            h = engine.propose_v2(items, cfg, {"autonomous": False}, now=NOW)["human"]
+>           assert h["proposals"] == []
+E           AssertionError: assert [{'action': '... 'wren', ...}] == []
+E             
+E             Left contains 2 more items, first extra item: {'action': 'ClarifyQuestion', 'need': 'unc', 'effects': ['message'], 'who': 'quill', ...}
+E             Use -v to get more diff
+
+tests/test_f2_context_goals.py:267: AssertionError
+2 failed, 11 deselected in 6.56s

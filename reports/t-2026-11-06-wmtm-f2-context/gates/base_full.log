@@ -1,0 +1,33 @@
+........................................................................ [  9%]
+........................................................................ [ 18%]
+........................................................................ [ 27%]
+..............................................ssssssss...sssss.......... [ 36%]
+........................................................................ [ 46%]
+........................................................................ [ 55%]
+......s.s.s............................................................. [ 64%]
+....ssss..s............................................................. [ 73%]
+........................................................................ [ 82%]
+.......................s................................................ [ 92%]
+.............................................................            [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_measure_parse.py:78: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:103: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:119: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:176: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:199: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:207: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [2] tests/test_measure_parse.py:228: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:287: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:316: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:336: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:359: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:375: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [3] tests/test_replay_equivalence.py:48: real-data replay skipped: set WMTM_REPLAY_DATA=<dir outside the repo> containing _wmtm_state.json and _journal/journal.metta (see README)
+SKIPPED [1] tests/test_semparse_catalog.py:58: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:65: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:72: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:87: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:113: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_wmtm_metta_codec.py:25: set PETTA_PARSER and SWIPL to run against real PeTTa sread
+759 passed, 22 skipped in 70.70s (0:01:10)
+exit=0

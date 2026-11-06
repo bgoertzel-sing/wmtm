@@ -70,7 +70,9 @@ def test_display_log_new_text_logged_inside_window(tmp_path):
     engine.run_shadow([_it(1, Q)], OK, cfg, source="automated", now=NOW)
     n1 = len(_lines(_g(tmp_path, "display.jsonl")))
     q2 = "Open question for Quill: should the cog3 part ship before the gizmo4 review?"
-    r = engine.run_shadow([_it(1, Q), _it(2, q2)], OK, cfg, source="automated", now=NOW + 60)
+    # F2: q2 is a day older than Q.  At the same age the two questions tie exactly, and a tie now escalates to a
+    # human (review section 10) instead of being broken by list order, so nothing would be displayed.
+    r = engine.run_shadow([_it(1, Q), _it(2, q2, age_d=3.0)], OK, cfg, source="automated", now=NOW + 60)
     assert r["display_logged"] >= 1 and len(_lines(_g(tmp_path, "display.jsonl"))) > n1
 
 

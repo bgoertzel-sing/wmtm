@@ -15,9 +15,9 @@ Extracted from the ProtoCosmo2 Iter tree (snapshot `83ea611`, branch
 - Design notes: `docs/`; release/tag mapping: `docs/RELEASES.md`.
 - `scripts/benchmark_wmtm.py`: micro-benchmark (run with `PYTHONPATH=.`).
 
-Known external coupling: `wmtm/goalchainer_bridge.py` adds a hardcoded
-OmegaClaw-GoalChainer path to `sys.path` (tests mock it). To be made
-configurable.
+GoalChainer v1 feed removed (F2, review section 10): `decide()` and
+`goalchainer_bridge.run_goalchainer_over_wmtm` no longer send notes to GoalChainer v1, which read none
+of them (it reads only `(Acceptable <action>)` STV/EC atoms). WMTM goals run on GoalChainer v2 (`wmtm/goals`).
 
 ## Interface (v0.2)
 
@@ -27,7 +27,7 @@ mem = WMTM(WMTMConfig(state_dir="memory"))          # journal defaults to PettaJ
 mem.observe({"user": user_text, "assistant": reply})  # reply only if it answered a real user message
 ctx = mem.context_for(user_text)                      # "" -> automated fast path; returns block or None
 mem.derive(note, source_ids)                          # explicit tool (flock-protected pending file)
-mem.decide(request)                                   # GoalChainer tool
+mem.decide(request)                                   # removed (F2): returns why; goals use GoalChainer v2
 mem.save(); mem.close()
 ```
 
@@ -54,8 +54,8 @@ restart): a PeTTaChainer shadow that runs PeTTaChainer on the top-K items (since
 Python PLN engine was removed), and a
 semantic-parse feed that parses items through the bot's LLM gateway (default cap 20 parses/hour). Both run in
 detached, niced, memory-capped workers (`python -m wmtm.workers.*`) and never affect the cycle. See
-`docs/RUNTIME.md`; `scripts/vendor_runtime.sh` builds the PeTTa v1.0.6 / PeTTaChainer 36b3fe6 (+ dedup patch)
-runtime, `scripts/fetch_semparse_hitl.sh` fetches semantic-parsing-hitl @1f1a7a6f (MIT; templates + LICENSE, pin checked).
+`docs/RUNTIME.md`; `scripts/vendor_runtime.sh` builds the PeTTa 3681b9b / PeTTaChainer bdae8d7e (no patch)
+runtime, `scripts/fetch_semparse_hitl.sh` fetches semantic-parsing-hitl @f44d7b74 (MIT; templates + LICENSE, pin checked).
 
 v0.5.0-rc2 adds ranked shadow goals (chains up to 3 steps, anchored on the current request; `shadow_goal_rank`,
 default on), treats derived strength as a probability (`reasoner_min_strength` 0.5, `reasoner_negation`
@@ -110,6 +110,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `context_passage_chars` | `WMTM_CONTEXT_PASSAGE_CHARS` | int | `600` | Context parse: the item text is split into passages of at most this many characters, and each passage is parsed separately. | `wmtm/parse_cache.py:422` `wmtm/parse_cache.py:512` |
 | `speaker_link` | `WMTM_SPEAKER_LINK` | bool | `false` | Track Q: speaker linking. When true, new parses resolve who is speaking (via `speaker_map` / `speaker_self`) and go to &lt;semparse_dir&gt;/spk1; old caches are kept, no backfill. Can be set in the flags file or with `WMTM_SPEAKER_LINK` (normal precedence). | `wmtm/parse_cache.py:335` `wmtm/workers/semparse_feed.py:100` |
 | `speaker_map` | `WMTM_SPEAKER_MAP` | dict | `{}` | Object mapping a Telegram user id or username to a canonical lower-case name. Used by speaker linking (`speaker_link`) and by the goal engine (who is a person, who a request came from). If it changes, the request index is rebuilt. | `wmtm/goals/requests.py:66` `wmtm/goals/requests.py:78` |
+| `name_resolve` | `WMTM_NAME_RESOLVE` | bool | `true` | P3 Deviation 6 (on by default since P4): before the parse gate, rewrite parser-1f1a7a6f named witnesses `(Name sk_x "label")` to deterministic symbols (`slug(label)`, as in semparse-hitl emit.py; two bearers of one label in a note get note-scoped `slug_k__i_<note>`). Unnamed witnesses are unchanged. Per-item report in the snapshot key `name_resolve`. | `wmtm/name_resolve.py:1` `wmtm/pc_shadow.py:258` |
 | `speaker_self` | `WMTM_SPEAKER_SELF` | str | `''` | The bot's own canonical name. With speaker linking, I/me/my in notes become this name, and the goal engine uses it as its own name. | `wmtm/goals/requests.py:66` `wmtm/goals/requests.py:78` |
 | `goalchainer` | `WMTM_GOALCHAINER` | bool | `false` | Track R: GoalChainer phase 1 (log only; wmtm/goals).  Runs inside the PeTTaChainer shadow worker, after its canary; writes &lt;runtime_dir&gt;/goalchainer/proposals.jsonl only.  Nothing reaches the prompt, no action is taken. | `wmtm/workers/pc_shadow.py:185` `wmtm/goals/engine.py:437` |
 | `goalchainer_src` | `WMTM_GOALCHAINER_SRC` | str | `''` | Directory appended to `sys.path` before importing `goal_chainer.deontic` for norm resolution. Empty: nothing is added, but the import is still attempted from the existing `sys.path`. Only if the import fails is the built-in local resolver used (result cached per value). Relative path resolves against the vendor root. | `wmtm/goals/legitimacy.py:41` |
@@ -146,6 +147,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `reasoner_admit_on_automated` | `WMTM_REASONER_ADMIT_ON_AUTOMATED` | bool | `true` | v0.4 rc2: also admit PeTTaChainer conclusions on automated (fast-path) turns | `wmtm/context.py:514` |
 | `admit_log_max_bytes` | `WMTM_ADMIT_LOG_MAX_BYTES` | int | `1000000` | &lt;shadow_dir&gt;/admit_log.jsonl (+ .1) | `wmtm/pc_admit.py:243` |
 | `gate_on` | `WMTM_GATE` | bool | `true` | Track J parse-quality gate (wmtm/parse_gate.py); applies to PeTTaChainer conclusions only | `wmtm/parse_gate.py:62` |
+| `gate_scoped_witness` | `WMTM_GATE_SCOPED_WITNESS` | bool | `true` | Parse gate (P4 rev3): a note-scoped parser witness `sk_<x>__i_<note>` is a real per-note entity and passes the placeholder rule; unscoped `sk_*` and pronoun-like words are still rejected. | `wmtm/parse_gate.py:94` |
 | `gate_min_conf` | `WMTM_GATE_MIN_CONF` | float | `0.3` | Parse gate (when `gate_on`): a fact whose parse confidence is below this is rejected. | `wmtm/parse_gate.py:62` |
 | `gate_broad_terms` | `WMTM_GATE_BROAD_TERMS` | str | `'thing,things,entity,entities,object,objects,something,anything,everything,stuff,item,items,concept,trivial,important,relevant,useful,ok,fine,good,bad'` | Parse gate: comma-separated broad or evaluative categories. An Inheritance/Member fact into one of these gets `gate_broad_action`. | `wmtm/parse_gate.py:63` |
 | `gate_placeholder_terms` | `WMTM_GATE_PLACEHOLDERS` | str | `'it,this,that,they,them,thing,something,someone,somebody,x,y,z'` | Parse gate: comma-separated pronoun-like words. A fact whose subject is one of these, or an `sk_*` placeholder, is rejected. | `wmtm/parse_gate.py:63` |
@@ -165,6 +167,9 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `shadow_k` | `WMTM_PC_SHADOW_K` | int | `200` | How many top active-set items go to the shadow worker and to the parse feed. | `wmtm/parse_cache.py:341` `wmtm/parse_cache.py:371` |
 | `shadow_max_goals` | `WMTM_PC_SHADOW_MAX_GOALS` | int | `60` | The most goals the shadow worker queries in one run. | `wmtm/pc_shadow.py:249` |
 | `shadow_full_kb` | `WMTM_PC_SHADOW_FULL_KB` | bool | `false` | True: each item's whole parsed KB goes into PeTTa. False: only the binary facts the goals are built from, which is much faster. | `wmtm/pc_shadow.py:273` |
+| `shadow_rules` | `WMTM_PC_SHADOW_RULES` | bool | `true` | True: the parser's Implication rules go into the shadow KB as well (P4; Equivalence is dropped, PeTTaChainer bdae8d7e rejects it). A narrowed class `(Narrow c R)` is named by a deterministic symbol plus a defining rule, in facts and rules alike. This is the design (Track P README 8cf5006), not a stopgap. | `wmtm/pc_shadow.py:359` |
+| `shadow_nwdef` | `WMTM_PC_SHADOW_NWDEF` | bool | `true` | With `shadow_rules`, also add the `nwdef_*` defining rules for narrowed classes (the F7 design: symbol plus defining rule). False leaves only those defining rules out. On the P4 A/B notes, 11 of the 12 direct parser-rule answers then keep c=0.7 instead of the c≈0.20 the upstream R2 inversion gives them; not all: `acl_d` comes back at c=0.04 through a `specializes` proof (upstream R9 repro, `upstream/pettachainer/`). `pc_admit` counts direct parser-implication proofs (`(by i_<note>__<id>_implication ...)`) as derivations. | `wmtm/runtime_config.py:134` `wmtm/pc_shadow.py:162` `wmtm/pc_shadow.py:444` |
+| `shadow_scoped_witness_goals` | `WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS` | bool | `true` | P4 rev3: goals about note-scoped parser witnesses `sk_<x>__i_<note>` are kept (they are real per-note entities). Unscoped `sk_*` goals still follow `shadow_skolem_goals`. | `wmtm/pc_shadow.py:166` |
 | `shadow_skolem_goals` | `WMTM_PC_SHADOW_SKOLEM_GOALS` | bool | `false` | True keeps goals about parser placeholder entities (`sk_*`). By default they are dropped. | `wmtm/pc_shadow.py:249` |
 | `shadow_goal_rank` | `WMTM_PC_SHADOW_GOAL_RANK` | bool | `true` | Track N: Design A ranked goal pool (off = Track M 2-step goals) | `wmtm/pc_shadow.py:282` |
 | `shadow_max_hops` | `WMTM_PC_SHADOW_MAX_HOPS` | int | `3` | Track N: longest chain in the pool (derivation steps) | `wmtm/pc_shadow.py:291` |
@@ -190,11 +195,11 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `runtime_dir` | `WMTM_RUNTIME_DIR` | str | `''` | Root directory for WMTM runtime data (goal engine output, shadow and parse-cache dirs by default). Empty: `<state_dir>/_wmtm_shadow` (`.local-data` in the repo if there is no state_dir). Relative path resolves against the state_dir. | `wmtm/runtime_config.py:263` `wmtm/runtime_config.py:264` |
 | `shadow_dir` | `WMTM_PC_SHADOW_DIR` | str | `''` | Directory of the PeTTaChainer shadow worker's files and the admission log (`admit_log.jsonl`). Empty: `<runtime_dir>/pc_shadow`. Relative path resolves against the state_dir. | `wmtm/runtime_config.py:265` `wmtm/pc_admit.py:120` |
 | `semparse_dir` | `WMTM_SEMPARSE_DIR` | str | `''` | Directory of the semantic-parse cache, queue and parse log (Track O/Q caches live in its `ctx1` / `spk1` subdirs). Empty: `<runtime_dir>/semparse_cache`. Relative path resolves against the state_dir. | `wmtm/runtime_config.py:266` `wmtm/parse_cache.py:48` |
-| `petta_dir` | `WMTM_PC_PETTA` | str | `'petta-v1.0.6'` | PeTTa installation the workers use: its `python/` dir goes on `sys.path` and `PETTA_PATH` is set to it in the worker environment. Relative path resolves against the vendor root. | `wmtm/runtime_config.py:458` `wmtm/runtime_config.py:459` |
-| `pettachainer_dir` | `WMTM_PC_VENDOR` | str | `'pettachainer-36b3fe6-dedup'` | PeTTaChainer checkout the parse and shadow workers put on `sys.path` to load the reasoner. Relative path resolves against the vendor root. | `wmtm/workers/semparse_feed.py:31` `wmtm/workers/pc_shadow.py:32` |
-| `semparse_hitl` | `WMTM_SEMPARSE_HITL` | str | `'semparse-hitl-1f1a7a6f'` | semantic-parsing-hitl checkout used in catalog mode (`scripts/fetch_semparse_hitl.sh`); must be commit 1f1a7a6f with its MIT LICENSE or the parse worker refuses (status `hitl_pin`). Relative path resolves against the vendor root. | `wmtm/semparse_catalog.py:95` `wmtm/workers/semparse_feed.py:36` |
-| `semparse_mode` | `WMTM_SEMPARSE_MODE` | str | `'catalog'` | `catalog`: the model writes JSON template instances and upstream `tmpl.validate` emits MeTTa (hitl 1f1a7a6f); `legacy`: the model writes MeTTa from `semparse_prompt`. | `wmtm/workers/semparse_feed.py:35` `wmtm/semparse_adapter.py:281` |
-| `semparse_prompt` | `SEMPARSE_PROMPT` | str | `'semparse-hitl-1f1a7a6f/templates/generated/PROMPT_CATALOG.txt'` | Prompt file the semantic parser sends to the LLM (its sha256 is checked against `semparse_prompt_sha256`); catalog mode uses the checkout's PROMPT_CATALOG.txt. Relative path resolves against the vendor root. | `wmtm/workers/semparse_feed.py:70` |
+| `petta_dir` | `WMTM_PC_PETTA` | str | `'petta-3681b9b'` | PeTTa installation the workers use: its `python/` dir goes on `sys.path` and `PETTA_PATH` is set to it in the worker environment. Relative path resolves against the vendor root. | `wmtm/runtime_config.py:458` `wmtm/runtime_config.py:459` |
+| `pettachainer_dir` | `WMTM_PC_VENDOR` | str | `'pettachainer-bdae8d7e'` | PeTTaChainer checkout the parse and shadow workers put on `sys.path` to load the reasoner. Relative path resolves against the vendor root. | `wmtm/workers/semparse_feed.py:31` `wmtm/workers/pc_shadow.py:32` |
+| `semparse_hitl` | `WMTM_SEMPARSE_HITL` | str | `'semparse-hitl-f44d7b74'` | semantic-parsing-hitl checkout used in catalog mode (`scripts/fetch_semparse_hitl.sh`); must be commit f44d7b74 (default since P4; 1f1a7a6f still accepted for rollback) with its MIT LICENSE or the parse worker refuses (status `hitl_pin`). Relative path resolves against the vendor root. | `wmtm/semparse_catalog.py:95` `wmtm/workers/semparse_feed.py:36` |
+| `semparse_mode` | `WMTM_SEMPARSE_MODE` | str | `'catalog'` | `catalog`: the model writes JSON template instances and upstream `tmpl.validate` emits MeTTa (hitl f44d7b74; 1f1a7a6f rollback); `legacy`: the model writes MeTTa from `semparse_prompt`. | `wmtm/workers/semparse_feed.py:35` `wmtm/semparse_adapter.py:281` |
+| `semparse_prompt` | `SEMPARSE_PROMPT` | str | `'semparse-hitl-f44d7b74/templates/generated/PROMPT_CATALOG.txt'` | Prompt file the semantic parser sends to the LLM (its sha256 is checked against `semparse_prompt_sha256`); catalog mode uses the checkout's PROMPT_CATALOG.txt. Relative path resolves against the vendor root. | `wmtm/workers/semparse_feed.py:70` |
 | `semparse_prompt_sha256` | `WMTM_SEMPARSE_PROMPT_SHA256` | str | `'e4c4a76c7666d70f6d019fd7fea9391d91b01528f8f89132ae05d842fdd8207e'` | If set, the parse worker refuses to run (status `prompt_mismatch`) when the sha256 of the prompt file differs. Empty means no check. | `wmtm/workers/semparse_feed.py:62` |
 | `swipl_bin` | `WMTM_SWIPL_BIN` | str | `''` | Directory prepended to the workers' `PATH` so they find `swipl` (for PeTTa). Empty: `PATH` unchanged. Relative path resolves against the vendor root. | `wmtm/runtime_config.py:456` `wmtm/runtime_config.py:457` |
 | `llm_env_file` | `WMTM_LLM_ENV_FILE` | str | `''` | Env file (`BASE_URL`, `LLM_MODEL`, `AI_API_KEY`) the parse worker's LLM gateway reads; variables already in the process environment take precedence. Empty: only the process environment is used. Relative path resolves against the vendor root. | `wmtm/workers/semparse_feed.py:79` |
@@ -260,5 +265,4 @@ the test refuses a directory inside the repo. Optionally set
   matters for long-lived hosts (CLI service, other bots).
 - State file writes are not atomic and not locked across processes.
 - `close()` does not save (see the docstring).
-- `embed_index.py` default cache path is `<repo>/memory/...`; `goalchainer_bridge`
-  hardcodes the GoalChainer path (`WMTMConfig.goalchainer_src` covers `decide()` only).
+- `embed_index.py` default cache path is `<repo>/memory/...`.

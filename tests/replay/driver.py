@@ -65,7 +65,9 @@ def run(root, steps, mode, extra_path="", journal_base=0):
 
 
 _HDR = re.compile(r"^\[WMTM Active Working Memory \((\d+) items, showing top (\d+), cycle (\d+)\)\]$")
-_LINE = re.compile(r"^  \[(recalled|derived|unknown) sti=-?\d+\.\d util=-?\d+\.\d age=(\d+m|\d+\.\dh|\d+\.\dd|\?)( rel=\d\.\d\d)?\] ")
+# Iter 83ea611 lines carry sti= util=; F2 (review section 7) lines carry the engine TV (derived) and source ids instead.
+_LINE = re.compile(r"^  \[(recalled|derived|unknown) (sti=-?\d+\.\d util=-?\d+\.\d|(tv=(\d\.\d\d,\d\.\d\d|none) )?from=\S+) "
+                   r"age=(\d+m|\d+\.\dh|\d+\.\dd|\?)( rel=\d\.\d\d)?\] ")
 
 
 def structural_check(steps, results, seed_state, strict_cycle=True):
@@ -118,3 +120,67 @@ def diff_results(a, b):
             if x["files"][k] != y["files"][k]:
                 diffs.append(f"step {i}: file {k} differs")
     return diffs
+
+
+def apply_f2_rules(root):
+    """F2 (t-2026-11-06-wmtm-f2-context, review sections 5 and 7) on the ORIGINAL Iter tree, as Track L did for the
+    reasoner: the replay then checks that everything else stays byte-identical.  Patches
+    transformations/wmtm_context.py: duplicate recall = the same proposition (not 60% shared words); context lines
+    carry the engine TV and source ids instead of STI/utility, and which 15 lines are shown is chosen without
+    attention (attention still orders them).  The F2 functions are copied from wmtm/context.py, not rewritten."""
+    import inspect
+    from wmtm import context as C
+    p = Path(root) / "transformations" / "wmtm_context.py"
+    s = p.read_text(encoding="utf-8")
+    a = s.index("def _is_duplicate_topic(")
+    b = s.index("\ndef ", a + 1)
+    helpers = "\n\n".join(inspect.getsource(f) for f in (
+        C.proposition_key, C._canon_atoms, C.same_proposition, C._engine_tv, C._sources, C._belief_tag,
+        C._select_attention_free, C._age_str, C._display_ts))
+    f2 = (helpers + "\n\n_MAX_SOURCES = %d\n\n" % C._MAX_SOURCES
+          + inspect.getsource(C.is_duplicate_topic).replace("def is_duplicate_topic(", "def _is_duplicate_topic(", 1)
+          + '''
+
+def _f2_item(it, now):
+    if hasattr(it, "effective_age_seconds"):
+        age = it.effective_age_seconds
+    elif it.created_at > 0:
+        age = now - it.created_at
+    else:
+        age = -1
+    return {"id": it.id, "src": it.source_type, "age": age, "tv": _engine_tv(getattr(it, "provenance", None)),
+            "from": _sources(it.source_type, it.id, getattr(it, "origin_cluster", None), it.derived_from)}
+
+
+def _f2_dict(d, now):
+    ts = _display_ts(d)
+    return {"id": d.get("id"), "src": d.get("source_type", "unknown"), "age": (now - ts) if ts > 0 else -1,
+            "tv": _engine_tv(d.get("provenance")),
+            "from": _sources(d.get("source_type", "unknown"), d.get("id"), d.get("origin_cluster"),
+                             d.get("derived_from"))}
+
+
+def _f2_pick_items(items, now):
+    keep = {e["id"] for e in _select_attention_free([_f2_item(it, now) for it in items], 15)}
+    return [it for it in items if it.id in keep]
+
+''')
+    s = s[:a] + f2 + s[b:]
+    reps = [
+        ("    display_items = items[:15]\n", "    display_items = _f2_pick_items(items, now)\n"),
+        ('        lines.append(f"  [{source_tag} sti={sti:.1f} util={util:.1f} age={age_str}] {content}")',
+         '        lines.append(f"  [{_belief_tag(_f2_item(item, now), source_tag)} age={age_str}] {content}")'),
+        (")[:15]\n\n        lines = []\n        for item in sorted_items:\n",
+         ")\n        _keep = {e[\"id\"] for e in _select_attention_free([_f2_dict(d, now) for d in items_dict.values()], 15)}\n"
+         "        sorted_items = [d for d in sorted_items if d.get(\"id\") in _keep]\n\n"
+         "        lines = []\n        for item in sorted_items:\n"),
+        ('            lines.append(f"  [{src} sti={sti:.1f} util={util:.1f} age={age_str}] {content}")',
+         '            lines.append(f"  [{_belief_tag(_f2_dict(item, now))} age={age_str}] {content}")'),
+        ("            displayed = _orchestrator.store.get_active_set()[:15]\n",      # F17 utility: the lines shown
+         "            import time as _t\n"
+         "            displayed = _f2_pick_items(_orchestrator.store.get_active_set(), _t.time())\n"),
+    ]
+    for old, new in reps:
+        assert s.count(old) == 1, old
+        s = s.replace(old, new)
+    p.write_text(s, encoding="utf-8")
