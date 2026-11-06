@@ -530,6 +530,32 @@ def automated_admit(state_dir, snapshot, cfg=None, default_reasoner="pettachaine
         return None
 
 
+def _one_rule_step(snapshot, items_dict, cycle, step):
+    """F1 §9: run one orchestrator phase (stale_cleanup or forget_phase) on the persisted snapshot in place.
+    -> the snapshot's items dict afterwards."""
+    from .orchestrator import WMTMOrchestrator
+    from .store import WMTMStore
+    orch = WMTMOrchestrator(WMTMStore(), use_goalchainer=False)
+    snap_in = dict(snapshot)
+    st_in = dict(snapshot.get("store") or {})
+    st_in.setdefault("capacity", orch.store.capacity)      # minimal/legacy states lack capacity/tick
+    st_in.setdefault("tick", 0)
+    st_in.setdefault("items", items_dict)
+    snap_in["store"] = st_in
+    orch.restore_state(snap_in)
+    orch._cycle = cycle
+    evicted = step(orch) or []
+    new = orch.snapshot_state()
+    for k in ("store", "utility", "forgetting_log"):
+        if k in new:
+            snapshot[k] = new[k]
+    crel = snapshot.get("context_rel")
+    if evicted and isinstance(crel, dict) and isinstance(crel.get("scores"), dict):
+        for ev in evicted:
+            crel["scores"].pop(ev.id, None)
+    return snapshot["store"].get("items", {})
+
+
 def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachainer", admit=True):
     """Ultra-lightweight turn for automated prompts (F20).
 
@@ -560,11 +586,6 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
                 cfg = _rc.resolve(state_dir)
             except Exception:
                 cfg = None                      # hooks/admit resolve again (and fail safe) themselves
-        if admit:
-            automated_admit(state_dir, snapshot, cfg, default_reasoner)
-            store_data = snapshot.get("store", {})
-            items_dict = store_data.get("items", {})
-
         # Format active context directly from JSON (no wmtm objects needed)
         import time as _t
         now = _t.time()
@@ -576,6 +597,17 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
             except Exception:
                 cfg = {}
         protect = protect_settings(cfg)
+        one_rule = setting(cfg, "forget_one_rule")
+
+        if one_rule:
+            # F1 §9 (review 1): the user turn's order: stale cleanup, then admission, then the cycle's forget phase.
+            # Cleanup must run before admission, or a fresh conclusion is judged by the stale tiers only here.
+            items_dict = _one_rule_step(snapshot, items_dict, cycle, lambda o: o.stale_cleanup(protect=protect))
+
+        if admit:
+            automated_admit(state_dir, snapshot, cfg, default_reasoner)
+            store_data = snapshot.get("store", {})
+            items_dict = store_data.get("items", {})
 
         if setting(cfg, "context_rank"):
             # Track P: same ranking/rendering as the user path, relevance = the last real request's (persisted).
@@ -584,32 +616,11 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
         else:
             context = _render_rc2_from_dicts(items_dict, now, cycle)
 
-        if setting(cfg, "forget_one_rule"):
-            # F1 §9: the same eviction/forgetting rule as a user turn (orchestrator.stale_cleanup + forget_phase):
-            # STI floor, derived thresholds, utility, policy, wall-clock tiers; every eviction in the forgetting log.
-            # Costs one engine import (~15 ms) per automated turn.
-            from .orchestrator import WMTMOrchestrator
-            from .store import WMTMStore
-            orch = WMTMOrchestrator(WMTMStore(), use_goalchainer=False)
-            snap_in = dict(snapshot)
-            st_in = dict(snapshot.get("store") or {})
-            st_in.setdefault("capacity", orch.store.capacity)      # minimal/legacy states lack capacity/tick
-            st_in.setdefault("tick", 0)
-            st_in.setdefault("items", items_dict)
-            snap_in["store"] = st_in
-            orch.restore_state(snap_in)
-            orch._cycle = cycle
-            evicted = orch.stale_cleanup(protect=protect) + orch.forget_phase()
-            new = orch.snapshot_state()
-            for k in ("store", "utility", "forgetting_log"):
-                if k in new:
-                    snapshot[k] = new[k]
-            items_dict = snapshot["store"].get("items", {})
-            crel = snapshot.get("context_rel")
-            if evicted and isinstance(crel, dict) and isinstance(crel.get("scores"), dict):
-                for ev in evicted:
-                    crel["scores"].pop(ev.id, None)
-        else:
+        if one_rule:
+            # F1 §9: the same eviction/forgetting rule as a user turn's cycle (orchestrator.forget_phase): STI floor,
+            # derived thresholds, utility, policy; every eviction in the forgetting log.  ~15 ms engine import.
+            items_dict = _one_rule_step(snapshot, items_dict, cycle, lambda o: o.forget_phase())
+        if not one_rule:
             # Minimal state update: decay STI, increment cycle, cleanup stale items
             # F23: Wall-clock cleanup in fast path. Without this, stale items
             # persist forever because cleanup only ran in the full path (real

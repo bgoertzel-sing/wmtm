@@ -76,3 +76,58 @@ def test_control_rc2_fast_path_diverges(tmp_path, monkeypatch):
     a, b = _memory(_fast(tmp_path, copy.deepcopy(snap))), _memory(_cycle(tmp_path, snap))
     assert a != b
     assert a["forgot"] == [] and "d-low" in a["items"]      # rc2: no forgetting log, no derived STI threshold
+
+
+# ------------------------------------------------------------------ review 1, finding 1: admission ON (order case (i))
+R_DOG = {"goal": "(Inheritance dog animal)", "stv": [0.6, 0.15], "proof": "(inh_trans sp0 sp1)", "s": 0.3,
+         "sources": ["s0", "s1"]}
+
+
+def _case_i(tmp_path, path, monkeypatch):
+    import test_pc_admit_rc2 as T
+    from wmtm import pc_shadow
+    for k in T._ENV_KEYS:
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(pc_shadow, "maybe_launch", lambda *a, **k: None)
+    monkeypatch.setattr(rc, "spawn_worker", lambda *a, **k: None)
+    d = tmp_path / path
+    d.mkdir()
+    sf = T._setup(d, flags={"forget_one_rule": True})
+    T._admit_doc(d, results=(R_DOG,))
+    if path == "fast":
+        ctx.fast_path_automated(sf)
+    else:
+        T._mem(d).context_for("tell me about dogs please")
+    st = json.load(open(sf))
+    pc = {v["content"]: round(v["attention"]["sti"], 6) for v in st["store"]["items"].values()
+          if (v.get("provenance") or {}).get("reasoner") == "pettachainer"}
+    fl = [r.get("item_id") for r in (st.get("forgetting_log") or {}).get("records", [])]
+    return pc, fl
+
+
+def test_case_i_short_conclusion_admitted_same_on_both_paths(tmp_path, monkeypatch):
+    """Order §9 case (i): 'dog is a animal' (under 20 chars) at (0.6, 0.15) from two live notes, admission on.
+    Both paths keep it at the same STI and forget nothing (ae2e51e: the fast path evicted and logged it)."""
+    fast, user = _case_i(tmp_path, "fast", monkeypatch), _case_i(tmp_path, "user", monkeypatch)
+    assert fast == user
+    assert fast[0] == {"dog is a animal": 0.9} and fast[1] == []
+
+
+def test_control_case_i_admit_before_cleanup_diverges(tmp_path, monkeypatch):
+    """Negative control: put the fast path back to admit-then-cleanup (ae2e51e order) -> the paths diverge for the
+    stated reason: the fresh short conclusion is evicted and logged only on the fast path."""
+    orig = ctx._one_rule_step
+    calls = []
+
+    def reordered(snapshot, items_dict, cycle, step):
+        calls.append(1)
+        if len(calls) % 2 == 1:
+            return items_dict                                   # skip the pre-admission cleanup ...
+        orig(snapshot, items_dict, cycle, lambda o: o.stale_cleanup(protect=ctx.protect_settings({})))
+        return orig(snapshot, snapshot["store"]["items"], cycle, step)   # ... and run it after admission instead
+    monkeypatch.setattr(ctx, "_one_rule_step", reordered)
+    fast = _case_i(tmp_path, "fast", monkeypatch)
+    monkeypatch.setattr(ctx, "_one_rule_step", orig)
+    user = _case_i(tmp_path, "user", monkeypatch)
+    assert fast != user
+    assert fast[0] == {} and len(fast[1]) == 1 and fast[1][0].startswith("derived-pc_deduction-")
