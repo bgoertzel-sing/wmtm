@@ -4,7 +4,7 @@
     mem.observe({"user": user_text, "assistant": last_reply})  # this turn's content
     ctx = mem.context_for(user_text)        # text block for the prompt, or None
     mem.derive(note, source_ids=None)       # explicit tool: add a derived belief
-    mem.decide(request)                     # explicit tool: GoalChainer decision
+    mem.decide(request)                     # removed (F2): says why; the goal engine is GoalChainer v2 (wmtm/goals)
     mem.save(); mem.close()
 
 The turn logic is the Iter glue (transformations/wmtm_context.py at
@@ -419,47 +419,17 @@ class WMTM:
         except Exception as e:
             return 'WMTM derive error: ' + str(e)
 
-    def _decide_memory_items(self):
-        """WMTM evidence for GoalChainer: a scratch store from the latest journal clusters."""
-        try:
-            from . import WMTMStore, WMTMOrchestrator
-            from .recall_bridge import parse_journal
-            clusters = parse_journal(resolve_supersedes(self.journal.read_lines()))
-            store = WMTMStore(capacity=self.config.capacity)
-            for c in clusters[-15:]:
-                store.admit(c.id, c.event_note or c.text, source_type='recalled', initial_sti=10.0)
-            WMTMOrchestrator(store).cycle()
-            items = [{'id': it.id, 'content': it.content, 'sti': float(it.attention.sti)}
-                     for it in store.get_active_set()[:20]]
-            return items or None
-        except Exception:
-            return None
+    DECIDE_REMOVED = ('WMTM decide() is removed (F2, review section 10): GoalChainer v1 '
+                      '(goal_chainer.pipeline.solve_incident) reads only (Acceptable <action>) STV/EC atoms with a '
+                      'goalchainer_slot, so it read none of the WMTM notes it was sent. WMTM goals run on GoalChainer v2 '
+                      '(wmtm/goals, goalchainer flag).')
 
     def decide(self, request, solve_incident=None):
-        """Run the GoalChainer decision pipeline with WMTM evidence. Returns text."""
-        try:
-            if solve_incident is None:
-                gc_dir = self.config.goalchainer_src
-                if gc_dir and gc_dir not in sys.path:
-                    sys.path.insert(0, gc_dir)
-                _os.environ.setdefault('GOALCHAINER_USE_HEURISTIC_PLN', '1')
-                from goal_chainer.pipeline import solve_incident
-            memory_items = self._decide_memory_items()
-            result = solve_incident(request, memory_items=memory_items)
-            lines = ['Decision: ' + str(result.get('decided')) + ' - ' + str(result.get('label')),
-                     'Status: ' + str(result.get('status')), '', 'Ranked actions:']
-            for d in result.get('decisions', []):
-                score = d.get('score', 'N/A')
-                lines.append('  ' + str(d.get('action_id')) + ': ' + str(d.get('label')) + ' - '
-                             + str(d.get('status')) + ' (score=' + str(score) + ')')
-            motivation = result.get('motivation')
-            if motivation:
-                lines += ['', 'Motivation: ' + str(motivation)[:200]]
-            if memory_items:
-                lines += ['', 'WMTM evidence: ' + str(len(memory_items)) + ' items fed to GoalChainer']
-            return '\n'.join(lines)
-        except Exception as e:
-            return 'GoalChainer error: ' + str(e)
+        """Removed (F2, review section 10).  The v1 path sent {id, content, sti} notes to GoalChainer v1, whose
+        parse_memory_evidence reads only (Acceptable <action>) STV/EC atoms with a goalchainer_slot: it read 0 of
+        them while this method reported "N items fed".  WMTM notes are not action-acceptability evidence, so encoding
+        them as such would invent truth values.  Nothing is sent; the reply says why.  Arguments are ignored."""
+        return self.DECIDE_REMOVED
 
     # ── persistence ────────────────────────────────────────────────
 

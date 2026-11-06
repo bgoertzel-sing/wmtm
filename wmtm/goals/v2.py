@@ -47,7 +47,9 @@ _CODE = {"ClarifyQuestion": "ask", "FlagUncertainty": "flag", "LookUp": "look", 
 # writes are strict.  Every message / write / live-change / git / push effect is forbidden on an automated turn.
 STRICT = ("no_git_memory", "read_only")
 CAP_STEP = 0.01        # a single action never reaches the band on paper: change <= gap * (1 - CAP_STEP * (rank + 1))
-TIE_STEP = 1e-6        # exact ties between candidates are broken in WMTM's candidate order
+# F2 (review section 10): no TIE_STEP.  Candidates with equal raw changes declare equal expectations (rank is dense:
+# equal raw values share a rank, also under the band cap), so v2 sees the tie and escalates it to a human instead of
+# WMTM breaking it by candidate (list) order.
 RULE_IDS = tuple(r[0] for r in legitimacy.RULES) + tuple("no_autonomous_" + e for e in legitimacy.AUTONOMOUS_EFFECTS)
 
 
@@ -96,15 +98,15 @@ def raw_change(c, est, st, now, recent=()):
 
 
 def expectations(cands, est, st, now, recent=()):
-    """-> [declared change per candidate].  Raw changes in candidate order; exact ties broken by that order; a
-    change that would bring the need into its band is capped just below the band edge (asking or reminding does
-    not by itself close an item), keeping the raw order, so v2 never sees two candidates tie at 'satisfied'."""
+    """-> [declared change per candidate].  Raw changes in candidate order; a change that would bring the need into
+    its band is capped just below the band edge (asking or reminding does not by itself close an item), keeping the
+    raw order.  F2: exact ties stay exact (dense rank), whatever the candidate order, so v2 escalates them."""
     raw = [raw_change(c, est, st, now, recent) for c in cands]
-    order = sorted(range(len(cands)), key=lambda i: (-raw[i], i))
-    rank = {i: r for r, i in enumerate(order)}
+    levels = sorted(set(raw), reverse=True)
+    rank = {i: levels.index(raw[i]) for i in range(len(cands))}
     out = []
     for i, c in enumerate(cands):
-        x = raw[i] * (1.0 - TIE_STEP * rank[i])
+        x = raw[i]
         gap = est[c["need"]]["target"] - est[c["need"]]["level"]
         if gap > 0:
             x = min(x, gap * (1.0 - CAP_STEP * (rank[i] + 1)))

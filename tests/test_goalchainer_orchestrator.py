@@ -9,7 +9,6 @@ from wmtm.store import WMTMStore
 from wmtm.orchestrator import WMTMOrchestrator, CycleResult
 from wmtm.goalchainer_bridge import (
     GoalChainerDecision,
-    wmtm_to_goalchainer_evidence,
     goalchainer_result_to_candidates,
     run_goalchainer_over_wmtm,
 )
@@ -65,32 +64,6 @@ class TestGoalChainerBridgeConversion:
         assert candidates[1].confidence == 0.0
 
 
-class TestWMTMToGoalChainerEvidence:
-    """Test evidence extraction from WMTM."""
-
-    def test_empty_store_produces_empty_evidence(self):
-        store = WMTMStore(capacity=10)
-        evidence = wmtm_to_goalchainer_evidence(store)
-        assert evidence == []
-
-    def test_non_empty_store_produces_evidence(self):
-        store = WMTMStore(capacity=10)
-        store.admit("i1", "The sky is blue")
-        store.admit("i2", "Grass is green")
-        evidence = wmtm_to_goalchainer_evidence(store)
-        assert len(evidence) == 2
-        assert "content" in evidence[0]
-        assert "id" in evidence[0]
-        assert "sti" in evidence[0]
-
-    def test_max_items_limits_evidence(self):
-        store = WMTMStore(capacity=20)
-        for i in range(10):
-            store.admit(f"i{i}", f"Fact {i}")
-        evidence = wmtm_to_goalchainer_evidence(store, max_items=3)
-        assert len(evidence) == 3
-
-
 class TestRunGoalChainerOverWMTM:
     """Test the full bridge function (returns [] if GoalChainer not available)."""
 
@@ -104,9 +77,6 @@ class TestRunGoalChainerOverWMTM:
         Mocks the internal run_goalchainer to avoid slow real calls."""
         store = WMTMStore(capacity=10)
         store.admit("i1", "Some fact")
-
-        import wmtm.goalchainer_bridge as gb
-        monkeypatch.setattr(gb, "run_goalchainer", lambda *a, **kw: None)
 
         result = run_goalchainer_over_wmtm(store, "test request")
         assert isinstance(result, list)
