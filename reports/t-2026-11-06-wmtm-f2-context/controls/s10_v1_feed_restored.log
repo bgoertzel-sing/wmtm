@@ -1,0 +1,55 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_s10_decide_sends_only_what_goalchainer_reads _______________
+
+tmp_path = PosixPath('/home/openclaw/tmp/pytest-of-openclaw/pytest-3003/test_s10_decide_sends_only_wha0')
+
+    def test_s10_decide_sends_only_what_goalchainer_reads(tmp_path):
+        """Condition 10 (v1 decide): whatever is sent is read, and the reply never claims more items than were read.
+        Control (v1 path restored): 3 notes are sent as {id, content, sti}, GoalChainer reads 0, the reply says
+        "3 items fed"."""
+        text = "".join(_cluster(i, n, 3600 + i * 60)[1] for i, n in enumerate(REX[:3]))
+        m = WMTM(WMTMConfig(state_dir=tmp_path, journal=_Journal(text), reasoner="off"))
+        seen = {"items": None}
+    
+        def solve(request, memory_items=None):
+            seen["items"] = memory_items
+            return {"decided": "a1", "label": "x", "status": "ok", "decisions": []}
+    
+        out = m.decide("should rex see the vet?", solve_incident=solve)
+        sent = list(seen["items"] or ())
+        read = _goalchainer_reads(sent)
+>       assert len(sent) == read
+E       AssertionError: assert 3 == 0
+E        +  where 3 = len([{'id': 'ep-note-20261106T170430Z', 'content': 'rex is a dog', 'sti': 9.0}, {'id': 'ep-note-20261106T170330Z', 'content': 'rex is a mammal', 'sti': 9.0}, {'id': 'ep-note-20261106T170230Z', 'content': 'rex is an animal', 'sti': 9.0}])
+
+tests/test_f2_context_goals.py:206: AssertionError
+________ test_s10_orchestrator_phase_sends_only_what_goalchainer_reads _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e6544af1180>
+
+    def test_s10_orchestrator_phase_sends_only_what_goalchainer_reads(monkeypatch):
+        """Condition 10 (orchestrator use_goalchainer phase, same v1 feed).
+        Control: run_goalchainer_over_wmtm sends the active set ({id, content, sti}); GoalChainer reads 0 of them."""
+        seen = {"items": None}
+        mod = types.ModuleType("goal_chainer.pipeline")
+    
+        def solve(request, memory_items=None):
+            seen["items"] = memory_items
+            return {"decisions": []}
+        mod.solve_incident = solve
+        monkeypatch.setitem(sys.modules, "goal_chainer", types.ModuleType("goal_chainer"))
+        monkeypatch.setitem(sys.modules, "goal_chainer.pipeline", mod)
+        from wmtm.goalchainer_bridge import run_goalchainer_over_wmtm
+        store = WMTMStore(capacity=10)
+        for i, n in enumerate(REX):
+            store.admit("ep-%d" % i, n)
+        run_goalchainer_over_wmtm(store, "should rex see the vet?")
+        sent = list(seen["items"] or ())
+>       assert len(sent) == _goalchainer_reads(sent)
+E       AssertionError: assert 5 == 0
+E        +  where 5 = len([{'id': 'ep-0', 'content': 'rex is a dog', 'sti': 1.0}, {'id': 'ep-1', 'content': 'rex is a mammal', 'sti': 1.0}, {'id...{'id': 'ep-3', 'content': 'rex is a pet', 'sti': 1.0}, {'id': 'ep-4', 'content': 'mammal is a vertebrate', 'sti': 1.0}])
+E        +  and   0 = _goalchainer_reads([{'id': 'ep-0', 'content': 'rex is a dog', 'sti': 1.0}, {'id': 'ep-1', 'content': 'rex is a mammal', 'sti': 1.0}, {'id...{'id': 'ep-3', 'content': 'rex is a pet', 'sti': 1.0}, {'id': 'ep-4', 'content': 'mammal is a vertebrate', 'sti': 1.0}])
+
+tests/test_f2_context_goals.py:229: AssertionError
+2 failed, 11 deselected in 0.11s

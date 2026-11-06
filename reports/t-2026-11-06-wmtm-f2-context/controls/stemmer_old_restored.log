@@ -1,0 +1,16 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_stemmer_dogs_matches_dog _________________________
+
+    def test_stemmer_dogs_matches_dog():
+        """Stemmer: "dogs" and "dog" match.  Control (old stemmer): "dogs" is kept whole (a 4-letter word was never
+        stripped), so the plural never matches the singular."""
+>       assert needs.stem("dogs") == needs.stem("dog") == "dog"
+E       AssertionError: assert 'dogs' == 'dog'
+E         
+E         - dog
+E         + dogs
+E         ?    +
+
+tests/test_f2_context_goals.py:278: AssertionError
+1 failed, 12 deselected in 0.08s

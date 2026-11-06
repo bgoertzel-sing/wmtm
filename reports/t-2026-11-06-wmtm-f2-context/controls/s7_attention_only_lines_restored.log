@@ -1,0 +1,53 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_s7_belief_is_the_same_at_two_attention_states[True] ___________
+
+rank = True
+
+    @pytest.mark.parametrize("rank", [True, False])
+    def test_s7_belief_is_the_same_at_two_attention_states(rank):
+        """Condition 7: each derived line shows its truth value and source note ids; attention only orders the lines,
+        so the believed lines are the same at two attention states.
+        Control (attention-only lines, attention-scored floor): lines carry sti=/util=, which differ between the
+        states, and the irrelevant high-STI note is shown in one state only."""
+        cfg = {"context_rank": rank}
+        store = _belief_store()
+        _attention(store, STATE_1)
+        h1, l1, _ = _block(store, cfg)
+        _attention(store, STATE_2)
+        h2, l2, _ = _block(store, cfg)
+>       assert h1 == h2
+E       AssertionError: assert '[WMTM Active... 4, cycle 3)]' == '[WMTM Active... 3, cycle 3)]'
+E         
+E         Skipping 40 identical leading characters in diff, use -v to show
+E         - owing top 3, cycle 3)]
+E         ?           ^
+E         + owing top 4, cycle 3)]
+E         ?           ^
+
+tests/test_f2_context_goals.py:140: AssertionError
+__________ test_s7_belief_is_the_same_at_two_attention_states[False] ___________
+
+rank = False
+
+    @pytest.mark.parametrize("rank", [True, False])
+    def test_s7_belief_is_the_same_at_two_attention_states(rank):
+        """Condition 7: each derived line shows its truth value and source note ids; attention only orders the lines,
+        so the believed lines are the same at two attention states.
+        Control (attention-only lines, attention-scored floor): lines carry sti=/util=, which differ between the
+        states, and the irrelevant high-STI note is shown in one state only."""
+        cfg = {"context_rank": rank}
+        store = _belief_store()
+        _attention(store, STATE_1)
+        h1, l1, _ = _block(store, cfg)
+        _attention(store, STATE_2)
+        h2, l2, _ = _block(store, cfg)
+        assert h1 == h2
+>       assert sorted(l1) == sorted(l2)
+E       AssertionError: assert ['  [derived ...e greenhouse'] == ['  [derived ...rex is a dog']
+E         
+E         At index 0 diff: '  [derived sti=40.0 util=0.0 age=0m] rex is a mammal' != '  [derived sti=0.5 util=0.0 age=0m] rex is a mammal'
+E         Use -v to get more diff
+
+tests/test_f2_context_goals.py:141: AssertionError
+2 failed, 11 deselected in 0.10s
