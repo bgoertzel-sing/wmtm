@@ -164,3 +164,22 @@ def test_derived_survives_raw_roundtrip():
     raw = [pc_shadow.raw_item(it) for it in st.get_active_set()]
     spec = pc_shadow.build_snapshot(pc_shadow._RawStore(raw), cycle=1, k=200)
     assert spec["derived_src"] == {"wm0": ["s0", "s1"]}
+
+
+def test_decision1_asserted_note_is_parsed_with_itself_as_source(tmp_path):
+    """Decision 1: a mem.derive() note (source_type asserted) is fed to the parser like any note, its source is the
+    note itself; a GoalChainer admission (derived) stays out of the parse feed."""
+    from wmtm import parse_cache
+    from wmtm.api import WMTM, WMTMConfig, derived_item_id
+    from wmtm.context import _sources
+    m = WMTM(WMTMConfig(state_dir=tmp_path))
+    note = "the kestrel archive codeword is amber"
+    m.derive(note, "src-1")
+    m.context_for("kestrel codeword?")
+    st = m.orchestrator.store
+    iid = derived_item_id(note)
+    it = st.get(iid)
+    assert it.source_type == "asserted"
+    assert iid in [r[0] for r in parse_cache.top_k_rows(st, 200)]
+    assert _sources(it.source_type, it.id, it.origin_cluster, it.derived_from) == [iid]
+    assert "d0" not in [r[0] for r in parse_cache.top_k_rows(_derived_store(), 200)]

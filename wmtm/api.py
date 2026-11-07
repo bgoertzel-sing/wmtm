@@ -290,7 +290,7 @@ class WMTM:
                             if item_id not in store:
                                 store.admit(
                                     item_id, d['note'],
-                                    source_type='derived',
+                                    source_type='asserted',   # decision 1: the agent's own claim, parsed like a note
                                     derived_from=d.get('source_ids', []),
                                     initial_sti=20.0,
                                 )

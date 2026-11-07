@@ -97,7 +97,7 @@ class WritebackManager:
 
     def _select_for_item(self, item: WMTMItem) -> Optional[WritebackCandidate]:
         """Evaluate a single item for writeback eligibility."""
-        if item.source_type == "derived":
+        if item.source_type in ("derived", "asserted"):   # decision 1: asserted notes keep tool-derive writeback
             return self._select_derived(item)
         if item.source_type == "recalled":
             return self._select_recalled(item)

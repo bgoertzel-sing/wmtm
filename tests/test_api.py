@@ -93,7 +93,8 @@ def test_derive_then_admitted(tmp_path):
     out = m.derive("a derived belief about kestrel archives and codewords", "src-1")
     assert out.startswith("Registered derived belief " + derived_item_id("a derived belief about kestrel archives and codewords"))
     ctx = m.context_for("kestrel codeword?")
-    assert "[derived tv=none from=src-1 " in ctx                      # F2 section 7: no engine TV for a tool derive
+    iid = derived_item_id("a derived belief about kestrel archives and codewords")
+    assert "[asserted from=%s " % iid in ctx                          # decision 1: agent-asserted, source = the note
     assert (tmp_path / "_wmtm_pending_derives.jsonl").read_text() == ""
 
 

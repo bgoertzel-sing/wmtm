@@ -441,7 +441,7 @@ def format_active_context(store, cycle):
     ents = _entries_from_items(items, now)
     keep = {e["id"] for e in _select_attention_free(ents, 15)}
     display = [e for e in ents if e["id"] in keep]
-    lines = [f"  [{_belief_tag(e, 'derived' if e['src'] == 'derived' else 'recalled')} age={_age_str(e['age'])}] "
+    lines = [f"  [{_belief_tag(e, e['src'] if e['src'] in ('derived', 'asserted') else 'recalled')} age={_age_str(e['age'])}] "
              f"{e['content'][:200]}" for e in display]
     display_items = display
 
