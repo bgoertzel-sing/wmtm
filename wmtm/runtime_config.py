@@ -158,6 +158,7 @@ SPEC = {
     "context_max_items":   ("WMTM_CONTEXT_MAX_ITEMS", int, 15, None),
     "context_min_request_items": ("WMTM_CONTEXT_MIN_REQUEST_ITEMS", int, 5, None),  # best-matching items always shown
     "context_min_score":   ("WMTM_CONTEXT_MIN_SCORE", float, 0.2, None),  # with a known request: hide weaker filler
+    "context_recent_focus": ("WMTM_CONTEXT_RECENT_FOCUS", int, 2, None),  # notes below the floor shown as recent focus
     "request_item":        ("WMTM_REQUEST_ITEM", bool, True, None),       # admit the request as a source_type=user item
     "request_item_chars":  ("WMTM_REQUEST_ITEM_CHARS", int, 600, None),
     "hooks_on_automated":  ("WMTM_HOOKS_ON_AUTOMATED", bool, True, None),

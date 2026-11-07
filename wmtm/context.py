@@ -973,6 +973,24 @@ def _clip(text, n, terms=None):
     return head + " … " + window + ("…" if best + span < len(text) else "")
 
 
+_FOCUS_CHARS = 300
+_FOCUS_LABEL = "  [recent focus] high attention, not matched to this request (not evidence for it):"
+
+
+def recent_focus(entries, admitted, cfg):
+    """F12 decision 3: when a request is known, F2's relevance floor stays, but up to context_recent_focus notes it
+    dropped are still shown, the highest attention first, below the evidence lines under _FOCUS_LABEL (a follow-up
+    such as "and the other one?" shares no words with the note it means).  Each keeps the tag an evidence line
+    would have (attention changes no truth value or source).  Not in the shown ids: no passive utility.
+    admitted = ids rank_entries kept.  -> entries."""
+    n = max(0, int(setting(cfg, "context_recent_focus")))
+    ents = [e for e in entries if e["src"] != "user"]
+    if n == 0 or not any(e.get("rel") for e in ents):    # no request known: the floor dropped nothing
+        return []
+    cand = [e for e in ents if e["id"] not in admitted and float(e.get("sti") or 0.0) > 0]
+    return sorted(cand, key=lambda e: (-float(e["sti"]), -float(e.get("total") or 0.0), str(e["id"])))[:n]
+
+
 def render_ranked(entries, context_rel, cycle, cfg):
     """Track P block: ranked entries, at most context_max_items, context_total_chars of item text in all; each item
     gets an equal share of the budget, capped at context_item_chars (floor 250).  Long items show their
@@ -981,6 +999,7 @@ def render_ranked(entries, context_rel, cycle, cfg):
     ranked = rank_entries(entries, context_rel, cfg)
     if not ranked:
         return None, []
+    focus = recent_focus(entries, {e["id"] for e in ranked}, cfg)   # F12 decision 3
     max_items = max(1, int(setting(cfg, "context_max_items")))
     if len(ranked) > max_items:                  # F2 section 7: choose without attention, keep the ranked order
         keep = {e["id"] for e in _select_attention_free(ranked, max_items)}
@@ -1001,6 +1020,17 @@ def render_ranked(entries, context_rel, cycle, cfg):
         rel_tag = f" rel={e['rel']:.2f}" if e.get("rel") else ""
         lines.append(f"  [{_belief_tag(e)} age={_age_str(e['age'])}{rel_tag}] {text}")
         shown.append(e["id"])
+    flines = []
+    for e in focus:                              # F12 decision 3: after the evidence lines, under their own label
+        room = budget - used
+        if room < 120:
+            break
+        text = _clip(e["content"], min(per, room, _FOCUS_CHARS))
+        used += len(text)
+        flines.append(f"  [{_belief_tag(e)} age={_age_str(e['age'])}] {text}")   # same tag as an evidence line
+    if flines:
+        lines.append(_FOCUS_LABEL)
+        lines.extend(flines)
     total = sum(1 for e in entries if e["src"] != "user")
     header = f"[WMTM Active Working Memory ({total} items, showing top {len(shown)}, cycle {cycle})]"
     return header + "\n" + "\n".join(lines), shown

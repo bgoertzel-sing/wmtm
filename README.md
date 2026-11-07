@@ -191,6 +191,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `context_max_items` | `WMTM_CONTEXT_MAX_ITEMS` | int | `15` | The most ranked items shown in the context block (at least 1). | `wmtm/context.py:901` |
 | `context_min_request_items` | `WMTM_CONTEXT_MIN_REQUEST_ITEMS` | int | `5` | best-matching items always shown | `wmtm/context.py:845` |
 | `context_min_score` | `WMTM_CONTEXT_MIN_SCORE` | float | `0.2` | with a known request: hide weaker filler | `wmtm/context.py:850` |
+| `context_recent_focus` | `WMTM_CONTEXT_RECENT_FOCUS` | int | `2` | With a known request, up to this many notes below the relevance floor are shown, highest attention first, as "recent focus" lines after the evidence lines (0 = off). | `wmtm/context.py:980` |
 | `request_item` | `WMTM_REQUEST_ITEM` | bool | `true` | admit the request as a source_type=user item | `wmtm/context.py:955` |
 | `request_item_chars` | `WMTM_REQUEST_ITEM_CHARS` | int | `600` | When the user message is admitted as a request item, whitespace is collapsed and the text is cut to this many characters (at least 20). | `wmtm/context.py:958` |
 | `hooks_on_automated` | `WMTM_HOOKS_ON_AUTOMATED` | bool | `true` | When true, automated (fast-path) turns also run the shadow and parse-feed hooks. `pc_shadow` or `semparse_feed` must still be on. | `wmtm/context.py:473` |

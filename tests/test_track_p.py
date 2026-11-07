@@ -312,3 +312,43 @@ def test_spread_cache_matches_uncached():
     assert got == ref and any(got)
     other = {"c5"}
     assert rb._spreading_activation_for(cl[2], other, st) != rb._spreading_activation_for(cl[2], active, st)
+
+
+# ── F12 decision 3: recent focus ─────────────────────────────────────
+
+FOCUS_LABEL = "  [recent focus] high attention, not matched to this request (not evidence for it):"
+
+
+def _followup_ents():
+    ents = [_entry("ref", 9.0, "Bob asked to ship the hinge patch by Friday")]
+    ents += [_entry("f%d" % k, 1.0 + k * 0.1, "filler %d" % k) for k in range(4)]
+    ents.append(_entry("x", 0.5, "the other branch is merged"))
+    ents.append(_entry("req", 99.0, "and the other one?", src="user"))
+    return ents
+
+
+def test_decision3_followup_sees_note_in_recent_focus():
+    text, shown = ctx.render_ranked(_followup_ents(), {"scores": {"x": 1.0}}, 1, {})
+    assert shown == ["x"]                                      # F2 floor holds for the evidence lines
+    evidence, focus = text.split(FOCUS_LABEL + "\n")
+    assert "hinge" not in evidence and "the other branch" in evidence
+    flines = focus.split("\n")
+    assert len(flines) == 2 and "hinge patch" in flines[0] and "filler 3" in flines[1]   # top 2 by attention
+
+
+def test_decision3_focus_keeps_truth_value_and_sources():
+    d = {"id": "d1", "src": "derived", "sti": 9.0, "util": 0.0, "age": 60.0, "content": "cat is a animal",
+         "total": 9.0, "tv": (0.81, 0.73), "from": ["s0", "s1"]}
+    text, _ = ctx.render_ranked([dict(d), _entry("x", 0.5, "x")], {"scores": {"x": 1.0}}, 1, {})
+    focus_line = text.split(FOCUS_LABEL + "\n")[1]
+    ev, _ = ctx.render_ranked([dict(d, sti=0.1)], {"scores": {"d1": 1.0}}, 1, {})
+    assert "[derived tv=0.81,0.73 from=s0,s1 age=" in focus_line
+    assert focus_line.split(" age=")[0] == ev.split("\n")[1].split(" age=")[0]   # same tag at any attention
+    assert "tv=" not in text.split(FOCUS_LABEL)[0].split("\n", 1)[1].replace("x", "")
+
+
+def test_decision3_off_or_no_request_no_focus():
+    text, shown = ctx.render_ranked(_followup_ents(), {"scores": {"x": 1.0}}, 1, {"context_recent_focus": 0})
+    assert FOCUS_LABEL not in text and shown == ["x"]
+    text, shown = ctx.render_ranked(_followup_ents(), None, 1, {})
+    assert FOCUS_LABEL not in text and len(shown) == 6
