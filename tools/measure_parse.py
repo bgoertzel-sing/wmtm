@@ -79,6 +79,15 @@ def baseline_tokens(row):
         u.get("cache_read_input_tokens", det.get("cached_tokens"))
     wr = u.get("cache_write") if u.get("cache_write") is not None else u.get("cache_creation_input_tokens")
     pt, out = u.get("prompt_tokens"), u.get("completion_tokens", u.get("output"))
+    tt = u.get("total_tokens")
+    if rd is None and wr is None and u.get("uncached_input") is None \
+            and pt is not None and out is not None and tt is not None:
+        # t-2026-11-05-p3-join-ab (cos answer 3): the live parse log has no cache split, but the gateway's
+        # prompt_tokens = uncached + cache_read and total_tokens additionally counts cache_write.  Same rule as
+        # t-2026-11-04-p2-real-notes recompute.py:62-64.  The old code ignored total_tokens and dropped the
+        # live call's ~88k cache_write (live_hi was ~4 prompt tokens + 5x output).
+        unc = min(4, pt)
+        return {"uncached_input": unc, "cache_read": pt - unc, "cache_write": max(0, tt - pt - out), "output": out}
     if u.get("uncached_input") is not None:
         unc = u["uncached_input"]
     elif pt is not None:
@@ -222,9 +231,13 @@ def main(argv=None):
                "live_weighted_lo": live_weighted(b, "uncached_input"),
                "live_weighted_hi": live_weighted(b, "cache_write")}
         rows.append(row)
+        if is_limit:                                        # cos answer 3: stop on any 429 / usage-limit error
+            print(f"STOP: limit error on note {h}: {err[:200]}", file=sys.stderr, flush=True)
         if status != "admitted" or err:
             bad.write(json.dumps({"hash": h, "item_id": iid, "text": txt, "error": err,
                                   "rejected": [[x, str(w)] for x, w in res.rejected][:50]}) + "\n")
+        if is_limit:
+            break
     bad.close()
     with open(os.path.join(a.out, "per_note.jsonl"), "w", encoding="utf-8") as fh:
         for r in rows:

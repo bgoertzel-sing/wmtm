@@ -144,21 +144,26 @@ def test_normalise_and_to_premises():
     n = sp.tokenize  # noqa
     node = sp.parse_one(sp.tokenize("(: r (Implication (And (P $a) (Q $a)) (R $a)) (STV 1.0 0.9))"), 0)[0]
     out = [sp.to_str(x) for x in sp.normalise(node)]
-    assert out == ["(: r (Implication (Premises (P $a) (Q $a)) (Conclusions (R $a))) (STV 1.0 0.9))"]
+    assert out == ["(: r (Implication (And (P $a) (Q $a)) (R $a)) (STV 1.0 0.9))"]
 
 
 def test_normalise_split_conclusions():
     node = sp.parse_one(sp.tokenize(
         "(: r (Implication (Premises (P $a)) (Conclusions (R $a) (S $a))) (STV 1.0 0.9))"), 0)[0]
     out = [sp.to_str(x) for x in sp.normalise(node)]
-    assert out == ["(: r_c1 (Implication (Premises (P $a)) (Conclusions (R $a))) (STV 1.0 0.9))",
-                   "(: r_c2 (Implication (Premises (P $a)) (Conclusions (S $a))) (STV 1.0 0.9))"]
+    assert out == ["(: r_c1 (Implication (P $a) (R $a)) (STV 1.0 0.9))",
+                   "(: r_c2 (Implication (P $a) (S $a)) (STV 1.0 0.9))"]
 
 
-def test_normalise_single_premise_wrapped():
+def test_normalise_single_premise_unchanged():
     node = sp.parse_one(sp.tokenize("(: r (Implication (P $a) (R $a)) (STV 1.0 0.9))"), 0)[0]
-    assert sp.to_str(sp.normalise(node)[0]) == \
-        "(: r (Implication (Premises (P $a)) (Conclusions (R $a))) (STV 1.0 0.9))"
+    assert sp.to_str(sp.normalise(node)[0]) == "(: r (Implication (P $a) (R $a)) (STV 1.0 0.9))"
+
+
+def test_normalise_premises_form_rewritten_to_and():
+    node = sp.parse_one(sp.tokenize(
+        "(: r (Implication (Premises (P $a) (Q $a)) (Conclusions (R $a))) (STV 1.0 0.9))"), 0)[0]
+    assert sp.to_str(sp.normalise(node)[0]) == "(: r (Implication (And (P $a) (Q $a)) (R $a)) (STV 1.0 0.9))"
 
 
 def test_interpretation_wrapper(tmp_path):
@@ -224,3 +229,55 @@ def test_preamble_prepended_file_untouched(tmp_path, monkeypatch):
     monkeypatch.setenv("WMTM_SEMPARSE_PREAMBLE", "0")
     assert sp.SemParseAdapter(lambda s, u: "", prompt_path=str(p)).system == "SYS"
     assert sp.SemParseAdapter(lambda s, u: "", system="RAW").system == "RAW"     # explicit system: no preamble
+
+
+# ------------------------------------------------------------ integration: normalise() output on the real engine
+import os as _os, subprocess as _sp, sys as _sys, json as _json
+from wmtm import runtime_config as _rc
+_CFG = _rc.resolve()
+_HAVE_PC = _os.path.isdir(_os.path.join(_CFG["petta_dir"], "python")) and \
+    _os.path.isdir(_os.path.join(_CFG["pettachainer_dir"], "pettachainer"))
+
+_ENGINE_SCRIPT = r"""
+import sys, os, json
+petta, vendor = sys.argv[1], sys.argv[2]
+sys.path.insert(0, os.path.join(petta, "python")); sys.path.insert(0, vendor)
+os.environ["PETTA_PATH"] = petta
+from pettachainer.pettachainer import PeTTaChainer
+spec = json.loads(sys.stdin.read())
+h = PeTTaChainer(); fails = []
+for s in spec["atoms"]:
+    try: h.add_atom(s)
+    except Exception as e: fails.append([s, type(e).__name__])
+out = {}
+for g in spec["goals"]:
+    r = h.query("(: $prf %s $tv)" % g, steps=200, timeout_sec=0)
+    out[g] = [str(x) for x in ([r] if isinstance(r, str) else list(r or []))]
+print("JSON " + json.dumps({"fails": fails, "res": out}))
+"""
+
+
+def _engine(atoms, goals):
+    p = _sp.run([_sys.executable, "-c", _ENGINE_SCRIPT, _CFG["petta_dir"], _CFG["pettachainer_dir"]],
+                input=_json.dumps({"atoms": atoms, "goals": goals}), capture_output=True, text=True,
+                env=_rc.worker_env(_CFG), timeout=180)
+    line = [l for l in p.stdout.splitlines() if l.startswith("JSON ")]
+    assert line, p.stderr[-2000:]
+    return _json.loads(line[-1][5:])
+
+
+@pytest.mark.skipif(not _HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+def test_integration_normalise_output_loads_and_derives_on_engine():
+    """answer 6: normalise() output must compile on 202b9379 and chain (Premises form was rejected)."""
+    rules = ["(: r (Implication (Premises (P $a) (Q $a)) (Conclusions (R $a))) (STV 1.0 0.9))",
+             "(: m (Implication (Premises (P $a)) (Conclusions (S $a) (T $a))) (STV 1.0 0.9))"]
+    atoms = []
+    for r in rules:
+        atoms += [sp.to_str(n) for n in sp.normalise(sp.parse_one(sp.tokenize(r), 0)[0])]
+    assert not any("Premises" in a or "Conclusions" in a for a in atoms)
+    atoms += ["(: f1 (P x) (STV 1.0 0.9))", "(: f2 (Q x) (STV 1.0 0.9))"]
+    out = _engine(atoms, ["(R x)", "(S x)", "(T x)", "(R y)"])
+    assert out["fails"] == [], out["fails"]
+    for g in ("(R x)", "(S x)", "(T x)"):
+        assert any("STV" in x for x in out["res"][g]), (g, out["res"][g])
+    assert not any("STV" in x for x in out["res"]["(R y)"])          # negative control

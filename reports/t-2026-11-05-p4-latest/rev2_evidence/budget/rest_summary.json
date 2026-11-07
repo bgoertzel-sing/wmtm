@@ -1,0 +1,65 @@
+{
+ "model": "openclaw/protocosmo2",
+ "mocked": false,
+ "notes_in_state": 20,
+ "parsed": 19,
+ "seed": 0,
+ "hashes_given": true,
+ "hashes_missing": [],
+ "max_chars": 1500,
+ "notes_over_max_chars_in_state": 0,
+ "hashes_skipped_long": [],
+ "semparse_dir_set": true,
+ "status": {
+  "admitted": 0,
+  "partial": 19,
+  "rejected": 0
+ },
+ "statements_accepted": 972,
+ "statements_rejected": 254,
+ "errors": 0,
+ "limit_errors_429_or_usage": 0,
+ "weights": {
+  "uncached_input": 1.0,
+  "cache_write": 1.25,
+  "cache_read": 0.1,
+  "output": 5.0
+ },
+ "measured_rows": {
+  "uncached_input": 19,
+  "cache_write": 19,
+  "cache_read": 19,
+  "output": 19,
+  "weighted": 19,
+  "latency_s": 19
+ },
+ "usage_complete": true,
+ "median": {
+  "uncached_input": 4,
+  "cache_write": 147893,
+  "cache_read": 2128,
+  "output": 6873,
+  "weighted": 219433.0,
+  "latency_s": 60.326
+ },
+ "live_baseline": {
+  "joined": 19,
+  "median_weighted_lo_prompt_as_uncached": 146294.3,
+  "median_weighted_hi_prompt_as_cache_write": 146294.3,
+  "median_secs": 64.206
+ },
+ "ratio_new_over_live": {
+  "vs_lo": 1.5,
+  "vs_hi": 1.5,
+  "paired_rows_lo": 19,
+  "paired_rows_hi": 19,
+  "basis": "medians over the notes that have a live baseline; only when every parsed note reported full usage (else null)"
+ },
+ "budget": {
+  "usage_ratio_max": 2.0,
+  "median_latency_max_s": 180,
+  "per_hour_cap": 20.0,
+  "usage_ok": true,
+  "latency_ok": true
+ }
+}

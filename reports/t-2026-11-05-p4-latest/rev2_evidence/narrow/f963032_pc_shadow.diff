@@ -1,0 +1,132 @@
+diff --git a/wmtm/pc_shadow.py b/wmtm/pc_shadow.py
+index 656c026..de9455f 100644
+--- a/wmtm/pc_shadow.py
++++ b/wmtm/pc_shadow.py
+@@ -67,24 +67,63 @@ def _cache_lookup(items, cache_dir=None, context=False, speaker=False):
+     return out
+ 
+ 
+-def semparse_facts(atom_strs):
+-    """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped)."""
++# STOPGAP(upstream: F7 PeTTaChainer "a Member class must be a symbol") -- remove when PeTTaChainer accepts a
++# compound Member class such as (Narrow pilot (Mod harbour)); listed in docs/STOPGAPS.md.
++def narrow_symbol(node) -> str:
++    """Deterministic class symbol for a (Narrow base R...) class: <base>__nw_<sha1(form)[:10]>."""
++    import hashlib
++    from .semparse_adapter import to_str
++    base = node[1] if isinstance(node[1], str) else narrow_symbol(node[1])
++    return "%s__nw_%s" % (base, hashlib.sha1(to_str(node).encode()).hexdigest()[:10])
++
++
++def _is_narrow(n) -> bool:
++    return (isinstance(n, list) and len(n) >= 3 and n[0] == "Narrow"
++            and (isinstance(n[1], str) or _is_narrow(n[1])))
++
++
++def _name_narrow(node, defs):
++    """STOPGAP(upstream: F7): replace every narrowed Member class by its deterministic symbol; defs collects
++    symbol -> (base symbol, narrow form) so each symbol gets its defining rule."""
++    if isinstance(node, list):
++        if len(node) == 3 and node[0] == "Member" and _is_narrow(node[2]):
++            return ["Member", _name_narrow(node[1], defs), _narrow_to_sym(node[2], defs)]
++        return [_name_narrow(x, defs) for x in node]
++    return node
++
++
++def _narrow_to_sym(n, defs):
++    base = n[1] if isinstance(n[1], str) else _narrow_to_sym(n[1], defs)
++    sym = narrow_symbol(n)
++    defs.setdefault(sym, base)
++    return sym
++
++
++def narrow_defining_rules(defs):
++    """STOPGAP(upstream: F7): (Member $x <sym>) implies (Member $x <base>) for every named narrowed class."""
++    return ["(: nwdef_%s (Implication (Member $x %s) (Member $x %s)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))"
++            % (sym, sym, base) for sym, base in sorted(defs.items())]
++
++
++def _forms(atom_strs, defs):
+     from .semparse_adapter import split_toplevel
+-    out = []
+-    for src, node, err in split_toplevel("\n".join(atom_strs)):
++    for _src, node, err in split_toplevel("\n".join(atom_strs or [])):
+         if err or not isinstance(node, list):
+             continue
+         if node and node[0] == "Interpretation" and len(node) == 3:
+             node = node[2]
+-        if len(node) != 4 or node[0] != ":":
++        if not (isinstance(node, list) and len(node) == 4 and node[0] == ":"):
+             continue
++        yield _name_narrow(node, defs)
++
++
++def semparse_facts(atom_strs, defs=None):
++    """Binary facts (head, a, b, s, c) from validated semparse atoms (Interpretation wrappers unwrapped).
++    A narrowed Member class becomes its deterministic symbol (STOPGAP F7); defs (dict) receives the definitions."""
++    defs = {} if defs is None else defs
++    out = []
++    for node in _forms(atom_strs, defs):
+         c, tv = node[2], node[3]
+-        if (isinstance(c, list) and len(c) == 3 and c[0] == "Member" and isinstance(c[1], str)
+-                and isinstance(c[2], list) and len(c[2]) == 3 and c[2][0] == "Narrow" and isinstance(c[2][1], str)):
+-            # P4 / F7: PeTTaChainer refuses a compound Member class ("a Member class must be a symbol"), so a
+-            # narrowed class (Member x (Narrow pilot (Mod harbour))) is lowered to its base class (Member x pilot);
+-            # the emitter's with_head twin states the same fact, which the dedupe below collapses.
+-            c = ["Member", c[1], c[2][1]]
+         if (isinstance(c, list) and len(c) == 3 and c[0] in SP_HEADS and all(isinstance(x, str) for x in c[1:])
+                 and isinstance(tv, list) and len(tv) == 3):
+             try:
+@@ -97,7 +136,7 @@ def semparse_facts(atom_strs):
+ 
+ 
+ def _flat_member_rule(node) -> bool:
+-    """True if every Member atom in an Implication rule names a symbol class (no compound Narrow class)."""
++    """True if every Member atom in a rule names a symbol class (after Narrow naming)."""
+     if isinstance(node, list):
+         if len(node) == 3 and node[0] == "Member" and not isinstance(node[2], str):
+             return False
+@@ -105,21 +144,22 @@ def _flat_member_rule(node) -> bool:
+     return True
+ 
+ 
+-def semparse_rules(atom_strs):
+-    """P4: the parser's (: id (Implication P C) (CTV ...)) rules, as MeTTa strings, for the shadow KB.
+-    A rule whose Member atoms name a compound (Narrow ...) class is skipped (F7: the engine refuses it)."""
+-    from .semparse_adapter import split_toplevel, to_str
++def semparse_rules(atom_strs, defs=None):
++    """P4: the parser's (: id (Implication|Equivalence P C) tv) rules, as MeTTa strings, for the shadow KB.
++    Narrowed classes are replaced by their deterministic symbols (STOPGAP F7) and every symbol seen (in rules
++    or, via defs, in facts) gets its defining rule appended."""
++    from .semparse_adapter import to_str
++    defs = {} if defs is None else defs
+     out = []
+-    for _src, node, err in split_toplevel("\n".join(atom_strs or [])):
+-        if err or not isinstance(node, list):
+-            continue
+-        if node and node[0] == "Interpretation" and len(node) == 3:
+-            node = node[2]
+-        if (len(node) == 4 and node[0] == ":" and isinstance(node[1], str) and isinstance(node[2], list)
+-                and len(node[2]) == 3 and node[2][0] in ("Implication", "Equivalence") and _flat_member_rule(node[2])):
++    for node in _forms(atom_strs, defs):
++        if (isinstance(node[1], str) and isinstance(node[2], list) and len(node[2]) == 3
++                and node[2][0] in ("Implication", "Equivalence") and _flat_member_rule(node[2])):
+             r = to_str(node)
+             if r not in out:
+                 out.append(r)
++    for r in narrow_defining_rules(defs):
++        if r not in out:
++            out.append(r)
+     return out
+ 
+ 
+@@ -317,7 +357,8 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
+                 for (h, x, y, sv, cv) in fs:
+                     metta.append("(: sp%d (%s %s %s) (STV %.4f %.4f))" % (i, h, x, y, min(1.0, max(0.0, sv)), min(0.99, max(0.0, cv)))); src["sp%d" % i] = it.id; lf["sp%d" % i] = "(%s %s %s)" % (h, x, y); i += 1
+                 if cfg.get("shadow_rules", True):   # P4: the parser's Implication rules (flat Member classes only)
+-                    for r in semparse_rules(cached[it.id]):
++                    _d = {}; semparse_facts(cached[it.id], _d)   # STOPGAP(upstream: F7): defining rules for fact classes too
++                    for r in semparse_rules(cached[it.id], _d):
+                         if r not in metta:
+                             metta.append(r); n_rules += 1
+             continue

@@ -1,0 +1,7 @@
+PeTTaChainer          rTreutlein/PeTTaChainer master  bdae8d7ee0bc38ef93528ea3e9d3dcc47c5b8c95  (commit 2026-11-05T13:41:47+01:00; fetched 2026-11-05 19:59 UTC)
+semantic-parsing-hitl leungmanhin/semantic-parsing-hitl main f44d7b740aed240c834165672b6a862998ee4a12  (commit 2026-11-05T18:12:27+08:00; fetched 2026-11-05 ~20:00 UTC, see LIST-manhin.md)
+PeTTa                 rTreutlein/PeTTa pr/compact-datatypes 3681b9baa28d005dfbad21ad9b5d46b243b1e323  (commit 2026-10-28T14:04:45+01:00)
+  PeTTa selection rationale: PeTTaChainer@bdae8d7e pyproject.toml names rTreutlein/PeTTa branch pr/compact-datatypes; 3681b9b is that branch's HEAD at fetch time.
+GoalChainer gate      external/PeTTaChainer 38b147345a3d195637377a9d0f6017e2f50aa105 (186/186 gate, see gates/)
+wmtm-module           base b317ff19a405f72a4c6a09960932b2c665851216  head 0875c96b2f726f5b0a527326a135281a57fb015d  (from P4's hive/t-2026-11-05-p4-latest)
+Runtime: SWI-Prolog 9.3.36, CPython 3.10.12, janus-swi 1.5.2, Linux x86_64

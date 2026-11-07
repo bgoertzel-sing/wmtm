@@ -1,0 +1,18 @@
+{
+ "gateway_log_span": [
+  1793862000.882,
+  1793918125.072
+ ],
+ "windows_covered": {
+  "canary": true,
+  "rest": true
+ },
+ "lines_in_windows": 686,
+ "error_lines": 0,
+ "errors": [],
+ "router_by_agent": {
+  "canary:protocosmo2": 7,
+  "rest:protocosmo2": 222,
+  "rest:?": 3
+ }
+}

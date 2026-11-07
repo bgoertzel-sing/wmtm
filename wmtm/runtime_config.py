@@ -32,8 +32,8 @@ PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_ROOT = os.path.dirname(PKG_DIR)            # <...>/wmtm-<tag>  (or the repo checkout)
 VENDOR_ROOT = os.path.dirname(DIST_ROOT)        # <bot>/vendor      (when vendored)
 
-SEMPARSE_PIN = "1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef"     # semantic-parsing-hitl template-catalog line (MIT)
-SEMPARSE_PROMPT_SHA256 = "e4c4a76c7666d70f6d019fd7fea9391d91b01528f8f89132ae05d842fdd8207e"  # PROMPT_CATALOG.txt @1f1a7a6f
+SEMPARSE_PIN = "f44d7b740aed240c834165672b6a862998ee4a12"     # semantic-parsing-hitl (MIT), P4 re-pin
+SEMPARSE_PROMPT_SHA256 = "645bff3f5c3a0670d98a463d60d18e178d899c08c58f17ea4b3ff5a53b1d25b6"  # PROMPT_CATALOG.txt @f44d7b74 (P4 re-pin)
 SEMPARSE_LEGACY_PROMPT_SHA256 = "2ed18b934e28afac75b1d6c7c47b7b7413ed778c4c2916441274fb42933d9d1e"  # prompt.txt @3ec15bd1 (mode legacy)
 
 _V, _D = "vendor", "data"
@@ -56,6 +56,7 @@ SPEC = {
     # Track Q: speaker linking (off by default; new parses go to <semparse_dir>/spk1, old caches are kept).
     # speaker_map: Telegram user id / username -> canonical name; speaker_self: the bot's own name.  Flags file only.
     "speaker_link":        ("WMTM_SPEAKER_LINK", bool, False, None),
+    "name_resolve":        ("WMTM_NAME_RESOLVE", bool, True, None),           # P3 Deviation 6 / P4: on for the parse path; (Name sk_x "label") -> deterministic symbol before the gate (wmtm/name_resolve.py)
     "speaker_map":         ("WMTM_SPEAKER_MAP", dict, {}, None),
     "speaker_self":        ("WMTM_SPEAKER_SELF", str, "", None),
     # Track R: GoalChainer phase 1 (log only; wmtm/goals).  Runs inside the PeTTaChainer shadow worker, after its
@@ -109,6 +110,7 @@ SPEC = {
     "admit_log_max_bytes": ("WMTM_ADMIT_LOG_MAX_BYTES", int, 1_000_000, None),   # <shadow_dir>/admit_log.jsonl (+ .1)
     # Track J parse-quality gate (wmtm/parse_gate.py); applies to PeTTaChainer conclusions only
     "gate_on":             ("WMTM_GATE", bool, True, None),
+    "gate_scoped_witness": ("WMTM_GATE_SCOPED_WITNESS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> passes the placeholder rule
     "gate_min_conf":       ("WMTM_GATE_MIN_CONF", float, 0.3, None),
     "gate_broad_terms":    ("WMTM_GATE_BROAD_TERMS", str, "thing,things,entity,entities,object,objects,something,anything,everything,stuff,item,items,concept,trivial,important,relevant,useful,ok,fine,good,bad", None),
     "gate_placeholder_terms": ("WMTM_GATE_PLACEHOLDERS", str, "it,this,that,they,them,thing,something,someone,somebody,x,y,z", None),
@@ -128,7 +130,10 @@ SPEC = {
     "shadow_k":            ("WMTM_PC_SHADOW_K", int, 200, None),
     "shadow_max_goals":    ("WMTM_PC_SHADOW_MAX_GOALS", int, 60, None),
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),
+    "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
+    "shadow_nwdef":        ("WMTM_PC_SHADOW_NWDEF", bool, True, None),           # P4 rev5: add nwdef_* defining rules for narrowed classes (False: leave out, upstream R2 lowers c)
     "shadow_skolem_goals": ("WMTM_PC_SHADOW_SKOLEM_GOALS", bool, False, None),
+    "shadow_scoped_witness_goals": ("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> goals allowed
     "shadow_goal_rank":    ("WMTM_PC_SHADOW_GOAL_RANK", bool, True, None),       # Track N: Design A ranked goal pool (off = Track M 2-step goals)
     "shadow_max_hops":     ("WMTM_PC_SHADOW_MAX_HOPS", int, 3, None),            # Track N: longest chain in the pool (derivation steps)
     "shadow_min_hops":     ("WMTM_PC_SHADOW_MIN_HOPS", int, 1, None),            # Track N: only ask goals needing >= N steps
@@ -154,11 +159,11 @@ SPEC = {
     "runtime_dir":         ("WMTM_RUNTIME_DIR", str, "", _D),
     "shadow_dir":          ("WMTM_PC_SHADOW_DIR", str, "", _D),
     "semparse_dir":        ("WMTM_SEMPARSE_DIR", str, "", _D),
-    "petta_dir":           ("WMTM_PC_PETTA", str, "petta-v1.0.6", _V),
-    "pettachainer_dir":    ("WMTM_PC_VENDOR", str, "pettachainer-36b3fe6-dedup", _V),
-    "semparse_hitl":       ("WMTM_SEMPARSE_HITL", str, "semparse-hitl-1f1a7a6f", _V),
+    "petta_dir":           ("WMTM_PC_PETTA", str, "petta-3681b9b", _V),
+    "pettachainer_dir":    ("WMTM_PC_VENDOR", str, "pettachainer-bdae8d7e", _V),
+    "semparse_hitl":       ("WMTM_SEMPARSE_HITL", str, "semparse-hitl-f44d7b74", _V),
     "semparse_mode":       ("WMTM_SEMPARSE_MODE", str, "catalog", None),
-    "semparse_prompt":     ("SEMPARSE_PROMPT", str, "semparse-hitl-1f1a7a6f/templates/generated/PROMPT_CATALOG.txt", _V),
+    "semparse_prompt":     ("SEMPARSE_PROMPT", str, "semparse-hitl-f44d7b74/templates/generated/PROMPT_CATALOG.txt", _V),
     "semparse_prompt_sha256": ("WMTM_SEMPARSE_PROMPT_SHA256", str, SEMPARSE_PROMPT_SHA256, None),
     "swipl_bin":           ("WMTM_SWIPL_BIN", str, "", _V),
     "llm_env_file":        ("WMTM_LLM_ENV_FILE", str, "", _V),
