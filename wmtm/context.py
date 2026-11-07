@@ -69,26 +69,41 @@ def parse_item_id_timestamp(item_id):
     return 0.0
 
 
-def is_duplicate_topic(content, existing_snippets, threshold=0.6):
-    """Return True if content is too similar to any existing snippet.
-    
-    Uses Jaccard similarity on word sets to detect topically redundant items.
-    This prevents the WMTM from being filled with 15 variations of the same
-    observation (e.g., "send() fails because processing/ is empty").
+def proposition_key(text):
+    """F2 (review section 5): the surface form two notes must share to state the same proposition: case, whitespace
+    and trailing sentence punctuation ignored, every word and number kept ("rex is a dog" != "rex is a mammal";
+    "CPU reads 92%" != "CPU reads 55%")."""
+    return " ".join(str(text or "").lower().split()).rstrip(" .!;")
+
+
+def _canon_atoms(atoms):
+    return tuple(sorted(" ".join(str(a).split()) for a in atoms or ()))
+
+
+def same_proposition(a, b, parse_of=None):
+    """F2 (review section 5): True only when notes a and b state the same proposition: the same proposition_key, or
+    (parse_of given: text -> parsed atoms, None when unparsed) both are parsed to the same non-empty atom set.
+    Sharing words never makes two notes one.  Supersession is the journal's (resolve_supersedes, before recall)."""
+    if proposition_key(a) == proposition_key(b):
+        return True
+    if parse_of is None:
+        return False
+    try:
+        pa, pb = parse_of(a), parse_of(b)
+    except Exception:
+        return False
+    return bool(pa) and bool(pb) and _canon_atoms(pa) == _canon_atoms(pb)
+
+
+def is_duplicate_topic(content, existing_snippets, threshold=None, parse_of=None):
+    """Return True if content states the same proposition as an already admitted snippet (same_proposition).
+
+    F2 (review section 5): this was a Jaccard word-overlap test (>= 0.6), which dropped "rex is a mammal" next to
+    "rex is a dog" and the second of two CPU readings.  Distinct propositions are now all admitted and ranking
+    decides what is shown.  threshold is accepted for old callers and ignored.
     """
-    if not existing_snippets:
-        return False
-    content_words = set(content.lower().split())
-    if len(content_words) < 3:
-        return False
-    for snippet in existing_snippets:
-        snippet_words = set(snippet.lower().split())
-        if not snippet_words:
-            continue
-        intersection = content_words & snippet_words
-        union = content_words | snippet_words
-        jaccard = len(intersection) / len(union) if union else 0
-        if jaccard >= threshold:
+    for snippet in existing_snippets or ():
+        if same_proposition(content, snippet, parse_of):
             return True
     return False
 
@@ -420,32 +435,16 @@ def format_active_context(store, cycle):
     if not items:
         return None
     
-    display_items = items[:15]
-    
-    lines = []
-    for item in display_items:
-        source_tag = "derived" if item.source_type == "derived" else "recalled"
-        sti = item.attention.sti
-        util = item.utility
-        # F25: Show wall-clock age based on effective age (considers origin_timestamp)
-        if hasattr(item, 'effective_age_seconds'):
-            age_secs = item.effective_age_seconds
-        elif item.created_at > 0:
-            age_secs = now - item.created_at
-        else:
-            age_secs = -1
-        if age_secs >= 0:
-            if age_secs < 3600:
-                age_str = f"{age_secs/60:.0f}m"
-            elif age_secs < 86400:
-                age_str = f"{age_secs/3600:.1f}h"
-            else:
-                age_str = f"{age_secs/86400:.1f}d"
-        else:
-            age_str = "?"
-        content = item.content[:200]
-        lines.append(f"  [{source_tag} sti={sti:.1f} util={util:.1f} age={age_str}] {content}")
-    
+    # F2 (review section 7): which items are shown does not depend on attention (newest first when there are more
+    # than 15); attention (active-set order) only orders the shown lines, and each line carries what is believed:
+    # the engine's truth value and the source note ids, never STI or utility.
+    ents = _entries_from_items(items, now)
+    keep = {e["id"] for e in _select_attention_free(ents, 15)}
+    display = [e for e in ents if e["id"] in keep]
+    lines = [f"  [{_belief_tag(e, 'derived' if e['src'] == 'derived' else 'recalled')} age={_age_str(e['age'])}] "
+             f"{e['content'][:200]}" for e in display]
+    display_items = display
+
     total = len(items)
     shown = len(display_items)
     header = f"[WMTM Active Working Memory ({total} items, showing top {shown}, cycle {cycle})]"
@@ -766,8 +765,54 @@ def _entries_from_items(items, now):
         else:
             age = -1
         out.append({"id": it.id, "src": it.source_type, "sti": float(it.attention.sti), "util": float(it.utility),
-                    "age": age, "content": it.content or "", "total": float(it.attention.total)})
+                    "age": age, "content": it.content or "", "total": float(it.attention.total),
+                    "tv": _engine_tv(getattr(it, "provenance", None)), "from": _sources(it.source_type, it.id,
+                                                                                         it.origin_cluster,
+                                                                                         it.derived_from)})
     return out
+
+
+def _engine_tv(prov):
+    """F2 (review section 7): the reasoning engine's truth value (strength, confidence) of a derived item, from its
+    provenance (pc_admit: provenance["stv"]); None when the engine gave none (a tool derive).  Never recomputed."""
+    try:
+        s, c = (prov or {}).get("stv")[:2]
+        return float(s), float(c)
+    except (TypeError, ValueError, IndexError, AttributeError):
+        return None
+
+
+def _sources(src, iid, origin_cluster=None, derived_from=None):
+    """F2 (review section 7): the note ids a line rests on: a derived item's premises, else the note itself."""
+    if src == "derived":
+        return [str(x) for x in derived_from or ()]
+    return [str(origin_cluster or iid)]
+
+
+_MAX_SOURCES = 4
+
+
+def _belief_tag(e, src=None):
+    """F2 (review section 7): the per-line tag: kind, truth value (derived lines) and sources.  No attention value:
+    the same item renders the same line at any two attention states."""
+    src = src or e["src"]
+    parts = [src]
+    if src == "derived":
+        tv = e.get("tv")
+        parts.append("tv=%.2f,%.2f" % tv if tv else "tv=none")
+    ids = e.get("from") or []
+    more = len(ids) - _MAX_SOURCES
+    parts.append("from=" + (",".join(ids[:_MAX_SOURCES]) + ("+%d" % more if more > 0 else "") if ids else "none"))
+    return " ".join(parts)
+
+
+def _select_attention_free(ents, n, rel=None):
+    """F2 (review section 7): which n entries are shown, chosen without attention: request relevance first (when
+    known), then the newest, then id.  The caller orders the chosen ones (attention may order, never choose)."""
+    rel = rel or {}
+    key = lambda e: (-float(rel.get(e["id"], e.get("rel", 0.0)) or 0.0),
+                     e["age"] if e.get("age") is not None and e["age"] >= 0 else float("inf"), str(e["id"]))
+    return sorted(ents, key=key)[:max(0, n)]
 
 
 def _display_ts(d):
@@ -787,24 +832,19 @@ def _entries_from_dicts(items_dict, now):
         att = d.get("attention", {}) or {}
         out.append({"id": d.get("id"), "src": d.get("source_type", "unknown"), "sti": float(att.get("sti", 0) or 0),
                     "util": float(d.get("utility", 0) or 0), "age": (now - ts) if ts > 0 else -1,
-                    "content": d.get("content", "") or "", "total": _att_total(d)})
+                    "content": d.get("content", "") or "", "total": _att_total(d),
+                    "tv": _engine_tv(d.get("provenance")),
+                    "from": _sources(d.get("source_type", "unknown"), d.get("id"), d.get("origin_cluster"),
+                                     d.get("derived_from"))})
     return out
 
 
 def _render_rc2_from_dicts(items_dict, now, cycle):
     """rc2 fast-path block (context_rank off): top 15 by STI, 200 chars each."""
-    sorted_items = sorted(items_dict.values(), key=lambda it: it.get("attention", {}).get("sti", 0),
-                          reverse=True)[:15]
-    lines = []
-    for item in sorted_items:
-        src = item.get("source_type", "unknown")
-        att = item.get("attention", {})
-        sti = att.get("sti", 0)
-        util = item.get("utility", 0)
-        ts = _display_ts(item)
-        age_str = _age_str(now - ts) if ts > 0 else "?"
-        content = item.get("content", "")[:200]
-        lines.append(f"  [{src} sti={sti:.1f} util={util:.1f} age={age_str}] {content}")
+    ents = _entries_from_dicts(items_dict, now)
+    keep = {e["id"] for e in _select_attention_free(ents, 15)}       # F2 section 7: selection without attention
+    sorted_items = sorted((e for e in ents if e["id"] in keep), key=lambda e: e["sti"], reverse=True)  # STI orders
+    lines = [f"  [{_belief_tag(e)} age={_age_str(e['age'])}] {e['content'][:200]}" for e in sorted_items]
     header = f"[WMTM Active Working Memory ({len(items_dict)} items, showing top {len(sorted_items)}, cycle {cycle})]"
     return header + "\n" + "\n".join(lines)
 
@@ -888,8 +928,10 @@ def rank_entries(entries, context_rel, cfg):
     pinned = {e["id"] for e in by_rel}
     rest = sorted((e for e in ents if e["id"] not in pinned), key=lambda e: (-e["score"], -e["total"]))
     if by_rel:                                   # a request is known: drop weak, irrelevant filler (frees budget)
+        # F2 (review section 7): the floor applies to the score without its attention term, so attention can
+        # reorder lines but never decide whether one is shown.
         floor = float(setting(cfg, "context_min_score"))
-        rest = [e for e in rest if e["score"] >= floor]
+        rest = [e for e in rest if w_rel * e["rel"] >= floor]
     return by_rel + rest
 
 
@@ -940,6 +982,9 @@ def render_ranked(entries, context_rel, cycle, cfg):
     if not ranked:
         return None, []
     max_items = max(1, int(setting(cfg, "context_max_items")))
+    if len(ranked) > max_items:                  # F2 section 7: choose without attention, keep the ranked order
+        keep = {e["id"] for e in _select_attention_free(ranked, max_items)}
+        ranked = [e for e in ranked if e["id"] in keep]
     budget = max(250, int(setting(cfg, "context_total_chars")))
     n = min(max_items, len(ranked))
     per = max(250, min(int(setting(cfg, "context_item_chars")), budget // n))
@@ -954,7 +999,7 @@ def render_ranked(entries, context_rel, cycle, cfg):
         text = _clip(e["content"], min(per, room), terms if e.get("rel") else None)
         used += len(text)
         rel_tag = f" rel={e['rel']:.2f}" if e.get("rel") else ""
-        lines.append(f"  [{e['src']} sti={e['sti']:.1f} util={e['util']:.1f} age={_age_str(e['age'])}{rel_tag}] {text}")
+        lines.append(f"  [{_belief_tag(e)} age={_age_str(e['age'])}{rel_tag}] {text}")
         shown.append(e["id"])
     total = sum(1 for e in entries if e["src"] != "user")
     header = f"[WMTM Active Working Memory ({total} items, showing top {len(shown)}, cycle {cycle})]"
@@ -980,7 +1025,10 @@ def format_context(store, cycle, cfg=None, context_rel=None, request=None):
 def _format_context_core(store, cycle, cfg, context_rel):
     if not setting(cfg, "context_rank"):
         text = format_active_context(store, cycle)
-        return text, [it.id for it in store.get_active_set()[:15]] if text else []
+        if not text:
+            return text, []
+        import time as _t
+        return text, [e["id"] for e in _select_attention_free(_entries_from_items(store.get_active_set(), _t.time()), 15)]
     import time as _t
     items = store.get_active_set()
     if not items:

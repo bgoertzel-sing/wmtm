@@ -3,7 +3,6 @@ import pytest
 from wmtm.store import WMTMStore
 from wmtm.goalchainer_bridge import (
     GoalChainerDecision,
-    wmtm_to_goalchainer_evidence,
     goalchainer_result_to_candidates,
     run_goalchainer_over_wmtm,
 )
@@ -22,24 +21,6 @@ class TestGoalChainerDecision:
         assert d.evidence_ids == []
         assert d.motivation == ""
         assert d.score == 0.8
-
-
-class TestWmtmToGoalchainerEvidence:
-    def test_converts_active_set(self):
-        store = _seed_store(3)
-        ev = wmtm_to_goalchainer_evidence(store)
-        assert len(ev) == 3
-        assert all("id" in e and "content" in e and "sti" in e for e in ev)
-
-    def test_respects_max_items(self):
-        store = _seed_store(10)
-        ev = wmtm_to_goalchainer_evidence(store, max_items=3)
-        assert len(ev) == 3
-
-    def test_empty_store(self):
-        store = WMTMStore(capacity=10)
-        ev = wmtm_to_goalchainer_evidence(store)
-        assert ev == []
 
 
 class TestGoalchainerResultToCandidates:
@@ -89,3 +70,8 @@ class TestRunGoalchainerOverWmtm:
         store = WMTMStore(capacity=10)
         cands = run_goalchainer_over_wmtm(store, "test request")
         assert cands == []
+
+    def test_v1_feed_removed_non_empty_store_returns_empty(self):
+        """F2 (review section 10): the v1 feed is removed; see tests/test_f2_context_goals.py."""
+        store = _seed_store(3)
+        assert run_goalchainer_over_wmtm(store, "test request") == []

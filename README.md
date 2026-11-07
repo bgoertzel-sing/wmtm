@@ -15,9 +15,9 @@ Extracted from the ProtoCosmo2 Iter tree (snapshot `83ea611`, branch
 - Design notes: `docs/`; release/tag mapping: `docs/RELEASES.md`.
 - `scripts/benchmark_wmtm.py`: micro-benchmark (run with `PYTHONPATH=.`).
 
-Known external coupling: `wmtm/goalchainer_bridge.py` adds a hardcoded
-OmegaClaw-GoalChainer path to `sys.path` (tests mock it). To be made
-configurable.
+GoalChainer v1 feed removed (F2, review section 10): `decide()` and
+`goalchainer_bridge.run_goalchainer_over_wmtm` no longer send notes to GoalChainer v1, which read none
+of them (it reads only `(Acceptable <action>)` STV/EC atoms). WMTM goals run on GoalChainer v2 (`wmtm/goals`).
 
 ## Interface (v0.2)
 
@@ -27,7 +27,7 @@ mem = WMTM(WMTMConfig(state_dir="memory"))          # journal defaults to PettaJ
 mem.observe({"user": user_text, "assistant": reply})  # reply only if it answered a real user message
 ctx = mem.context_for(user_text)                      # "" -> automated fast path; returns block or None
 mem.derive(note, source_ids)                          # explicit tool (flock-protected pending file)
-mem.decide(request)                                   # GoalChainer tool
+mem.decide(request)                                   # removed (F2): returns why; goals use GoalChainer v2
 mem.save(); mem.close()
 ```
 
@@ -267,5 +267,4 @@ the test refuses a directory inside the repo. Optionally set
   matters for long-lived hosts (CLI service, other bots).
 - State file writes are not atomic and not locked across processes.
 - `close()` does not save (see the docstring).
-- `embed_index.py` default cache path is `<repo>/memory/...`; `goalchainer_bridge`
-  hardcodes the GoalChainer path (`WMTMConfig.goalchainer_src` covers `decide()` only).
+- `embed_index.py` default cache path is `<repo>/memory/...`.

@@ -146,7 +146,9 @@ def test_ranking_relevance_beats_attention_and_budget_holds():
     assert " rel=1.00] the answer" in lines[1]
     body = sum(len(l.split("] ", 1)[1]) for l in lines[1:])
     assert body <= 2000 and len(lines[1].split("] ", 1)[1]) == 500           # 500 chars, not rc2's 200
-    assert len(shown) == 4
+    # F2 (review section 7): with a request known, filler with no relevance is dropped whatever its attention
+    # (was: the 3 highest-STI unrelated notes filled the remaining slots).
+    assert shown == ["relevant"]
 
 
 def test_budget_is_shared_between_items():
@@ -176,7 +178,9 @@ def test_min_score_drops_filler_only_with_a_request():
     ents = [_entry("rel", 1.0, "match")] + [_entry("f%d" % k, 1.0, "filler %d" % k) for k in range(5)]
     ents.append(_entry("hot", 10.0, "high attention"))
     _, shown = ctx.render_ranked(ents, {"scores": {"rel": 1.0}}, 1, {})
-    assert shown == ["rel", "hot"]                      # filler: 0.3 * 1/10 < 0.2
+    # F2 (review section 7): the floor is on relevance (0.7 * rel >= 0.2), not on attention: "hot" (STI 10, no
+    # relevance) is dropped like the other filler (was: kept because 0.3 * 10/10 >= 0.2).
+    assert shown == ["rel"]
     _, shown = ctx.render_ranked(ents, None, 1, {})
     assert len(shown) == 7                              # no request known: nothing dropped (STI order)
 

@@ -1,14 +1,11 @@
-"""GoalChainer Bridge: feeds WMTM active set to GoalChainer and admits decisions back.
+"""GoalChainer Bridge: GoalChainer decisions -> WMTM candidates.
 
-This closes the feedback loop: GoalChainer reads WMTM evidence, makes a
-decision, and the recommended action (with deontic status and motivation)
-is converted into WMTM InferenceCandidates that re-enter working memory.
-
-Flow:
-  1. wmtm_to_goalchainer_evidence: Convert WMTM active set -> memory_items
-  2. run_goalchainer: Call GoalChainer pipeline with evidence
-  3. goalchainer_result_to_candidates: Convert decisions -> WMTM candidates
-  4. WMTM orchestrator admits novel candidates (step 2c)
+F2 (review section 10): the v1 feed is removed.  It sent the active set as {id, content, sti} memory_items to
+GoalChainer v1 (goal_chainer.pipeline.solve_incident), whose parse_memory_evidence reads only items with a
+goalchainer_slot and an (Acceptable <action>) STV / EvidencePacket EC atom: it read 0 of the items sent.  WMTM notes
+are not action-acceptability evidence, so encoding them as such would invent truth values.  run_goalchainer_over_wmtm
+(the orchestrator's use_goalchainer phase, off by default) now sends nothing and returns no candidates.  WMTM goals
+run on GoalChainer v2 in wmtm/goals.  goalchainer_result_to_candidates stays (live_tool_bridge uses it).
 """
 from __future__ import annotations
 
@@ -35,49 +32,6 @@ class GoalChainerDecision:
         """Initialize evidence_ids list if not provided."""
         if self.evidence_ids is None:
             self.evidence_ids = []
-
-
-def wmtm_to_goalchainer_evidence(store: WMTMStore, max_items: int = 20) -> list:
-    """Convert WMTM active set into GoalChainer memory_items format.
-
-    GoalChainer expects dicts with id, content, sti keys.
-    """
-    items = []
-    for item in store.get_active_set()[:max_items]:
-        items.append({
-            'id': item.id,
-            'content': item.content,
-            'sti': float(item.attention.sti),
-        })
-    return items
-
-
-def run_goalchainer(
-    request: str,
-    store: WMTMStore,
-    max_evidence: int = 20,
-) -> Optional[dict]:
-    """Run the GoalChainer pipeline with WMTM evidence.
-
-    Returns the raw GoalChainer result dict, or None on failure.
-    """
-    gc_dir = '/home/openclaw/research-agent/projects/omegaclaw/repos/OmegaClaw-GoalChainer/src'
-    if gc_dir not in sys.path:
-        sys.path.insert(0, gc_dir)
-
-    os.environ.setdefault('GOALCHAINER_USE_HEURISTIC_PLN', '1')
-
-    try:
-        from goal_chainer.pipeline import solve_incident
-    except ImportError:
-        return None
-
-    memory_items = wmtm_to_goalchainer_evidence(store, max_evidence)
-    try:
-        result = solve_incident(request, memory_items=memory_items if memory_items else None)
-        return result
-    except Exception:
-        return None
 
 
 def goalchainer_result_to_candidates(
@@ -138,22 +92,6 @@ def run_goalchainer_over_wmtm(
     request: str,
     max_evidence: int = 20,
 ) -> list:
-    """Full GoalChainer feedback loop over WMTM.
-
-    1. Extract evidence from WMTM active set
-    2. Run GoalChainer pipeline
-    3. Convert decisions to WMTM candidates
-
-    Returns candidates that the orchestrator can admit.
-    """
-    if not store.get_active_set():
-        return []
-
-    result = run_goalchainer(request, store, max_evidence)
-    if result is None:
-        return []
-
-    # Collect source IDs from active set for provenance
-    source_ids = [item.id for item in store.get_active_set()[:max_evidence]]
-
-    return goalchainer_result_to_candidates(result, source_ids=source_ids)
+    """Removed v1 feedback loop (F2, review section 10): sends nothing to GoalChainer v1 and returns [] (see the
+    module docstring).  Kept so WMTMOrchestrator(use_goalchainer=True) still runs."""
+    return []
