@@ -47,6 +47,8 @@ SPEC = {
     # Track O: derived strength is a probability; below reasoner_min_strength it means "probably not"
     "reasoner_min_strength": ("WMTM_REASONER_MIN_STRENGTH", float, 0.5, None),
     "reasoner_negation":   ("WMTM_REASONER_NEGATION", str, "skip", None),        # skip | unlikely ("unlikely: <text>")
+    "reasoner_initial_sti": ("WMTM_REASONER_INITIAL_STI", float, 1.0, None),   # F1 §4: a conclusion's base STI
+    "reasoner_initial_sti_rel": ("WMTM_REASONER_INITIAL_STI_REL", float, 4.0, None),  # F1 §4: + this * request relevance
     # Track O: CONTEXT coreference (off by default; results go to <semparse_dir>/ctx1, the old cache is kept)
     "semparse_context":    ("WMTM_SEMPARSE_CONTEXT", bool, False, None),
     "context_max_notes":   ("WMTM_CONTEXT_MAX_NOTES", int, 3, None),

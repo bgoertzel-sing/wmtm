@@ -103,6 +103,8 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `reasoner_max_admit` | `WMTM_REASONER_MAX_ADMIT` | int | `5` | The most PeTTaChainer conclusions admitted from one worker result, after the per-fact cap. 0 falls back to 5. | `wmtm/pc_admit.py:182` |
 | `reasoner_min_strength` | `WMTM_REASONER_MIN_STRENGTH` | float | `0.5` | Track O: derived strength is a probability; below reasoner_min_strength it means "probably not" | `wmtm/pc_admit.py:43` |
 | `reasoner_negation` | `WMTM_REASONER_NEGATION` | str | `'skip'` | skip \| unlikely ("unlikely: &lt;text&gt;") | `wmtm/pc_admit.py:51` |
+| `reasoner_initial_sti` | `WMTM_REASONER_INITIAL_STI` | float | `1.0` | Base starting STI of an admitted PeTTaChainer conclusion (F1 §4). 0 or empty falls back to 1.0. | `wmtm/pc_admit.py:118` |
+| `reasoner_initial_sti_rel` | `WMTM_REASONER_INITIAL_STI_REL` | float | `4.0` | Added to the base STI times the conclusion's request relevance (0-1). 0 or empty falls back to 4.0. | `wmtm/pc_admit.py:119` |
 | `semparse_context` | `WMTM_SEMPARSE_CONTEXT` | bool | `false` | Track O: CONTEXT coreference (off by default; results go to &lt;semparse_dir&gt;/ctx1, the old cache is kept) | `wmtm/parse_cache.py:339` `wmtm/parse_cache.py:492` |
 | `context_max_notes` | `WMTM_CONTEXT_MAX_NOTES` | int | `3` | Context parse (`semparse_context`): the most earlier notes passed as context for one item (`select_context`). | `wmtm/parse_cache.py:414` `wmtm/parse_cache.py:508` |
 | `context_max_atoms` | `WMTM_CONTEXT_MAX_ATOMS` | int | `40` | Context parse: the most atoms from earlier notes passed as context. | `wmtm/parse_cache.py:415` `wmtm/parse_cache.py:509` |
