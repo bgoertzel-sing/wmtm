@@ -281,3 +281,64 @@ def test_stemmer_dogs_matches_dog():
     assert needs.cluster_match({"dogs", "vets"}, {"dog", "vet"})
     for w in ("glass", "status", "this", "bus"):            # not plurals: unchanged by the new rule
         assert needs.stem(w) == (w[:-1] if len(w) >= 5 and w.endswith("s") else w)
+
+
+# ── F12 decision 4: an escalated tie is surfaced as a choice; the series goes on ─────────────────────────────
+def test_decision4_tie_is_shown_as_a_choice(tmp_path):
+    from wmtm import goal_prompt as gp
+    import test_goals_v2 as T
+    for items in ORDERS:
+        d = tmp_path / ("o%d" % len(list(d for d in tmp_path.iterdir())))
+        d.mkdir()
+        cfg = T._cfg(d, goal_prompt=True)
+        cfg.update(speaker_map=MAP, speaker_self="botty")
+        run = engine.run_shadow(items, T.OK, cfg, source="cycle", now=NOW)
+        assert run["status"] == "ok" and run["v2"]["decisions"].get("escalate") == 1 and run["v2"]["choices"] == 1
+        out = gp.render(cfg, now=NOW + 10, speaker="quill")
+        assert out and "2 equally urgent asks, which first?" in out
+        assert "widget7" in out and "gizmo4" in out
+
+
+def test_decision4_runner_continues_after_a_tie(tmp_path):
+    from wmtm.goals import v2_runner
+    calls = []
+
+    def run_request(req, budget=None):
+        keep = open(req["domain"]["path"]).read()
+        calls.append(keep)
+        if len(calls) == 1:
+            return {"review": {"disposition": "escalate", "escalation": {"reasons": ["tie"], "contested": ["a", "b"]}}}
+        return {"review": {"disposition": "propose", "proposal": {"action": "c"}}} if len(calls) == 2 else \
+            {"review": {"disposition": "hold"}}
+
+    class RB:
+        def __init__(self, **kw):
+            pass
+    s = {"label": "main", "header": "", "blocks": {"a": "A", "b": "B", "c": "C", "d": "D"}, "order": ["a", "b", "c", "d"],
+         "as_of": "x", "passes": [{"label": "human", "readings": []}], "remove": {}, "max_reviews": 5,
+         "continue_on_tie": True}
+    out = v2_runner.run_series(s, {"inferences": 1, "timeout_seconds": 1}, str(tmp_path),
+                               (run_request, lambda *a, **k: {"recorded": True}, RB))
+    disp = [r.get("disposition") for r in out["passes"][0]["reviews"]]
+    assert disp == ["escalate", "propose", "hold"]
+    assert "A" not in calls[1] and "B" not in calls[1] and "C" in calls[1]      # the tied pair left the domain
+    assert "C" not in calls[2] and "D" in calls[2]
+
+
+def test_decision4_map_pass_proposal_after_tie_and_choice():
+    third = "Still pending: Quill to send the brass9 lever invoice for crank5."
+    p = engine.prepare_v2([_syn(1, TIE_A), _syn(2, TIE_B), _syn(3, third)], {"speaker_map": MAP, "speaker_self": "botty"},
+                          {"autonomous": False}, now=NOW)
+    ids = p["job"]["order"]
+    assert p["job"]["continue_on_tie"] is True
+    amap = p["amap"]
+    asks = [a for a in ids if "_ask_" in a and ("widget7" in amap[a]["text"] or "gizmo4" in amap[a]["text"])]
+    assert len(asks) == 2
+    grouped = set(asks) | {x for a in asks for x in p["job"]["remove"].get(a, ())}
+    other = [a for a in ids if a not in grouped and not any(a in p["job"]["remove"].get(b, ()) for b in asks)][0]
+    rv = [{"review_id": "r0", "disposition": "escalate", "escalation": {"reasons": ["tie"], "contested": asks}},
+          {"review_id": "r1", "disposition": "propose", "proposal": {"action": other, "deontic": "permitted",
+           "carrying_path": {"value": {"low": 0.1, "high": 0.1}}, "predicted_need_changes": []}}]
+    res = engine.finish_v2(p, {"label": "main", "passes": [{"label": "human", "reviews": rv}]}, "human")
+    assert [x["action_id"] for x in res["all_proposed"]] == [other]
+    assert len(res["choices"]) == 1 and len(res["choices"][0]["options"]) == 2

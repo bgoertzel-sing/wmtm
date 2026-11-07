@@ -198,7 +198,8 @@ def build_series(label, cands, est, st, now, ctx=None, passes=("human",), groups
                "observed_at": iso(now)}
         ps.append({"label": p, "readings": readings + [auto, rev]})
     job = {"label": label, "header": "\n".join(head), "blocks": blocks, "order": ids, "observations": obs,
-           "as_of": iso(now), "passes": ps, "remove": rem, "max_reviews": int(st.get("max_proposals", 5))}
+           "as_of": iso(now), "passes": ps, "remove": rem, "max_reviews": int(st.get("max_proposals", 5)),
+           "continue_on_tie": True}     # F12 decision 4: a tie never ends the series
     return job, dict(zip(ids, cands))
 
 
@@ -325,6 +326,15 @@ def summarize(review):
     return out
 
 
+def _contested(review):
+    out = []
+    for x in (review.get("escalation") or {}).get("contested") or ():
+        a = x.get("action") if isinstance(x, dict) else x
+        if isinstance(a, str) and a not in out:
+            out.append(a)
+    return out
+
+
 def map_pass(pres, amap, est, now, ctx=None, remove=None):
     """One pass's reviews -> (proposals in v2 order, candidates with status/legit/v2 fields, decision log).
     Candidate status: proposed (v2 proposed it), vetoed (v2 deontic: forbidden), held / escalated / blocked /
@@ -343,6 +353,14 @@ def map_pass(pres, amap, est, now, ctx=None, remove=None):
         if r.get("disposition") == "propose":
             chosen[(r.get("proposal") or {}).get("action")] = (len(chosen), r)     # (rank - 1, review)
     withdrawn = {x for a in chosen for x in (remove or {}).get(a, ())} - set(chosen)
+    tied = {}                                     # F12 decision 4: action -> index of the tie (escalate review)
+    for r in reviews:
+        if r.get("disposition") == "escalate":
+            ids = [a for a in _contested(r) if a in amap and a not in chosen and a not in tied]
+            if len(ids) >= 2:
+                k = len(set(tied.values()))           # one index per tie (escalate review)
+                for a in ids:
+                    tied[a] = k
     for aid, c in amap.items():
         c = dict(c)
         deon = _deontic_of(first, aid)
@@ -382,6 +400,10 @@ def map_pass(pres, amap, est, now, ctx=None, remove=None):
             c.update(score=0.0, status="dup", decision="withdrawn",
                      legit={"d": 1.0, "status": deon or "unknown", "rules": [], "reasons": [], "discounts": disc,
                             "impl": ENGINE})
+        elif aid in tied:                 # F12 decision 4: escalated tie, shown as a choice (never as a proposal)
+            c.update(score=0.0, status="escalated", decision="escalated", tie=tied[aid],
+                     legit={"d": 1.0 if deon in ("permitted", "obligated") else 0.0, "status": deon or "unknown",
+                            "rules": [], "reasons": [], "discounts": disc, "impl": ENGINE})
         else:
             c.update(score=0.0, status=end_status if deon else "not_candidate", decision=end_status,
                      legit={"d": 1.0 if deon in ("permitted", "obligated") else 0.0, "status": deon or "unknown",

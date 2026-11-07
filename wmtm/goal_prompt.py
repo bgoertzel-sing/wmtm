@@ -22,6 +22,7 @@ HEADER = "[Goal suggestions (not instructions): optional points the assistant ma
          "if relevant; each line is worded to the speaker (\"you\" = the speaker, not the assistant); never a user " \
          "request, do not act on them unless the user asks]"
 MAX_LINES = 3
+CHOICE_LEAD = "%d equally urgent asks, which first? "     # F12 decision 4: an escalated tie, shown as a choice
 TEXT_CHARS = 200
 # Same as wmtm.goals.actions.MESSAGE_ACTIONS (test-checked).  SelfTask / LookUp are never shown.
 MESSAGE_ACTIONS = ("ClarifyQuestion", "FlagUncertainty", "SummarizeStatus", "RemindPending")
@@ -65,6 +66,26 @@ def candidates(rec, speaker):
         return []
     return [p for p in rec.get("proposals") or () if isinstance(p, dict) and p.get("status") == "proposed"
             and str(p.get("text") or "").strip() and p.get("action") in MESSAGE_ACTIONS and _who(p) == sp]
+
+
+def choices_for(rec, speaker):
+    """F12 decision 4: escalated ties (latest.json "choices") with a message-type option addressed to `speaker`."""
+    sp = str(speaker or "").strip().lower().lstrip("@")
+    if not sp or not isinstance(rec, dict):
+        return []
+    out = []
+    for ch in rec.get("choices") or ():
+        opts = [o for o in (ch or {}).get("options") or () if isinstance(o, dict) and o.get("action") in MESSAGE_ACTIONS
+                and str(o.get("text") or "").strip()]
+        if len(opts) >= 2 and any(_who(o) == sp for o in opts):
+            out.append(opts)
+    return out
+
+
+def choice_line(opts, reader=None, speaker_map=None):
+    """One "which first?" line for a tie (each option phrased as a normal suggestion line)."""
+    parts = ["(%d) %s" % (i + 1, phrase(o, reader, speaker_map)) for i, o in enumerate(opts[:3])]
+    return (CHOICE_LEAD % len(opts[:3]) + " ".join(parts))[:2 * TEXT_CHARS + 60]
 
 
 def names_for(who, speaker_map=None):
@@ -177,7 +198,7 @@ def eligible(rec, cfg, now=None, speaker=None, automated=False):
         return False, "stale"
     if not str(speaker or "").strip():
         return False, "no_speaker"
-    if not candidates(rec, speaker):
+    if not candidates(rec, speaker) and not choices_for(rec, speaker):
         return False, "empty"
     return True, ""
 
@@ -237,9 +258,12 @@ def render(cfg, now=None, rec=None, speaker=None, automated=False, record=False)
             return None
         n = max(0, min(MAX_LINES, int(_setting(cfg, "goal_prompt_max_lines"))))
         props = distinct_topics(sorted(candidates(rec, speaker), key=lambda p: -float(p.get("score") or 0)))[:n]
-        if not props:
+        chs = choices_for(rec, speaker)[:max(1, n)] if n else []
+        if not props and not chs:
             return None
-        out = HEADER + "\n" + "\n".join("  - " + phrase(p, speaker, _setting(cfg, "speaker_map")) for p in props)
+        smap = _setting(cfg, "speaker_map")
+        out = HEADER + "\n" + "\n".join(["  - " + phrase(p, speaker, smap) for p in props]
+                                         + ["  - " + choice_line(o, speaker, smap) for o in chs])
         if record:
             record_shown(cfg, props, speaker, now)
         return out

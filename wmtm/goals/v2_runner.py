@@ -56,6 +56,16 @@ def _write(path, header, blocks, keep):
             fh.write(blocks[a] + "\n")
 
 
+def contested_ids(rv):
+    """Action ids of an escalate review's contested set (plain ids or {"action": id} records)."""
+    out = []
+    for x in (rv.get("escalation") or {}).get("contested") or ():
+        a = x.get("action") if isinstance(x, dict) else x
+        if isinstance(a, str) and a not in out:
+            out.append(a)
+    return out
+
+
 def run_series(s, budget, workdir, api):
     run_request, run_motivation_request, RunBudget = api
     t0 = time.time()
@@ -99,6 +109,12 @@ def run_series(s, budget, workdir, api):
                 reviews.append({"error": "no review: " + json.dumps(r)[:300]})
                 break
             reviews.append({k: v for k, v in rv.items() if k not in DROP})
+            if rv.get("disposition") == "escalate" and s.get("continue_on_tie"):
+                tied = [a for a in contested_ids(rv) if a in keep]
+                if tied:                # F12 decision 4: the tie is surfaced as a choice; the rest is reviewed again
+                    for a in tied:
+                        removed |= {a} | remove.get(a, set())
+                    continue
             if rv.get("disposition") != "propose":
                 break
             a = (rv.get("proposal") or {}).get("action")

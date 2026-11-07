@@ -298,7 +298,20 @@ def finish_v2(prep, sres, pass_label="human"):
                       for n in NEEDS},
             "candidates": cands + prep["dups"], "proposals": ok[:st["max_proposals"]], "all_proposed": ok,
             "vetoed": [c for c in cands if c["status"] == "vetoed"], "refused": refused, "deontic_impl": v2.ENGINE,
-            "suppressed": prep["supp"], "decisions": dec}
+            "suppressed": prep["supp"], "decisions": dec, "choices": choices(cands)}
+
+
+def choices(cands):
+    """F12 decision 4: escalated ties -> [{"tie": i, "options": [{id, action, who, text, topic}]}] (2+ options,
+    candidate order).  Surfaced by goal_prompt as "which first?"; never proposals."""
+    g = {}
+    for c in cands:
+        if c.get("decision") == "escalated" and c.get("tie") is not None:
+            o = {k: c.get(k) for k in ("id", "action", "who", "text", "topic")}
+            if any(same_cluster(o, x) for x in g.get(c["tie"], ())):
+                continue          # same (person, topic) as an option already listed: one ask, not a choice
+            g.setdefault(c["tie"], []).append(o)
+    return [{"tie": i, "options": o} for i, o in sorted(g.items()) if len(o) >= 2]
 
 
 def propose_v2(raw_items, cfg=None, ctx=None, now=None, kb=None, extra_candidates=(), trace=None, workdir=None,
@@ -463,11 +476,12 @@ def run_shadow(raw, rec, cfg, source=None, now=None):
     run["budget_s"] = budget
     run["s"] = round(time.time() - t0, 3)
     latest = run.pop("_latest", None)
+    chs = run.pop("_choices", None)
     try:
         rc.append_jsonl(os.path.join(d, "runs.jsonl"), run, mx)
     except Exception:   # noqa: BLE001
         pass
-    write_latest(d, run, latest if run.get("status") == "ok" else [], cfg_value(cfg, "goal_topic_overlap"))
+    write_latest(d, run, latest if run.get("status") == "ok" else [], cfg_value(cfg, "goal_topic_overlap"), chs)
     return run
 
 
@@ -511,7 +525,7 @@ def log_display(d, run, source, now, shown, dedupe_s, mx, rc, thr=None):
     return n
 
 
-def write_latest(d, run, proposals, thr=None):
+def write_latest(d, run, proposals, thr=None, choices=None):
     """Track S: <d>/latest.json = this run's time, status, canary result and ALL its proposals (repeats included;
     proposals.jsonl holds new ones only).  A failed run writes an empty list, so an older run's suggestions never
     survive it.  Atomic (tmp + os.replace).  Never raises."""
@@ -522,7 +536,8 @@ def write_latest(d, run, proposals, thr=None):
         proposals = dedupe_cluster(list(proposals or []), thr)     # rc2: one line per (person, topic cluster)
         rec = {"ts": run.get("ts"), "run_id": run.get("run_id"), "status": run.get("status"),
                "canary_ok": bool(can.get("ok")) and run.get("status") == "ok",
-               "proposals": [{k: p.get(k) for k in LATEST_FIELDS} for p in (proposals or [])]}
+               "proposals": [{k: p.get(k) for k in LATEST_FIELDS} for p in (proposals or [])],
+               "choices": list(choices or []) if run.get("status") == "ok" else []}   # F12 decision 4
         tmp = os.path.join(d, LATEST + ".%d.tmp" % os.getpid())
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(rec, fh)
@@ -667,6 +682,8 @@ def _run_v2(raw, rec, cfg, source, now, run, d, ppath, mx, rc):
         run["display_logged"] = log_display(d, run, source, now, shown, max(st["repeat_s"], st["reask_s"]), mx, rc,
                                              st["topic_overlap"])
         run["v2"]["display_decisions"] = [x.get("disposition") for x in dh["decisions"]]
+    run["_choices"] = (dh if auto else r).get("choices") or []      # F12 decision 4
+    run["v2"]["choices"] = len(run["_choices"])
     logged = _log_proposals(r, ppath, run, source, now, mx, rc)
     run.update(status="ok", needs=r["needs"], candidates=len(r["candidates"]), vetoed=len(r["vetoed"]),
                refused=r["refused"], logged=logged, kb_proofs=len(kb), autonomous=auto,
