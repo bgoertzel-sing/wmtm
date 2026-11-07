@@ -66,7 +66,7 @@ def run(root, steps, mode, extra_path="", journal_base=0):
 
 _HDR = re.compile(r"^\[WMTM Active Working Memory \((\d+) items, showing top (\d+), cycle (\d+)\)\]$")
 # Iter 83ea611 lines carry sti= util=; F2 (review section 7) lines carry the engine TV (derived) and source ids instead.
-_LINE = re.compile(r"^  \[(recalled|derived|unknown) (sti=-?\d+\.\d util=-?\d+\.\d|(tv=(\d\.\d\d,\d\.\d\d|none) )?from=\S+) "
+_LINE = re.compile(r"^  \[(recalled|derived|asserted|unknown) (sti=-?\d+\.\d util=-?\d+\.\d|(tv=(\d\.\d\d,\d\.\d\d|none) )?from=\S+) "
                    r"age=(\d+m|\d+\.\dh|\d+\.\dd|\?)( rel=\d\.\d\d)?\] ")
 
 
@@ -184,3 +184,36 @@ def _f2_pick_items(items, now):
         assert s.count(old) == 1, old
         s = s.replace(old, new)
     p.write_text(s, encoding="utf-8")
+
+
+def apply_decision1_rules(root):
+    """F12 decision 1 on the ORIGINAL tree (as apply_f2_rules does for F2): a mem.derive() note is admitted with
+    source_type 'asserted' (the agent's own claim, its source = the note itself) and keeps the writeback and
+    retention a tool derive had.  PLN/GoalChainer admissions (orchestrator) stay 'derived'.  Everything else stays
+    byte-identical."""
+    root = Path(root)
+    edits = {
+        "transformations/wmtm_context.py": [
+            ("                                source_type='derived',\n",
+             "                                source_type='asserted',\n"),
+            ('        source_tag = "derived" if item.source_type == "derived" else "recalled"\n',
+             '        source_tag = item.source_type if item.source_type in ("derived", "asserted") else "recalled"\n'),
+        ],
+        "wmtm/writeback.py": [
+            ('        if item.source_type == "derived":\n            return self._select_derived(item)\n',
+             '        if item.source_type in ("derived", "asserted"):\n            return self._select_derived(item)\n'),
+        ],
+        "wmtm/forgetting.py": [
+            ('        if item.source_type == "derived":\n',
+             '        if item.source_type in ("derived", "asserted"):\n', 2),
+        ],
+    }
+    for rel, reps in edits.items():
+        f = root / rel
+        t = f.read_text(encoding="utf-8")
+        for r in reps:
+            old, new = r[0], r[1]
+            n = r[2] if len(r) > 2 else 1
+            assert t.count(old) == n, (rel, old)
+            t = t.replace(old, new)
+        f.write_text(t, encoding="utf-8")

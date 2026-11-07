@@ -98,6 +98,7 @@ def _replay_body(tmp_path, orig_src, steps, state, journal, mode):
             # Track L: v0.1.0 ran Python PLN by default; the new tree has no Python PLN.
             # Compare both with the reasoner off (orig: use_pln=False; new: WMTM_REASONER=off below).
             driver.apply_f2_rules(root)   # F2: both sides use the review's section 5/7 rules; the rest stays identical
+            driver.apply_decision1_rules(root)   # F12 decision 1: mem.derive notes are 'asserted' on both sides
             o = root / "wmtm" / "orchestrator.py"
             o.write_text(o.read_text(encoding="utf-8").replace("use_pln: bool = True", "use_pln: bool = False", 1)
                            .replace("candidates = self.engine.infer(active)", "candidates = []  # Track L: Python engine removed", 1)
@@ -178,5 +179,9 @@ def test_known_answer_canary(tmp_path, orig_src, impl):
     assert st2["cycle"] == st1["cycle"] + 1
     assert "zebra-quartz-41" in r[2]["out"][-1]["content"]
     b4 = r[3]["out"][-1]["content"]
-    assert scenarios.DERIVE_CANARY in b4 and "[derived " in b4     # F2: new lines are "[derived tv=... from=..."
+    assert scenarios.DERIVE_CANARY in b4
+    if impl == "orig":
+        assert "[derived " in b4                     # unpatched Iter 83ea611 + v0.1.0: tool derive shown as derived
+    else:
+        assert "[asserted from=derived-" in b4       # F12 decision 1: tool derive = asserted, source = the note
     assert r[3]["files"]["memory/_wmtm_pending_derives.jsonl"] == ""
