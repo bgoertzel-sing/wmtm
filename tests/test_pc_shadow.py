@@ -183,3 +183,52 @@ def test_decision1_asserted_note_is_parsed_with_itself_as_source(tmp_path):
     assert iid in [r[0] for r in parse_cache.top_k_rows(st, 200)]
     assert _sources(it.source_type, it.id, it.origin_cluster, it.derived_from) == [iid]
     assert "d0" not in [r[0] for r in parse_cache.top_k_rows(_derived_store(), 200)]
+
+
+def _deep_source_store():
+    """F12 decision 2: the conclusion ranks high, its sources rank below the top-k cut but are still in memory."""
+    st = WMTMStore()
+    st.admit("d0", "cat is a animal", source_type="derived", derived_from=["s0", "s1"], initial_sti=1.0,
+             provenance={"reasoner": "pettachainer", "goal": "(Inheritance cat animal)", "stv": [0.81, 0.73],
+                         "polarity": "positive", "proof": "(r sp0 sp1)"})
+    for i, t in enumerate(SYN):
+        st.admit("s%d" % i, t, source_type="recalled", initial_sti=0.5 - i * 0.01)
+    return st
+
+
+def test_decision2_sources_outside_top_k_keep_the_conclusion():
+    st = _deep_source_store()
+    assert [it.id for it in st.get_active_set()][0] == "d0"
+    spec = pc_shadow.build_snapshot(st, cycle=1, k=1)        # only d0 is in the snapshot
+    assert "(: wm0 (Inheritance cat animal) (STV 0.8100 0.7300))" in spec["atoms"]
+    assert spec["derived_src"] == {"wm0": ["s0", "s1"]}
+
+
+def test_decision2_worker_path_uses_store_ids():
+    st = _deep_source_store()
+    act = st.get_active_set()
+    raw = [pc_shadow.raw_item(it) for it in act[:1]]
+    with_ids = pc_shadow.build_snapshot(pc_shadow._RawStore(raw, [it.id for it in act]), cycle=1, k=1)
+    assert with_ids["derived_src"] == {"wm0": ["s0", "s1"]}
+    no_ids = pc_shadow.build_snapshot(pc_shadow._RawStore(raw), cycle=1, k=1)   # old spec: only snapshot ids
+    assert no_ids["derived_src"] == {}
+
+
+def test_decision2_withdrawn_source_still_drops():
+    st = _deep_source_store()
+    act = st.get_active_set()
+    ids = [it.id for it in act if it.id != "s1"]
+    raw = [pc_shadow.raw_item(it) for it in act[:1]]
+    spec = pc_shadow.build_snapshot(pc_shadow._RawStore(raw, ids), cycle=1, k=1)
+    assert spec["derived_src"] == {}
+
+
+def test_decision2_maybe_launch_passes_store_ids(monkeypatch):
+    st = _deep_source_store()
+    seen = {}
+    monkeypatch.setattr(pc_shadow, "launch", lambda spec, cfg=None, **kw: seen.update(spec) or 7)
+    monkeypatch.setattr(pc_shadow, "rate_limited", lambda cfg: False)
+    cfg = dict(pc_shadow.rc.resolve()); cfg.update(pc_shadow=True, shadow_k=1)
+    monkeypatch.setattr(pc_shadow.rc, "busy", lambda *a, **k: False)
+    assert pc_shadow.maybe_launch(st, 3, cfg=cfg) == 7
+    assert len(seen["raw_items"]) == 1 and set(seen["live_ids"]) == {"d0", "s0", "s1", "s2", "s3"}

@@ -482,7 +482,7 @@ def automated_hooks(state_dir, items_dict, cycle, cfg=None):
             try:
                 from . import pc_shadow
                 out["shadow"] = pc_shadow.maybe_launch_raw([pc_shadow.raw_item_from_dict(d) for d in top], cycle, cfg,
-                                                           source="automated")
+                                                           source="automated", live_ids=list(items_dict.keys()))
             except Exception:
                 pass
         if cfg.get("semparse_feed"):

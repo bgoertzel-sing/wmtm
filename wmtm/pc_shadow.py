@@ -425,7 +425,11 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     max_goals = int(cfg["shadow_max_goals"]); skolem_goals = bool(cfg["shadow_skolem_goals"])
     global SCOPED_WITNESS_GOALS
     SCOPED_WITNESS_GOALS = bool(cfg.get("shadow_scoped_witness_goals", True))
-    items = store.get_active_set()[:k]
+    all_items = store.get_active_set()
+    items = all_items[:k]
+    # F12 decision 2: a conclusion's sources are looked up in the whole memory store, not the top-k snapshot
+    store_ids = getattr(store, "live_ids", None)
+    store_ids = set(store_ids) if store_ids is not None else {it.id for it in all_items}
     if cfg.get("speaker_link"):
         cached = _cache_lookup(items, cfg["semparse_dir"], context=bool(cfg.get("semparse_context")), speaker=True)
     elif cfg.get("semparse_context"):
@@ -443,7 +447,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
 
     from . import parse_gate as _pg   # Track J: per-fact sanity rules before facts enter the KB
     gst = _pg.settings(cfg); gdec, lf = [], {}
-    live_ids = {it.id for it in items}
+    live_ids = store_ids
     n_derived, j = 0, 0
     for it in items:
         if getattr(it, "source_type", "") == "derived":   # F1 §3: a conclusion is never parsed; it enters the KB
@@ -563,7 +567,7 @@ def _stamp(cfg):
         pass
 
 
-def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle", force=False):
+def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle", force=False, live_ids=None):
     """Launch from raw top-K item dicts (raw_item() shape, active-set order).  Shared by the orchestrator hook and
     the automated fast path (which has only the state JSON, no engine).  Gates, cheapest first: flag, single-worker
     busy guard, rate limit (shadow_min_interval_s).  Returns pid or None; swallows every error."""
@@ -579,8 +583,11 @@ def maybe_launch_raw(raw, cycle=0, cfg=None, state_dir=None, source="cycle", for
         raw = list(raw or [])[:k]
         if not raw:
             return None
-        pid = launch({"cycle": cycle, "ts": time.time(), "k": k, "raw_items": raw, "atoms": [], "goals": [],
-                      "source": source}, cfg)
+        spec = {"cycle": cycle, "ts": time.time(), "k": k, "raw_items": raw, "atoms": [], "goals": [],
+                "source": source}
+        if live_ids is not None:   # F12 decision 2: ids of every item in the memory store
+            spec["live_ids"] = sorted(str(i) for i in live_ids)
+        pid = launch(spec, cfg)
         if pid:
             _stamp(cfg)
         return pid
@@ -598,7 +605,9 @@ def maybe_launch(store, cycle=0, state_dir=None, cfg=None, force=False):
             return None  # skip before doing any work
         # cycle side only copies the top-K item fields; the worker builds the snapshot (cache read)
         k = int(cfg["shadow_k"])
-        return maybe_launch_raw([raw_item(it) for it in store.get_active_set()[:k]], cycle, cfg, force=force)
+        act = store.get_active_set()
+        return maybe_launch_raw([raw_item(it) for it in act[:k]], cycle, cfg, force=force,
+                                live_ids=[it.id for it in act])
     except Exception:
         return None
 
@@ -622,8 +631,9 @@ def raw_item(it):
 
 class _RawStore:
     """Minimal store over raw item dicts (already in active-set order), for building a snapshot in the worker."""
-    def __init__(self, raw):
+    def __init__(self, raw, live_ids=None):
         from types import SimpleNamespace as NS
+        self.live_ids = set(live_ids) if live_ids is not None else None   # F12 decision 2: whole-store ids
         self._items = [NS(id=r["id"], content=r["content"], attention=NS(sti=r.get("sti", 0.0)),
                           tv_strength=r.get("tv_strength", 0.0), tv_confidence=r.get("tv_confidence", 0.0),
                           source_type=r.get("source_type", "recalled"), derived_from=list(r.get("derived_from") or []),
@@ -634,7 +644,7 @@ class _RawStore:
 
 def snapshot_from_raw(spec, cfg=None):
     """Worker side: turn a raw spec (from maybe_launch) into a full spec."""
-    full = build_snapshot(_RawStore(spec["raw_items"]), spec.get("cycle", 0), spec.get("k"), cfg)
+    full = build_snapshot(_RawStore(spec["raw_items"], spec.get("live_ids")), spec.get("cycle", 0), spec.get("k"), cfg)
     full["source"] = spec.get("source")
     full["ts"] = spec.get("ts", full["ts"]); full["build_s"] = round(time.time() - full["ts"], 3)
     return full
