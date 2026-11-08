@@ -1,8 +1,9 @@
 """Track G shadow worker: ``python -m wmtm.workers.pc_shadow --spec S --out O [--config C]``.
 
 Launched detached by wmtm/pc_shadow.py; never waited on.  Outer process: builds the snapshot from the raw spec
-(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa rT 3681b9b + PeTTaChainer rT 202b9379,
-paths from the runtime config), which loads transitivity rules + mem_inh + snapshot atoms + Grace canary facts and
+(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa rT 3681b9b + PeTTaChainer bdae8d7e,
+paths from the runtime config), which loads snapshot atoms + Grace canary facts (no wmtm rules since F3 v2; Member/
+Inheritance chaining is engine-native) and
 answers one goal per stdin line.  Each query has a hard timeout (default 2 s) enforced by SIGKILL of the child's
 process group; the queries share a budget (default 20 s).  Address space is capped (worker_mem_mb, inherited by the
 child).  Sanity gate: canary (Member grace person) must prove and the negative control (Member grace robot) must

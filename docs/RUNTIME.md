@@ -60,8 +60,9 @@ With `pettachainer`:
   `skipped`, `dropped`, and `timing` (user turns: `store_s`, `journal_s`, `recall_s`, `relevance_s`,
   `derives_cleanup_s`, `elapsed_before_cycle_s`, `cycle_s` or `admit_s` + `tick_s`, `total_s`, `cycle_budget`;
   automated: `admit_s`).
-- Per result it needs a proof that used a derivation rule (`inh_trans`, `imp_trans`, `mem_inh`), so proofs straight
-  from asserted facts are dropped. It also needs confidence >= 0.05 and (rc2) strength >= `reasoner_min_strength`
+- Per result it needs a derivation proof (`pc_admit.is_derivation`): any proof head other than an asserted fact label,
+  `merge/revision` or `factored-revision` (with its engine `prior`) over asserted facts; so proofs straight from
+  asserted facts, and revisions of them, are dropped. It also needs (rc2) strength >= `reasoner_min_strength`
   (0.5; below it the conclusion means "probably not": `reasoner_negation` `skip` drops it, `unlikely` admits it
   as `unlikely: <text>`), at least one supporting item still active, and
   it applies the per-fact cap (`gate_max_per_fact`) and `reasoner_max_admit`.

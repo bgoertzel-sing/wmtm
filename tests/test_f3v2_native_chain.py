@@ -74,3 +74,50 @@ def test_repro_native_beats_wmtm_rule_and_canary_without_rules():
     for s in G:
         h.add_atom(s)
     assert not h.query("(: $prf (Member grace robot) $tv)", steps=30, timeout_sec=0)
+
+
+# F3 v3 (review 1 finding 4 / order C): a factored revision of asserted facts is not a new conclusion.
+@pytest.mark.parametrize("proof,want", [
+    ("(: (factored-revision sp1 sp2) (Inheritance a b) (STV 0.9 0.8))", False),
+    ("(: (factored-revision sp1 (prior (STV 0.99 0.99)) sp2) (Member a b) (STV 0.9 0.8))", False),
+    ("(: (factored-revision (merge/revision sp1 sp2) sp3) (Member a b) (STV 0.9 0.8))", False),
+    # negative controls: a factored revision that wraps a real derivation is still admitted
+    ("(: (factored-revision sp1 (by r1 sp2)) (Member a b) (STV 0.9 0.8))", True),
+    ("(: (factored-revision (inh_trans sp1 sp2) sp3) (Inheritance a c) (STV 0.9 0.8))", True),
+])
+def test_factored_revision_of_asserted_not_admitted(proof, want):
+    assert pc_admit.is_derivation(proof) is want
+
+
+KB_F = ["(: f1 (Member b1 cls_a) (STV 1.0 0.99))", "(: r1 (Implication (Member b1 cls_a) (Member b1 acl_d)) (STV 0.9 0.7))"]
+KB_R = ["(: mem_inh (Implication (And (Member $x $a) (Inheritance $a $b)) (Member $x $b)) (STV 1.0 0.99))"] + IT
+
+
+def _stv(PC, atoms, goal):
+    h = PC()
+    for s in atoms:
+        h.add_atom(s)
+    r = h.query("(: $prf %s $tv)" % goal, steps=30, timeout_sec=0)
+    assert r, goal
+    m = re.search(r"\(STV ([\d.e-]+) ([\d.e-]+)\)\)\s*$", str(r[0]))
+    return str(r[0]), float(m.group(1)), float(m.group(2))
+
+
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+def test_repro_kbA_kbD_values():
+    """andy's r9 repro: kbA (no wmtm rules) proves (by r1 f1) at (0.9, 0.7);
+    kbD (mem_inh + inh_trans put back) specializes down to (0.977, 0.018)."""
+    PC = _engine()
+    pa, sa, ca = _stv(PC, KB_F, "(Member b1 acl_d)")
+    assert "(by r1 f1)" in pa and "mem_inh" not in pa
+    assert sa == pytest.approx(0.9, abs=1e-6) and ca == pytest.approx(0.7, abs=1e-6)
+    pd, sd, cd = _stv(PC, KB_R + KB_F, "(Member b1 acl_d)")
+    assert "specializes" in pd and "mem_inh" in pd
+    assert sd == pytest.approx(0.97660, abs=1e-4) and cd == pytest.approx(0.01793, abs=1e-4)
+
+
+@pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+def test_repro_kbH_kbI_values():
+    PC = _engine()
+    _, sh, ch = _stv(PC, A, "(Inheritance harbour_pilot licensed)")
+    assert sh == pytest.approx(0.9, abs=1e-6) and ch == pytest.approx(0.7, abs=1e-2)

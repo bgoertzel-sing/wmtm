@@ -26,7 +26,9 @@ REASONERS = ("pettachainer", "off")
 # F1 item 3 (t-2026-11-06-wmtm-f1-memory): no confidence cutoff.  A low-confidence engine answer is still an answer
 # (Roman), so nothing is dropped for c alone; reasoner_max_admit (best first) bounds how many enter per run.
 _RULE = re.compile(r"\b(?:inh_trans|imp_trans|mem_inh)\b")   # legacy wmtm rule names (pre F3 v2 shadow docs)
-_ASSERTED_TOKENS = re.compile(r"\b(?:sp|wm)\d+\b|merge/revision|[():\s]")
+# F3 v3 (review 1 finding 4): revision-only heads (merge/revision, factored-revision, and the engine prior it carries)
+# over fact labels are not derivations; a factored revision of two asserted facts must not be admitted.
+_ASSERTED_TOKENS = re.compile(r"\(prior\s*\(STV\s+[\d.eE+-]+\s+[\d.eE+-]+\)\)|\b(?:sp|wm)\d+\b|factored-revision|merge/revision|[():\s]")
 
 
 def is_derivation(proof) -> bool:
