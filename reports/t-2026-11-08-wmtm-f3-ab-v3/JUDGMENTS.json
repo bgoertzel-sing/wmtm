@@ -17,7 +17,7 @@
      0.83
     ],
     "verdict": "WRONG",
-    "why": "P3 W4 #1/#4: send valid only while a request is open; condition dropped",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 4",
     "wmtm_rule": true
    },
    {
@@ -27,7 +27,7 @@
      0.99
     ],
     "verdict": "WRONG",
-    "why": "P3 W4 #0: the branch hive/t-... is a branch, the task id is not",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 0",
     "wmtm_rule": true
    },
    {
@@ -37,7 +37,7 @@
      0.99
     ],
     "verdict": "CORRECT",
-    "why": "P3 W4 #2: trivially true",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 2",
     "wmtm_rule": true
    },
    {
@@ -47,7 +47,7 @@
      0.99
     ],
     "verdict": "CORRECT",
-    "why": "P3 W4 #3: LTM entry is an entry",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 3",
     "wmtm_rule": true
    }
   ]

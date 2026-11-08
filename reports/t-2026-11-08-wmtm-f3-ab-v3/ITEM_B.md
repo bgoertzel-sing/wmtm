@@ -25,3 +25,6 @@ Reading:
 - goalchainer_v2_status branch (A: WRONG): B's answer is factored-revision/merge-revision over the asserted sp118-sp121 (sp118 asserts it directly). Under item C that is not a derivation, so B does not conclude it; the wrong claim is a stored B fact.
 - hive_progress_report report (A: CORRECT): no proof, exact or class-level; only reflexive Inheritance. Lost correct conclusion (B parses report as Member sk_report_* witnesses).
 - turn_without_send_entry entry (A: CORRECT): no proof; `(Member $x entry)` and `(Inheritance ltm_entry entry)` also 0. Lost correct conclusion.
+
+
+Branch answer TV (review 1 finding 4): exact goal (Member hive_t_2026_10_28_goalchainer_v2_status branch) = (STV 1.0 0.99), identical v3r1-r5; full term in REPORT §11 row 2. Engine /tmp/f3/pc = PeTTaChainer 13c6c9c5a6f50bae08c08d8e28b0f88d991f5b41 (clean). B KB = KB_B_atoms.json (sha b558b2b9e8cef5da, identical r1-r5).

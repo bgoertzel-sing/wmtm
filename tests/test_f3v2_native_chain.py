@@ -121,3 +121,26 @@ def test_repro_kbH_kbI_values():
     PC = _engine()
     _, sh, ch = _stv(PC, A, "(Inheritance harbour_pilot licensed)")
     assert sh == pytest.approx(0.9, abs=1e-6) and ch == pytest.approx(0.7, abs=1e-2)
+
+
+# F3 v3 review 1 finding 1: the engine-shaped proof term B returns for an already-asserted fact (ITEM_B, all 5 runs).
+# is_derivation currently returns True on it ((by nwdef_.. sp) restatements and 'reported with cpu' count as steps);
+# whether that should count is an open design question (REPORT follow-up).  The real safeguard is goal selection:
+# an asserted triple is never a goal, so this answer is never asked for and never admitted.
+ENGINE_REVISION = ("(: (factored-revision (merge/revision (merge/revision (by nwdef_branch__nw_af7c55181b sp121) "
+                   "(by nwdef_branch__nw_a33c0de6a2 sp120)) (by nwdef_branch__nw_50b94ee13a sp119)) "
+                   "(prior (STV 1.0 0.9930341767667782)) (((reported with cpu (prior (STV 0.5 0.0))) sp118))) "
+                   "(Member hive_t_2026_10_28_goalchainer_v2_status branch) (STV 1.0 0.99))")
+
+
+def test_engine_shaped_revision_documented_as_admitted():
+    assert pc_admit.is_derivation(ENGINE_REVISION) is True   # documents current behaviour; see design follow-up
+
+
+def test_asserted_fact_is_never_a_goal():
+    rel = {("Member", "t1", "branch"), ("Inheritance", "branch", "ref"), ("Member", "t1", "ref"),
+           ("Member", "t2", "branch")}
+    goals = pc_shadow.build_goals(rel)
+    assert "(Member t1 ref)" not in goals and "(Member t2 ref)" in goals
+    pool = pc_shadow.goal_pool(rel)
+    assert ("Member", "t1", "ref") not in pool and ("Member", "t2", "ref") in pool

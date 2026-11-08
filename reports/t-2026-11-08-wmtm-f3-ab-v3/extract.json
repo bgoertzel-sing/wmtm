@@ -919,7 +919,9 @@
 "(Member sk_want_1__i_ep_note_20261104T045724Z want)"
 ],
 "input_sha256": "0a339405e8f2450ed97b83abaa243e9c342ad58de76fce59c9a3fd89c8432aa5",
-"nw_symbol_notes": {}
+"nw_symbol_notes": {},
+"spec_atoms_sha256": null,
+"record_sha256": "223d754eb21a811faee7ddfba67bfbac6ab614b37a955f7f20cae362c0f29f2f"
 },
 "B_v3": {
 "shadow": "runs/v3_B.shadow.jsonl",
@@ -2093,7 +2095,9 @@
 "review__nw_804555dcbf": [
 "ep-note-20261104T045724Z"
 ]
-}
+},
+"spec_atoms_sha256": null,
+"record_sha256": "06e9bd4e59131cd3b0f4b1a1b62ec6e19e1996ea62e204da1657587166ff53dd"
 },
 "A_v3r1": {
 "shadow": "runs/v3r1_A.shadow.jsonl",
@@ -3015,7 +3019,9 @@
 "(Member sk_want_1__i_ep_note_20261104T045724Z want)"
 ],
 "input_sha256": "0a339405e8f2450ed97b83abaa243e9c342ad58de76fce59c9a3fd89c8432aa5",
-"nw_symbol_notes": {}
+"nw_symbol_notes": {},
+"spec_atoms_sha256": "ab52d5b121c504220cdefee91fd69d1af5fbabaec64ccb4cda37d7bd74840a02",
+"record_sha256": "7dcef30046423b26fe301c7a6ab95ab8dc93b72326e838b5201e426e4ff238be"
 },
 "B_v3r1": {
 "shadow": "runs/v3r1_B.shadow.jsonl",
@@ -4189,7 +4195,9 @@
 "review__nw_804555dcbf": [
 "ep-note-20261104T045724Z"
 ]
-}
+},
+"spec_atoms_sha256": "b558b2b9e8cef5daae5356b1d52232fb7595358cee396939274a125d46c3d755",
+"record_sha256": "29c561dba176acde5ca551c4df284e7eef3164e2e17d522896ea52f50daa812b"
 },
 "A_v3r2": {
 "shadow": "runs/v3r2_A.shadow.jsonl",
@@ -5111,7 +5119,9 @@
 "(Member sk_want_1__i_ep_note_20261104T045724Z want)"
 ],
 "input_sha256": "0a339405e8f2450ed97b83abaa243e9c342ad58de76fce59c9a3fd89c8432aa5",
-"nw_symbol_notes": {}
+"nw_symbol_notes": {},
+"spec_atoms_sha256": "ab52d5b121c504220cdefee91fd69d1af5fbabaec64ccb4cda37d7bd74840a02",
+"record_sha256": "b6a9d19716d201aef59f256c2d33d2ed50f6bb2d0db18e93bb14fec13d2059d9"
 },
 "B_v3r2": {
 "shadow": "runs/v3r2_B.shadow.jsonl",
@@ -6285,7 +6295,9 @@
 "review__nw_804555dcbf": [
 "ep-note-20261104T045724Z"
 ]
-}
+},
+"spec_atoms_sha256": "b558b2b9e8cef5daae5356b1d52232fb7595358cee396939274a125d46c3d755",
+"record_sha256": "e8f80b70807a4f286bb0dff8e05841b0c4b3b572232712488829604e99f73e30"
 },
 "A_v3r3": {
 "shadow": "runs/v3r3_A.shadow.jsonl",
@@ -7207,7 +7219,9 @@
 "(Member sk_want_1__i_ep_note_20261104T045724Z want)"
 ],
 "input_sha256": "0a339405e8f2450ed97b83abaa243e9c342ad58de76fce59c9a3fd89c8432aa5",
-"nw_symbol_notes": {}
+"nw_symbol_notes": {},
+"spec_atoms_sha256": "ab52d5b121c504220cdefee91fd69d1af5fbabaec64ccb4cda37d7bd74840a02",
+"record_sha256": "787dc965b257df15195e443883443854be2ed67d784a02f3bc2a473d7f276724"
 },
 "B_v3r3": {
 "shadow": "runs/v3r3_B.shadow.jsonl",
@@ -8381,7 +8395,9 @@
 "review__nw_804555dcbf": [
 "ep-note-20261104T045724Z"
 ]
-}
+},
+"spec_atoms_sha256": "b558b2b9e8cef5daae5356b1d52232fb7595358cee396939274a125d46c3d755",
+"record_sha256": "d9f1dadf60b7029e05b3a7afdbe58d590682d5b6e5985db9eb38b0f9a64fa6a6"
 },
 "A_v3r4": {
 "shadow": "runs/v3r4_A.shadow.jsonl",
@@ -9303,7 +9319,9 @@
 "(Member sk_want_1__i_ep_note_20261104T045724Z want)"
 ],
 "input_sha256": "0a339405e8f2450ed97b83abaa243e9c342ad58de76fce59c9a3fd89c8432aa5",
-"nw_symbol_notes": {}
+"nw_symbol_notes": {},
+"spec_atoms_sha256": "ab52d5b121c504220cdefee91fd69d1af5fbabaec64ccb4cda37d7bd74840a02",
+"record_sha256": "8dc82350522d9eca175084de1189a05a1c8e3d13830030f2809a73faacdbfe9d"
 },
 "B_v3r4": {
 "shadow": "runs/v3r4_B.shadow.jsonl",
@@ -10477,7 +10495,9 @@
 "review__nw_804555dcbf": [
 "ep-note-20261104T045724Z"
 ]
-}
+},
+"spec_atoms_sha256": "b558b2b9e8cef5daae5356b1d52232fb7595358cee396939274a125d46c3d755",
+"record_sha256": "ba7ca284bda6f05805e9f11a346c05fe54a8fd3fb1a06d06056ae44828097880"
 },
 "A_v3r5": {
 "shadow": "runs/v3r5_A.shadow.jsonl",
@@ -11399,7 +11419,9 @@
 "(Member sk_want_1__i_ep_note_20261104T045724Z want)"
 ],
 "input_sha256": "0a339405e8f2450ed97b83abaa243e9c342ad58de76fce59c9a3fd89c8432aa5",
-"nw_symbol_notes": {}
+"nw_symbol_notes": {},
+"spec_atoms_sha256": "ab52d5b121c504220cdefee91fd69d1af5fbabaec64ccb4cda37d7bd74840a02",
+"record_sha256": "6fa0bdd1519e900ff08e58af2677b81adfe705e38e538273a99d0dd790ee7cff"
 },
 "B_v3r5": {
 "shadow": "runs/v3r5_B.shadow.jsonl",
@@ -12573,6 +12595,8 @@
 "review__nw_804555dcbf": [
 "ep-note-20261104T045724Z"
 ]
-}
+},
+"spec_atoms_sha256": "b558b2b9e8cef5daae5356b1d52232fb7595358cee396939274a125d46c3d755",
+"record_sha256": "a4bb86de5451367e208d20f5b5931a25294f31f4925a8aeb26e8da1cd359eb00"
 }
 }
