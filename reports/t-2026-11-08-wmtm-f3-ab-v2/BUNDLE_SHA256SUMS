@@ -1,0 +1,8 @@
+f4bb3648defd20f06ba38d0d6561ab85c68fcb339b1b0e2b9cbebbdb42ebdef0  ./JUDGMENTS_v3.json
+dae15c2e2558acaf6405106428219fe842608fc0ff1b34037ae09ac6eac60545  ./RAW_SHA.txt
+e6633d057cc8e7d6e7a7b2cdc6cac464a078979feb23dd8c3087e91a57726cf4  ./recompute/extract.json
+23636efa29cc99cec6d8fdc4f3483c15b3c1f03c23ca342857168ad90e2b08ae  ./recompute/recompute.py
+224dea74fdec25c261e2c31fcef37a999900121a91fce88cc4101d8e340f4258  ./REPORT.md
+4fb422827598fdb1856981cbdd918e9b4b023d2a0ba85cb23cff666422fef452  ./RUNS_TABLE.md
+616ed8e32dc880095a67ba0cc588f8c0e19a1ab84dd9b22385a1c4bb7bfebd45  ./runs/v3rN_run.sh
+f8e12f2c8760b0e75b01a98aa698a09b41dead1586a7534695f5d4bb064dbc63  ./runs/v3_run.sh
