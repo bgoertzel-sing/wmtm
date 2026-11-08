@@ -329,6 +329,8 @@ def top_k_rows(store, k):
     carry request metadata (the source_type=user request item)."""
     out = []
     for it in store.get_active_set()[:int(k)]:
+        if getattr(it, "source_type", "") == "derived":   # F1 §3: conclusions are never re-parsed (they enter the KB
+            continue                                      # with their engine TV and sources, pc_shadow.build_snapshot)
         sm = getattr(it, "source_meta", None)
         out.append((it.id, it.content, it.attention.sti, dict(sm)) if sm else (it.id, it.content, it.attention.sti))
     return out

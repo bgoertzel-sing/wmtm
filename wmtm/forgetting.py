@@ -90,13 +90,13 @@ class ForgettingPolicy:
 
     def _sti_threshold_for(self, item: WMTMItem) -> float:
         """Return the STI threshold for the item's source type."""
-        if item.source_type == "derived":
+        if item.source_type in ("derived", "asserted"):   # decision 1: same retention as before
             return self.derived_sti_threshold
         return self.sti_threshold
 
     def _max_age_for(self, item: WMTMItem) -> int:
         """Return the max age for the item's source type."""
-        if item.source_type == "derived":
+        if item.source_type in ("derived", "asserted"):   # decision 1: same retention as before
             return self.derived_max_age
         return self.max_age
 

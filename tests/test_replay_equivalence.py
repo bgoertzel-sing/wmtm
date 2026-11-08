@@ -71,7 +71,8 @@ def _inputs(dataset):
 # Track L: reasoner off (see orig-tree note below).  Track P: the rc2 recall/context behaviour (the original glue
 # has no fresh-recall protection, relevance ranking or request item); tests/test_track_p.py covers the new one.
 _REPLAY_ENV = {"WMTM_REASONER": "off", "WMTM_CLEANUP_PROTECT_RECENT": "0", "WMTM_CONTEXT_RANK": "0",
-               "WMTM_REQUEST_ITEM": "0"}
+               "WMTM_REQUEST_ITEM": "0",
+               "WMTM_FORGET_ONE_RULE": "0"}   # F1 §9: the 83ea611 glue never logged stale-cleanup evictions
 
 
 def _replay(tmp_path, orig_src, steps, state, journal, mode):
@@ -96,6 +97,8 @@ def _replay_body(tmp_path, orig_src, steps, state, journal, mode):
             driver.build_original_tree(root, orig_src); extra = ""
             # Track L: v0.1.0 ran Python PLN by default; the new tree has no Python PLN.
             # Compare both with the reasoner off (orig: use_pln=False; new: WMTM_REASONER=off below).
+            driver.apply_f2_rules(root)   # F2: both sides use the review's section 5/7 rules; the rest stays identical
+            driver.apply_decision1_rules(root)   # F12 decision 1: mem.derive notes are 'asserted' on both sides
             o = root / "wmtm" / "orchestrator.py"
             o.write_text(o.read_text(encoding="utf-8").replace("use_pln: bool = True", "use_pln: bool = False", 1)
                            .replace("candidates = self.engine.infer(active)", "candidates = []  # Track L: Python engine removed", 1)
@@ -165,9 +168,20 @@ def test_known_answer_canary(tmp_path, orig_src, impl):
     sti1 = st1["store"]["items"]["ep-note-20261015T180000Z"]["attention"]["sti"]
     st2 = json.loads(r[2]["files"]["memory/_wmtm_state.json"])
     sti2 = st2["store"]["items"]["ep-note-20261015T180000Z"]["attention"]["sti"]
-    assert abs(sti2 - sti1 * 0.9) < 1e-9             # fast path: exactly one 0.9 decay
+    if impl == "orig":
+        assert abs(sti2 - sti1 * 0.9) < 1e-9         # fast path: exactly one 0.9 decay
+    else:
+        # F1 §9: the fast path applies the cycle's rule: one 0.9 decay, plus the cycle's reinforce (+2.0, 5% to ATI)
+        # if the item was used in the snapshot's cycle (passive use of displayed items after the user turn)
+        rec = (st1.get("utility") or {}).get("records", {}).get("ep-note-20261015T180000Z") or {}
+        used = rec.get("use_count", 0) > 0 and rec.get("last_use_tick") == st1["cycle"]
+        assert abs(sti2 - (sti1 * 0.9 + (1.9 if used else 0.0))) < 1e-9
     assert st2["cycle"] == st1["cycle"] + 1
     assert "zebra-quartz-41" in r[2]["out"][-1]["content"]
     b4 = r[3]["out"][-1]["content"]
-    assert scenarios.DERIVE_CANARY in b4 and "[derived sti=" in b4
+    assert scenarios.DERIVE_CANARY in b4
+    if impl == "orig":
+        assert "[derived " in b4                     # unpatched Iter 83ea611 + v0.1.0: tool derive shown as derived
+    else:
+        assert "[asserted from=derived-" in b4       # F12 decision 1: tool derive = asserted, source = the note
     assert r[3]["files"]["memory/_wmtm_pending_derives.jsonl"] == ""

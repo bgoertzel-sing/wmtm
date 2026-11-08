@@ -93,7 +93,8 @@ def test_derive_then_admitted(tmp_path):
     out = m.derive("a derived belief about kestrel archives and codewords", "src-1")
     assert out.startswith("Registered derived belief " + derived_item_id("a derived belief about kestrel archives and codewords"))
     ctx = m.context_for("kestrel codeword?")
-    assert "[derived sti=" in ctx
+    iid = derived_item_id("a derived belief about kestrel archives and codewords")
+    assert "[asserted from=%s " % iid in ctx                          # decision 1: agent-asserted, source = the note
     assert (tmp_path / "_wmtm_pending_derives.jsonl").read_text() == ""
 
 
@@ -105,18 +106,17 @@ def test_reasoner_flag(tmp_path):
             WMTM(WMTMConfig(state_dir=tmp_path, reasoner=bad))
 
 
-def test_decide_with_injected_solver(tmp_path):
+def test_decide_v1_path_removed(tmp_path):
+    """F2 (review section 10): decide() no longer feeds GoalChainer v1 (it read none of the notes); it says why."""
     m = _mem(tmp_path)
     seen = {}
 
     def solve(request, memory_items=None):
-        seen["items"] = memory_items
-        return {"decided": "a1", "label": "Do it", "status": "ok",
-                "decisions": [{"action_id": "a1", "label": "Do it", "status": "permitted", "score": 0.9}]}
+        seen["called"] = True
+        return {}
 
     out = m.decide("should I do it?", solve_incident=solve)
-    assert out.startswith("Decision: a1 - Do it") and "WMTM evidence: 2 items" in out
-    assert {i["id"] for i in seen["items"]} >= {CANARY_ID}
+    assert out == WMTM.DECIDE_REMOVED and "items fed" not in out and not seen
 
 
 def test_cli_context(tmp_path):

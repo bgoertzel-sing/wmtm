@@ -335,11 +335,18 @@ TOPIC_OVERLAP = 0.4        # default of the goal_topic_overlap flag
 _SUFFIXES = ("ings", "ing", "ers", "er", "ed", "es", "s", "e")
 
 
+_PLURAL_KEEP = ("ss", "us", "is")
+
+
 def stem(w):
-    """Light suffix stripping so paraphrases share keys (merge / merging / merged -> merg)."""
+    """Light suffix stripping so paraphrases share keys (merge / merging / merged -> merg).
+    F2: a plain plural "s" is also stripped from a 4-letter word (dogs / vets -> dog / vet; was kept whole, so
+    "dogs" never matched "dog"); -ss / -us / -is words (glass, status, this) are left alone."""
     for suf in _SUFFIXES:
         if w.endswith(suf) and len(w) - len(suf) >= 4:
             return w[:-len(suf)]
+    if len(w) >= 4 and w.endswith("s") and not w.endswith(_PLURAL_KEEP):
+        return w[:-1]
     return w
 
 
@@ -573,7 +580,10 @@ def extract(raw_items, now=None, people=(), requests=(), self_name="", trace=Non
             if len(k) < 2:
                 continue
             need = "unc" if c["kind"] == "question" else "comp"
+            # F2 (review section 5): open questions / pending items addressed to different people are never one
+            # signal, whatever words they share (an unaddressed note may still restate either).
             cur = next((g for g in sigs if g["need"] == need and g["origin"] == origin
+                        and not (g["who"] and c["who"] and g["who"] != c["who"])
                         and cluster_match(g["ckeys"], k, thr)), None)
             if cur is None:
                 sigs.append({"kind": c["kind"], "need": need, "text": c["text"], "body": c["body"], "keys": k,

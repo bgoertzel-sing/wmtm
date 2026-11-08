@@ -89,6 +89,12 @@ def main():
                     break
                 r = review(s, p, keep, i)
                 revs.append(r)
+                if r["disposition"] == "escalate" and s.get("continue_on_tie"):
+                    tied = [a for a in r["escalation"]["contested"] if a in keep]
+                    if tied:
+                        for a in tied:
+                            removed |= {a} | set(s["remove"].get(a, ()))
+                        continue
                 if r["disposition"] != "propose":
                     break
                 a = r["proposal"]["action"]

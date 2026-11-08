@@ -16,7 +16,8 @@ def _now() -> float:
 class WMTMItem:
     """A mutable item in the WMTM active set.
 
-    source_type: 'recalled' (pulled from LTM) or 'derived' (from PLN inference)
+    source_type: 'recalled' (pulled from LTM), 'derived' (from PLN inference), 'asserted' (mem.derive(): the
+        agent's own claim; parsed like a note, its sources = the note itself) or 'user' (the request)
     origin_cluster: LTM MemoryCluster ID (if recalled)
     derived_from: parent item IDs (if derived)
     age: number of ticks since admission

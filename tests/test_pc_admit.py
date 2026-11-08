@@ -87,7 +87,8 @@ def test_pettachainer_mode_admits_with_provenance_and_replaces_python(tmp_path, 
     it = d["cat is a animal"]
     assert it.provenance["reasoner"] == "pettachainer" and it.provenance["stv"] == [0.9, 0.6]
     assert it.provenance["proof"] == "(inh_trans sp0 sp1)" and it.derived_from == ["s0", "s1"]
-    assert abs(it.attention.sti - 0.54) < 1e-6 or it.attention.sti <= 0.54   # initial STI = s*c (then decay)
+    # F1 §4: initial STI comes from relevance (base 1.0 with no request terms), not s*c = 0.54; one tick of decay
+    assert abs(it.attention.sti - 0.9) < 1e-6 and it.attention.sti > 0.54
     assert launches and launches[0].get("force") is True              # worker launched although pc_shadow off
 
 
@@ -107,7 +108,22 @@ def test_admission_filters(tmp_path):
             {"goal": "(Inheritance a b)", "stv": "x", "proof": "(inh_trans p)", "sources": ["s0"]}]
     _admit_doc(tmp_path, rows)
     cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path)}, _store())
-    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "below_threshold": 0, "bad": 3, "known": 0, "negative": 1, "per_fact_cap": 0}
+    assert cands == [] and info["dropped"] == {"asserted": 0, "no_live_source": 1, "bad": 3, "known": 0, "negative": 1, "per_fact_cap": 0}
+
+
+def test_low_confidence_is_admitted(tmp_path):
+    """F1 item 3: an answer at c<0.05 is still an answer (no MIN_CONFIDENCE drop); the max_admit cap still holds."""
+    low = dict(R_CAT, stv=[0.9, 0.042])                         # c=0.042, like the flag-off acl_d answer
+    _admit_doc(tmp_path, [low])
+    cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 5}, _store())
+    assert [c.content for c in cands] == ["cat is a animal"], info["dropped"]
+    assert cands[0].confidence == pytest.approx(0.042) and cands[0].provenance["stv"] == [0.9, 0.042]
+    assert "below_threshold" not in info["dropped"]
+    rows = [{"goal": "(Inheritance a%d b)" % i, "stv": [0.9, 0.01], "proof": "(inh_trans sp%d)" % i, "sources": ["s0"]}
+            for i in range(12)]
+    _admit_doc(tmp_path, rows)
+    cands, info = pc_admit.load_candidates({"shadow_dir": str(tmp_path), "reasoner_max_admit": 5}, _store())
+    assert len(cands) == 5 and info["candidates"] == 5           # cap kept
 
 
 def test_max_admit_cap(tmp_path):
@@ -283,7 +299,8 @@ def test_negation_unlikely_mode(tmp_path):
     assert "unlikely: cat is a animal" in by and "cat is a animal" not in by and info["dropped"]["negative"] == 0
     u = by["unlikely: cat is a animal"]
     assert u.provenance["polarity"] == "negative" and u.provenance["stv"] == [0.2, 0.6]
-    assert abs(u.initial_sti - 0.8 * 0.6) < 1e-9          # STI from the probability of "not"
+    # F1 §4: STI from relevance (no request: base 1.0), not s*c; the probability of "not" stays in provenance
+    assert abs(u.initial_sti - 1.0) < 1e-9
 
 
 def test_negation_threshold_configurable(tmp_path):

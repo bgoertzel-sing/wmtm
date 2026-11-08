@@ -24,7 +24,7 @@ ap.add_argument("--vendor", default=None, help="PeTTaChainer dir (contains petta
 ap.add_argument("--steps", type=int, default=None)
 ap.add_argument("--timeout", type=float, default=None)
 ap.add_argument("--budget", type=float, default=None)
-ap.add_argument("--warm-timeout", type=float, default=60.0)
+ap.add_argument("--warm-timeout", type=float, default=None)   # F1 §11: default from shadow_warm_timeout_s
 ap.add_argument("--keep-spec", action="store_true")
 a = ap.parse_args()
 CFG = rc.load_worker_config(a.config) if a.config else rc.resolve()
@@ -33,6 +33,7 @@ a.vendor = a.vendor or CFG["pettachainer_dir"]
 a.steps = a.steps if a.steps is not None else int(CFG["shadow_steps"])
 a.timeout = a.timeout if a.timeout is not None else float(CFG["shadow_timeout_s"])
 a.budget = a.budget if a.budget is not None else float(CFG["shadow_budget_s"])
+a.warm_timeout = a.warm_timeout if a.warm_timeout is not None else float(CFG.get("shadow_warm_timeout_s") or 120.0)
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb")) if not a.inner else None
 PRIO_GUARD = rc.PriorityGuard(CFG) if not a.inner else None   # set in the child itself; re-asserted on it + the PeTTa child
 PRIO = PRIO_GUARD.start() if PRIO_GUARD else None

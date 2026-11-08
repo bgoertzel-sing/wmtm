@@ -192,9 +192,22 @@ def test_no_exception_escapes(tmp_path, monkeypatch, target, capsys):
     assert out and "cycle 41" in out and json.load(open(sf))["cycle"] == 42
 
 
-def test_fast_path_does_not_import_engine(tmp_path):
+def test_fast_path_one_rule_imports_only_store_and_orchestrator(tmp_path):
+    # F1 §9: with forget_one_rule (default) the fast path runs the cycle's forgetting rule: the engine core is
+    # imported (~15 ms), never the heavy parts (semparse, recall bridge, numpy).
     sf = _state(tmp_path)
     _flags(tmp_path, pc_shadow=True, semparse_feed=True, python="/bin/true")
+    code = ("import sys; from wmtm import context as c; c.fast_path_automated(%r);"
+            "heavy = [m for m in ('wmtm.semparse_adapter', 'wmtm.recall_bridge', 'numpy') if m in sys.modules];"
+            "print(heavy)") % sf
+    r = subprocess.run([sys.executable, "-c", code], cwd=rc.DIST_ROOT, capture_output=True, text=True, timeout=60)
+    assert r.stdout.strip() == "[]" and "WARN" not in r.stderr, r.stderr
+
+
+def test_fast_path_does_not_import_engine(tmp_path):
+    # forget_one_rule off: the rc2 JSON-only fast path (no engine objects)
+    sf = _state(tmp_path)
+    _flags(tmp_path, pc_shadow=True, semparse_feed=True, python="/bin/true", forget_one_rule=False)
     code = ("import sys; from wmtm import context as c; c.fast_path_automated(%r);"
             "heavy = [m for m in ('wmtm.orchestrator', 'wmtm.store', 'wmtm.semparse_adapter',"
             " 'wmtm.recall_bridge', 'numpy') if m in sys.modules]; print(heavy)") % sf

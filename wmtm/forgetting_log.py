@@ -23,11 +23,20 @@ class ForgetRecord:
     final_utility: float
     final_sti: float
     derived_from: list[str] = field(default_factory=list)
+    deriv_hash: str = ""
 
 
 def content_hash(content: str) -> str:
     """Compute a short hash of content for dedup."""
     return hashlib.md5(content.lower().strip().encode()).hexdigest()[:12]
+
+
+def deriv_hash(content: str, derived_from=None, chash: str = None) -> str:
+    """F1 §4: key of a derivation = the conclusion plus its sorted source ids.  The same conclusion reached from
+    other sources is a new derivation and gets a different key.  chash: precomputed content_hash (old records)."""
+    ch = chash if chash is not None else content_hash(content)
+    srcs = ",".join(sorted(str(x) for x in (derived_from or [])))
+    return hashlib.md5((ch + "|" + srcs).encode()).hexdigest()[:12]
 
 
 class ForgettingLog:
@@ -45,6 +54,7 @@ class ForgettingLog:
         """
         self._records: list[ForgetRecord] = []
         self._hashes: set[str] = set()
+        self._derivs: set[str] = set()
         self._ids: set[str] = set()
         self._max_records = max_records
 
@@ -59,10 +69,12 @@ class ForgettingLog:
             age_at_eviction=item.age,
             final_utility=item.utility,
             final_sti=item.attention.sti,
-            derived_from=item.derived_from,
+            derived_from=list(item.derived_from or []),
+            deriv_hash=deriv_hash(item.content, item.derived_from, ch),
         )
         self._records.append(rec)
         self._hashes.add(ch)
+        self._derivs.add(rec.deriv_hash)
         self._ids.add(item.id)
         # F08b: Enforce max_records cap (FIFO pruning).
         # Without this, the forgetting log grows unboundedly despite
@@ -72,13 +84,21 @@ class ForgettingLog:
             # Only remove hash/id if no other record shares them
             if not any(r.content_hash == pruned.content_hash for r in self._records):
                 self._hashes.discard(pruned.content_hash)
+            if not any(r.deriv_hash == pruned.deriv_hash for r in self._records):
+                self._derivs.discard(pruned.deriv_hash)
             if not any(r.item_id == pruned.item_id for r in self._records):
                 self._ids.discard(pruned.item_id)
         return rec
 
-    def is_forgotten(self, content: str) -> bool:
-        """Check if content matching this has been forgotten."""
-        return content_hash(content) in self._hashes
+    def is_forgotten(self, content: str, derived_from=None) -> bool:
+        """Check if content matching this has been forgotten.
+
+        F1 §4: with derived_from (a list, possibly empty) the check is on the derivation (conclusion + sorted
+        sources): a forgotten conclusion derived again from different sources is NOT forgotten.  Without it
+        (None) the old sentence-only check."""
+        if derived_from is None:
+            return content_hash(content) in self._hashes
+        return deriv_hash(content, derived_from) in self._derivs
 
     def is_id_forgotten(self, item_id: str) -> bool:
         """Check if an item ID has been forgotten."""
@@ -107,6 +127,7 @@ class ForgettingLog:
         """Clear the log (for testing)."""
         self._records.clear()
         self._hashes.clear()
+        self._derivs.clear()
         self._ids.clear()
 
     def __len__(self) -> int:
@@ -147,9 +168,12 @@ class ForgettingLog:
                 age_at_eviction=rec_d.get("age_at_eviction", 0),
                 final_utility=rec_d.get("final_utility", 0.0),
                 final_sti=rec_d.get("final_sti", 0.0),
-                derived_from=rec_d.get("derived_from", []),
+                derived_from=rec_d.get("derived_from", []) or [],
             )
+            # F1 §4: the derivation key is not persisted (state format unchanged); recomputed from content_hash + sources
+            rec.deriv_hash = deriv_hash("", rec.derived_from, rec.content_hash)
             log._records.append(rec)
             log._hashes.add(rec.content_hash)
+            log._derivs.add(rec.deriv_hash)
             log._ids.add(rec.item_id)
         return log

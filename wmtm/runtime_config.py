@@ -47,6 +47,8 @@ SPEC = {
     # Track O: derived strength is a probability; below reasoner_min_strength it means "probably not"
     "reasoner_min_strength": ("WMTM_REASONER_MIN_STRENGTH", float, 0.5, None),
     "reasoner_negation":   ("WMTM_REASONER_NEGATION", str, "skip", None),        # skip | unlikely ("unlikely: <text>")
+    "reasoner_initial_sti": ("WMTM_REASONER_INITIAL_STI", float, 1.0, None),   # F1 §4: a conclusion's base STI
+    "reasoner_initial_sti_rel": ("WMTM_REASONER_INITIAL_STI_REL", float, 4.0, None),  # F1 §4: + this * request relevance
     # Track O: CONTEXT coreference (off by default; results go to <semparse_dir>/ctx1, the old cache is kept)
     "semparse_context":    ("WMTM_SEMPARSE_CONTEXT", bool, False, None),
     "context_max_notes":   ("WMTM_CONTEXT_MAX_NOTES", int, 3, None),
@@ -141,8 +143,13 @@ SPEC = {
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),
     "shadow_budget_s":     ("WMTM_PC_SHADOW_BUDGET", float, 20.0, None),
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),
+    # F1 §11: warm-up limit of the inner PeTTaChainer child.  Measured on pop-os (8 cores) at worker priority
+    # (nice 19 + SCHED_IDLE): idle p50 3.0 s / max 3.4 s; 8 CPU spinners (load1 3.9-12.3) n=10 max 54.4 s, review 6
+    # saw 62 s at the old 60 s limit.  120 s = ~2x the loaded worst case.
+    "shadow_warm_timeout_s": ("WMTM_PC_SHADOW_WARM_TIMEOUT", float, 120.0, None),
     "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
     # Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour.
+    "forget_one_rule":     ("WMTM_FORGET_ONE_RULE", bool, True, None),   # F1 §9: every path records evictions in the forgetting log
     "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
     "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
     "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds
@@ -153,6 +160,7 @@ SPEC = {
     "context_max_items":   ("WMTM_CONTEXT_MAX_ITEMS", int, 15, None),
     "context_min_request_items": ("WMTM_CONTEXT_MIN_REQUEST_ITEMS", int, 5, None),  # best-matching items always shown
     "context_min_score":   ("WMTM_CONTEXT_MIN_SCORE", float, 0.2, None),  # with a known request: hide weaker filler
+    "context_recent_focus": ("WMTM_CONTEXT_RECENT_FOCUS", int, 2, None),  # notes below the floor shown as recent focus
     "request_item":        ("WMTM_REQUEST_ITEM", bool, True, None),       # admit the request as a source_type=user item
     "request_item_chars":  ("WMTM_REQUEST_ITEM_CHARS", int, 600, None),
     "hooks_on_automated":  ("WMTM_HOOKS_ON_AUTOMATED", bool, True, None),

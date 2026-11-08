@@ -15,9 +15,9 @@ Extracted from the ProtoCosmo2 Iter tree (snapshot `83ea611`, branch
 - Design notes: `docs/`; release/tag mapping: `docs/RELEASES.md`.
 - `scripts/benchmark_wmtm.py`: micro-benchmark (run with `PYTHONPATH=.`).
 
-Known external coupling: `wmtm/goalchainer_bridge.py` adds a hardcoded
-OmegaClaw-GoalChainer path to `sys.path` (tests mock it). To be made
-configurable.
+GoalChainer v1 feed removed (F2, review section 10): `decide()` and
+`goalchainer_bridge.run_goalchainer_over_wmtm` no longer send notes to GoalChainer v1, which read none
+of them (it reads only `(Acceptable <action>)` STV/EC atoms). WMTM goals run on GoalChainer v2 (`wmtm/goals`).
 
 ## Interface (v0.2)
 
@@ -27,7 +27,7 @@ mem = WMTM(WMTMConfig(state_dir="memory"))          # journal defaults to PettaJ
 mem.observe({"user": user_text, "assistant": reply})  # reply only if it answered a real user message
 ctx = mem.context_for(user_text)                      # "" -> automated fast path; returns block or None
 mem.derive(note, source_ids)                          # explicit tool (flock-protected pending file)
-mem.decide(request)                                   # GoalChainer tool
+mem.decide(request)                                   # removed (F2): returns why; goals use GoalChainer v2
 mem.save(); mem.close()
 ```
 
@@ -103,6 +103,8 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `reasoner_max_admit` | `WMTM_REASONER_MAX_ADMIT` | int | `5` | The most PeTTaChainer conclusions admitted from one worker result, after the per-fact cap. 0 falls back to 5. | `wmtm/pc_admit.py:182` |
 | `reasoner_min_strength` | `WMTM_REASONER_MIN_STRENGTH` | float | `0.5` | Track O: derived strength is a probability; below reasoner_min_strength it means "probably not" | `wmtm/pc_admit.py:43` |
 | `reasoner_negation` | `WMTM_REASONER_NEGATION` | str | `'skip'` | skip \| unlikely ("unlikely: &lt;text&gt;") | `wmtm/pc_admit.py:51` |
+| `reasoner_initial_sti` | `WMTM_REASONER_INITIAL_STI` | float | `1.0` | Base starting STI of an admitted PeTTaChainer conclusion (F1 §4). 0 or empty falls back to 1.0. | `wmtm/pc_admit.py:118` |
+| `reasoner_initial_sti_rel` | `WMTM_REASONER_INITIAL_STI_REL` | float | `4.0` | Added to the base STI times the conclusion's request relevance (0-1). 0 or empty falls back to 4.0. | `wmtm/pc_admit.py:119` |
 | `semparse_context` | `WMTM_SEMPARSE_CONTEXT` | bool | `false` | Track O: CONTEXT coreference (off by default; results go to &lt;semparse_dir&gt;/ctx1, the old cache is kept) | `wmtm/parse_cache.py:339` `wmtm/parse_cache.py:492` |
 | `context_max_notes` | `WMTM_CONTEXT_MAX_NOTES` | int | `3` | Context parse (`semparse_context`): the most earlier notes passed as context for one item (`select_context`). | `wmtm/parse_cache.py:414` `wmtm/parse_cache.py:508` |
 | `context_max_atoms` | `WMTM_CONTEXT_MAX_ATOMS` | int | `40` | Context parse: the most atoms from earlier notes passed as context. | `wmtm/parse_cache.py:415` `wmtm/parse_cache.py:509` |
@@ -178,7 +180,9 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `shadow_timeout_s` | `WMTM_PC_SHADOW_TIMEOUT` | float | `2.0` | Shadow worker: timeout in seconds for each PeTTa query, including the canary and negative-control queries. The worker's `--timeout` option overrides it. | `wmtm/workers/pc_shadow.py:34` |
 | `shadow_budget_s` | `WMTM_PC_SHADOW_BUDGET` | float | `20.0` | Shadow worker: total seconds for all goal queries in one run. Goals still waiting when it runs out are skipped. | `wmtm/workers/pc_shadow.py:35` |
 | `shadow_steps` | `WMTM_PC_SHADOW_STEPS` | int | `30` | Shadow worker: PeTTa step limit for each query. | `wmtm/workers/pc_shadow.py:33` |
+| `shadow_warm_timeout_s` | `WMTM_PC_SHADOW_WARM_TIMEOUT` | float | `120.0` | F1 §11: warm-up limit of the inner PeTTaChainer child (was a fixed 60 s); measured on pop-os at worker priority: idle max 3.4 s, 8-spinner load max 54.4 s | `wmtm/runtime_config.py:147` |
 | `shadow_min_interval_s` | `WMTM_PC_SHADOW_MIN_INTERVAL` | float | `300.0` | The fewest seconds between two shadow-worker launches. 0 means no limit. | `wmtm/pc_shadow.py:341` |
+| `forget_one_rule` | `WMTM_FORGET_ONE_RULE` | bool | `true` | F1 §9: every path (cycle, user-turn stale cleanup, automated fast path) records its evictions in the forgetting log; off = the 83ea611 behaviour (replay harness only) | `wmtm/runtime_config.py:146` |
 | `cleanup_protect_recent` | `WMTM_CLEANUP_PROTECT_RECENT` | bool | `true` | Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour. stale cleanup spares fresh recalls | `wmtm/context.py:676` |
 | `cleanup_grace_turns` | `WMTM_CLEANUP_GRACE_TURNS` | int | `10` | ... recalled/relevant within N cycles | `wmtm/context.py:678` |
 | `cleanup_grace_s` | `WMTM_CLEANUP_GRACE_S` | float | `1800.0` | ... or within N seconds | `wmtm/context.py:679` |
@@ -189,6 +193,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `context_max_items` | `WMTM_CONTEXT_MAX_ITEMS` | int | `15` | The most ranked items shown in the context block (at least 1). | `wmtm/context.py:901` |
 | `context_min_request_items` | `WMTM_CONTEXT_MIN_REQUEST_ITEMS` | int | `5` | best-matching items always shown | `wmtm/context.py:845` |
 | `context_min_score` | `WMTM_CONTEXT_MIN_SCORE` | float | `0.2` | with a known request: hide weaker filler | `wmtm/context.py:850` |
+| `context_recent_focus` | `WMTM_CONTEXT_RECENT_FOCUS` | int | `2` | With a known request, up to this many notes below the relevance floor are shown, highest attention first, as "recent focus" lines after the evidence lines (0 = off). | `wmtm/context.py:980` |
 | `request_item` | `WMTM_REQUEST_ITEM` | bool | `true` | admit the request as a source_type=user item | `wmtm/context.py:955` |
 | `request_item_chars` | `WMTM_REQUEST_ITEM_CHARS` | int | `600` | When the user message is admitted as a request item, whitespace is collapsed and the text is cut to this many characters (at least 20). | `wmtm/context.py:958` |
 | `hooks_on_automated` | `WMTM_HOOKS_ON_AUTOMATED` | bool | `true` | When true, automated (fast-path) turns also run the shadow and parse-feed hooks. `pc_shadow` or `semparse_feed` must still be on. | `wmtm/context.py:473` |
@@ -265,5 +270,4 @@ the test refuses a directory inside the repo. Optionally set
   matters for long-lived hosts (CLI service, other bots).
 - State file writes are not atomic and not locked across processes.
 - `close()` does not save (see the docstring).
-- `embed_index.py` default cache path is `<repo>/memory/...`; `goalchainer_bridge`
-  hardcodes the GoalChainer path (`WMTMConfig.goalchainer_src` covers `decide()` only).
+- `embed_index.py` default cache path is `<repo>/memory/...`.

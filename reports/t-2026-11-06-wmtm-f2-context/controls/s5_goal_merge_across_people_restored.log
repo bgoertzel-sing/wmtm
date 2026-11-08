@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_s5_goal_engine_keeps_questions_to_different_people_apart _________
+
+    def test_s5_goal_engine_keeps_questions_to_different_people_apart():
+        """Condition 5 (goal engine): open questions addressed to different people stay two signals.
+        Control: extract() merges them into one signal (cluster_match on shared words, person ignored)."""
+        now = 1_800_000_000.0
+        items = [{"id": "syn-1", "content": "Open question for Quill: should the vet clinic dogs get the rabies booster?",
+                  "sti": 1.0, "source_type": "recalled", "origin_ts": now - 2 * 86400},
+                 {"id": "syn-2", "content": "Open question for Wren: should the vet clinic dogs get the rabies booster?",
+                  "sti": 1.0, "source_type": "recalled", "origin_ts": now - 86400}]
+        sigs = needs.extract(items, now, people=needs.people_patterns({"1": "quill", "2": "wren"}), self_name="botty")
+        qs = [s for s in sigs if s["kind"] == "question"]
+>       assert sorted(s["who"] for s in qs) == ["quill", "wren"]
+E       AssertionError: assert ['wren'] == ['quill', 'wren']
+E         
+E         At index 0 diff: 'wren' != 'quill'
+E         Right contains one more item: 'wren'
+E         Use -v to get more diff
+
+tests/test_f2_context_goals.py:98: AssertionError
+1 failed, 12 deselected in 0.09s

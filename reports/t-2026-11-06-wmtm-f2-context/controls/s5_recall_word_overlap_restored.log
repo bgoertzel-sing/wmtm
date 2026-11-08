@@ -1,0 +1,36 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_s5_five_compatible_rex_notes_are_all_admitted ______________
+
+tmp_path = PosixPath('/home/openclaw/tmp/pytest-of-openclaw/pytest-3002/test_s5_five_compatible_rex_no0')
+
+    def test_s5_five_compatible_rex_notes_are_all_admitted(tmp_path):
+        """Condition 5: all five notes are admitted; ranking decides which are shown.
+        Control (0.6 word-overlap test restored): "rex is a dog" / "rex is a mammal" are skipped as duplicate topics."""
+        got, _ = _recalled_after_turn(tmp_path, REX, "what do we know about rex the dog, mammal, animal, pet, vertebrate?")
+>       assert sorted(got) == sorted(REX)
+E       AssertionError: assert ['mammal is a...is an animal'] == ['mammal is a...is an animal']
+E         
+E         At index 1 diff: 'rex is a pet' != 'rex is a dog'
+E         Right contains 2 more items, first extra item: 'rex is a pet'
+E         Use -v to get more diff
+
+tests/test_f2_context_goals.py:64: AssertionError
+________________ test_s5_two_cpu_readings_are_two_observations _________________
+
+tmp_path = PosixPath('/home/openclaw/tmp/pytest-of-openclaw/pytest-3002/test_s5_two_cpu_readings_are_t0')
+
+    def test_s5_two_cpu_readings_are_two_observations(tmp_path):
+        """Condition 5: the two readings are two observations (the later one is the current value, by age).
+        Control: the 55% reading is skipped as a duplicate of the 92% one."""
+        notes = ["service-1 CPU reads 92% after the restart", "service-1 CPU reads 55% after the restart"]
+        got, ids = _recalled_after_turn(tmp_path, notes, "what does service-1 CPU read after the restart?")
+>       assert sorted(got) == sorted(notes)
+E       AssertionError: assert ['service-1 C... the restart'] == ['service-1 C... the restart']
+E         
+E         At index 0 diff: 'service-1 CPU reads 92% after the restart' != 'service-1 CPU reads 55% after the restart'
+E         Right contains one more item: 'service-1 CPU reads 92% after the restart'
+E         Use -v to get more diff
+
+tests/test_f2_context_goals.py:72: AssertionError
+2 failed, 11 deselected in 0.11s

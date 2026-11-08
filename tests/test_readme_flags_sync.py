@@ -100,3 +100,14 @@ def test_readme_flags_table_matches_spec():
     if dups:
         msg.append(f"listed more than once in the README flags table: {dups}")
     assert not msg, "; ".join(msg)
+
+
+def test_f12_reasoner_initial_sti_in_spec_and_readme():
+    """F12 SPEC fix: pc_admit.initial_sti reads reasoner_initial_sti / reasoner_initial_sti_rel; both are SPEC keys
+    (env-settable, resolved) and README rows.  Control (keys removed from SPEC): KeyError / not in resolve()."""
+    import os
+    from wmtm import runtime_config as rc
+    for k, env, d in (("reasoner_initial_sti", "WMTM_REASONER_INITIAL_STI", 1.0),
+                      ("reasoner_initial_sti_rel", "WMTM_REASONER_INITIAL_STI_REL", 4.0)):
+        assert rc.SPEC[k][0] == env and rc.SPEC[k][2] == d
+        assert ("| `%s` |" % k) in README.read_text(encoding="utf-8")

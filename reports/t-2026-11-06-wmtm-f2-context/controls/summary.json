@@ -1,0 +1,67 @@
+{
+ "fix": "6ce9286",
+ "base": "77d62b9",
+ "controls": [
+  {
+   "name": "s5_recall_word_overlap_restored",
+   "undone": [
+    "wmtm/context.py"
+   ],
+   "tests": "test_s5_five or test_s5_two_cpu",
+   "exit": 1,
+   "result": "2 failed, 11 deselected in 0.11s",
+   "control_fails": true
+  },
+  {
+   "name": "s5_goal_merge_across_people_restored",
+   "undone": [
+    "wmtm/goals/needs.py"
+   ],
+   "tests": "test_s5_goal_engine",
+   "exit": 1,
+   "result": "1 failed, 12 deselected in 0.09s",
+   "control_fails": true
+  },
+  {
+   "name": "s7_attention_only_lines_restored",
+   "undone": [
+    "wmtm/context.py"
+   ],
+   "tests": "test_s7_belief",
+   "exit": 1,
+   "result": "2 failed, 11 deselected in 0.10s",
+   "control_fails": true
+  },
+  {
+   "name": "s10_v1_feed_restored",
+   "undone": [
+    "wmtm/api.py",
+    "wmtm/goalchainer_bridge.py"
+   ],
+   "tests": "test_s10_decide or test_s10_orchestrator",
+   "exit": 1,
+   "result": "2 failed, 11 deselected in 0.11s",
+   "control_fails": true
+  },
+  {
+   "name": "s10_tie_step_restored",
+   "undone": [
+    "wmtm/goals/v2.py"
+   ],
+   "tests": "test_s10_tied or test_s10_real",
+   "exit": 1,
+   "result": "2 failed, 11 deselected in 6.56s",
+   "control_fails": true
+  },
+  {
+   "name": "stemmer_old_restored",
+   "undone": [
+    "wmtm/goals/needs.py"
+   ],
+   "tests": "test_stemmer",
+   "exit": 1,
+   "result": "1 failed, 12 deselected in 0.08s",
+   "control_fails": true
+  }
+ ]
+}

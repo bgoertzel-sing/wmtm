@@ -47,7 +47,9 @@ _CODE = {"ClarifyQuestion": "ask", "FlagUncertainty": "flag", "LookUp": "look", 
 # writes are strict.  Every message / write / live-change / git / push effect is forbidden on an automated turn.
 STRICT = ("no_git_memory", "read_only")
 CAP_STEP = 0.01        # a single action never reaches the band on paper: change <= gap * (1 - CAP_STEP * (rank + 1))
-TIE_STEP = 1e-6        # exact ties between candidates are broken in WMTM's candidate order
+# F2 (review section 10): no TIE_STEP.  Candidates with equal raw changes declare equal expectations (rank is dense:
+# equal raw values share a rank, also under the band cap), so v2 sees the tie and escalates it to a human instead of
+# WMTM breaking it by candidate (list) order.
 RULE_IDS = tuple(r[0] for r in legitimacy.RULES) + tuple("no_autonomous_" + e for e in legitimacy.AUTONOMOUS_EFFECTS)
 
 
@@ -96,15 +98,15 @@ def raw_change(c, est, st, now, recent=()):
 
 
 def expectations(cands, est, st, now, recent=()):
-    """-> [declared change per candidate].  Raw changes in candidate order; exact ties broken by that order; a
-    change that would bring the need into its band is capped just below the band edge (asking or reminding does
-    not by itself close an item), keeping the raw order, so v2 never sees two candidates tie at 'satisfied'."""
+    """-> [declared change per candidate].  Raw changes in candidate order; a change that would bring the need into
+    its band is capped just below the band edge (asking or reminding does not by itself close an item), keeping the
+    raw order.  F2: exact ties stay exact (dense rank), whatever the candidate order, so v2 escalates them."""
     raw = [raw_change(c, est, st, now, recent) for c in cands]
-    order = sorted(range(len(cands)), key=lambda i: (-raw[i], i))
-    rank = {i: r for r, i in enumerate(order)}
+    levels = sorted(set(raw), reverse=True)
+    rank = {i: levels.index(raw[i]) for i in range(len(cands))}
     out = []
     for i, c in enumerate(cands):
-        x = raw[i] * (1.0 - TIE_STEP * rank[i])
+        x = raw[i]
         gap = est[c["need"]]["target"] - est[c["need"]]["level"]
         if gap > 0:
             x = min(x, gap * (1.0 - CAP_STEP * (rank[i] + 1)))
@@ -196,7 +198,8 @@ def build_series(label, cands, est, st, now, ctx=None, passes=("human",), groups
                "observed_at": iso(now)}
         ps.append({"label": p, "readings": readings + [auto, rev]})
     job = {"label": label, "header": "\n".join(head), "blocks": blocks, "order": ids, "observations": obs,
-           "as_of": iso(now), "passes": ps, "remove": rem, "max_reviews": int(st.get("max_proposals", 5))}
+           "as_of": iso(now), "passes": ps, "remove": rem, "max_reviews": int(st.get("max_proposals", 5)),
+           "continue_on_tie": True}     # F12 decision 4: a tie never ends the series
     return job, dict(zip(ids, cands))
 
 
@@ -323,6 +326,15 @@ def summarize(review):
     return out
 
 
+def _contested(review):
+    out = []
+    for x in (review.get("escalation") or {}).get("contested") or ():
+        a = x.get("action") if isinstance(x, dict) else x
+        if isinstance(a, str) and a not in out:
+            out.append(a)
+    return out
+
+
 def map_pass(pres, amap, est, now, ctx=None, remove=None):
     """One pass's reviews -> (proposals in v2 order, candidates with status/legit/v2 fields, decision log).
     Candidate status: proposed (v2 proposed it), vetoed (v2 deontic: forbidden), held / escalated / blocked /
@@ -341,6 +353,14 @@ def map_pass(pres, amap, est, now, ctx=None, remove=None):
         if r.get("disposition") == "propose":
             chosen[(r.get("proposal") or {}).get("action")] = (len(chosen), r)     # (rank - 1, review)
     withdrawn = {x for a in chosen for x in (remove or {}).get(a, ())} - set(chosen)
+    tied = {}                                     # F12 decision 4: action -> index of the tie (escalate review)
+    for r in reviews:
+        if r.get("disposition") == "escalate":
+            ids = [a for a in _contested(r) if a in amap and a not in chosen and a not in tied]
+            if len(ids) >= 2:
+                k = len(set(tied.values()))           # one index per tie (escalate review)
+                for a in ids:
+                    tied[a] = k
     for aid, c in amap.items():
         c = dict(c)
         deon = _deontic_of(first, aid)
@@ -380,6 +400,10 @@ def map_pass(pres, amap, est, now, ctx=None, remove=None):
             c.update(score=0.0, status="dup", decision="withdrawn",
                      legit={"d": 1.0, "status": deon or "unknown", "rules": [], "reasons": [], "discounts": disc,
                             "impl": ENGINE})
+        elif aid in tied:                 # F12 decision 4: escalated tie, shown as a choice (never as a proposal)
+            c.update(score=0.0, status="escalated", decision="escalated", tie=tied[aid],
+                     legit={"d": 1.0 if deon in ("permitted", "obligated") else 0.0, "status": deon or "unknown",
+                            "rules": [], "reasons": [], "discounts": disc, "impl": ENGINE})
         else:
             c.update(score=0.0, status=end_status if deon else "not_candidate", decision=end_status,
                      legit={"d": 1.0 if deon in ("permitted", "obligated") else 0.0, "status": deon or "unknown",
