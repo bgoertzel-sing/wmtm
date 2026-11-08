@@ -49,7 +49,8 @@ No production path: wmtm/pc_admit.py only keeps the names in the legacy `_RULE` 
 
 ## Commits (branch hive/t-2026-11-08-wmtm-f3-ab-v3, on v2 head 61c2568)
 - 1571d80 items C+D: wmtm/pc_admit.py is_derivation, tests/test_f3v2_native_chain.py (+47), wmtm/workers/pc_shadow.py docstring, docs/RUNTIME.md.
-- 00fa834 evidence: ITEM_B.md + item_b_queries.py, CRITERION5.md, runs/ (12 shadow records), extract.json (premise id -> source note id/fact, nw-symbol -> notes, gate rejects), W4.json, JUDGMENTS.json (reasons replaced by "hand-judged", no note text), worker_config_A/B.json, RUNS_TABLE.md, B_CHECKOUT.txt, recompute.py.
+- fd02402 review-1 fixes: tests/test_f3v2_native_chain.py (+2 tests: engine-shaped revision term documented as is_derivation True; asserted fact never a goal), DEVIATION_1.md, KB_A/B_atoms.json, ITEM_B.md TV + engine commit, JUDGMENTS.json hygiene, extract.json per-record shas, SHA256SUMS, this report.
+- 00fa834 evidence: ITEM_B.md + item_b_queries.py, CRITERION5.md, runs/ (12 shadow records), extract.json (premise id -> source note id/fact, nw-symbol -> notes, gate rejects), W4.json, JUDGMENTS.json (reasons replaced by "hand-judged", no note text; A rows fixed in fd02402), worker_config_A/B.json, RUNS_TABLE.md, B_CHECKOUT.txt, recompute.py.
 
 ## Gates (PREREG t-2026-11-07-wmtm-f3-ab)
 1. Count rule: B 8C/2W/1U and A 2C/2W in all 6 runs per arm. HOLDS. W1 is now re-derived mechanically: the shared symbol nwdef_config__nw_b1a247bbd8 joins notes 185132Z and 185959Z.
@@ -63,7 +64,7 @@ No production path: wmtm/pc_admit.py only keeps the names in the legacy `_RULE` 
 `env -i PATH=/usr/bin:/bin python3 -S reports/t-2026-11-08-wmtm-f3-ab-v3/recompute.py` prints RECOMPUTE_OK.
 Item B: `python3 item_b_queries.py v3rN` on pop-os (needs the private built specs under /tmp/f3/ab).
 Engine: PeTTa 3681b9b + PeTTaChainer bdae8d7e (WMTM_PC_PETTA / WMTM_PC_VENDOR).
-Full suite on 00fa834 with engine env: 817 passed, 26 skipped (113 s). A premises in the §11 table re-checked against extract.json (v3r1).
+Full suite on fd02402 with engine env: 819 passed, 26 skipped (53.7 s; 00fa834 was 817/26, +2 new tests). A premises in the §11 table re-checked against extract.json (v3r1).
 
 ## Evidence hygiene (finding 5)
 JUDGMENTS.json: all reasons now read "hand-judged against the source note (text not committed)", and A rows keep only the P3 W4 row number. extract.json: each record has its own record_sha256 and spec_atoms_sha256. The shared input_sha256 is the one 20-note raw input that every run used, and that is intended. SHA256SUMS lists every file in this directory.
