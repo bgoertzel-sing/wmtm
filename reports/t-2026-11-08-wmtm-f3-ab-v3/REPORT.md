@@ -32,3 +32,6 @@ Propose deploy: no, not yet. The count rule and the warm-up and budget gates hol
 Item B: `python3 item_b_queries.py v3rN` on pop-os (needs the private built specs under /tmp/f3/ab).
 Engine: PeTTa 3681b9b + PeTTaChainer bdae8d7e (WMTM_PC_PETTA / WMTM_PC_VENDOR).
 Full suite on 00fa834 with engine env: 817 passed, 26 skipped (113 s). A premises in the §11 table re-checked against extract.json (v3r1).
+
+## Branch state
+hive/t-2026-11-08-wmtm-f3-ab-v3 is committed locally on pop-os and NOT pushed: pop-os has no GitHub credentials (push fails with "could not read Username"). A human with credentials must push it; nothing goes to main.
