@@ -1,0 +1,28 @@
+........................................................................ [ 29%]
+........................................................................ [ 59%]
+........................................................................ [ 89%]
+..........................                                               [100%]
+242 passed in 31.86s
+	Command being timed: "python3 -m pytest -q -p no:cacheprovider -rs tests/test_goalchainer_bridge.py tests/test_goalchainer_orchestrator.py tests/test_goal_rank.py tests/test_goals_rc3.py tests/test_goals_track_r2.py tests/test_goals_track_r.py tests/test_goals_track_s.py tests/test_goals_track_t.py tests/test_goals_track_v.py tests/test_goals_v060.py tests/test_goals_v2.py tests/test_pc_shadow.py tests/test_pc_admit.py tests/test_pc_admit_rc2.py"
+	User time (seconds): 26.74
+	System time (seconds): 0.91
+	Percent of CPU this job got: 86%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:32.04
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 139264
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 396232
+	Voluntary context switches: 2387
+	Involuntary context switches: 645
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 7216
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,276 @@
+PCMIG ingestion module = user
+Warning: execution-close-frame! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execution-close-slice! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execution-open-frame! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execution-open-slice! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-branch-share is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-evaluation-per-step is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-reserve-near! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-root-claim-limit is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-root-claim-share is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-take! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: sk-walk-per-step is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: context-answer-seeds! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: context-cold-merged is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: context-propagate? is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: execute-backward is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: run-query-execution-plan is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: present-query-plan-results is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: query-plan-runtime-goal is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: retain-query-proof! is defined or imported after already being used; earlier expressions treat it as a plain symbol. Move the import or definition above the first use.
+Warning: [Thread main] the declaration (: query (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement))
+Warning: [Thread main] the declaration (: query-materialize (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-materialize (-[nondet]-> Number KB AnnotatedStatement AnnotatedStatement))
+Warning: [Thread main] the declaration (: query-many (-[nondet]-> Number KB (List AnnotatedStatement) QueryBatchResult)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-many (-[nondet]-> Number KB (List AnnotatedStatement) QueryBatchResult))
+Warning: [Thread main] the declaration (: query-many-refs (-[nondet]-> Number KB (List AnnotatedStatement) QueryBatchResult)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-many-refs (-[nondet]-> Number KB (List AnnotatedStatement) QueryBatchResult))
+Warning: [Thread main] the declaration (: expand-proof (-[nondet]-> Proof Proof)) is a duplicate in &gc-group-pettachainer; the first declaration is (: expand-proof (-[nondet]-> Proof Proof))
+Warning: [Thread main] the declaration (: query-many-materialize (-[nondet]-> Number KB (List AnnotatedStatement) QueryBatchResult)) is a duplicate in &gc-group-pettachainer; the first declaration is (: query-many-materialize (-[nondet]-> Number KB (List AnnotatedStatement) QueryBatchResult))
+Warning: [Thread main] the declaration (: set-backward-query-metrics (-[det]-> Bool Bool)) is a duplicate in &gc-group-pettachainer; the first declaration is (: set-backward-query-metrics (-[det]-> Bool Bool))
+Warning: [Thread main] the declaration (: backward-query-metrics (-[det]-> (List BackwardQueryMetric))) is a duplicate in &gc-group-pettachainer; the first declaration is (: backward-query-metrics (-[det]-> (List BackwardQueryMetric)))
+Warning: [Thread main] the declaration (: chainer-many (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult)))) is a duplicate in &gc-group-pettachainer; the first declaration is (: chainer-many (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult))))
+Warning: [Thread main] the declaration (: chainer-many-materialize (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult)))) is a duplicate in &gc-group-pettachainer; the first declaration is (: chainer-many-materialize (-[nondet]-> Number (List (| Goal (Statement KBContext Proof TV))) (List (List RuntimeResult))))
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+Q !(add-atom &self (= (wk $x $u) (+ $x 1))) [['True']]
+Q !(add-atom &self (= (cl $u) done)) [['True']]
+Q !(add-atom &self (= (apply-unit $f) (if (== (get-metatype $f) Expression) (union-atom $f ( [['True']]
+Q !(add-atom &self (= (finally $w $c) (let $r (metta (apply-unit $w) %Undefined% &self) (let [['True']]
+Q !(add-atom &self (= (brand $t $x) $x)) [['True']]
+Q !(add-atom &self (= (the $t $x) $x)) [['True']]
+Q !(chainer-reset!) [['(chainer-reset!)']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+Q !(collapse (compileadd kbx (: f1 (A a) (STV 1.0 0.9)))) [['((: (kbx MAIN Nil) f1 (A a) (STV 1.0 0.9)))']]
+Q !(collapse (materialize-stmt-lambdas (: $p (A a) $tv))) [['((: $p (A a) $tv))']]
+Q !(collapse (member-canon (A a))) [['((A a))']]
+Q !(collapse (query-root (: $p (A a) $tv))) [['((: $p (A a) $tv))']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (mm2compileQuery kbx (query-root (: $p (A a) $tv)))) [['((compiled-query ((A a) (kbx MAIN Nil) $p $tv) ()))']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $c (mm2compileQuery kbx (query-root (: $p (A a) $tv))) (run-query-executio [['()']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $c (mm2compileQuery kbx (query-root (: $p (A a) $tv))) (compiled-query-exe [['((query-execution-plan ((0 (A a) (: $p (A a) $tv) ((A a) (kbx MAIN Nil) $p $tv))) ()))']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $c (mm2compileQuery kbx (query-root (: $p (A a) $tv))) (let (query-executi [['(((data (A a) (kbx MAIN Nil) $p $tv)))']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $c (mm2compileQuery kbx (query-root (: $p (A a) $tv))) (let (query-executi [['()']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $c (mm2compileQuery kbx (query-root (: $p (A a) $tv))) (execution-query-ru [['()']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $c (mm2compileQuery kbx (query-root (: $p (A a) $tv))) (execution-query-ru [['()']]
+Q !(collapse (match &sk_pending_facts $f $f)) [['()']]
+Q !(collapse (execute-backward-run 20 ((data (A a) (kbx MAIN Nil) $p $tv)) true u)) [['()']]
+Q !(collapse (execute-backward 20 ((data (A a) (kbx MAIN Nil) $p $tv)) true)) [['()']]
+Q !(collapse (sk-clear-query-values!)) [['(True)']]
+Q !(collapse (execution-reset-frames!)) [['((let* (($_13 (sk-close-claim!)) ($_14 (change-state! sk_branch_at 0)) ($_15 (remove-data-rows! &metta-space-52 (quote ($_16 $_17 $_18))))) ()))']]
+Q !(collapse (sk-park-deliveries!)) [['((let $_19 (collapse (match &metta-space-68 ($_20 (sk-delivery $_21 $_22)) (let $_23 (remove-atom &metta-space-68 ($_20 (sk-delivery $_24 $_25))) (sk-queued $_20 (sk-delivery $_21 $_22))))) (fold-semidet sk-park-step () $_19)))']]
+Q !(collapse (sk-activate-facts!)) [['((fold-semidet sk-activate-fact-step () (collapse (match &metta-space-67 (sk-pending-fact $_26) (let $_27 (remove-atom &metta-space-67 (sk-pending-fact $_26)) $_26)))))']]
+Q !(collapse (fold-semidet sk-root-score-step () ((data (A a) (kbx MAIN Nil) $p $tv)))) [['((Error (fold-semidet sk-root-score-step () ((data (A a) (kbx MAIN Nil) $p $tv))) (BadArgType 1 (-> $_28 $_29 $_28) (-[semidet]-> Atom (| Goal (Statement KBContext Proof (| STVType CTVType NoEvidenceType))) %Undefined%))))']]
+Q !(collapse (sk-activate-rules!)) [['((fold-semidet sk-activate-rule-step () (collapse (match &metta-space-66 (sk-pending-rule $_30) (let $_31 (remove-atom &metta-space-66 (sk-pending-rule $_30)) $_30)))))']]
+Q !(collapse (sk-activate-thawed!)) [['((let $_32 (collapse (match &metta-space-100 ($_33 (sk-key $_34 $_35)) (let* (($_36 (remove-atom &metta-space-100 ($_33 (sk-key $_34 $_35)))) ($_37 (sk-register-key! (sk-key $_34 $_35))) ($_38 (assemble-stored-runtime-fact $_34 $_35 $_39 $_40))) (fold-semidet (sk-start-rule-step $_38) () (collapse (sk-rule-match $_38)))))) ()))']]
+Q !(collapse (sk-drain!)) [['((case (collapse (once (match &metta-space-68 ($_41 (sk-delivery $_42 $_43)) (sk-queued $_41 (sk-delivery $_42 $_43))))) ((() ()) ((cons (sk-queued $_44 (sk-delivery $_45 $_46)) $_47) (if (<= (search-id-value sk_row_budget) 0) () (let* (($_48 (remove-atom &metta-space-68 ($_44 (sk-delivery $_49 $_50)))) ($_51 (sk-node-hash $_45)) ($_52 (collapse (match &sk_wait ($_51 $_53 $_54) (if (=alpha $_53 $_']]
+Q !(collapse (execution-allowances! 100 true)) [['(())']]
+Q !(collapse (context-seeds $c)) [['(())']]
+Q !(collapse (fold-semidet sk-root-reader-step () ((data (A a) (kbx MAIN Nil) $p $tv)))) [['((Error (fold-semidet sk-root-reader-step () ((data (A a) (kbx MAIN Nil) $p $tv))) (BadArgType 1 (-> $_56 $_57 $_56) (-[semidet]-> Atom (| Goal (Statement KBContext Proof (| STVType CTVType NoEvidenceType))) %Undefined%))))']]
+Q !(collapse (sk-walk! ((data (A a) (kbx MAIN Nil) $p $tv)))) [['()']]
+Q !(collapse (sk-invalidate-world!)) [['((let* (($_58 (collapse (match &metta-space-84 ($_59 $_60) $_60))) ($_61 (remove-data-rows! &metta-space-84 (quote ($_62 $_63)))) ($_64 (sk-stale-world-keys! $_58)) ($_65 (remove-data-rows! &metta-space-87 (quote ($_66 $_67))))) ()))']]
+Q !(collapse (fold-semidet sk-root-keys-step () ((data (A a) (kbx MAIN Nil) $p $tv)))) [['()']]
+Q !(collapse (sk-evaluate!)) [['((let* (($_68 (if (take-hazards-changed) (sk-rehazard-tallies!) ())) ($_69 (remove-data-rows! &metta-space-56 (quote ($_70 $_71 $_72)))) ($_73 (remove-data-rows! &metta-space-76 (quote ($_74 $_75 $_76)))) ($_77 (sk-force-reset!)) ($_78 (remove-data-rows! &metta-space-57 (quote ($_79 $_80)))) ($_81 (collapse (match &ctx_sk_partial ($_82 $_83) (if (sk-needed? $_82 $_83) (let $_84 (context-add! &mett']]
+Q !(collapse (inference-add! 0)) [['(True)']]
+Q !(collapse (map-semidet (sk-root-results true) ((data (A a) (kbx MAIN Nil) $p $tv)))) [['()']]
+Q !(collapse (sk-stale-held!)) [['((let* (($_121 (change-state! sk_holding 0)) ($_122 (collapse (match &ctx_sk_held ($_123 $_124 $_125) (if (case $_125 ((sk-stale-input True) ((sk-branch-hold $_126 $_127 $_128 $_129) (== (sk-branch-values $_126 $_127 $_128 $_129 True) ())))) (sk-row-item-at $_123 $_124) (empty))))) ($_130 (remove-data-rows! &metta-space-98 (quote ($_131 $_132 $_133)))) ($_134 (remove-data-rows! &metta-space-99 (qu']]
+Q !(collapse (execute-backward-run 20 ((data (A a) (kbx MAIN Nil) $p $tv)) true u)) [['()']]
+Q !(collapse (typed-runtime-premise (data (A a) (kbx MAIN Nil) $p $tv))) [['()']]
+Q !(collapse (execution-search-goal (data (A a) (kbx MAIN Nil) $p $tv))) [['()']]
+Q !(collapse (if (= (data (A a) k $p $tv) (CPU $f $a $r)) yes no)) [['(no)']]
+Q !(collapse (brand Statement (A a))) [['((A a))']]
+Q !(collapse (checked-stored-tv $tv)) [['($tv)']]
+Q !(collapse (checked-stored-tv (STV 1.0 0.9))) [['((STV 1.0 0.9))']]
+Q !(collapse (assemble-runtime-fact (A a) (kbx MAIN Nil) $p $tv)) [['((data (A a) (kbx MAIN Nil) $p $tv))']]
+Q !(collapse (typed-runtime-fact ((A a) (kbx MAIN Nil) $p $tv))) [['((data (A a) (kbx MAIN Nil) $p $tv))']]
+Q !(collapse (typed-runtime-fact (data (A a) (kbx MAIN Nil) $p $tv))) [['()']]
+Q !(get-type typed-runtime-fact) [['(-[det]-> Atom (Statement KBContext Proof (| STVType CTVType NoEvidenceType)))']]
+Q !(add-atom &self (= (typed-runtime-fact (data $t $k $p $tv)) (data $t $k $p $tv))) [['True']]
+Q !(collapse (typed-runtime-fact (data (A a) (kbx MAIN Nil) $p $tv))) [['((data (A a) (kbx MAIN Nil) $p $tv))']]
+Q !(collapse (execution-search-goal (data (A a) (kbx MAIN Nil) $p $tv))) [['((data (A a) (kbx MAIN Nil) $p $tv))']]
+Q !(collapse (execute-backward 20 ((data (A a) (kbx MAIN Nil) $p $tv)) true)) [['()']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (query 20 kbx (: $p (A a) $tv))) [['()']]
+Q !(add-atom &self (= (brand $t $x) $x)) [['True']]
+Q !(add-atom &self (= (the $t $x) $x)) [['True']]
+Q !(space-row-present? &context_polymorphic_facts (quote (kb1 true))) [['False']]
+Q !(collapse (compile-ordinary-fact kb1 p1 (Rain) (STV 1.0 0.9))) [['((() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (compile_ kb1 (: p1 (Rain) (STV 1.0 0.9)))) [['((() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.0 0.9))) (() |- (: (kb1 MAIN Nil) p1 (Rain) (STV 1.']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (let $a (compile_ kb1 (: p1 (Rain) (STV 1.0 0.9))) (mm2stmt $a))) [['((source-plan generated structural-source () () ((Rain) (kb1 MAIN Nil) p1 (STV 1.0 0.9))) (source-plan generated structural-source () () ((Rain) (kb1 MAIN Nil) p1 (STV 1.0 0.9))) (source-plan generated structural-source () () ((Rain) (kb1 MAIN Nil) p1 (STV 1.0 0.9))) (source-plan generated structural-source () () ((Rain) (kb1 MAIN Nil) p1 (STV 1.0 0.9))) (source-plan generated structural-source ()']]
+Q !(collapse (compile-outputs (: kb1 p1 (Rain) (STV 1.0 0.9)))) [['()']]
+Q !(collapse (compile-specialization-fact-triggers kb1 (Rain))) [['()']]
+Q !(add-atom &self (= (brand $t $x) $x)) [['True']]
+Q !(add-atom &self (= (the $t $x) $x)) [['True']]
+Q !(collapse (the Foo (x y))) [['((x y) (x y) (x y))']]
+Q !(chainer-reset!) [['(chainer-reset!)']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+Q !(collapse (compileadd kbx (: f1 (A a) (STV 1.0 0.9)))) [['((: (kbx MAIN Nil) f1 (A a) (STV 1.0 0.9)) (: (kbx MAIN Nil) f1 (A a) (STV 1.0 0.9)) (: (kbx MAIN Nil) f1 (A a) (STV 1.0 0.9)))']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(collapse (query 20 kbx (: $p (A a) $tv))) [['()']]
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer compound-connective?
+PCMIG fwd $metta_exec:&gc-group-pettachainer source-computation-head?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+PCMIG fwd $metta_exec:&gc-group-pettachainer bidirectional-implication-form?
+Q !(gc-pettachainer-warm-up) [['False']]
+PREP ProtocolError Module group pettachainer's warm-up gc-pettachainer-warm-up must answer True once.

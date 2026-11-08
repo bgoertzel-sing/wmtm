@@ -1,0 +1,5 @@
+# gc_rt49ca_shim9_r1
+117 failed, 69 passed in 98.26s (0:01:38)
+    116 E       metta._errors.errors.EngineError: statement_mask/3: Unknown procedure: 'bidirectional-implication-form?'/2
+    116 E               janus_swi.janus.PrologError: statement_mask/3: Unknown procedure: 'bidirectional-implication-form?'/2
+    116 E               goal_chainer.errors.MettaEngineError: Module group pettachainer's warm-up gc-pettachainer-warm-up failed: statement_mask/3: Unknown procedure: 'bidirectional-implication-form?'/2

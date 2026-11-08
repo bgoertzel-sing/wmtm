@@ -1,0 +1,5 @@
+# gc_rt49ca_shim13_r1
+117 failed, 69 passed in 99.76s (0:01:39)
+    116 E       metta._errors.errors.EngineError: format/3: Format error: too many arguments
+    116 E               janus_swi.janus.PrologError: format/3: Format error: too many arguments
+    116 E               goal_chainer.errors.MettaEngineError: Module group pettachainer's warm-up gc-pettachainer-warm-up failed: format/3: Format error: too many arguments

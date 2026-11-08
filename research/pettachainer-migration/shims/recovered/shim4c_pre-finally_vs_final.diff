@@ -1,0 +1,21 @@
+--- gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl.pre-finally	2026-11-03 21:00:08.383012044 -0700
++++ gc/src/external/PeTTaChainer/pettachainer/metta/lib/natives.pl	2026-11-03 21:16:55.458163022 -0700
+@@ -25,8 +25,16 @@
+ % Run Work, then Cleanup however Work ends. Errors propagate instead of being
+ % swallowed by reduce/2.
+ finally(Work, Cleanup, Result) :-
+-    setup_call_cleanup(true, once(apply_fn1(Work,[],Result)),
+-                       once(apply_fn1(Cleanup,[],_))).
++    setup_call_cleanup(true, once(pc_apply_unit(Work,Result)),
++                       once(pc_apply_unit(Cleanup,_))).
++
++% PeTTa applies Work to the unit argument [] (apply_fn1(F,[],R)). Under
++% pymetta, with Atom-typed arguments, Work arrives as an unevaluated call
++% expression (a list) or a bare function name; apply it to [] by appending.
++pc_apply_unit(F, R) :- is_list(F), F = [H|_], H \== '|->', !,
++    append(F, [[]], Call), reduce(Call, R).
++pc_apply_unit(F, R) :- atom(F), !, reduce([F, []], R).
++pc_apply_unit(F, R) :- reduce([F], R).
+ 
+ % A host's call of a MeTTa function (pettachainer.py): Fn applied to the
+ % arguments each MeTTa source in Sources reads as, every result collected in

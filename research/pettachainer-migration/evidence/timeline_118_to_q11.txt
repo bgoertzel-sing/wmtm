@@ -1,0 +1,22 @@
+Scratch-tree files modified after warmprobe118 (out/warmprobe118.txt 20:13:15, fact read OK) and before qprobe11.py (21:24:27, fact read ())
+find -newermt '2026-11-03 20:13:15' ! -newermt '2026-11-03 21:24:27' (paths relative to gc/src/external/PeTTaChainer/)
+20:16:12 pettachainer/metta/runtime/evaluator/versions.metta.prefa
+21:00:08 pettachainer/metta/lib/natives.pl.pre-finally
+21:03:38 pettachainer/metta/lib/natives.metta.pre-finally
+21:14:50 pettachainer/metta/runtime/evaluator/versions.metta.fa-current
+21:15:50 pettachainer/metta/lib/natives.metta.pcapply
+21:15:50 pettachainer/metta/lib/natives.pl.pcapply
+21:16:55 pettachainer/metta/lib/natives.metta
+21:16:55 pettachainer/metta/lib/natives.pl
+21:19:37 pettachainer/metta/runtime/backward/skeleton.metta
+21:19:37 pettachainer/metta/runtime/evaluator/core.metta
+21:19:37 pettachainer/metta/runtime/evaluator/merge.metta
+21:19:37 pettachainer/metta/runtime/evaluator/sampling.metta
+21:19:37 pettachainer/metta/runtime/evaluator/values.metta
+21:19:37 pettachainer/metta/runtime/evaluator/work.metta
+21:19:37 pettachainer/metta/runtime/fact_reads/policy.metta
+21:19:37 pettachainer/metta/runtime/hypothesis_mining.metta
+21:19:37 pettachainer/metta/runtime/hypothesis_review.metta
+21:19:37 pettachainer/metta/runtime/proofs.metta
+21:19:37 pettachainer/metta/runtime/store/fact_settings.metta
+21:20:21 pettachainer/metta/runtime/evaluator/versions.metta

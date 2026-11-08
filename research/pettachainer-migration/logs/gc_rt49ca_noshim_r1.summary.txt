@@ -1,0 +1,5 @@
+# gc_rt49ca_noshim_r1
+117 failed, 69 passed in 57.75s
+    114 E       metta._errors.errors.EngineError: metta_add_atom/3: cannot honour the annotated arrow for fold-semidet: ['-[semidet]->',['-[semidet]->',_14298,_14304,_14298],_14298,['List',_14304],_14298] (annotated arrows require a named function and a concrete top-level cardinality and effect; pro
+    114 E               janus_swi.janus.PrologError: metta_add_atom/3: cannot honour the annotated arrow for fold-semidet: ['-[semidet]->',['-[semidet]->',_14298,_14304,_14298],_14298,['List',_14304],_14298] (annotated arrows require a named function and a concrete top-level cardinality and effect; 
+    114 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: metta_add_atom/3: cannot honour the annotated arrow for fold-semidet: ['-[semidet]->',['-[semidet]->',_14298,_14304,_14298],

@@ -1,0 +1,5 @@
+# gc_rt49ca_shim13_warmplain
+117 failed, 69 passed in 120.56s (0:02:00)
+    116 E               goal_chainer.errors.ProtocolError: Module group pettachainer's warm-up gc-pettachainer-warm-up must answer True once.
+      1 E         Use -v to get more diff)
+      1 E         At index 0 diff: 'False' != 'True'

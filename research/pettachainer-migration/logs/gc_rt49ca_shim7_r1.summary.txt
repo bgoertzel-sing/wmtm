@@ -1,0 +1,5 @@
+# gc_rt49ca_shim7_r1
+117 failed, 69 passed in 94.98s (0:01:34)
+    115 E       metta._errors.errors.EngineError: metta_add_atom/3: cannot honour the annotated arrow for particle-map-pairs: ['-[det]->',['-[det]->',_15890,_15896],['List',[_15890,'Number']],['List',[_15896,'Number']],['List',[_15896,'Number']]] (annotated arrows require a named function and a conc
+    115 E               janus_swi.janus.PrologError: metta_add_atom/3: cannot honour the annotated arrow for particle-map-pairs: ['-[det]->',['-[det]->',_15890,_15896],['List',[_15890,'Number']],['List',[_15896,'Number']],['List',[_15896,'Number']]] (annotated arrows require a named function and a c
+    115 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: metta_add_atom/3: cannot honour the annotated arrow for particle-map-pairs: ['-[det]->',['-[det]->',_15890,_15896],['List',[

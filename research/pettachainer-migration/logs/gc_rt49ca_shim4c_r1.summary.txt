@@ -1,0 +1,5 @@
+# gc_rt49ca_shim4c_r1
+117 failed, 69 passed in 62.84s (0:01:02)
+    115 E       metta._errors.errors.EngineError: metta_add_atom/3: cannot honour the annotated arrow for finally: ['-[semidet]->',['-[nondet]->','Atom',_14836],['-[nondet]->','Atom','Atom'],_14836] (annotated arrows require a named function and a concrete top-level cardinality and effect; product v
+    115 E               janus_swi.janus.PrologError: metta_add_atom/3: cannot honour the annotated arrow for finally: ['-[semidet]->',['-[nondet]->','Atom',_14836],['-[nondet]->','Atom','Atom'],_14836] (annotated arrows require a named function and a concrete top-level cardinality and effect; produc
+    115 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: metta_add_atom/3: cannot honour the annotated arrow for finally: ['-[semidet]->',['-[nondet]->','Atom',_14836],['-[nondet]->

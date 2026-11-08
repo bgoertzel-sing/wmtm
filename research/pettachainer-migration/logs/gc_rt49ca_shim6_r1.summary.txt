@@ -1,0 +1,5 @@
+# gc_rt49ca_shim6_r1
+117 failed, 69 passed in 68.03s (0:01:08)
+    116 E       metta._errors.errors.EngineError: no predicate named sk-take! is loaded, so registering it would compile every call to it into a partial application rather than failing
+    116 E               janus_swi.janus.PrologError: no predicate named sk-take! is loaded, so registering it would compile every call to it into a partial application rather than failing
+    116 E               goal_chainer.errors.MettaEngineError: The engine refused module MettaLibrary(name='pettachainer', module='petta_chainer') of module group pettachainer: no predicate named sk-take! is loaded, so registering it would compile every call to it into a partial application rather th
