@@ -37,11 +37,11 @@ a.warm_timeout = a.warm_timeout if a.warm_timeout is not None else float(CFG.get
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb")) if not a.inner else None
 PRIO_GUARD = rc.PriorityGuard(CFG) if not a.inner else None   # set in the child itself; re-asserted on it + the PeTTa child
 PRIO = PRIO_GUARD.start() if PRIO_GUARD else None
-RULES = [
-    "(: mem_inh (Implication (And (Member $x $a) (Inheritance $a $b)) (Member $x $b)) (STV 1.0 0.99))",
-    "(: inh_trans (Implication (And (Inheritance $a $b) (Inheritance $b $c)) (Inheritance $a $c)) (STV 1.0 0.99))",
-    "(: imp_trans (Implication (And (Implies $a $b) (Implies $b $c)) (Implies $a $c)) (STV 1.0 0.99))",
-]
+# F3 v2 (t-2026-11-08-wmtm-f3-ab-v2): no wmtm-side rules.  PeTTaChainer chains Member/Inheritance natively; the old
+# mem_inh / inh_trans rules (andy repro kbD/kbI, upstream/pettachainer/r9_specializes_bdae8d7e.metta) pulled the engine
+# into a low-confidence 'specializes' combination (c 0.019 / 0.064 vs 0.70 native).  imp_trans went with them: the
+# engine has no native chaining over wmtm's own (Implies a b) head, so Implies chains are no longer goals (pc_shadow).
+RULES = []
 CANARY = ["(: cf (Member grace pilot) (STV 1.0 0.99))", "(: cg (Inheritance pilot person) (STV 1.0 0.99))"]
 CANARY_GOAL, NEG_GOAL = "(Member grace person)", "(Member grace robot)"
 

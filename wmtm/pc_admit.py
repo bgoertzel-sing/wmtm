@@ -25,7 +25,19 @@ ADMIT_LOG = "admit_log.jsonl"
 REASONERS = ("pettachainer", "off")
 # F1 item 3 (t-2026-11-06-wmtm-f1-memory): no confidence cutoff.  A low-confidence engine answer is still an answer
 # (Roman), so nothing is dropped for c alone; reasoner_max_admit (best first) bounds how many enter per run.
-_RULE = re.compile(r"\b(?:inh_trans|imp_trans|mem_inh)\b")   # proof used a derivation rule
+_RULE = re.compile(r"\b(?:inh_trans|imp_trans|mem_inh)\b")   # legacy wmtm rule names (pre F3 v2 shadow docs)
+_ASSERTED_TOKENS = re.compile(r"\b(?:sp|wm)\d+\b|merge/revision|[():\s]")
+
+
+def is_derivation(proof) -> bool:
+    """F3 v2: a proof is a derivation unless its proof term is only fact labels and their revision.
+    Native engine steps ((by ..), conditioned, conditional-implication, specializes, ...) count; so do legacy rules."""
+    p = str(proof or "").strip()
+    if _RULE.search(p) or _PARSER_RULE.search(p):
+        return True
+    m = re.match(r"^\(:\s*(.*?)\s*\((?:Inheritance|Member|Implies|Similarity|Evaluation)\s+\S+\s+\S+\)\s*\(STV[^()]*\)\)\s*$", p, re.S)
+    term = m.group(1) if m else p
+    return bool(_ASSERTED_TOKENS.sub("", term))
 _PARSER_RULE = re.compile(r"\(by i_\w+?__\w*implication\w*\b")   # P4 rev5: direct step through a parser Implication rule (<note>__<id>) is a derivation too
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
 _GOAL = re.compile(r"^\((Inheritance|Member|Implies|Similarity|Evaluation) (\S+) (\S+)\)$")
@@ -170,7 +182,7 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
             drop["bad"] += 1; continue
         if not text or not r.get("proof"):
             drop["bad"] += 1; continue
-        if not (_RULE.search(str(r.get("proof"))) or _PARSER_RULE.search(str(r.get("proof")))):
+        if not is_derivation(r.get("proof")):
             # proved straight from asserted facts (or their revision): already in WMTM, not a new conclusion
             drop["asserted"] += 1; continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))

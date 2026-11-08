@@ -218,11 +218,11 @@ def test_integration_worker_writes_admit_file_and_cycle_admits(tmp_path, monkeyp
     doc = json.loads((tmp_path / pc_admit.ADMIT_FILE).read_text())
     assert doc["status"] == "ok" and doc["canary_ok"]
     goals = {r["goal"]: r for r in doc["results"]}
-    assert {"(Inheritance cat animal)", "(Implies rain slippery)"} <= set(goals)
+    assert "(Inheritance cat animal)" in goals and "(Implies rain slippery)" not in goals   # F3 v2
     assert set(goals["(Inheritance cat animal)"]["sources"]) == {"s0", "s1"}
     o = _orch(tmp_path, "pettachainer", monkeypatch)
     r = o.cycle()
-    assert not r.reasoner_skipped and {"cat is a animal", "rain implies slippery"} <= set(_derived(o))
+    assert not r.reasoner_skipped and "cat is a animal" in set(_derived(o)) and "rain implies slippery" not in set(_derived(o))
 
 
 def test_fact_or_revision_proof_not_admitted(tmp_path):

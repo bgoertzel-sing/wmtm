@@ -19,7 +19,7 @@ _NAME = re.compile(r"^(\w+)\(([a-z_][a-z0-9_-]*),([a-z_][a-z0-9_-]*)\)$")
 # PLN relation -> MeTTa head.  Python "Implication" facts become (Implies a b): a bare (Implication a b)
 # would be read by PeTTaChainer as a *rule*, not a fact.
 HEAD = {"Inheritance": "Inheritance", "Implication": "Implies", "Similarity": "Similarity", "Evaluation": "Evaluation"}
-TRANSITIVE = ("Inheritance", "Implies")
+TRANSITIVE = ("Inheritance",)   # F3 v2: Implies dropped with imp_trans (no native engine chaining over Implies)
 
 
 def enabled(cfg=None) -> bool:

@@ -60,14 +60,14 @@ def test_snapshot_ranked_and_source_type_roundtrip(monkeypatch):
     st = WMTMStore()
     for i, t in enumerate(["cat is a mammal", "mammal is a animal", "rain -> wet", "wet -> slippery"]):
         st.admit("s%d" % i, t, source_type="recalled", initial_sti=1.0 - i * 0.01)
-    st.admit("u0", "rain -> wet", source_type="user", initial_sti=0.5)
+    st.admit("u0", "cat is a mammal", source_type="user", initial_sti=0.5)
     spec = ps.build_snapshot(st, cycle=1, k=200)
-    assert spec["goal_rank"]["user_items"] == 1 and spec["goals"][0] == "(Implies rain slippery)"
-    assert spec["goal_meta"]["(Implies rain slippery)"]["overlap"] == 1.0
+    assert spec["goal_rank"]["user_items"] == 1 and spec["goals"][0] == "(Inheritance cat animal)"
+    assert spec["goal_meta"]["(Inheritance cat animal)"]["overlap"] == 1.0
     raw = [ps.raw_item(it) for it in st.get_active_set()]
     assert any(r["source_type"] == "user" for r in raw)
     full = ps.snapshot_from_raw({"raw_items": raw, "cycle": 1, "k": 200, "ts": 0})
     assert full["goals"] == spec["goals"]
     monkeypatch.setenv("WMTM_PC_SHADOW_GOAL_RANK", "0")
     off = ps.build_snapshot(st, cycle=1, k=200)
-    assert off["goal_rank"] is None and "(Implies rain slippery)" in off["goals"]
+    assert off["goal_rank"] is None and "(Inheritance cat animal)" in off["goals"] and "(Implies rain slippery)" not in off["goals"]
