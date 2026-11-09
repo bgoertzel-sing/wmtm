@@ -1,8 +1,9 @@
 """Track G shadow worker: ``python -m wmtm.workers.pc_shadow --spec S --out O [--config C]``.
 
 Launched detached by wmtm/pc_shadow.py; never waited on.  Outer process: builds the snapshot from the raw spec
-(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa rT 3681b9b + PeTTaChainer rT 202b9379,
-paths from the runtime config), which loads transitivity rules + mem_inh + snapshot atoms + Grace canary facts and
+(off the cycle path), then spawns an inner PeTTaChainer child (PeTTa rT 3681b9b + PeTTaChainer bdae8d7e,
+paths from the runtime config), which loads snapshot atoms + Grace canary facts (no wmtm rules since F3 v2; Member/
+Inheritance chaining is engine-native) and
 answers one goal per stdin line.  Each query has a hard timeout (default 2 s) enforced by SIGKILL of the child's
 process group; the queries share a budget (default 20 s).  Address space is capped (worker_mem_mb, inherited by the
 child).  Sanity gate: canary (Member grace person) must prove and the negative control (Member grace robot) must
@@ -37,11 +38,11 @@ a.warm_timeout = a.warm_timeout if a.warm_timeout is not None else float(CFG.get
 MEM_CAP = rc.apply_mem_cap(CFG.get("worker_mem_mb")) if not a.inner else None
 PRIO_GUARD = rc.PriorityGuard(CFG) if not a.inner else None   # set in the child itself; re-asserted on it + the PeTTa child
 PRIO = PRIO_GUARD.start() if PRIO_GUARD else None
-RULES = [
-    "(: mem_inh (Implication (And (Member $x $a) (Inheritance $a $b)) (Member $x $b)) (STV 1.0 0.99))",
-    "(: inh_trans (Implication (And (Inheritance $a $b) (Inheritance $b $c)) (Inheritance $a $c)) (STV 1.0 0.99))",
-    "(: imp_trans (Implication (And (Implies $a $b) (Implies $b $c)) (Implies $a $c)) (STV 1.0 0.99))",
-]
+# F3 v2 (t-2026-11-08-wmtm-f3-ab-v2): no wmtm-side rules.  PeTTaChainer chains Member/Inheritance natively; the old
+# mem_inh / inh_trans rules (andy repro kbD/kbI, upstream/pettachainer/r9_specializes_bdae8d7e.metta) pulled the engine
+# into a low-confidence 'specializes' combination (c 0.019 / 0.064 vs 0.70 native).  imp_trans went with them: the
+# engine has no native chaining over wmtm's own (Implies a b) head, so Implies chains are no longer goals (pc_shadow).
+RULES = []
 CANARY = ["(: cf (Member grace pilot) (STV 1.0 0.99))", "(: cg (Inheritance pilot person) (STV 1.0 0.99))"]
 CANARY_GOAL, NEG_GOAL = "(Member grace person)", "(Member grace robot)"
 

@@ -1,0 +1,1 @@
+B checkout /tmp/f3/wmtmB2: 137/137 .py files byte-identical to 3288bf2 and 61c2568 (cmpB2.sh)

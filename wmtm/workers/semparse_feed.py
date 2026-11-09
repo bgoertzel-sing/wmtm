@@ -11,7 +11,7 @@ Gates before any LLM spend:
     @1f1a7a6f with its MIT LICENSE (semparse_catalog.verify_checkout), and the prompt sent is its
     templates/generated/PROMPT_CATALOG.txt (no legacy preamble); mode "legacy" sends ``semparse_prompt``;
   * the prompt file must exist and match ``semparse_prompt_sha256`` (default: PROMPT_CATALOG.txt @1f1a7a6f);
-  * a no-LLM load canary (Grace pilot facts + mem_inh) must prove (Member grace person) and not
+  * a no-LLM load canary (Grace pilot facts, engine-native Member x Inheritance) must prove (Member grace person) and not
     (Member grace robot) through the same loader.
 Optional --llm-canary also parses the canary sentence through the LLM (costs one parse; counted against the cap).
 Address space is capped (worker_mem_mb).  One status line per run in worker_runs.jsonl (size-capped).
@@ -83,8 +83,7 @@ try:
         os.environ["PETTA_PATH"] = a.petta
         from pettachainer.pettachainer import PeTTaChainer
         loader = PeTTaChainer()
-        for s in ["(: mem_inh (Implication (And (Member $x $a) (Inheritance $a $b)) (Member $x $b)) (STV 1.0 0.99))",
-                  "(: cf (Member grace pilot) (STV 1.0 0.99))", "(: cg (Inheritance pilot person) (STV 1.0 0.99))"]:
+        for s in ["(: cf (Member grace pilot) (STV 1.0 0.99))", "(: cg (Inheritance pilot person) (STV 1.0 0.99))"]:
             loader.add_atom(s)
         pos = str(loader.query("(: $prf (Member grace person) $tv)", steps=30, timeout_sec=0))
         neg = str(loader.query("(: $prf (Member grace robot) $tv)", steps=30, timeout_sec=0))

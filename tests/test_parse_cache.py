@@ -141,7 +141,7 @@ def test_build_goals_chains_and_joins():
     rel = {("Inheritance", "a", "b"), ("Inheritance", "b", "c"), ("Implies", "p", "q"), ("Implies", "q", "r"),
            ("Member", "x", "a"), ("Inheritance", "a", "c")}
     g = pc_shadow.build_goals(rel)
-    assert "(Implies p r)" in g and "(Member x b)" in g and "(Member x c)" in g
+    assert "(Implies p r)" not in g and "(Member x b)" in g and "(Member x c)" in g
     assert "(Inheritance a c)" not in g                              # already asserted
 
 

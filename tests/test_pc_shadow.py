@@ -39,7 +39,7 @@ def test_snapshot_maps_atoms_and_goals():
     joined = " ".join(spec["atoms"])
     assert "(Inheritance cat mammal)" in joined and "(Implies rain wet)" in joined
     assert "(Implication " not in joined            # facts must not look like rules
-    assert "(Inheritance cat animal)" in spec["goals"] and "(Implies rain slippery)" in spec["goals"]
+    assert "(Inheritance cat animal)" in spec["goals"] and "(Implies rain slippery)" not in spec["goals"]   # F3 v2: no Implies chains
     assert spec["semparse_items"] == 4 and spec["unparsed_items"] == 0 and "python_derived" not in spec
 
 
@@ -109,8 +109,8 @@ def test_integration_synthetic(tmp_path):
     assert rc == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
     assert rec["petta"].startswith(_CFG["petta_dir"]) and rec["mem_cap_mb"] == _CFG["worker_mem_mb"]
     proved = {q["goal"] for q in rec["queries"] if q["ok"]}
-    assert {"(Inheritance cat animal)", "(Implies rain slippery)"} <= proved
-    assert rec["goal_rank"]["pool"] >= 2 and all(q.get("hops", 0) >= 1 for q in rec["queries"])   # rc2: Track N
+    assert "(Inheritance cat animal)" in proved and "(Implies rain slippery)" not in proved   # F3 v2: engine-native only
+    assert rec["goal_rank"]["pool"] >= 1 and all(q.get("hops", 0) >= 1 for q in rec["queries"])   # rc2: Track N
     assert not sp.exists()                                    # spec deleted
 
 

@@ -1,0 +1,178 @@
+{
+ "A_v3": {
+  "counts": {
+   "correct": 2,
+   "wrong": 2,
+   "unclear": 0,
+   "unjudged": 0,
+   "timeouts": 0,
+   "warm_s": 0.802,
+   "total_s": 1.091
+  },
+  "rows": [
+   {
+    "goal": "(Inheritance chat_send valid)",
+    "stv": [
+     0.92,
+     0.83
+    ],
+    "verdict": "WRONG",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 4",
+    "wmtm_rule": true
+   },
+   {
+    "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+    "stv": [
+     1.0,
+     0.99
+    ],
+    "verdict": "WRONG",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 0",
+    "wmtm_rule": true
+   },
+   {
+    "goal": "(Inheritance hive_progress_report report)",
+    "stv": [
+     1.0,
+     0.99
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 2",
+    "wmtm_rule": true
+   },
+   {
+    "goal": "(Member turn_without_send_entry entry)",
+    "stv": [
+     1.0,
+     0.99
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed); P3 W4 row 3",
+    "wmtm_rule": true
+   }
+  ]
+ },
+ "B_v3": {
+  "counts": {
+   "correct": 8,
+   "wrong": 2,
+   "unclear": 1,
+   "unjudged": 0,
+   "timeouts": 0,
+   "warm_s": 2.925,
+   "total_s": 3.659
+  },
+  "rows": [
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "UNCLEAR",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acl_d)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "WRONG",
+    "why": "W1",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_note_1__i_ep_note_20261028T153222Z closed)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member sk_config_1__i_ep_note_20261028T185959Z effective)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "WRONG",
+    "why": "W1",
+    "wmtm_rule": false
+   },
+   {
+    "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "verdict": "CORRECT",
+    "why": "hand-judged against the source note (text not committed)",
+    "wmtm_rule": false
+   }
+  ]
+ }
+}
