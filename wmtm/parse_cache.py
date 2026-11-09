@@ -234,6 +234,7 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
     preamble: v0.5 (Track M) flag ``semparse_preamble`` (None = adapter default: on).  The cache stays keyed by
     content hash only, so entries parsed with an older prompt are reused, never re-parsed; each new attempt records
     the short sha of the prompt actually sent (``prompt_sha``) in parse_log.jsonl and cache.jsonl."""
+    from .frozen_parse import refuse_if_evaluating as _rie; _rie("process_queue")   # t-2026-11-10: no re-parse in evaluations
     from .semparse_adapter import SemParseAdapter, DEFAULT_PROMPT
     ad = adapter or SemParseAdapter(llm, loader=loader, prompt_path=prompt_path or DEFAULT_PROMPT,
                                     reject_log=cache.reject_log, max_chars=cache.max_chars,
@@ -417,6 +418,7 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
                       contents=None, order=None):
     """Like process_queue, but each queued note is parsed with CONTEXT = atoms of related earlier notes (from the
     base cache and earlier context parses) and long notes per passage.  Records go to ``ctx`` only."""
+    from .frozen_parse import refuse_if_evaluating as _rie; _rie("process_queue_ctx")   # t-2026-11-10: no re-parse in evaluations
     from .semparse_context import select_context
     cfg = cfg or rc.resolve()
     psha = (getattr(adapter, "prompt_sha256", None) or "")[:16] or None
@@ -502,6 +504,7 @@ def process_queue_spk(spk: ParseCache, llm, adapter, n=None, now=time.time, cfg=
                       contents=None):
     """Like process_queue, but the text sent to the parser is speaker-linked (wmtm.semparse_speaker.link, map from
     the flags file).  With semparse_context also on, CONTEXT comes from base, ctx1 and earlier spk1 parses."""
+    from .frozen_parse import refuse_if_evaluating as _rie; _rie("process_queue_spk")   # t-2026-11-10: no re-parse in evaluations
     from .semparse_speaker import linker
     from .semparse_context import select_context
     cfg = cfg or rc.resolve()

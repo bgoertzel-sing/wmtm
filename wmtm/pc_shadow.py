@@ -442,6 +442,11 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         name_rep = {}
         for iid in list(cached):
             cached[iid], name_rep[iid] = _nr(cached[iid])
+    norm_rep = None
+    if cfg.get("shadow_normalise", True):  # t-2026-11-10: every parser shape -> the reader's form; unrecognised counted
+        from . import parse_normalise as _pn
+        cached, _nrep = _pn.normalise_cached(cached, nwdef=bool(cfg.get("shadow_nwdef", True)))
+        norm_rep = _pn.report_json(_nrep)
     metta, facts, n_sp, n_unparsed, i, n_rules = [], [], 0, 0, 0, 0
     src, fsrc, dsrc = {}, [], {}   # F1 §3: dsrc = wm label -> source item ids of a re-entered conclusion
 
@@ -511,7 +516,7 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
             "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts), "rules": n_rules,
             "skolem_goals": skolem_goals, "goal_meta": goal_meta, "goal_rank": rank_info,
             "atom_src": src, "fact_src": fsrc, "label_fact": lf, "derived_src": dsrc, "derived_items": n_derived,
-            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec), "name_resolve": name_rep}
+            "gate": dict(_pg.summary(gdec), on=gst["on"], decisions=gdec), "name_resolve": name_rep, "normalise": norm_rep}
 
 
 def _cleanup_specs(out_dir, max_age=3600):
