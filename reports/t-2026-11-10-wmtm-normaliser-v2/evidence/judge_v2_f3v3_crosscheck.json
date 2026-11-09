@@ -1,0 +1,266 @@
+{
+ "A_v3": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "A_v3r1": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "A_v3r2": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "A_v3r3": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "A_v3r4": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "A_v3r5": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "B_v3": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "B_v3r1": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "B_v3r2": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "B_v3r3": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "B_v3r4": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "B_v3r5": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 8,
+   "UNCLEAR": 1,
+   "UNJUDGED": 0,
+   "W1": 2,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ }
+}

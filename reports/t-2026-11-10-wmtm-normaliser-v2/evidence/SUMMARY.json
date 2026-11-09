@@ -1,0 +1,76 @@
+{
+ "parses": {
+  "nov5_1f1a7a6f": {
+   "known_unused": 413,
+   "mapped": 263,
+   "member_narrow": 103,
+   "notes": 20,
+   "nwdef": 64,
+   "raw_sha256": "839129a6f0b23639801457002d4668be325e4cd3de939b4f041ba7dc24884aab",
+   "rewrites": {
+    "M2_narrow": 73
+   },
+   "top_unrecognised": {
+    "(Agent sk sk)": 13,
+    "(Bearer sk sk)": 7,
+    "(Directive (Not (And ..)))": 5,
+    "(GroupOf sk (Narrow S (Mod ..)))": 10,
+    "(GroupOf sk S)": 26,
+    "(Location sk sk)": 6,
+    "(On sk sk)": 7,
+    "(PartOf sk sk)": 8,
+    "(Patient sk sk)": 44,
+    "(Theme sk sk)": 14
+   },
+   "unrecognised": 291
+  },
+  "nov9_533c2274": null,
+  "nov9_f44d7b74": null
+ },
+ "runs": {
+  "p3_after": {
+   "atoms": 398,
+   "canary": true,
+   "facts": 253,
+   "goals": [
+    "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+    "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+    "(Member sk_tree_1__i_ep_note_20261103T004843Z working)"
+   ],
+   "goals_n": 9,
+   "pc_proved": 9,
+   "semparse_items": 20,
+   "status": "ok",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "p3_before": {
+   "atoms": 396,
+   "canary": true,
+   "facts": 252,
+   "goals": [
+    "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+    "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+    "(Member sk_tree_1__i_ep_note_20261103T004843Z working)"
+   ],
+   "goals_n": 9,
+   "pc_proved": 9,
+   "semparse_items": 20,
+   "status": "ok",
+   "timeouts": 0,
+   "unparsed_items": 0
+  }
+ }
+}
