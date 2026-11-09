@@ -8,7 +8,7 @@ from wmtm.semparse_adapter import split_toplevel
 F = "/home/openclaw/research-agent/projects/omegaclaw/frozen_parses"
 E = sys.argv[1]; os.makedirs(E, exist_ok=True)
 PARSES = {"nov5_1f1a7a6f": "raw/nov5_1f1a7a6f_cache.jsonl", "nov9_f44d7b74": "raw/nov9_f44d7b74_cache.jsonl",
-          "nov9_533c2274": "raw/nov9_533c2274_cache.jsonl"}
+          "ppv_r1_533c2274": "raw/ppv_r1_533c2274_cache.jsonl"}
 def member_narrow(atoms):
     n = 0
     for _s, node, err in split_toplevel("\n".join(atoms)):

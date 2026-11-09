@@ -24,8 +24,29 @@
    },
    "unrecognised": 291
   },
-  "nov9_533c2274": null,
-  "nov9_f44d7b74": null
+  "nov9_f44d7b74": null,
+  "ppv_r1_533c2274": {
+   "known_unused": 365,
+   "mapped": 185,
+   "member_narrow": 0,
+   "notes": 20,
+   "nwdef": 0,
+   "raw_sha256": "a839f2972a888b3bda653193a28d225e20870fe071b122c78f5cd852a6c1b20d",
+   "rewrites": {},
+   "top_unrecognised": {
+    "(Agent sk sk)": 13,
+    "(Bearer sk sk)": 8,
+    "(Experiencer sk sk)": 5,
+    "(GroupOf sk (Narrow S (Mod ..)))": 7,
+    "(GroupOf sk S)": 23,
+    "(On sk sk)": 8,
+    "(PartOf sk sk)": 10,
+    "(Patient sk sk)": 45,
+    "(Possession sk sk)": 5,
+    "(Theme sk sk)": 14
+   },
+   "unrecognised": 260
+  }
  },
  "runs": {
   "p3_after": {
@@ -67,6 +88,30 @@
    ],
    "goals_n": 9,
    "pc_proved": 9,
+   "semparse_items": 20,
+   "status": "ok",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "p533_after": {
+   "atoms": 217,
+   "canary": true,
+   "facts": 184,
+   "goals": [],
+   "goals_n": 0,
+   "pc_proved": 0,
+   "semparse_items": 20,
+   "status": "ok",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "p533_before": {
+   "atoms": 217,
+   "canary": true,
+   "facts": 184,
+   "goals": [],
+   "goals_n": 0,
+   "pc_proved": 0,
    "semparse_items": 20,
    "status": "ok",
    "timeouts": 0,
