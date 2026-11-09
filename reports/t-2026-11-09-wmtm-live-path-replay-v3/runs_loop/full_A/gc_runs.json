@@ -1,0 +1,402 @@
+[
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 1
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "no-candidates": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 1
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "cycle",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ },
+ {
+  "source": "automated",
+  "status": "ok",
+  "canary_ok": true,
+  "decisions": {
+   "propose": 1
+  },
+  "choices": null,
+  "logged": 0
+ }
+]
