@@ -36,7 +36,8 @@ def key(note_hash: str, pin: str, prompt_sha: str) -> str:
 
 
 def in_evaluation() -> bool:
-    return _ACTIVE[0] > 0 or os.environ.get(ENV, "") not in ("", "0")
+    return (_ACTIVE[0] > 0 or os.environ.get(ENV, "") not in ("", "0")
+            or bool(os.environ.get("WMTM_EVAL_FROZEN_STORE", "").strip()))
 
 
 @contextlib.contextmanager
@@ -125,3 +126,18 @@ class FrozenStore:
             fsha = None
         return {"file_sha256": fsha, "keys": {k: hashlib.sha256("\n".join(e.get("atoms") or []).encode()).hexdigest()
                                              for k, e in sorted(ent.items())}}
+
+
+STORE_ENV = "WMTM_EVAL_FROZEN_STORE"     # "<store dir>|<parser pin>|<prompt sha>"
+
+
+def store_from_env():
+    """Evaluation mode: (FrozenStore, pin, prompt sha) from WMTM_EVAL_FROZEN_STORE, else None.  Setting it also
+    turns the no-reparse guard on (in_evaluation())."""
+    v = os.environ.get(STORE_ENV, "").strip()
+    if not v:
+        return None
+    parts = v.split("|")
+    if len(parts) != 3 or not all(parts):
+        raise FrozenParseError("%s must be <dir>|<pin>|<prompt sha>" % STORE_ENV)
+    return FrozenStore(parts[0]), parts[1], parts[2]

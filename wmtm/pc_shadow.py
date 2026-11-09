@@ -42,6 +42,11 @@ SP_HEADS = ("Inheritance", "Member", "Implies", "Similarity", "Evaluation")
 def _cache_lookup(items, cache_dir=None, context=False, speaker=False):
     """item.id -> validated semparse atom strings (Track H cache), only for items that have a cached parse.
     context=True (Track O, flags key semparse_context): context parses in <cache_dir>/ctx1 win over the base cache."""
+    from . import frozen_parse as _fp
+    fz = _fp.store_from_env()
+    if fz is not None:                    # t-2026-11-10: evaluation reads only the frozen store (strict, no fallback)
+        st, pin, psha = fz
+        return st.lookup(items, pin, psha, strict=False)
     try:
         from .parse_cache import ParseCache, CTX_VERSION
         c = ParseCache(cache_dir); ent = c.entries()

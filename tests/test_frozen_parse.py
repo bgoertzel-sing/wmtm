@@ -74,3 +74,23 @@ def test_guard_off_outside_evaluation(monkeypatch):
     monkeypatch.delenv(F.ENV, raising=False)
     assert not F.in_evaluation()
     F.refuse_if_evaluating("x")      # negative control: no error outside an evaluation
+
+
+def test_shadow_reads_only_frozen_store_when_env_set(tmp_path, monkeypatch):
+    from wmtm import pc_shadow as P
+    st = F.FrozenStore(str(tmp_path / "fz"))
+    st.put(F.content_hash("note one"), "pinA", "shaA", "n1", "ok", ["(: f (Member a b) (STV 1 1))"])
+    live = tmp_path / "live"; live.mkdir()
+    import json
+    (live / "cache.jsonl").write_text(json.dumps({"hash": F.content_hash("note one"), "item_id": "n1", "status": "ok",
+                                                  "atoms": ["(: g (Member live x) (STV 1 1))"]}) + "\n")
+    items = [_it("n1", "note one")]
+    monkeypatch.delenv(F.STORE_ENV, raising=False)
+    assert P._cache_lookup(items, str(live)) == {"n1": ["(: g (Member live x) (STV 1 1))"]}   # control: live cache
+    monkeypatch.setenv(F.STORE_ENV, "%s|pinA|shaA" % (tmp_path / "fz"))
+    assert P._cache_lookup(items, str(live)) == {"n1": ["(: f (Member a b) (STV 1 1))"]}       # frozen wins, no live read
+    assert F.in_evaluation()
+    with pytest.raises(F.FrozenParseError):
+        PC.process_queue(None, _Boom(), adapter=object())
+    monkeypatch.setenv(F.STORE_ENV, "%s|pinB|shaA" % (tmp_path / "fz"))
+    assert P._cache_lookup(items, str(live)) == {}                                              # other pin: miss, no fallback
