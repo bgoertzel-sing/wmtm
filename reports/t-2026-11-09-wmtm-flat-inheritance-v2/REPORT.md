@@ -1,12 +1,14 @@
-# t-2026-11-09-wmtm-flat-inheritance-v2: step 0, parser coverage
-
-Supersedes: t-2026-11-09-wmtm-flat-inheritance
-
 ## Summary
 
 The question was whether the class-level statements in note 181709Z (progress report is a report) and note 185959Z (turn_without_send entry / ltm entry) reach the B knowledge base, and if not, where they get lost. They never come out of the parser. Our wmtm KB build does not drop them. The order says to stop and report in that case, so I stopped at step 0 and made no wmtm code change. I did not run the step-1 fallback that my earlier checkpoint mentioned.
 
 One caveat: F3 v3's exact B parser cache (/tmp/f3/ab/B/cache) was deleted after that task closed. The conclusion therefore rests on F3 v3's saved B KB, a direct probe of the reader, and the two parser caches that still exist. It does not rest on the original raw parse. Humans need to decide: (a) whether the parser should emit flat Inheritance (this question has been open since p3-join-ab on Nov 5), or (b) whether to authorize a wmtm-side fallback that derives Inheritance from the sk_<cls>_* witness shape, which this order does not cover. Optionally, someone can re-parse the same 20 notes with the same pins if a check against the exact raw input is needed.
+
+## Task
+
+t-2026-11-09-wmtm-flat-inheritance-v2: step 0, parser coverage.
+
+Supersedes: t-2026-11-09-wmtm-flat-inheritance
 
 ## Evidence
 
