@@ -1,0 +1,58 @@
+[
+ {
+  "item_id": "ep-note-20261104T154242Z",
+  "content_hash": "dbe2162e1bc5",
+  "source_type": "recalled",
+  "evicted_at_tick": 10,
+  "final_utility": 6.2,
+  "final_sti": 0.037964271261592714
+ },
+ {
+  "item_id": "ep-note-20261104T043925Z",
+  "content_hash": "3998df186d67",
+  "source_type": "recalled",
+  "evicted_at_tick": 10,
+  "final_utility": 4.2,
+  "final_sti": 0.03993834988281799
+ },
+ {
+  "item_id": "ep-note-20261104T151833Z",
+  "content_hash": "70a7d33ba31d",
+  "source_type": "recalled",
+  "evicted_at_tick": 11,
+  "final_utility": 1.9,
+  "final_sti": 0.0422216424638233
+ },
+ {
+  "item_id": "ep-note-20261104T051320Z",
+  "content_hash": "b52a49f8b535",
+  "source_type": "recalled",
+  "evicted_at_tick": 11,
+  "final_utility": 0.0,
+  "final_sti": 0.03791439019098442
+ },
+ {
+  "item_id": "ep-note-20261104T181709Z",
+  "content_hash": "2617a16c8e7d",
+  "source_type": "recalled",
+  "evicted_at_tick": 13,
+  "final_utility": 0.0,
+  "final_sti": 0.032411217923061064
+ },
+ {
+  "item_id": "ep-note-20261104T165705Z",
+  "content_hash": "eea495027e38",
+  "source_type": "recalled",
+  "evicted_at_tick": 18,
+  "final_utility": 0.0,
+  "final_sti": 0.023232955368798557
+ },
+ {
+  "item_id": "ep-note-20261103T203949Z",
+  "content_hash": "3d6bd59b2146",
+  "source_type": "recalled",
+  "evicted_at_tick": 18,
+  "final_utility": 0.0,
+  "final_sti": 0.040457973213045624
+ }
+]

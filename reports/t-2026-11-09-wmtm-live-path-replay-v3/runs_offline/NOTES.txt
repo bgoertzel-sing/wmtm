@@ -1,0 +1,79 @@
+2026-11-09T11:37:48-07:00 knownA_full: live code + live spk1 copy reproduces F3 v3_A exactly (141 atoms, 4 goals same set, 4 proved, canary ok)
+2026-11-09T11:38:11-07:00 B cache: bfa7db2c had one llm_error (api internal error) at 11:20, retried ok at 11:23 (45 accepted). B parses fed via process_queue into base dir (not spk1, no speaker-linked text); A live spk1 entries all speaker_source=unresolved -> text sent unchanged, so the difference is only the cache location. Record as deviation note in report.
+2026-11-09T11:39:23-07:00 B cache: 43115a46 llm_error (api internal error) 11:38; watching for retry like bfa7db2c. 0 x 429 so far.
+2026-11-09T11:42:10-07:00 feed --n 17 exited after 17 calls (18/20 cached; 43115a46 retry + 43509f30 left); relaunched --n 2
+2026-11-09T11:43:22-07:00 wait 2114 s for parse slot (queue 2, try 1)
+2026-11-09T11:46:12-07:00 judge canary: F3 v3 W1-W4 (DEVIATION_1 nwdef join) + F3 v3 W4 table on knownA_full -> 2C/2W/0U/0 unjudged = F3 v3 A exactly; extract premises (141) and gate rejects (348) identical to F3 v3 A_v3
+2026-11-09T12:19:45-07:00 wait 36 s for parse slot (queue 1, try 2)
+2026-11-09T12:21:14-07:00 B cache resolves 19/20
+2026-11-09T12:21:14-07:00 FULL_SKIPPED B cache incomplete
+2026-11-09T12:27:43-07:00 43115a46 cached failed after 2x llm_error (api internal error); sandbox-only retry 3: removed failed entry (backup cache.jsonl.bak_pre_retry3), re-enqueued attempts=0, feed --n 1
+2026-11-09T12:29:54-07:00 retry 3 of 43115a46 ok (33 accepted, 107s); B cache resolves 20/20
+2026-11-09T12:30:19-07:00 FULL_DONE rc=0
+2026-11-09T12:31:08-07:00 full A/B judged: A_full 2C/2W (=F3 v3 A, 141 atoms, 4 goals); B_full 243 atoms/190 facts, goals_n 0 (goal_rank pool 0), 0C/0W; gate1 count rule FAILS (B correct 0 < A 2). NOTE petta differs: A vendor petta-v1.0.6, B p1-engine petta-3681b9b
+2026-11-09T12:32:16-07:00 B goals_n=0 diagnosis: B KB has 0 Inheritance (heads Member 190, Implication 53); goal_pool and rule_goal_pool both 0 even with skolem_goals=True -> no Member x Inheritance / transitive chain possible. Same root cause as flat-inheritance-v2 (parser emits no flat Inheritance). Confound: petta A=vendor v1.0.6, B=p1-engine 3681b9b
+2026-11-09T12:37:20-07:00 SCOPE: order requires real sandbox turn loop + goalchainer v2 on; offline pc_shadow A/B (goalchainer False) covers only item 5 partially; pins differ (A petta v1.0.6/pc 36b3fe6-dedup, B petta 3681b9b/pc f873824). Next: turn-loop harness, same pins b6aacc68
+2026-11-09T12:39:32-07:00 TASK CANCELLED by hive at 12:39:16; stopped work, no report submitted. Evidence kept in reports/t-2026-11-09-wmtm-live-path-replay-v2 (uncommitted) and /tmp/lpr
+2026-11-09T12:43:06-07:00 v3 item9 evidence: 533c2274 parseable rules (4) have antecedent (PartOf $x sk_group_N) but groups are declared via GroupOf, no PartOf fact has a group as object -> 0 matches. f44d7b74 x*_implication rules were (Member sk C__nw_h)->(Member sk adj) from Narrow-in-Member; 533c2274 puts Narrow inside GroupOf/As/To/Directive (12 atoms) -> full_B KB has 0 __nw_ / 0 nwdef (F3 v3 KB_B had 162/75)
+2026-11-09T12:45:06-07:00 v3 item10 probe: F3 v3 configs show BOTH arms used prompt-mode 3ec15bd1 (sha 2ed18b93), not catalog f44d7b74; ran branch B code on copy of A spk1 cache (2fcbcc54) -> full_Bf3
+2026-11-09T12:45:34-07:00 full_Bf3 (branch B code + A spk1 cache 2fcbcc54): 500 atoms, 478 facts, goals_n 49 (1-hop), sampled proved -> parser change explains 0 goals. Next: why 49 vs F3 v3 11 (base 56bc717 vs 3288bf2, pins); then turn-loop harness
+2026-11-09T12:46:17-07:00 49 vs 11: full_Bf3 used A spk1 cache (different LLM parse; only 115/398 bodies shared with F3 KB_B; 79 Inheritance from flat-inh code). Not the F3 B parse. Next: recover F3 B parse - KB_B_atoms.json is post-reader KB; check spec format to replay it
+2026-11-09T12:47:37-07:00 CORRECTION: F3 v3 B parse had Narrow (162 __nw_) while A spk1 has 0 Narrow -> F3 v3 B used catalog default f44d7b74 (runtime_config default); full_Bf3 is NOT the f44d7b74 column. Need real f44d7b74 re-parse.
+2026-11-09T12:49:11-07:00 Bf44: fetched f44d7b74 (sha checks ok) to /tmp/lpr/hitl-f44d7b74; enqueued 20 notes; pilot feed --n 1
+2026-11-09T12:49:58-07:00 Bf44 pilot: end_tests ERROR line in feed log is benign (also 36x/12x in successful feedB_last2/retry3 logs)
+2026-11-09T12:51:39-07:00 Bf44 pilot ok (bfa7db2c, 50 accepted, prompt 645bff3f); launched fill_Bf44_then_run.sh
+2026-11-09T12:51:39-07:00 Bf44 wait 0 s (queue 19, try 1)
+2026-11-09T12:52:09-07:00 Bf44 pilot vs F3 v3: note 20261104T151833Z re-parsed at same pin f44d7b74 gives 50 raw atoms, 0 Narrow, 3 Implication (all Not/And consequents, unparseable by _parse_rules); F3 v3 KB_B had 2 __nw_ atoms for this note -> same-pin re-parse is NOT reproducing F3 v3 output (LLM nondeterminism and/or parser model change). Item 10 confound: must report parse variance, compare per-note Narrow/__nw_ counts f44 re-parse vs F3 v3 KB_B.
+2026-11-09T12:53:11-07:00 Bp3 probe: /tmp/p3_out/ab/B2/cache (Nov5, prompt_sha e4c4a76c = catalog 1f1a7a6f, 98 Member+Narrow) through branch pc_shadow -> full_Bp3
+2026-11-09T12:53:23-07:00 full_Bp3 (branch code + Nov5 B2 cache, catalog 1f1a7a6f e4c4a76c): 396 atoms/252 facts, goals_n 9, 9 proved; KB bodies shared with F3v3 KB_B 300/398; 8 of F3v3 B's 11 goals present -> a Narrow-in-Member parse restores goals through same code
+2026-11-09T12:53:35-07:00 Bp3 vs F3v3 B goals: 8/11 shared; F3v3-only: sk_bundle_1 acl_d (190214Z), sk_note_1 closed (153222Z), sk_config_1 effective (185959Z); Bp3-only: sk_coverage_1 shown (151833Z). Parse variance at catalog level, not code.
+2026-11-09T12:54:18-07:00 Bf44 4/20 ok so far: 0 Member+Narrow at the same pin f44d7b74 that F3 v3 used (F3v3 KB_B 162 __nw_). Same-pin re-parse is not reproducing F3 v3 -> parse drift (gateway model / LLM nondeterminism), not only the pin change
+2026-11-09T12:56:35-07:00 live-config note: transformation builds WMTMConfig(state_dir) with use_goalchainer default False -> orchestrator GC phase off live; GoalChainer v2 runs only via pc_shadow worker hook run_shadow (flags goalchainer True). Harness A must mirror that.
+2026-11-09T12:58:56-07:00 turn_loop.py fixed: forget_log key=records, focus label '[recent focus]'
+2026-11-09T13:01:06-07:00 loop canary2: notes admitted then evicted same turn (flog records recalled notes at final_sti 68/40); store keeps only user item -> shadow sees 0 semparse items. Diagnosing eviction tier. BrokenPipe = cut in my pipe, harmless; run loop with stdout to file next.
+2026-11-09T13:01:20-07:00 eviction cause: notes origin_ts Oct28-Nov4 (>48h), utility 0 -> recalled Tier 2 in cleanup_stale_items; live recall path calls it.mark_recalled(cycle) when protect is on (api.py recall loop), harness did not. Fix: mirror mark_recalled.
+2026-11-09T13:02:28-07:00 canary3: notes still evicted same turn despite mark_recalled; checking Tier 0 operational-noise (applies before protection)
+2026-11-09T13:03:27-07:00 canary diag: note evicted inside context_for -> relevance_stimulus (context.py:382), not stale cleanup
+2026-11-09T13:03:44-07:00 cause: relevance_stimulus evicts recalled items whose cluster id is not in the recall bridge; harness journal.append makes a NEW cluster id (ep-note-<now>), so the note id never resolves. Fix: write journal cluster under the real note id.
+2026-11-09T13:03:58-07:00 turn_loop: journal clusters written under real note id (origin_ts as OpenedAt), _last_refresh reset; canary rerun
+2026-11-09T13:05:00-07:00 canary4 OK: notes stay resident (flog empty), shadow sees semparse items (2 of 3), GC v2 runs ok each turn
+2026-11-09T13:05:16-07:00 LOOP start pilot_A n=4 cache=/tmp/lpr/ab/A/cache code=/home/openclaw/research-agent/projects/omegaclaw/protocosmo2/iter-port/repos/vendor/wmtm-v0.7.0-rc2
+2026-11-09T13:06:28-07:00 note: vendor rc2 (arm A) context.py has no _belief_tag -> A context lines carry no tv=/from= tags by design; B (branch) does. Recompute item 4 post hoc from ctx_*.txt using tag regex '^\s*\[derived ' (harness 'derived' substring count can false-positive on content)
+2026-11-09T13:06:46-07:00 LOOP end pilot_A rc=0
+2026-11-09T13:06:46-07:00 LOOP start pilot_B533 n=4 cache=/tmp/lpr/ab/B/cache code=/home/openclaw/research-agent/projects/omegaclaw/wmtm-module
+2026-11-09T13:07:08-07:00 pilot_A ok: 8 turns, 0 err, GC v2 ok+canary every turn (no-candidates x8, 0 choices), notes resident (items 5, flog 0), shadow last 12 atoms/0 goals at k=4 (= offline pilot). NOTE forget_events=1 on turn 0 is a harness artifact (flog()=-1 before state file exists); recompute evictions from persisted forgetting_log records, not the delta.
+2026-11-09T13:08:13-07:00 LOOP end pilot_B533 rc=0
+2026-11-09T13:08:13-07:00 LOOP start pilot_Bp3 n=4 cache=/tmp/lpr/ab/Bp3/cache code=/home/openclaw/research-agent/projects/omegaclaw/wmtm-module
+2026-11-09T13:08:39-07:00 pilot_B533 ok (8 turns, 0 err, GC ok 8/8, 0 evictions, 0 goals); launched chain_full.sh (full 20: A,B533,Bp3, then Bf44 after BF44_DONE)
+2026-11-09T13:09:40-07:00 LOOP end pilot_Bp3 rc=0
+2026-11-09T13:09:40-07:00 LOOP_STAGE_DONE pilot
+2026-11-09T13:09:55-07:00 pilot_Bp3 ok: 8 turns, 0 err, GC ok 8/8 (no-candidates), 0 evictions, 0 focus; 2 derived context lines, both with tv= and from= tags; shadow goals 1 proved 1 -> live path admits+renders B conclusions when parse has Narrow
+2026-11-09T13:09:59-07:00 LOOP start full_A n=20 cache=/tmp/lpr/ab/A/cache code=/home/openclaw/research-agent/projects/omegaclaw/protocosmo2/iter-port/repos/vendor/wmtm-v0.7.0-rc2
+2026-11-09T13:11:12-07:00 item6 offline check: proposed goals that are already asserted facts in the same KB = 0 in full_A(4), full_B(0), full_Bf3(49), full_Bp3(9), knownA_full(4). Guard = goal_pool/rule_goal_pool 't in have' (pc_shadow.py). GC v2 in loop: no-candidates every run so far -> no GC-side case. Still to check on full loop runs: admitted derived facts (pc_admit) re-entering rel and goal pool
+2026-11-09T13:11:36-07:00 item6 code read: re-entered conclusions (source_type derived, all sources live) enter facts/rel as wm<j> (pc_shadow.py:452-462), so goal_pool/rule_goal_pool 't in have' excludes them as goals too; asserted (tool derive) items are parsed like notes -> also in rel. Verify on full loop runs: any goal == wm fact or asserted fact.
+2026-11-09T13:13:34-07:00 item9 shape table (raw caches, head-abstracted): Bf44 fresh f44d7b74 18 notes 796 atoms Member+Narrow 0 Narrow 9 GroupOf 35 Impl 41 flat-ok 3; B533 20 notes 846 atoms Member+Narrow 2 Narrow 12 GroupOf 37 Impl 55 flat-ok 4; B2 1f1a7a6f 20 notes 967 atoms Member+Narrow 98 Narrow 109 GroupOf 40 Impl 72 flat-ok(raw) 2. Rule-shape mix similar across all 3; difference is Member+Narrow (98 vs 0-2), which _name_narrow turns into nw symbols + flat x*_implication/nwdef rules. Cause = parser output content (Narrow-in-Member gone), same at fixed pin f44d7b74 -> drift, not our reader regressing; our-side gap = Narrow outside Member not named, PartOf/GroupOf mismatch.
+2026-11-09T13:14:38-07:00 Bf44 cache ok 20/20
+2026-11-09T13:14:41-07:00 BF44_DONE rc=0 (cache ok 20/20)
+2026-11-09T13:14:52-07:00 full_Bf44 offline checked
+2026-11-09T13:15:14-07:00 ITEM10 offline: full_Bf44 (branch B code + fresh f44d7b74 catalog parse, 20/20 ok, 899 raw atoms, 0 Member+Narrow) -> 251 atoms, 205 facts, goals_n 0, proved 0. B does NOT get F3 v3's 11 goals back on a fresh parse at the same pin. Bp3 (Nov5 1f1a7a6f parse, 98 Member+Narrow) -> 9 goals/9 proved, 8 of 11 F3v3 goals. So 0 goals follows parse content (Narrow-in-Member), which drifted at fixed pin; not the 533c2274 pin change alone, not B code, not the live path.
+2026-11-09T13:16:31-07:00 ITEM5 judge (F3 v3 W1-W4 + DEVIATION_1 join, F3v3 W4 table, no new hand verdicts per order 'No hand-judging'): A 2C/2W; B533 0/0; Bf44 0/0; Bp3 6C/0W/1U/2 UNJUDGED (sk_config_1 effective @185132Z, sk_coverage_1 shown @151833Z). Count rule: B533,Bf44 FAIL (0C<2C); Bp3 HOLDS even worst case (2 unjudged as WRONG -> 6C/2W vs A 2C/2W).
+2026-11-09T13:17:12-07:00 LOOP end full_A rc=0
+2026-11-09T13:17:12-07:00 LOOP start full_B533 n=20 cache=/tmp/lpr/ab/B/cache code=/home/openclaw/research-agent/projects/omegaclaw/wmtm-module
+2026-11-09T13:17:35-07:00 full_A loop: 40 turns, 0 err, GC ok+canary 40/40 (no-candidates 20, propose 20), escalations 0, choices 0, evictions 7 (all recalled), focus 0, derived lines 0 (rc2 has no tags), shadow goals max 3 proved 3 (offline full_A 4)
+2026-11-09T13:17:45-07:00 full_A evictions: 7 recalled, all at final_sti 0.02-0.04 (< sti_threshold 0.05 -> forget_phase _evict_below_sti, user turns only; auto ticks 0). GC: propose x20 from cycle ~10 on, logged 1 (repeat window), escalations 0
+2026-11-09T13:18:13-07:00 stop-line: raw parse caches hold Name string literals from note text -> NOT committed; moved to /tmp/lpr/cache_offrepo, sha256 in reports/.../CACHE_SHA256.txt
+2026-11-09T13:18:24-07:00 stop-line: v2 reports/caches (A spk1, B cache, parse log) moved off-repo to /tmp/lpr/cache_offrepo/v2
+2026-11-09T13:23:52-07:00 item6 loop check CAVEAT: loop workers delete spec files (no --keep-spec), so 'asserted-as-goal 0' on loop runs is vacuous (A specs kept 0, B533 1). Item 6 evidence = offline kept-spec runs (0 of 4/0/49/9 goals asserted) + code read (goal_pool/rule_goal_pool 't in have'; re-entered wm facts in rel). For loop: rebuild KB per run from store snapshot + cache before report.
+2026-11-09T13:24:14-07:00 LOOP end full_B533 rc=0
+2026-11-09T13:24:14-07:00 LOOP start full_Bp3 n=20 cache=/tmp/lpr/ab/Bp3/cache code=/home/openclaw/research-agent/projects/omegaclaw/wmtm-module
+2026-11-09T13:24:39-07:00 full_B533 loop: 40 turns, 0 err, GC ok+canary 40/40 (no-candidates 20, propose 20), escalations 0, choices 0, evictions 7 (all recalled, = A), recent focus headers 32 / lines 64 (A 0), derived lines 0, shadow goals max 0
+2026-11-09T13:24:50-07:00 item2/3: B533 evicted the SAME 7 recalled ids at the same ticks as A (10,10,11,11,13,18,18) -> evictions did not rise. Recent focus: vendor rc2 (A) has no recent_focus code (0 refs) -> A 0 by design; B533 32 headers/64 lines over 20 user turns (context_recent_focus=2).
+2026-11-09T13:29:25-07:00 report template: parse budget corrected from parse logs (B533 23 calls = 20 ok + 3 llm_error, Bf44 20 ok, 0x429)
+2026-11-09T13:31:25-07:00 LOOP end full_Bp3 rc=0
+2026-11-09T13:31:25-07:00 LOOP_STAGE_DONE full
+2026-11-09T13:31:25-07:00 LOOP start fullf44_Bf44 n=20 cache=/tmp/lpr/ab/Bf44/cache code=/home/openclaw/research-agent/projects/omegaclaw/wmtm-module
+2026-11-09T13:31:56-07:00 full_Bp3 loop: 40 turns, 0 err, GC ok+canary 40/40, escalations 0, choices 0, evictions 7 recalled = SAME ids/ticks as A, focus 32/64, derived lines 45 (45 tv, 45 from), shadow goals max 8 proved 8
+2026-11-09T13:38:27-07:00 LOOP end fullf44_Bf44 rc=0
+2026-11-09T13:38:27-07:00 LOOP_STAGE_DONE fullf44
+2026-11-09T13:38:27-07:00 CHAIN_FULL_DONE
+2026-11-09T13:38:33-07:00 FINALIZE_DONE

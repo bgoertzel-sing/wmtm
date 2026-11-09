@@ -1,0 +1,1695 @@
+{
+ "A_full": {
+  "gate_rejected": [
+   "(Inheritance open_cleanup_item item)",
+   "(Inheritance open_item item)",
+   "(Inheritance sk_group_3__i_ep_note_20261028T183317Z no_candidates)",
+   "(Inheritance sk_group_4__i_ep_note_20261028T183317Z propose)",
+   "(Inheritance sk_group_5__i_ep_note_20261028T183317Z blocked)",
+   "(Inheritance user_request open)",
+   "(Member sk_acl_1__i_ep_note_20261104T165705Z acl)",
+   "(Member sk_add_1__i_ep_note_20261104T165705Z add)",
+   "(Member sk_add_1__i_ep_note_20261104T194242Z add)",
+   "(Member sk_add_2__i_ep_note_20261104T165705Z add)",
+   "(Member sk_answer_1__i_ep_note_20261104T181709Z answer)",
+   "(Member sk_base_1__i_ep_note_20261028T122745Z base)",
+   "(Member sk_become_1__i_ep_note_20261104T181709Z become)",
+   "(Member sk_belong_1__i_ep_note_20261028T122745Z belong)",
+   "(Member sk_branch_1__i_ep_note_20261028T122745Z task_branch)",
+   "(Member sk_branch_1__i_ep_note_20261028T185959Z branch)",
+   "(Member sk_bundle_1__i_ep_note_20261028T190214Z acld)",
+   "(Member sk_bundle_1__i_ep_note_20261028T190214Z evidence_bundle)",
+   "(Member sk_bundle_1__i_ep_note_20261103T203949Z bundle)",
+   "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+   "(Member sk_bundle_1__i_ep_note_20261104T154242Z bundle)",
+   "(Member sk_canary_1__i_ep_note_20261104T154242Z canary)",
+   "(Member sk_canary_1__i_ep_note_20261104T154242Z ok)",
+   "(Member sk_case_1__i_ep_note_20261028T185959Z case)",
+   "(Member sk_change_1__i_ep_note_20261103T004843Z change)",
+   "(Member sk_channel_1__i_ep_note_20261104T193740Z hive_channel)",
+   "(Member sk_check_1__i_ep_note_20261028T185132Z check)",
+   "(Member sk_check_1__i_ep_note_20261103T203949Z check)",
+   "(Member sk_check_1__i_ep_note_20261103T203949Z ok)",
+   "(Member sk_check_1__i_ep_note_20261104T151833Z check)",
+   "(Member sk_check_1__i_ep_note_20261104T154242Z check)",
+   "(Member sk_check_1__i_ep_note_20261104T154242Z ok)",
+   "(Member sk_check_1__i_ep_note_20261104T165705Z check)",
+   "(Member sk_check_1__i_ep_note_20261104T165705Z ok)",
+   "(Member sk_check_1__i_ep_note_20261104T193740Z check)",
+   "(Member sk_check_1__i_ep_note_20261104T193740Z ok)",
+   "(Member sk_check_2__i_ep_note_20261028T185132Z check)",
+   "(Member sk_check_out_1__i_ep_note_20261028T185132Z check_out)",
+   "(Member sk_checkpoint_1__i_ep_note_20261104T151833Z checkpoint)",
+   "(Member sk_choose_1__i_ep_note_20261104T193740Z open)",
+   "(Member sk_clean_1__i_ep_note_20261103T004843Z clean)",
+   "(Member sk_cleanup_1__i_ep_note_20261028T185132Z cleanup)",
+   "(Member sk_cleanup_1__i_ep_note_20261028T185132Z open)",
+   "(Member sk_cleanup_1__i_ep_note_20261028T190214Z cleanup)",
+   "(Member sk_cleanup_1__i_ep_note_20261028T190214Z done)",
+   "(Member sk_cleanup_1__i_ep_note_20261104T051925Z cleanup)",
+   "(Member sk_clone_1__i_ep_note_20261028T122745Z clone)",
+   "(Member sk_close_1__i_ep_note_20261028T153222Z close)",
+   "(Member sk_close_1__i_ep_note_20261028T185132Z close)",
+   "(Member sk_close_1__i_ep_note_20261104T051925Z close)",
+   "(Member sk_close_1__i_ep_note_20261104T154242Z close)",
+   "(Member sk_close_1__i_ep_note_20261104T194242Z close)",
+   "(Member sk_closed_1__i_ep_note_20261028T190214Z closed)",
+   "(Member sk_code_ref_1__i_ep_note_20261028T122745Z code_ref)",
+   "(Member sk_commit_1__i_ep_note_20261028T185132Z commit)",
+   "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+   "(Member sk_commit_2__i_ep_note_20261028T185132Z commit)",
+   "(Member sk_commit_2__i_ep_note_20261028T185132Z staged)",
+   "(Member sk_comparison_1__i_ep_note_20261028T183317Z replay_comparison)",
+   "(Member sk_confidence_1__i_ep_note_20261104T151833Z confidence)",
+   "(Member sk_confidence_1__i_ep_note_20261104T151833Z stv_rule_penalty)",
+   "(Member sk_confirm_1__i_ep_note_20261028T122745Z confirm)",
+   "(Member sk_consolidation_1__i_ep_note_20261028T121808Z consolidation)",
+   "(Member sk_consolidation_1__i_ep_note_20261028T122745Z consolidation)",
+   "(Member sk_consolidation_1__i_ep_note_20261028T153222Z consolidation)",
+   "(Member sk_consolidation_1__i_ep_note_20261028T185132Z consolidation)",
+   "(Member sk_consolidation_1__i_ep_note_20261028T185959Z consolidation)",
+   "(Member sk_contradict_1__i_ep_note_20261028T121808Z contradict)",
+   "(Member sk_contradict_1__i_ep_note_20261028T122745Z contradict)",
+   "(Member sk_contradict_1__i_ep_note_20261028T153222Z contradict)",
+   "(Member sk_contradict_1__i_ep_note_20261028T185132Z contradict)",
+   "(Member sk_contradict_1__i_ep_note_20261028T185959Z contradict)",
+   "(Member sk_contradict_2__i_ep_note_20261028T153222Z contradict)",
+   "(Member sk_contradict_3__i_ep_note_20261028T153222Z contradict)",
+   "(Member sk_copy_1__i_ep_note_20261028T122745Z hive_review_copy)",
+   "(Member sk_correct_1__i_ep_note_20261104T151833Z correct)",
+   "(Member sk_correct_1__i_ep_note_20261104T165705Z correct)",
+   "(Member sk_count_1__i_ep_note_20261028T153222Z suite_count)",
+   "(Member sk_count_1__i_ep_note_20261028T185132Z count)",
+   "(Member sk_count_2__i_ep_note_20261028T185132Z count)",
+   "(Member sk_count_3__i_ep_note_20261028T185132Z count)",
+   "(Member sk_criterion_1__i_ep_note_20261104T181709Z criterion)",
+   "(Member sk_delete_1__i_ep_note_20261028T190214Z delete)",
+   "(Member sk_delete_2__i_ep_note_20261028T190214Z delete)",
+   "(Member sk_derive_1__i_ep_note_20261104T193449Z derive)",
+   "(Member sk_diff_1__i_ep_note_20261103T004843Z replay_diff)",
+   "(Member sk_diff_1__i_ep_note_20261104T051320Z diff)",
+   "(Member sk_diff_1__i_ep_note_20261104T051320Z tested)",
+   "(Member sk_diff_1__i_ep_note_20261104T165705Z diff)",
+   "(Member sk_differ_1__i_ep_note_20261028T153222Z differ)",
+   "(Member sk_doc_1__i_ep_note_20261104T193449Z doc)",
+   "(Member sk_engine_1__i_ep_note_20261104T051320Z engine)",
+   "(Member sk_error_1__i_ep_note_20261104T193449Z domain_error)",
+   "(Member sk_error_1__i_ep_note_20261104T193449Z rule_syntax)",
+   "(Member sk_error_2__i_ep_note_20261104T193449Z domain_error)",
+   "(Member sk_error_2__i_ep_note_20261104T193449Z rule_syntax)",
+   "(Member sk_error_3__i_ep_note_20261104T193449Z domain_error)",
+   "(Member sk_error_3__i_ep_note_20261104T193449Z truth_value)",
+   "(Member sk_evidence_1__i_ep_note_20261028T185132Z evidence)",
+   "(Member sk_evidence_1__i_ep_note_20261028T185959Z evidence)",
+   "(Member sk_evidence_1__i_ep_note_20261028T190214Z evidence)",
+   "(Member sk_evidence_1__i_ep_note_20261103T004843Z evidence)",
+   "(Member sk_evidence_2__i_ep_note_20261028T185132Z evidence)",
+   "(Member sk_evidence_2__i_ep_note_20261028T185959Z live_state_evidence)",
+   "(Member sk_exist_1__i_ep_note_20261028T121808Z exist)",
+   "(Member sk_fail_1__i_ep_note_20261104T045724Z fail)",
+   "(Member sk_fail_1__i_ep_note_20261104T051320Z fail)",
+   "(Member sk_fail_1__i_ep_note_20261104T194242Z fail)",
+   "(Member sk_failure_1__i_ep_note_20261028T153222Z review_failure)",
+   "(Member sk_failure_1__i_ep_note_20261028T185132Z failure)",
+   "(Member sk_failure_2__i_ep_note_20261028T153222Z review_failure)",
+   "(Member sk_failure_2__i_ep_note_20261028T185132Z failure)",
+   "(Member sk_failure_3__i_ep_note_20261028T153222Z review_failure)",
+   "(Member sk_failure_3__i_ep_note_20261028T185132Z failure)",
+   "(Member sk_find_1__i_ep_note_20261103T004843Z find)",
+   "(Member sk_find_1__i_ep_note_20261104T194242Z find)",
+   "(Member sk_fix_1__i_ep_note_20261104T051320Z missing)",
+   "(Member sk_fix_1__i_ep_note_20261104T051320Z population_prior_acceptance_fix)",
+   "(Member sk_fix_1__i_ep_note_20261104T193449Z fix)",
+   "(Member sk_fix_1__i_ep_note_20261104T193740Z fix)",
+   "(Member sk_fix_2__i_ep_note_20261103T004843Z fix)",
+   "(Member sk_fix_2__i_ep_note_20261104T193449Z fix)",
+   "(Member sk_fix_2__i_ep_note_20261104T193740Z fix)",
+   "(Member sk_follow_up_1__i_ep_note_20261104T043925Z bounded)",
+   "(Member sk_follow_up_1__i_ep_note_20261104T043925Z follow_up)",
+   "(Member sk_follow_up_1__i_ep_note_20261104T043925Z open_item)",
+   "(Member sk_follow_up_1__i_ep_note_20261104T043925Z optional)",
+   "(Member sk_force_add_1__i_ep_note_20261104T043925Z force_add)",
+   "(Member sk_gain_1__i_ep_note_20261104T151833Z coverage)",
+   "(Member sk_gain_1__i_ep_note_20261104T151833Z gain)",
+   "(Member sk_gap_1__i_ep_note_20261103T004843Z merge_gap)",
+   "(Member sk_gap_2__i_ep_note_20261103T004843Z merge_gap)",
+   "(Member sk_gap_3__i_ep_note_20261103T004843Z merge_gap)",
+   "(Member sk_gap_3__i_ep_note_20261103T004843Z swap_case)",
+   "(Member sk_grade_1__i_ep_note_20261104T154242Z grade)",
+   "(Member sk_hash_1__i_ep_note_20261028T185959Z hash)",
+   "(Member sk_have_1__i_ep_note_20261103T203949Z have)",
+   "(Member sk_have_1__i_ep_note_20261104T193449Z have)",
+   "(Member sk_have_2__i_ep_note_20261104T193449Z have)",
+   "(Member sk_head_1__i_ep_note_20261028T122745Z head)",
+   "(Member sk_hidden_1__i_ep_note_20261103T203949Z hidden)",
+   "(Member sk_hold_1__i_ep_note_20261028T185132Z hold)",
+   "(Member sk_host_1__i_ep_note_20261103T203949Z host)",
+   "(Member sk_human_1__i_ep_note_20261104T193740Z human)",
+   "(Member sk_identical_1__i_ep_note_20261104T193449Z identical)",
+   "(Member sk_implication_1__i_ep_note_20261104T165705Z implication)",
+   "(Member sk_implication_1__i_ep_note_20261104T165705Z stored)",
+   "(Member sk_keep_1__i_ep_note_20261104T051925Z keep)",
+   "(Member sk_lesson_1__i_ep_note_20261028T122745Z lesson)",
+   "(Member sk_lesson_1__i_ep_note_20261028T185132Z lesson)",
+   "(Member sk_lesson_1__i_ep_note_20261028T185959Z lesson)",
+   "(Member sk_lesson_1__i_ep_note_20261104T051320Z lesson)",
+   "(Member sk_lesson_1__i_ep_note_20261104T151833Z lesson)",
+   "(Member sk_lesson_2__i_ep_note_20261028T122745Z lesson)",
+   "(Member sk_line_1__i_ep_note_20261104T051925Z closed)",
+   "(Member sk_line_1__i_ep_note_20261104T051925Z migration_line)",
+   "(Member sk_line_1__i_ep_note_20261104T151833Z integrity_line)",
+   "(Member sk_link_1__i_ep_note_20261028T185132Z link)",
+   "(Member sk_link_1__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_2__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_3__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_4__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_5__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_6__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_7__i_ep_note_20261028T185959Z link)",
+   "(Member sk_link_8__i_ep_note_20261028T185959Z link)",
+   "(Member sk_list_1__i_ep_note_20261104T051320Z change_list)",
+   "(Member sk_list_1__i_ep_note_20261104T194242Z list)",
+   "(Member sk_live_1__i_ep_note_20261028T183317Z live)",
+   "(Member sk_local_1__i_ep_note_20261028T121808Z local)",
+   "(Member sk_look_up_1__i_ep_note_20261104T165705Z look_up)",
+   "(Member sk_match_1__i_ep_note_20261103T004843Z match)",
+   "(Member sk_merge_1__i_ep_note_20261104T051925Z human_merge)",
+   "(Member sk_need_1__i_ep_note_20261104T165705Z need)",
+   "(Member sk_note_1__i_ep_note_20261028T121808Z note)",
+   "(Member sk_note_1__i_ep_note_20261028T122745Z note)",
+   "(Member sk_note_1__i_ep_note_20261028T153222Z note)",
+   "(Member sk_note_1__i_ep_note_20261028T153222Z out_of_date)",
+   "(Member sk_note_1__i_ep_note_20261028T153222Z top_recall)",
+   "(Member sk_note_1__i_ep_note_20261028T185132Z note)",
+   "(Member sk_note_1__i_ep_note_20261028T190214Z note)",
+   "(Member sk_note_1__i_ep_note_20261104T194242Z note)",
+   "(Member sk_note_2__i_ep_note_20261028T121808Z note)",
+   "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+   "(Member sk_note_2__i_ep_note_20261028T153222Z note)",
+   "(Member sk_note_2__i_ep_note_20261028T190214Z note)",
+   "(Member sk_note_3__i_ep_note_20261028T153222Z note)",
+   "(Member sk_note_3__i_ep_note_20261028T190214Z note)",
+   "(Member sk_note_4__i_ep_note_20261028T153222Z note)",
+   "(Member sk_note_4__i_ep_note_20261028T190214Z note)",
+   "(Member sk_note_5__i_ep_note_20261028T153222Z note)",
+   "(Member sk_open_1__i_ep_note_20261028T185959Z open)",
+   "(Member sk_open_1__i_ep_note_20261104T193740Z open)",
+   "(Member sk_open_2__i_ep_note_20261104T193740Z open)",
+   "(Member sk_open_3__i_ep_note_20261104T193740Z open)",
+   "(Member sk_original_1__i_ep_note_20261104T193449Z original)",
+   "(Member sk_original_2__i_ep_note_20261104T193449Z original)",
+   "(Member sk_original_3__i_ep_note_20261104T193449Z original)",
+   "(Member sk_out_of_date_1__i_ep_note_20261028T153222Z out_of_date)",
+   "(Member sk_out_of_scope_1__i_ep_note_20261028T121808Z out_of_scope)",
+   "(Member sk_outcome_1__i_ep_note_20261104T194242Z outcome)",
+   "(Member sk_pass_1__i_ep_note_20261028T121808Z pass)",
+   "(Member sk_pass_1__i_ep_note_20261028T190214Z pass)",
+   "(Member sk_pass_1__i_ep_note_20261103T004843Z pass)",
+   "(Member sk_pass_1__i_ep_note_20261104T051925Z pass)",
+   "(Member sk_pass_2__i_ep_note_20261103T004843Z pass)",
+   "(Member sk_pass_3__i_ep_note_20261103T004843Z pass)",
+   "(Member sk_pin_1__i_ep_note_20261028T185132Z pin)",
+   "(Member sk_place_1__i_ep_note_20261028T185959Z place)",
+   "(Member sk_point_1__i_ep_note_20261028T121808Z point)",
+   "(Member sk_port_1__i_ep_note_20261104T165705Z port)",
+   "(Member sk_position_1__i_ep_note_20261028T121808Z hive_position)",
+   "(Member sk_position_1__i_ep_note_20261103T004843Z hive_position)",
+   "(Member sk_post_1__i_ep_note_20261028T183317Z post)",
+   "(Member sk_post_1__i_ep_note_20261103T004843Z post)",
+   "(Member sk_post_1__i_ep_note_20261103T203949Z post)",
+   "(Member sk_post_1__i_ep_note_20261104T043925Z post)",
+   "(Member sk_post_1__i_ep_note_20261104T151833Z post)",
+   "(Member sk_post_1__i_ep_note_20261104T154242Z post)",
+   "(Member sk_post_1__i_ep_note_20261104T165705Z post)",
+   "(Member sk_post_1__i_ep_note_20261104T193740Z post)",
+   "(Member sk_push_1__i_ep_note_20261028T121808Z push)",
+   "(Member sk_push_2__i_ep_note_20261028T185959Z push)",
+   "(Member sk_push_2__i_ep_note_20261104T193740Z open)",
+   "(Member sk_push_2__i_ep_note_20261104T193740Z push)",
+   "(Member sk_queue_1__i_ep_note_20261103T004843Z queue)",
+   "(Member sk_queue_1__i_ep_note_20261104T194242Z queue)",
+   "(Member sk_read_1__i_ep_note_20261028T185959Z read)",
+   "(Member sk_recommendation_1__i_ep_note_20261028T185959Z recommendation)",
+   "(Member sk_recommendation_1__i_ep_note_20261104T043925Z recommendation)",
+   "(Member sk_reject_1__i_ep_note_20261028T185959Z reject)",
+   "(Member sk_reject_1__i_ep_note_20261104T193449Z reject)",
+   "(Member sk_remote_1__i_ep_note_20261028T121808Z remote)",
+   "(Member sk_remove_1__i_ep_note_20261028T121808Z remove)",
+   "(Member sk_remove_1__i_ep_note_20261028T190214Z remove)",
+   "(Member sk_remove_1__i_ep_note_20261104T051925Z remove)",
+   "(Member sk_remove_2__i_ep_note_20261028T190214Z remove)",
+   "(Member sk_remove_2__i_ep_note_20261104T051925Z remove)",
+   "(Member sk_remove_3__i_ep_note_20261028T190214Z remove)",
+   "(Member sk_remove_3__i_ep_note_20261104T051925Z remove)",
+   "(Member sk_remove_4__i_ep_note_20261104T051925Z remove)",
+   "(Member sk_remove_5__i_ep_note_20261104T051925Z remove)",
+   "(Member sk_repeat_1__i_ep_note_20261028T185132Z repeat)",
+   "(Member sk_report_1__i_ep_note_20261103T203949Z report)",
+   "(Member sk_report_1__i_ep_note_20261104T051320Z predecessor_report)",
+   "(Member sk_report_1__i_ep_note_20261104T151833Z report)",
+   "(Member sk_repost_1__i_ep_note_20261104T194242Z repost)",
+   "(Member sk_request_1__i_ep_note_20261028T185959Z open)",
+   "(Member sk_request_1__i_ep_note_20261028T185959Z request)",
+   "(Member sk_rerun_1__i_ep_note_20261103T203949Z rerun)",
+   "(Member sk_resubmit_1__i_ep_note_20261028T121808Z resubmit)",
+   "(Member sk_result_1__i_ep_note_20261028T122745Z result)",
+   "(Member sk_result_1__i_ep_note_20261028T153222Z result)",
+   "(Member sk_result_1__i_ep_note_20261028T183317Z result)",
+   "(Member sk_result_1__i_ep_note_20261028T185959Z result)",
+   "(Member sk_result_1__i_ep_note_20261103T203949Z result)",
+   "(Member sk_result_1__i_ep_note_20261104T151833Z report)",
+   "(Member sk_result_1__i_ep_note_20261104T151833Z result)",
+   "(Member sk_result_1__i_ep_note_20261104T154242Z result)",
+   "(Member sk_result_1__i_ep_note_20261104T165705Z result)",
+   "(Member sk_result_1__i_ep_note_20261104T193740Z queued)",
+   "(Member sk_result_1__i_ep_note_20261104T193740Z result)",
+   "(Member sk_result_1__i_ep_note_20261104T194242Z result)",
+   "(Member sk_result_text_1__i_ep_note_20261028T185132Z result_text)",
+   "(Member sk_review_1__i_ep_note_20261028T153222Z review)",
+   "(Member sk_review_1__i_ep_note_20261028T183317Z review)",
+   "(Member sk_review_1__i_ep_note_20261028T185132Z review)",
+   "(Member sk_review_1__i_ep_note_20261028T185959Z review)",
+   "(Member sk_review_1__i_ep_note_20261103T004843Z review)",
+   "(Member sk_review_1__i_ep_note_20261103T203949Z review)",
+   "(Member sk_review_1__i_ep_note_20261104T045724Z review)",
+   "(Member sk_review_1__i_ep_note_20261104T051320Z review)",
+   "(Member sk_review_1__i_ep_note_20261104T051925Z review)",
+   "(Member sk_review_1__i_ep_note_20261104T154242Z review)",
+   "(Member sk_review_1__i_ep_note_20261104T193740Z review)",
+   "(Member sk_review_2__i_ep_note_20261028T153222Z review)",
+   "(Member sk_review_2__i_ep_note_20261028T185132Z review)",
+   "(Member sk_reviewer_1__i_ep_note_20261104T045724Z reviewer)",
+   "(Member sk_revision_1__i_ep_note_20261103T004843Z revision)",
+   "(Member sk_revision_1__i_ep_note_20261104T045724Z revision)",
+   "(Member sk_revision_1__i_ep_note_20261104T051320Z revision)",
+   "(Member sk_rule_1__i_ep_note_20261028T122745Z correct)",
+   "(Member sk_rule_1__i_ep_note_20261028T122745Z general)",
+   "(Member sk_rule_1__i_ep_note_20261028T122745Z rule)",
+   "(Member sk_rule_1__i_ep_note_20261028T185959Z promote_rule)",
+   "(Member sk_rule_1__i_ep_note_20261104T051925Z open)",
+   "(Member sk_rule_1__i_ep_note_20261104T051925Z rule)",
+   "(Member sk_rule_2__i_ep_note_20261028T185959Z final)",
+   "(Member sk_rule_2__i_ep_note_20261028T185959Z rule)",
+   "(Member sk_run_1__i_ep_note_20261104T165705Z after_run)",
+   "(Member sk_runtime_1__i_ep_note_20261104T193740Z runtime)",
+   "(Member sk_sanitize_1__i_ep_note_20261104T045724Z sanitize)",
+   "(Member sk_save_1__i_ep_note_20261104T165705Z save)",
+   "(Member sk_say_1__i_ep_note_20261028T190214Z say)",
+   "(Member sk_search_1__i_ep_note_20261104T194242Z sidecar_search)",
+   "(Member sk_see_1__i_ep_note_20261028T185132Z see)",
+   "(Member sk_see_1__i_ep_note_20261028T185959Z root_cause)",
+   "(Member sk_see_1__i_ep_note_20261028T185959Z see)",
+   "(Member sk_self_check_1__i_ep_note_20261103T004843Z self_check)",
+   "(Member sk_send_1__i_ep_note_20261028T185132Z send)",
+   "(Member sk_show_1__i_ep_note_20261028T122745Z show)",
+   "(Member sk_show_1__i_ep_note_20261104T151833Z show)",
+   "(Member sk_side_1__i_ep_note_20261028T185132Z iter_side)",
+   "(Member sk_sidecar_1__i_ep_note_20261028T122745Z sidecar)",
+   "(Member sk_sidecar_1__i_ep_note_20261028T185132Z sidecar)",
+   "(Member sk_sidecar_1__i_ep_note_20261028T185959Z sidecar)",
+   "(Member sk_skip_1__i_ep_note_20261028T121808Z skip)",
+   "(Member sk_skip_1__i_ep_note_20261103T004843Z skip)",
+   "(Member sk_stage_1__i_ep_note_20261104T194242Z stage)",
+   "(Member sk_stash_1__i_ep_note_20261103T004843Z stash)",
+   "(Member sk_storage_1__i_ep_note_20261104T154242Z established)",
+   "(Member sk_storage_1__i_ep_note_20261104T154242Z storage)",
+   "(Member sk_stv_1__i_ep_note_20261104T193449Z stv)",
+   "(Member sk_suite_1__i_ep_note_20261028T121808Z suite)",
+   "(Member sk_suite_1__i_ep_note_20261103T004843Z suite)",
+   "(Member sk_supersede_1__i_ep_note_20261028T121808Z supersede)",
+   "(Member sk_supersede_1__i_ep_note_20261028T122745Z supersede)",
+   "(Member sk_supersede_1__i_ep_note_20261028T153222Z supersede)",
+   "(Member sk_supersede_1__i_ep_note_20261028T185959Z supersede)",
+   "(Member sk_supersede_1__i_ep_note_20261028T190214Z supersede)",
+   "(Member sk_supersede_2__i_ep_note_20261028T185959Z supersede)",
+   "(Member sk_support_1__i_ep_note_20261028T122745Z support)",
+   "(Member sk_support_1__i_ep_note_20261028T185132Z support)",
+   "(Member sk_support_1__i_ep_note_20261028T185959Z support)",
+   "(Member sk_table_1__i_ep_note_20261028T121808Z table)",
+   "(Member sk_task_1__i_ep_note_20261028T153222Z readme_flags_task)",
+   "(Member sk_task_1__i_ep_note_20261028T185959Z hive_report_task)",
+   "(Member sk_task_2__i_ep_note_20261028T153222Z readme_flags_task)",
+   "(Member sk_thing_1__i_ep_note_20261028T153222Z local)",
+   "(Member sk_thing_1__i_ep_note_20261028T153222Z thing)",
+   "(Member sk_thing_1__i_ep_note_20261028T190214Z thing)",
+   "(Member sk_thing_1__i_ep_note_20261103T004843Z thing)",
+   "(Member sk_top_recall_1__i_ep_note_20261028T153222Z top_recall)",
+   "(Member sk_tree_1__i_ep_note_20261103T004843Z clean)",
+   "(Member sk_tree_1__i_ep_note_20261103T004843Z working_tree)",
+   "(Member sk_unblocked_1__i_ep_note_20261104T181709Z unblocked)",
+   "(Member sk_unset_1__i_ep_note_20261103T203949Z unset)",
+   "(Member sk_unset_2__i_ep_note_20261103T203949Z unset)",
+   "(Member sk_update_1__i_ep_note_20261104T194242Z update)",
+   "(Member sk_upgrade_1__i_ep_note_20261104T051320Z missing)",
+   "(Member sk_upgrade_1__i_ep_note_20261104T051320Z upgrade)",
+   "(Member sk_valid_1__i_ep_note_20261028T185959Z valid)",
+   "(Member sk_wait_1__i_ep_note_20261028T153222Z wait)",
+   "(Member sk_wait_1__i_ep_note_20261028T183317Z wait)",
+   "(Member sk_wait_1__i_ep_note_20261028T185959Z wait)",
+   "(Member sk_wait_1__i_ep_note_20261103T004843Z wait)",
+   "(Member sk_want_1__i_ep_note_20261104T045724Z want)",
+   "(Member sk_write_1__i_ep_note_20261104T045724Z write)"
+  ],
+  "nw_symbol_notes": {},
+  "premises": {
+   "sp0": {
+    "fact": "(Member id_9d9b82d commit)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp1": {
+    "fact": "(Member id_9d9b82d result)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp10": {
+    "fact": "(Inheritance predecessor_report report)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp100": {
+    "fact": "(Member hive_evidence_dir directory)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp101": {
+    "fact": "(Inheritance git_blob_sha256 sha256)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp102": {
+    "fact": "(Inheritance deployment_equality equality)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp103": {
+    "fact": "(Inheritance live_source source)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp104": {
+    "fact": "(Inheritance code_deliverable deliverable)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp105": {
+    "fact": "(Member wmtm_module clone)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp106": {
+    "fact": "(Member turn_without_send_entry ltm_entry)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp107": {
+    "fact": "(Inheritance ltm_entry entry)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp108": {
+    "fact": "(Inheritance send valid)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp109": {
+    "fact": "(Inheritance hive_wait wait)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp11": {
+    "fact": "(Inheritance change_list list)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp110": {
+    "fact": "(Inheritance chat_send send)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp111": {
+    "fact": "(Member tmp_hive_evidence_t_2026_11_04_p1_engine bundle)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp112": {
+    "fact": "(Member f75da21 prereq)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp113": {
+    "fact": "(Member patch_0001 patch)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp114": {
+    "fact": "(Member patch_0002 patch)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp115": {
+    "fact": "(Member hive_t_2026_11_04_p1_engine branch)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp116": {
+    "fact": "(Member plunit open)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp117": {
+    "fact": "(Inheritance hive_channel channel)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp118": {
+    "fact": "(Member t_2026_10_28_goalchainer_v2_status task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp119": {
+    "fact": "(Member t_2026_10_28_readme_flags task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp12": {
+    "fact": "(Member review_3 review)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp120": {
+    "fact": "(Inheritance review_failure failure)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp121": {
+    "fact": "(Inheritance result_text text)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp122": {
+    "fact": "(Inheritance host_path path)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp123": {
+    "fact": "(Member wmtm_module clone)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp124": {
+    "fact": "(Inheritance hive_report_only_task task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp125": {
+    "fact": "(Inheritance release_git_ref ref)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp126": {
+    "fact": "(Member b44ce5e commit)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp127": {
+    "fact": "(Member b44ce5e revision)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp128": {
+    "fact": "(Inheritance iter_side side)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp129": {
+    "fact": "(Inheritance hive_task task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp13": {
+    "fact": "(Member cos_answer_1 answer)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp130": {
+    "fact": "(Inheritance chat_send send)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp131": {
+    "fact": "(Member t_2026_11_04_pettachainer_migration_report report)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp132": {
+    "fact": "(Member shim_6 shim)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp133": {
+    "fact": "(Member shim_7 shim)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp134": {
+    "fact": "(Member probe_118 probe)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp135": {
+    "fact": "(Inheritance fitness_count count)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp136": {
+    "fact": "(Member d3cd6d8 commit)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp137": {
+    "fact": "(Inheritance scratch_backup backup)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp138": {
+    "fact": "(Inheritance home_path path)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp139": {
+    "fact": "(Inheritance intermediate_artifact artifact)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp14": {
+    "fact": "(Member wmtm repo)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp140": {
+    "fact": "(Inheritance intermediate_artifact intermediate)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp15": {
+    "fact": "(Member wmtm staged)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp16": {
+    "fact": "(Member wmtm_module clone)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp17": {
+    "fact": "(Inheritance hive_review_copy copy)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp18": {
+    "fact": "(Inheritance task_branch branch)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp19": {
+    "fact": "(Inheritance code_ref ref)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp2": {
+    "fact": "(Member tmp_pcmig_wt worktree)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp20": {
+    "fact": "(Member 6df07f5 stray)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp21": {
+    "fact": "(Member t_2026_11_04_p1_engine unblocked)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp22": {
+    "fact": "(Inheritance engine_patch patch)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp23": {
+    "fact": "(Inheritance metta_file file)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp24": {
+    "fact": "(Inheritance hive_progress_report progress_report)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp25": {
+    "fact": "(Inheritance progress_report report)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp26": {
+    "fact": "(Inheritance engine_limit limit)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp27": {
+    "fact": "(Member hive_gh remote)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp28": {
+    "fact": "(Inheritance sidecar_search search)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp29": {
+    "fact": "(Member hive_t_2026_11_04_p1_engine branch)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp3": {
+    "fact": "(Inheritance open_item open)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp30": {
+    "fact": "(Member cdbf470 commit)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp31": {
+    "fact": "(Inheritance hive_copy copy)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp32": {
+    "fact": "(Inheritance top_recall recall)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp33": {
+    "fact": "(Inheritance top_recall top)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp34": {
+    "fact": "(Inheritance readme_flags_task task)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp35": {
+    "fact": "(Inheritance review_failure failure)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp36": {
+    "fact": "(Inheritance mutation_test test)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp37": {
+    "fact": "(Inheritance code_fence_case case)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp38": {
+    "fact": "(Inheritance acceptance_criterion criterion)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp39": {
+    "fact": "(Inheritance scratch_check check)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp4": {
+    "fact": "(Inheritance stv_rule_penalty penalty)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp40": {
+    "fact": "(Inheritance suite_count count)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp41": {
+    "fact": "(Member pop_os environment)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp42": {
+    "fact": "(Member astra environment)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp43": {
+    "fact": "(Member rev_40d1502 revision)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp44": {
+    "fact": "(Member rev_40d1502 open)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp45": {
+    "fact": "(Inheritance user_request request)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp46": {
+    "fact": "(Member v2 live)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp47": {
+    "fact": "(Member wmtm_v0_7_0_rc2 vendor)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp48": {
+    "fact": "(Member pymetta_native_2 runtime)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp49": {
+    "fact": "(Inheritance replay_comparison comparison)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp5": {
+    "fact": "(Member tmp_hive_evidence_t_2026_11_04_pettachainer_core_extraction bundle)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp50": {
+    "fact": "(Member rev4 revision)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp51": {
+    "fact": "(Member review_3 review)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp52": {
+    "fact": "(Member retest_sh canary_first)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp53": {
+    "fact": "(Member id_c43f18ab report)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp54": {
+    "fact": "(Member id_a3ea682f sum)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp55": {
+    "fact": "(Inheritance after_run run)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp56": {
+    "fact": "(Member path_home hidden)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp57": {
+    "fact": "(Member t_2026_10_28_goalchainer_v2_status closed)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp58": {
+    "fact": "(Member review_4 review)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp59": {
+    "fact": "(Inheritance evidence_bundle bundle)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp6": {
+    "fact": "(Inheritance integrity_line line)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp60": {
+    "fact": "(Member wmtm_module module)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp61": {
+    "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status evidence_branch)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp62": {
+    "fact": "(Inheritance evidence_branch branch)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp63": {
+    "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp64": {
+    "fact": "(Member d7d02c4 revision)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp65": {
+    "fact": "(Member tmp_pcmig_wt worktree)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp66": {
+    "fact": "(Member hive_t_2026_11_04_pettachainer_migration_report branch)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp67": {
+    "fact": "(Member hive_t_2026_11_04_pettachainer_migration_report unpushed)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp68": {
+    "fact": "(Inheritance human_merge merge)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp69": {
+    "fact": "(Inheritance migration_line line)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp7": {
+    "fact": "(Member t_2026_11_04_pettachainer_migration_report report)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp70": {
+    "fact": "(Inheritance predecessor_finding finding)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp71": {
+    "fact": "(Inheritance change_list_row row)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp72": {
+    "fact": "(Inheritance hive_position position)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp73": {
+    "fact": "(Inheritance self_check check)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp74": {
+    "fact": "(Inheritance merge_gap gap)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp75": {
+    "fact": "(Inheritance swap_case case)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp76": {
+    "fact": "(Inheritance lifecycle_test test)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp77": {
+    "fact": "(Inheritance replay_output_file file)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp78": {
+    "fact": "(Inheritance working_tree tree)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp79": {
+    "fact": "(Inheritance replay_diff diff)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp8": {
+    "fact": "(Inheritance population_prior_acceptance_fix fix)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp80": {
+    "fact": "(Member pc3 identical)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp81": {
+    "fact": "(Inheritance domain_error error)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp82": {
+    "fact": "(Member wmtm_wt branch)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp83": {
+    "fact": "(Member h_c9f5591 unpushed)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp84": {
+    "fact": "(Member h_5c58cce unpushed)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp85": {
+    "fact": "(Member bc95d26 revision)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp86": {
+    "fact": "(Member hive_t_2026_10_28_readme_flags branch)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp87": {
+    "fact": "(Member bc95d26 local)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp88": {
+    "fact": "(Inheritance hive_position position)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp89": {
+    "fact": "(Inheritance hive_task_order order)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp9": {
+    "fact": "(Member b option)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp90": {
+    "fact": "(Inheritance read_local_commit read)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp91": {
+    "fact": "(Inheritance local_commit commit)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp92": {
+    "fact": "(Inheritance local_commit local)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp93": {
+    "fact": "(Inheritance read_tmp read)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp94": {
+    "fact": "(Member speaker_link true)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp95": {
+    "fact": "(Inheritance promote_rule rule)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp96": {
+    "fact": "(Inheritance root_cause cause)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp97": {
+    "fact": "(Inheritance live_state_evidence evidence)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp98": {
+    "fact": "(Inheritance hive_report_task task)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp99": {
+    "fact": "(Inheritance accept_time time)",
+    "src": "ep-note-20261028T185959Z"
+   }
+  },
+  "record_sha256": "03bb46ce42a873f0e2d6434f86f0fd876704fbdf70c25c64d4deda13aed6b68a",
+  "shadow": "ab/runs/full_A/shadow.jsonl",
+  "spec_atoms_sha256": "0b5f33a97470cb4434f00377ae87aded5cbcbb61b27c6dfdfb432e17e353eaae"
+ },
+ "B_full": {
+  "gate_rejected": [
+   "(Member sk_group_1__i_ep_note_20261028T183317Z ok)"
+  ],
+  "nw_symbol_notes": {},
+  "premises": {
+   "sp0": {
+    "fact": "(Member sk_result_1__i_ep_note_20261104T154242Z result)",
+    "src": "ep-note-20261104T154242Z"
+   },
+   "sp1": {
+    "fact": "(Member sk_post_1__i_ep_note_20261104T154242Z post)",
+    "src": "ep-note-20261104T154242Z"
+   },
+   "sp10": {
+    "fact": "(Member sk_penalty_1__i_ep_note_20261104T151833Z penalty)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp100": {
+    "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status deleted)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp101": {
+    "fact": "(Member sk_say_1__i_ep_note_20261028T190214Z say)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp102": {
+    "fact": "(Member tmp_hive_evidence_t_2026_10_28_goalchainer_v2_status removed)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp103": {
+    "fact": "(Member tmp_gc2snap removed)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp104": {
+    "fact": "(Member tmp_gc2ev removed)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp105": {
+    "fact": "(Member sk_delete_1__i_ep_note_20261028T190214Z delete)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp106": {
+    "fact": "(Member sk_supersede_1__i_ep_note_20261028T190214Z supersede)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp107": {
+    "fact": "(Member sk_cleanup_1__i_ep_note_20261104T051925Z cleanup)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp108": {
+    "fact": "(Member tmp_pcmig_wt worktree)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp109": {
+    "fact": "(Member hive_t_2026_11_04_pettachainer_migration_report branch)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp11": {
+    "fact": "(Member sk_speed_1__i_ep_note_20261104T151833Z speed)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp110": {
+    "fact": "(Member sk_line_1__i_ep_note_20261104T051925Z line)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp111": {
+    "fact": "(Member sk_close_1__i_ep_note_20261104T051925Z close)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp112": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T051925Z day)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp113": {
+    "fact": "(Member sk_pass_1__i_ep_note_20261104T051925Z pass)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp114": {
+    "fact": "(Member sk_cleanup_1__i_ep_note_20261104T051925Z done)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp115": {
+    "fact": "(Member sk_remove_1__i_ep_note_20261104T051925Z remove)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp116": {
+    "fact": "(Member hive_t_2026_11_04_pettachainer_migration_report unpushed)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp117": {
+    "fact": "(Member sk_rm_1__i_ep_note_20261104T051925Z rm)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp118": {
+    "fact": "(Member sk_rm_2__i_ep_note_20261104T051925Z rm)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp119": {
+    "fact": "(Member sk_rm_3__i_ep_note_20261104T051925Z rm)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp12": {
+    "fact": "(Member tmp_hive_evidence_t_2026_11_04_pettachainer_core_extraction bundle)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp120": {
+    "fact": "(Member sk_rm_4__i_ep_note_20261104T051925Z rm)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp121": {
+    "fact": "(Member sk_line_1__i_ep_note_20261104T051925Z closed)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp122": {
+    "fact": "(Member sk_group_1__i_ep_note_20261104T051925Z history)",
+    "src": "ep-note-20261104T051925Z"
+   },
+   "sp123": {
+    "fact": "(Member sk_self_check_1__i_ep_note_20261103T004843Z self_check)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp124": {
+    "fact": "(Member sk_case_1__i_ep_note_20261103T004843Z case)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp125": {
+    "fact": "(Member sk_fix_1__i_ep_note_20261103T004843Z fix)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp126": {
+    "fact": "(Member sk_suite_1__i_ep_note_20261103T004843Z suite)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp127": {
+    "fact": "(Member sk_tree_1__i_ep_note_20261103T004843Z tree)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp128": {
+    "fact": "(Member sk_queue_1__i_ep_note_20261103T004843Z queue)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp129": {
+    "fact": "(Member sk_time_1__i_ep_note_20261103T004843Z day)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp13": {
+    "fact": "(Member sk_report_1__i_ep_note_20261104T151833Z report)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp130": {
+    "fact": "(Member sk_wait_1__i_ep_note_20261103T004843Z wait)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp131": {
+    "fact": "(Member sk_post_1__i_ep_note_20261103T004843Z post)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp132": {
+    "fact": "(Member sk_find_1__i_ep_note_20261103T004843Z find)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp133": {
+    "fact": "(Member sk_stash_1__i_ep_note_20261103T004843Z stash)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp134": {
+    "fact": "(Member sk_pass_1__i_ep_note_20261103T004843Z pass)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp135": {
+    "fact": "(Member sk_pass_2__i_ep_note_20261103T004843Z pass)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp136": {
+    "fact": "(Member sk_change_1__i_ep_note_20261103T004843Z change)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp137": {
+    "fact": "(Member sk_tree_1__i_ep_note_20261103T004843Z clean)",
+    "src": "ep-note-20261103T004843Z"
+   },
+   "sp138": {
+    "fact": "(Member sk_doc_1__i_ep_note_20261104T193449Z doc)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp139": {
+    "fact": "(Member sk_branch_1__i_ep_note_20261104T193449Z branch)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp14": {
+    "fact": "(Member sk_line_1__i_ep_note_20261104T151833Z line)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp140": {
+    "fact": "(Member sk_identical_1__i_ep_note_20261104T193449Z identical)",
+    "src": "ep-note-20261104T193449Z"
+   },
+   "sp141": {
+    "fact": "(Member sk_table_1__i_ep_note_20261028T121808Z table)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp142": {
+    "fact": "(Member sk_remote_1__i_ep_note_20261028T121808Z remote)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp143": {
+    "fact": "(Member sk_position_1__i_ep_note_20261028T121808Z position)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp144": {
+    "fact": "(Member speaker_link_off note)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp145": {
+    "fact": "(Member sk_remove_1__i_ep_note_20261028T121808Z remove)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp146": {
+    "fact": "(Member sk_point_1__i_ep_note_20261028T121808Z point)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp147": {
+    "fact": "(Member bc95d26 local)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp148": {
+    "fact": "(Member sk_resubmit_1__i_ep_note_20261028T121808Z resubmit)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp149": {
+    "fact": "(Member sk_supersede_1__i_ep_note_20261028T121808Z supersede)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp15": {
+    "fact": "(Member sk_bundle_1__i_ep_note_20261104T151833Z bundle)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp150": {
+    "fact": "(Member sk_time_1__i_ep_note_20261028T121808Z day)",
+    "src": "ep-note-20261028T121808Z"
+   },
+   "sp151": {
+    "fact": "(Member sk_cause_1__i_ep_note_20261028T185959Z cause)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp152": {
+    "fact": "(Member sk_directory_1__i_ep_note_20261028T185959Z directory)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp153": {
+    "fact": "(Member sk_hash_1__i_ep_note_20261028T185959Z hash)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp154": {
+    "fact": "(Member sk_result_1__i_ep_note_20261028T185959Z result)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp155": {
+    "fact": "(Member sk_clone_1__i_ep_note_20261028T185959Z clone)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp156": {
+    "fact": "(Member sk_sidecar_1__i_ep_note_20261028T185959Z sidecar)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp157": {
+    "fact": "(Member sk_pin_1__i_ep_note_20261028T185959Z pin)",
+    "src": "ep-note-20261028T185959Z"
+   },
+   "sp158": {
+    "fact": "(Member sk_result_1__i_ep_note_20261104T193740Z result)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp159": {
+    "fact": "(Member tmp_hive_evidence_t_2026_11_04_p1_engine bundle)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp16": {
+    "fact": "(Member sk_post_1__i_ep_note_20261104T151833Z post)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp160": {
+    "fact": "(Member hive_t_2026_11_04_p1_engine branch)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp161": {
+    "fact": "(Member sk_review_1__i_ep_note_20261104T193740Z review)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp162": {
+    "fact": "(Member sk_channel_1__i_ep_note_20261104T193740Z channel)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp163": {
+    "fact": "(Member sk_bundle_1__i_ep_note_20261104T193740Z bundle)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp164": {
+    "fact": "(Member sk_post_1__i_ep_note_20261104T193740Z post)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp165": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T193740Z day)",
+    "src": "ep-note-20261104T193740Z"
+   },
+   "sp166": {
+    "fact": "(Member sk_evidence_1__i_ep_note_20261028T185132Z evidence)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp167": {
+    "fact": "(Member sk_commit_1__i_ep_note_20261028T185132Z commit)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp168": {
+    "fact": "(Member sk_submission_1__i_ep_note_20261028T185132Z submission)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp169": {
+    "fact": "(Member sk_commit_2__i_ep_note_20261028T185132Z commit)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp17": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T151833Z day)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp170": {
+    "fact": "(Member sk_clone_1__i_ep_note_20261028T185132Z clone)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp171": {
+    "fact": "(Member sk_sidecar_1__i_ep_note_20261028T185132Z sidecar)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp172": {
+    "fact": "(Member sk_check_py_1__i_ep_note_20261028T185132Z check_py)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp173": {
+    "fact": "(Member sk_output_1__i_ep_note_20261028T185132Z output)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp174": {
+    "fact": "(Member sk_config_1__i_ep_note_20261028T185132Z config)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp175": {
+    "fact": "(Member sk_ref_1__i_ep_note_20261028T185132Z ref)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp176": {
+    "fact": "(Member sk_task_1__i_ep_note_20261028T185132Z task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp177": {
+    "fact": "(Member sk_side_1__i_ep_note_20261028T185132Z side)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp178": {
+    "fact": "(Member sk_task_3__i_ep_note_20261028T185132Z task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp179": {
+    "fact": "(Member sk_task_4__i_ep_note_20261028T185132Z task)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp18": {
+    "fact": "(Member sk_coverage_1__i_ep_note_20261104T151833Z gain)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp180": {
+    "fact": "(Member sk_repeat_1__i_ep_note_20261028T185132Z repeat)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp181": {
+    "fact": "(Member sk_pin_1__i_ep_note_20261028T185132Z pin)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp182": {
+    "fact": "(Member sk_hold_1__i_ep_note_20261028T185132Z hold)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp183": {
+    "fact": "(Member sk_close_1__i_ep_note_20261028T185132Z close)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp184": {
+    "fact": "(Member sk_check_out_1__i_ep_note_20261028T185132Z check_out)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp185": {
+    "fact": "(Member sk_close_2__i_ep_note_20261028T185132Z close)",
+    "src": "ep-note-20261028T185132Z"
+   },
+   "sp186": {
+    "fact": "(Member sk_reviewer_1__i_ep_note_20261104T045724Z reviewer)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp187": {
+    "fact": "(Member sk_sanitize_1__i_ep_note_20261104T045724Z sanitize)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp188": {
+    "fact": "(Member sk_search_1__i_ep_note_20261104T045724Z search)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp189": {
+    "fact": "(Member sk_want_1__i_ep_note_20261104T045724Z want)",
+    "src": "ep-note-20261104T045724Z"
+   },
+   "sp19": {
+    "fact": "(Member sk_speed_1__i_ep_note_20261104T151833Z unshown)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp2": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T154242Z day)",
+    "src": "ep-note-20261104T154242Z"
+   },
+   "sp20": {
+    "fact": "(Member sk_correct_1__i_ep_note_20261104T151833Z correct)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp21": {
+    "fact": "(Member sk_review_1__i_ep_note_20261104T051320Z review)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp22": {
+    "fact": "(Member 3681b9b upgrade)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp23": {
+    "fact": "(Member sk_fix_1__i_ep_note_20261104T051320Z fix)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp24": {
+    "fact": "(Member b option)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp25": {
+    "fact": "(Member sk_report_1__i_ep_note_20261104T051320Z report)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp26": {
+    "fact": "(Member sk_list_1__i_ep_note_20261104T051320Z list)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp27": {
+    "fact": "(Member sk_fail_1__i_ep_note_20261104T051320Z fail)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp28": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T051320Z day)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp29": {
+    "fact": "(Member sk_post_1__i_ep_note_20261104T051320Z post)",
+    "src": "ep-note-20261104T051320Z"
+   },
+   "sp3": {
+    "fact": "(Member sk_result_1__i_ep_note_20261104T043925Z result)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp30": {
+    "fact": "(Member sk_route_1__i_ep_note_20261028T122745Z route)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp31": {
+    "fact": "(Member sk_sidecar_1__i_ep_note_20261028T122745Z sidecar)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp32": {
+    "fact": "(Member sk_head_1__i_ep_note_20261028T122745Z head)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp33": {
+    "fact": "(Member sk_clone_1__i_ep_note_20261028T122745Z clone)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp34": {
+    "fact": "(Member sk_commit_1__i_ep_note_20261028T122745Z commit)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp35": {
+    "fact": "(Member sk_copy_1__i_ep_note_20261028T122745Z copy)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp36": {
+    "fact": "(Member sk_note_1__i_ep_note_20261028T122745Z note)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp37": {
+    "fact": "(Member 6df07f5 stray)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp38": {
+    "fact": "(Member sk_contradict_1__i_ep_note_20261028T122745Z contradict)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp39": {
+    "fact": "(Member sk_supersede_1__i_ep_note_20261028T122745Z supersede)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp4": {
+    "fact": "(Member 9d9b82d commit)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp40": {
+    "fact": "(Member sk_support_1__i_ep_note_20261028T122745Z support)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp41": {
+    "fact": "(Member sk_close_1__i_ep_note_20261028T122745Z close)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp42": {
+    "fact": "(Member sk_belong_1__i_ep_note_20261028T122745Z belong)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp43": {
+    "fact": "(Member sk_show_1__i_ep_note_20261028T122745Z show)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp44": {
+    "fact": "(Member sk_confirm_1__i_ep_note_20261028T122745Z confirm)",
+    "src": "ep-note-20261028T122745Z"
+   },
+   "sp45": {
+    "fact": "(Member sk_repro_1__i_ep_note_20261104T181709Z repro)",
+    "src": "ep-note-20261104T181709Z"
+   },
+   "sp46": {
+    "fact": "(Member sk_result_1__i_ep_note_20261104T194242Z result)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp47": {
+    "fact": "(Member hive_gh_1__i_ep_note_20261104T194242Z remote)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp48": {
+    "fact": "(Member hive_t_2026_11_04_p1_engine branch)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp49": {
+    "fact": "(Member sk_commit_1__i_ep_note_20261104T194242Z commit)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp5": {
+    "fact": "(Member sk_post_1__i_ep_note_20261104T043925Z post)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp50": {
+    "fact": "(Member sk_outcome_1__i_ep_note_20261104T194242Z outcome)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp51": {
+    "fact": "(Member sk_repost_1__i_ep_note_20261104T194242Z repost)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp52": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T194242Z day)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp53": {
+    "fact": "(Member sk_fail_1__i_ep_note_20261104T194242Z fail)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp54": {
+    "fact": "(Member sk_add_1__i_ep_note_20261104T194242Z add)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp55": {
+    "fact": "(Member sk_update_1__i_ep_note_20261104T194242Z update)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp56": {
+    "fact": "(Member sk_list_1__i_ep_note_20261104T194242Z list)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp57": {
+    "fact": "(Member sk_stage_1__i_ep_note_20261104T194242Z stage)",
+    "src": "ep-note-20261104T194242Z"
+   },
+   "sp58": {
+    "fact": "(Member sk_note_1__i_ep_note_20261028T153222Z note)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp59": {
+    "fact": "(Member sk_recall_1__i_ep_note_20261028T153222Z recall)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp6": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T043925Z day)",
+    "src": "ep-note-20261104T043925Z"
+   },
+   "sp60": {
+    "fact": "(Member sk_note_2__i_ep_note_20261028T153222Z note)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp61": {
+    "fact": "(Member sk_check_1__i_ep_note_20261028T153222Z check)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp62": {
+    "fact": "(Member sk_result_1__i_ep_note_20261028T153222Z result)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp63": {
+    "fact": "(Member sk_environment_1__i_ep_note_20261028T153222Z environment)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp64": {
+    "fact": "(Member main_2__i_ep_note_20261028T153222Z local)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp65": {
+    "fact": "(Member sk_supersede_1__i_ep_note_20261028T153222Z supersede)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp66": {
+    "fact": "(Member sk_contradict_1__i_ep_note_20261028T153222Z contradict)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp67": {
+    "fact": "(Member sk_submit_1__i_ep_note_20261028T153222Z submit)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp68": {
+    "fact": "(Member sk_wait_1__i_ep_note_20261028T153222Z wait)",
+    "src": "ep-note-20261028T153222Z"
+   },
+   "sp69": {
+    "fact": "(Member sk_result_1__i_ep_note_20261028T183317Z result)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp7": {
+    "fact": "(Member sk_result_1__i_ep_note_20261104T151833Z result)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp70": {
+    "fact": "(Member sk_comparison_1__i_ep_note_20261028T183317Z comparison)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp71": {
+    "fact": "(Member sk_post_1__i_ep_note_20261028T183317Z post)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp72": {
+    "fact": "(Member sk_time_1__i_ep_note_20261028T183317Z day)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp73": {
+    "fact": "(Member v2_1__i_ep_note_20261028T183317Z live)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp74": {
+    "fact": "(Member sk_wait_1__i_ep_note_20261028T183317Z wait)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp75": {
+    "fact": "(Member sk_time_2__i_ep_note_20261028T183317Z day)",
+    "src": "ep-note-20261028T183317Z"
+   },
+   "sp76": {
+    "fact": "(Member sk_result_1__i_ep_note_20261104T165705Z result)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp77": {
+    "fact": "(Member sk_acl_1__i_ep_note_20261104T165705Z acl)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp78": {
+    "fact": "(Member sk_post_1__i_ep_note_20261104T165705Z post)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp79": {
+    "fact": "(Member sk_time_1__i_ep_note_20261104T165705Z day)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp8": {
+    "fact": "(Member sk_coverage_1__i_ep_note_20261104T151833Z coverage)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp80": {
+    "fact": "(Member sk_correct_1__i_ep_note_20261104T165705Z correct)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp81": {
+    "fact": "(Member sk_add_1__i_ep_note_20261104T165705Z add)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp82": {
+    "fact": "(Member sk_add_2__i_ep_note_20261104T165705Z add)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp83": {
+    "fact": "(Member sk_need_1__i_ep_note_20261104T165705Z need)",
+    "src": "ep-note-20261104T165705Z"
+   },
+   "sp84": {
+    "fact": "(Member sk_result_1__i_ep_note_20261103T203949Z result)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp85": {
+    "fact": "(Member sk_bundle_1__i_ep_note_20261103T203949Z bundle)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp86": {
+    "fact": "(Member sk_host_1__i_ep_note_20261103T203949Z host)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp87": {
+    "fact": "(Member sk_post_1__i_ep_note_20261103T203949Z post)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp88": {
+    "fact": "(Member sk_time_1__i_ep_note_20261103T203949Z day)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp89": {
+    "fact": "(Member sk_rerun_1__i_ep_note_20261103T203949Z rerun)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp9": {
+    "fact": "(Member sk_confidence_1__i_ep_note_20261104T151833Z confidence)",
+    "src": "ep-note-20261104T151833Z"
+   },
+   "sp90": {
+    "fact": "(Member sk_unset_1__i_ep_note_20261103T203949Z unset)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp91": {
+    "fact": "(Member sk_unset_2__i_ep_note_20261103T203949Z unset)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp92": {
+    "fact": "(Member sk_have_1__i_ep_note_20261103T203949Z have)",
+    "src": "ep-note-20261103T203949Z"
+   },
+   "sp93": {
+    "fact": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp94": {
+    "fact": "(Member sk_cleanup_1__i_ep_note_20261028T190214Z cleanup)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp95": {
+    "fact": "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp96": {
+    "fact": "(Member sk_evidence_1__i_ep_note_20261028T190214Z evidence)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp97": {
+    "fact": "(Member sk_pass_1__i_ep_note_20261028T190214Z pass)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp98": {
+    "fact": "(Member sk_use_1__i_ep_note_20261028T190214Z use)",
+    "src": "ep-note-20261028T190214Z"
+   },
+   "sp99": {
+    "fact": "(Member sk_cleanup_1__i_ep_note_20261028T190214Z done)",
+    "src": "ep-note-20261028T190214Z"
+   }
+  },
+  "record_sha256": "0eee0f045e29699f002fc2faddaa5d6cf4359bf9566495e63840809e28261951",
+  "shadow": "ab/runs/full_B/shadow.jsonl",
+  "spec_atoms_sha256": "8cb1fac9033f4abc87f81142159a2b5efc4c7fcf733285df9b80d96a5ad72e0d"
+ }
+}

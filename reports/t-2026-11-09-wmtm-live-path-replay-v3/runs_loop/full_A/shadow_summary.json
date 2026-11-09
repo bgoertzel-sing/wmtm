@@ -1,0 +1,403 @@
+[
+ {
+  "status": "ok",
+  "items": 2,
+  "atoms": 0,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 2,
+  "atoms": 0,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 3,
+  "atoms": 4,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 3,
+  "atoms": 4,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 4,
+  "atoms": 7,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 4,
+  "atoms": 7,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 5,
+  "atoms": 12,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 5,
+  "atoms": 12,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 6,
+  "atoms": 21,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 6,
+  "atoms": 21,
+  "goals_n": 0,
+  "proved": 0,
+  "goals": []
+ },
+ {
+  "status": "ok",
+  "items": 7,
+  "atoms": 27,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 7,
+  "atoms": 27,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 8,
+  "atoms": 32,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 8,
+  "atoms": 32,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 9,
+  "atoms": 46,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 9,
+  "atoms": 46,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 10,
+  "atoms": 50,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 10,
+  "atoms": 50,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 11,
+  "atoms": 56,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 11,
+  "atoms": 56,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 12,
+  "atoms": 57,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 10,
+  "atoms": 53,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 11,
+  "atoms": 60,
+  "goals_n": 2,
+  "proved": 2,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 9,
+  "atoms": 52,
+  "goals_n": 2,
+  "proved": 2,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 10,
+  "atoms": 60,
+  "goals_n": 2,
+  "proved": 2,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 10,
+  "atoms": 60,
+  "goals_n": 2,
+  "proved": 2,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 11,
+  "atoms": 68,
+  "goals_n": 2,
+  "proved": 2,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance hive_progress_report report)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 10,
+  "atoms": 62,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 11,
+  "atoms": 67,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 11,
+  "atoms": 67,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 12,
+  "atoms": 77,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 12,
+  "atoms": 77,
+  "goals_n": 1,
+  "proved": 1,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 13,
+  "atoms": 93,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance chat_send valid)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 13,
+  "atoms": 93,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance chat_send valid)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 14,
+  "atoms": 100,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance chat_send valid)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 14,
+  "atoms": 100,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance chat_send valid)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 15,
+  "atoms": 113,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance chat_send valid)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 13,
+  "atoms": 106,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Inheritance chat_send valid)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 14,
+  "atoms": 116,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Inheritance chat_send valid)",
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ },
+ {
+  "status": "ok",
+  "items": 14,
+  "atoms": 116,
+  "goals_n": 3,
+  "proved": 3,
+  "goals": [
+   "(Inheritance chat_send valid)",
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "(Member turn_without_send_entry entry)"
+  ]
+ }
+]

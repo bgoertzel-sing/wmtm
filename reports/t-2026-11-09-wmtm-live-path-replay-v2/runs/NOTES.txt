@@ -1,0 +1,14 @@
+2026-11-09T11:37:48-07:00 knownA_full: live code + live spk1 copy reproduces F3 v3_A exactly (141 atoms, 4 goals same set, 4 proved, canary ok)
+2026-11-09T11:38:11-07:00 B cache: bfa7db2c had one llm_error (api internal error) at 11:20, retried ok at 11:23 (45 accepted). B parses fed via process_queue into base dir (not spk1, no speaker-linked text); A live spk1 entries all speaker_source=unresolved -> text sent unchanged, so the difference is only the cache location. Record as deviation note in report.
+2026-11-09T11:39:23-07:00 B cache: 43115a46 llm_error (api internal error) 11:38; watching for retry like bfa7db2c. 0 x 429 so far.
+2026-11-09T11:42:10-07:00 feed --n 17 exited after 17 calls (18/20 cached; 43115a46 retry + 43509f30 left); relaunched --n 2
+2026-11-09T11:43:22-07:00 wait 2114 s for parse slot (queue 2, try 1)
+2026-11-09T11:46:12-07:00 judge canary: F3 v3 W1-W4 (DEVIATION_1 nwdef join) + F3 v3 W4 table on knownA_full -> 2C/2W/0U/0 unjudged = F3 v3 A exactly; extract premises (141) and gate rejects (348) identical to F3 v3 A_v3
+2026-11-09T12:19:45-07:00 wait 36 s for parse slot (queue 1, try 2)
+2026-11-09T12:21:14-07:00 B cache resolves 19/20
+2026-11-09T12:21:14-07:00 FULL_SKIPPED B cache incomplete
+2026-11-09T12:27:43-07:00 43115a46 cached failed after 2x llm_error (api internal error); sandbox-only retry 3: removed failed entry (backup cache.jsonl.bak_pre_retry3), re-enqueued attempts=0, feed --n 1
+2026-11-09T12:29:54-07:00 retry 3 of 43115a46 ok (33 accepted, 107s); B cache resolves 20/20
+2026-11-09T12:30:19-07:00 FULL_DONE rc=0
+2026-11-09T12:31:08-07:00 full A/B judged: A_full 2C/2W (=F3 v3 A, 141 atoms, 4 goals); B_full 243 atoms/190 facts, goals_n 0 (goal_rank pool 0), 0C/0W; gate1 count rule FAILS (B correct 0 < A 2). NOTE petta differs: A vendor petta-v1.0.6, B p1-engine petta-3681b9b
+2026-11-09T12:32:16-07:00 B goals_n=0 diagnosis: B KB has 0 Inheritance (heads Member 190, Implication 53); goal_pool and rule_goal_pool both 0 even with skolem_goals=True -> no Member x Inheritance / transitive chain possible. Same root cause as flat-inheritance-v2 (parser emits no flat Inheritance). Confound: petta A=vendor v1.0.6, B=p1-engine 3681b9b

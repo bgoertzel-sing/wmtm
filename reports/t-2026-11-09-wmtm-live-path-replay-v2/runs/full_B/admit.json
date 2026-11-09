@@ -1,0 +1,1 @@
+{"ts": 1794252619.1608922, "spec_ts": 1793867629.9887795, "cycle": 0, "status": "ok", "canary_ok": true, "timeout_s": 2.0, "budget_s": 20.0, "skipped_budget": 0, "timeouts": 0, "asked": 0, "results": [], "gate": {"on": true, "rejected": {"broad_category": 1}, "discounted": {}}}
