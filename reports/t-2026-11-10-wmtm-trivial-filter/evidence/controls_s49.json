@@ -1,0 +1,496 @@
+{
+ "s49_run_live": [
+  {
+   "goal": "(Member sk_confidence_1__i_ep_note_20261104T151833Z penalty)",
+   "proof": "(: (by sp30 sp29) (Member sk_confidence_1__i_ep_note_20261104T151833Z penalty) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_see_1__i_ep_note_20261028T185959Z cause)",
+   "proof": "(: (by sp353 sp352) (Member sk_see_1__i_ep_note_20261028T185959Z cause) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_note_1__i_ep_note_20261028T153222Z recall)",
+   "proof": "(: (by sp118 sp117) (Member sk_note_1__i_ep_note_20261028T153222Z recall) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_note_1__i_ep_note_20261028T153222Z top)",
+   "proof": "(: (by sp119 sp117) (Member sk_note_1__i_ep_note_20261028T153222Z top) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Inheritance chat_send valid)",
+   "proof": "(: (conditional-implication (by sp382 (merge/revision (by sp388 (ctx proof 0)) (by sp457 (ctx proof 0))))) (Inheritance chat_send valid) (STV 0.9 0.8999999889358341))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_send_1__i_ep_note_20261028T185132Z valid)",
+   "proof": "(: (by sp382 sp452) (Member sk_send_1__i_ep_note_20261028T185132Z valid) (STV 0.9 0.8999999778718083))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member before_vs_after gap)",
+   "proof": "(: (by sp262 sp263) (Member before_vs_after gap) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member merge_a_into_b_vs_the_reverse gap)",
+   "proof": "(: (by sp262 sp264) (Member merge_a_into_b_vs_the_reverse gap) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member swap_x_and_y case)",
+   "proof": "(: (by sp267 sp266) (Member swap_x_and_y case) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member swap_x_and_y gap)",
+   "proof": "(: (by sp262 sp265) (Member swap_x_and_y gap) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "proof": "(: (by sp215 sp214) (Member hive_t_2026_10_28_goalchainer_v2_status branch) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_follow_up_1__i_ep_note_20261104T043925Z open)",
+   "proof": "(: (by sp20 sp19) (Member sk_follow_up_1__i_ep_note_20261104T043925Z open) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_line_1__i_ep_note_20261104T151833Z line)",
+   "proof": "(: (by sp34 sp33) (Member sk_line_1__i_ep_note_20261104T151833Z line) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_run_1__i_ep_note_20261104T165705Z run)",
+   "proof": "(: (by sp188 sp187) (Member sk_run_1__i_ep_note_20261104T165705Z run) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_count_1__i_ep_note_20261028T153222Z count)",
+   "proof": "(: (by sp146 sp145) (Member sk_count_1__i_ep_note_20261028T153222Z count) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_failure_1__i_ep_note_20261028T153222Z failure)",
+   "proof": "(: (conditioned sp138 (merge/revision (by sp134 (given true)) (by sp418 (given true))) (merge/revision (by sp134 (given false)) (by sp418 (given false)))) (Member sk_failure_1__i_ep_note_20261028T153222Z failure) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_failure_2__i_ep_note_20261028T153222Z failure)",
+   "proof": "(: (conditioned sp139 (merge/revision (by sp134 (given true)) (by sp418 (given true))) (merge/revision (by sp134 (given false)) (by sp418 (given false)))) (Member sk_failure_2__i_ep_note_20261028T153222Z failure) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_failure_3__i_ep_note_20261028T153222Z failure)",
+   "proof": "(: (conditioned sp140 (merge/revision (by sp134 (given true)) (by sp418 (given true))) (merge/revision (by sp134 (given false)) (by sp418 (given false)))) (Member sk_failure_3__i_ep_note_20261028T153222Z failure) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_result_text_1__i_ep_note_20261028T185132Z text)",
+   "proof": "(: (by sp433 sp435) (Member sk_result_text_1__i_ep_note_20261028T185132Z text) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_side_1__i_ep_note_20261028T185132Z side)",
+   "proof": "(: (by sp453 sp454) (Member sk_side_1__i_ep_note_20261028T185132Z side) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_task_1__i_ep_note_20261028T153222Z task)",
+   "proof": "(: (by sp131 sp132) (Member sk_task_1__i_ep_note_20261028T153222Z task) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_task_2__i_ep_note_20261028T153222Z task)",
+   "proof": "(: (by sp131 sp133) (Member sk_task_2__i_ep_note_20261028T153222Z task) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_top_recall_1__i_ep_note_20261028T153222Z recall)",
+   "proof": "(: (by sp118 sp116) (Member sk_top_recall_1__i_ep_note_20261028T153222Z recall) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_top_recall_1__i_ep_note_20261028T153222Z top)",
+   "proof": "(: (by sp119 sp116) (Member sk_top_recall_1__i_ep_note_20261028T153222Z top) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_channel_1__i_ep_note_20261104T193740Z channel)",
+   "proof": "(: (by sp413 sp412) (Member sk_channel_1__i_ep_note_20261104T193740Z channel) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Inheritance hive_progress_report report)",
+   "proof": "(: (conditional-implication (by sp92 (by sp91 (ctx proof 1)))) (Inheritance hive_progress_report report) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_error_1__i_ep_note_20261104T193449Z error)",
+   "proof": "(: (by sp293 sp294) (Member sk_error_1__i_ep_note_20261104T193449Z error) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_error_2__i_ep_note_20261104T193449Z error)",
+   "proof": "(: (by sp293 sp296) (Member sk_error_2__i_ep_note_20261104T193449Z error) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_error_3__i_ep_note_20261104T193449Z error)",
+   "proof": "(: (by sp293 sp298) (Member sk_error_3__i_ep_note_20261104T193449Z error) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_diff_1__i_ep_note_20261103T004843Z diff)",
+   "proof": "(: (by sp284 sp283) (Member sk_diff_1__i_ep_note_20261103T004843Z diff) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_position_1__i_ep_note_20261028T121808Z position)",
+   "proof": "(: (conditioned sp327 (merge/revision (by sp255 (given true)) (by sp328 (given true))) (merge/revision (by sp255 (given false)) (by sp328 (given false)))) (Member sk_position_1__i_ep_note_20261028T121808Z position) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_position_1__i_ep_note_20261103T004843Z position)",
+   "proof": "(: (conditioned sp254 (merge/revision (by sp255 (given true)) (by sp328 (given true))) (merge/revision (by sp255 (given false)) (by sp328 (given false)))) (Member sk_position_1__i_ep_note_20261103T004843Z position) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_self_check_1__i_ep_note_20261103T004843Z check)",
+   "proof": "(: (by sp259 sp258) (Member sk_self_check_1__i_ep_note_20261103T004843Z check) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z tree)",
+   "proof": "(: (by sp279 sp278) (Member sk_tree_1__i_ep_note_20261103T004843Z tree) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_fix_1__i_ep_note_20261104T051320Z fix)",
+   "proof": "(: (by sp45 sp44) (Member sk_fix_1__i_ep_note_20261104T051320Z fix) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_line_1__i_ep_note_20261104T051925Z line)",
+   "proof": "(: (by sp246 sp245) (Member sk_line_1__i_ep_note_20261104T051925Z line) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_list_1__i_ep_note_20261104T051320Z list)",
+   "proof": "(: (by sp54 sp53) (Member sk_list_1__i_ep_note_20261104T051320Z list) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_merge_1__i_ep_note_20261104T051925Z merge)",
+   "proof": "(: (by sp240 sp239) (Member sk_merge_1__i_ep_note_20261104T051925Z merge) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_report_1__i_ep_note_20261104T051320Z report)",
+   "proof": "(: (by sp52 sp51) (Member sk_report_1__i_ep_note_20261104T051320Z report) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_comparison_1__i_ep_note_20261028T183317Z comparison)",
+   "proof": "(: (by sp166 sp165) (Member sk_comparison_1__i_ep_note_20261028T183317Z comparison) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_evidence_2__i_ep_note_20261028T185959Z evidence)",
+   "proof": "(: (by sp360 sp359) (Member sk_evidence_2__i_ep_note_20261028T185959Z evidence) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_rule_1__i_ep_note_20261028T185959Z rule)",
+   "proof": "(: (by sp348 sp347) (Member sk_rule_1__i_ep_note_20261028T185959Z rule) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_task_1__i_ep_note_20261028T185959Z task)",
+   "proof": "(: (by sp362 sp361) (Member sk_task_1__i_ep_note_20261028T185959Z task) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member turn_without_send_entry entry)",
+   "proof": "(: (by sp380 sp379) (Member turn_without_send_entry entry) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_branch_1__i_ep_note_20261028T122745Z branch)",
+   "proof": "(: (by sp78 sp77) (Member sk_branch_1__i_ep_note_20261028T122745Z branch) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle)",
+   "proof": "(: (by sp209 sp208) (Member sk_bundle_1__i_ep_note_20261028T190214Z bundle) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_code_ref_1__i_ep_note_20261028T122745Z ref)",
+   "proof": "(: (by sp81 sp80) (Member sk_code_ref_1__i_ep_note_20261028T122745Z ref) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_copy_1__i_ep_note_20261028T122745Z copy)",
+   "proof": "(: (by sp74 sp73) (Member sk_copy_1__i_ep_note_20261028T122745Z copy) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_search_1__i_ep_note_20261104T194242Z search)",
+   "proof": "(: (by sp104 sp103) (Member sk_search_1__i_ep_note_20261104T194242Z search) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  }
+ ],
+ "s49_run_snap": [
+  {
+   "goal": "(Member sk_confidence_1__i_ep_note_20261104T151833Z penalty)",
+   "proof": "(: (by sp30 sp29) (Member sk_confidence_1__i_ep_note_20261104T151833Z penalty) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_see_1__i_ep_note_20261028T185959Z cause)",
+   "proof": "(: (by sp353 sp352) (Member sk_see_1__i_ep_note_20261028T185959Z cause) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_note_1__i_ep_note_20261028T153222Z recall)",
+   "proof": "(: (by sp118 sp117) (Member sk_note_1__i_ep_note_20261028T153222Z recall) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_note_1__i_ep_note_20261028T153222Z top)",
+   "proof": "(: (by sp119 sp117) (Member sk_note_1__i_ep_note_20261028T153222Z top) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Inheritance chat_send valid)",
+   "proof": "(: (conditional-implication (by sp382 (merge/revision (by sp388 (ctx proof 0)) (by sp457 (ctx proof 0))))) (Inheritance chat_send valid) (STV 0.9 0.8999999889358341))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_send_1__i_ep_note_20261028T185132Z valid)",
+   "proof": "(: (by sp382 sp452) (Member sk_send_1__i_ep_note_20261028T185132Z valid) (STV 0.9 0.8999999778718083))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member before_vs_after gap)",
+   "proof": "(: (by sp262 sp263) (Member before_vs_after gap) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member merge_a_into_b_vs_the_reverse gap)",
+   "proof": "(: (by sp262 sp264) (Member merge_a_into_b_vs_the_reverse gap) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member swap_x_and_y case)",
+   "proof": "(: (by sp267 sp266) (Member swap_x_and_y case) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member swap_x_and_y gap)",
+   "proof": "(: (by sp262 sp265) (Member swap_x_and_y gap) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status branch)",
+   "proof": "(: (by sp215 sp214) (Member hive_t_2026_10_28_goalchainer_v2_status branch) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_follow_up_1__i_ep_note_20261104T043925Z open)",
+   "proof": "(: (by sp20 sp19) (Member sk_follow_up_1__i_ep_note_20261104T043925Z open) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_line_1__i_ep_note_20261104T151833Z line)",
+   "proof": "(: (by sp34 sp33) (Member sk_line_1__i_ep_note_20261104T151833Z line) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_run_1__i_ep_note_20261104T165705Z run)",
+   "proof": "(: (by sp188 sp187) (Member sk_run_1__i_ep_note_20261104T165705Z run) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_count_1__i_ep_note_20261028T153222Z count)",
+   "proof": "(: (by sp146 sp145) (Member sk_count_1__i_ep_note_20261028T153222Z count) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_failure_1__i_ep_note_20261028T153222Z failure)",
+   "proof": "(: (conditioned sp138 (merge/revision (by sp134 (given true)) (by sp418 (given true))) (merge/revision (by sp134 (given false)) (by sp418 (given false)))) (Member sk_failure_1__i_ep_note_20261028T153222Z failure) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_failure_2__i_ep_note_20261028T153222Z failure)",
+   "proof": "(: (conditioned sp139 (merge/revision (by sp134 (given true)) (by sp418 (given true))) (merge/revision (by sp134 (given false)) (by sp418 (given false)))) (Member sk_failure_2__i_ep_note_20261028T153222Z failure) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_failure_3__i_ep_note_20261028T153222Z failure)",
+   "proof": "(: (conditioned sp140 (merge/revision (by sp134 (given true)) (by sp418 (given true))) (merge/revision (by sp134 (given false)) (by sp418 (given false)))) (Member sk_failure_3__i_ep_note_20261028T153222Z failure) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_result_text_1__i_ep_note_20261028T185132Z text)",
+   "proof": "(: (by sp433 sp435) (Member sk_result_text_1__i_ep_note_20261028T185132Z text) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_side_1__i_ep_note_20261028T185132Z side)",
+   "proof": "(: (by sp453 sp454) (Member sk_side_1__i_ep_note_20261028T185132Z side) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_task_1__i_ep_note_20261028T153222Z task)",
+   "proof": "(: (by sp131 sp132) (Member sk_task_1__i_ep_note_20261028T153222Z task) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_task_2__i_ep_note_20261028T153222Z task)",
+   "proof": "(: (by sp131 sp133) (Member sk_task_2__i_ep_note_20261028T153222Z task) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_top_recall_1__i_ep_note_20261028T153222Z recall)",
+   "proof": "(: (by sp118 sp116) (Member sk_top_recall_1__i_ep_note_20261028T153222Z recall) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_top_recall_1__i_ep_note_20261028T153222Z top)",
+   "proof": "(: (by sp119 sp116) (Member sk_top_recall_1__i_ep_note_20261028T153222Z top) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_channel_1__i_ep_note_20261104T193740Z channel)",
+   "proof": "(: (by sp413 sp412) (Member sk_channel_1__i_ep_note_20261104T193740Z channel) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Inheritance hive_progress_report report)",
+   "proof": "(: (conditional-implication (by sp92 (by sp91 (ctx proof 1)))) (Inheritance hive_progress_report report) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_error_1__i_ep_note_20261104T193449Z error)",
+   "proof": "(: (by sp293 sp294) (Member sk_error_1__i_ep_note_20261104T193449Z error) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_error_2__i_ep_note_20261104T193449Z error)",
+   "proof": "(: (by sp293 sp296) (Member sk_error_2__i_ep_note_20261104T193449Z error) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_error_3__i_ep_note_20261104T193449Z error)",
+   "proof": "(: (by sp293 sp298) (Member sk_error_3__i_ep_note_20261104T193449Z error) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_diff_1__i_ep_note_20261103T004843Z diff)",
+   "proof": "(: (by sp284 sp283) (Member sk_diff_1__i_ep_note_20261103T004843Z diff) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_position_1__i_ep_note_20261028T121808Z position)",
+   "proof": "(: (conditioned sp327 (merge/revision (by sp255 (given true)) (by sp328 (given true))) (merge/revision (by sp255 (given false)) (by sp328 (given false)))) (Member sk_position_1__i_ep_note_20261028T121808Z position) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_position_1__i_ep_note_20261103T004843Z position)",
+   "proof": "(: (conditioned sp254 (merge/revision (by sp255 (given true)) (by sp328 (given true))) (merge/revision (by sp255 (given false)) (by sp328 (given false)))) (Member sk_position_1__i_ep_note_20261103T004843Z position) (STV 1.0 0.9916527406555187))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_self_check_1__i_ep_note_20261103T004843Z check)",
+   "proof": "(: (by sp259 sp258) (Member sk_self_check_1__i_ep_note_20261103T004843Z check) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z tree)",
+   "proof": "(: (by sp279 sp278) (Member sk_tree_1__i_ep_note_20261103T004843Z tree) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_fix_1__i_ep_note_20261104T051320Z fix)",
+   "proof": "(: (by sp45 sp44) (Member sk_fix_1__i_ep_note_20261104T051320Z fix) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_line_1__i_ep_note_20261104T051925Z line)",
+   "proof": "(: (by sp246 sp245) (Member sk_line_1__i_ep_note_20261104T051925Z line) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_list_1__i_ep_note_20261104T051320Z list)",
+   "proof": "(: (by sp54 sp53) (Member sk_list_1__i_ep_note_20261104T051320Z list) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_merge_1__i_ep_note_20261104T051925Z merge)",
+   "proof": "(: (by sp240 sp239) (Member sk_merge_1__i_ep_note_20261104T051925Z merge) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_report_1__i_ep_note_20261104T051320Z report)",
+   "proof": "(: (by sp52 sp51) (Member sk_report_1__i_ep_note_20261104T051320Z report) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_comparison_1__i_ep_note_20261028T183317Z comparison)",
+   "proof": "(: (by sp166 sp165) (Member sk_comparison_1__i_ep_note_20261028T183317Z comparison) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_evidence_2__i_ep_note_20261028T185959Z evidence)",
+   "proof": "(: (by sp360 sp359) (Member sk_evidence_2__i_ep_note_20261028T185959Z evidence) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_rule_1__i_ep_note_20261028T185959Z rule)",
+   "proof": "(: (by sp348 sp347) (Member sk_rule_1__i_ep_note_20261028T185959Z rule) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_task_1__i_ep_note_20261028T185959Z task)",
+   "proof": "(: (by sp362 sp361) (Member sk_task_1__i_ep_note_20261028T185959Z task) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member turn_without_send_entry entry)",
+   "proof": "(: (by sp380 sp379) (Member turn_without_send_entry entry) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_branch_1__i_ep_note_20261028T122745Z branch)",
+   "proof": "(: (by sp78 sp77) (Member sk_branch_1__i_ep_note_20261028T122745Z branch) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z bundle)",
+   "proof": "(: (by sp209 sp208) (Member sk_bundle_1__i_ep_note_20261028T190214Z bundle) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_code_ref_1__i_ep_note_20261028T122745Z ref)",
+   "proof": "(: (by sp81 sp80) (Member sk_code_ref_1__i_ep_note_20261028T122745Z ref) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_copy_1__i_ep_note_20261028T122745Z copy)",
+   "proof": "(: (by sp74 sp73) (Member sk_copy_1__i_ep_note_20261028T122745Z copy) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  },
+  {
+   "goal": "(Member sk_search_1__i_ep_note_20261104T194242Z search)",
+   "proof": "(: (by sp104 sp103) (Member sk_search_1__i_ep_note_20261104T194242Z search) (STV 1.0 0.9867109082677673))",
+   "rules": {}
+  }
+ ]
+}

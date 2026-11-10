@@ -1,0 +1,399 @@
+{
+ "A": {
+  "counts": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "verdicts": {
+   "(Inheritance chat_send valid)": "WRONG",
+   "(Inheritance hive_progress_report report)": "CORRECT",
+   "(Member hive_t_2026_10_28_goalchainer_v2_status branch)": "WRONG",
+   "(Member turn_without_send_entry entry)": "CORRECT"
+  }
+ },
+ "controls": {
+  "A_A_v3": {
+   "proved": 4,
+   "refused": 0
+  },
+  "A_A_v3r1": {
+   "proved": 4,
+   "refused": 0
+  },
+  "s49_run_live": {
+   "admit_sha256": "b7125a499aac2a32faf8a3fe50602507d917626d4f19c29b34b19a08d822983a",
+   "refused": 0,
+   "results": 49
+  },
+  "s49_run_snap": {
+   "admit_sha256": "1467d078fbb3db6eee45cddd3c7e22c45179a84525271d9f97c8779018980987",
+   "refused": 0,
+   "results": 49
+  }
+ },
+ "parses": {
+  "r1": {
+   "admit_sha256": "7aa7426d122431b8b9569addef05a2f02bebc7ce994f896d3bc737a5e35bf269",
+   "after": {
+    "n": 0,
+    "split": {
+     "non_trivial": 0,
+     "trivial": 0
+    },
+    "verdicts": {}
+   },
+   "before": {
+    "n": 12,
+    "split": {
+     "non_trivial": 0,
+     "trivial": 12
+    },
+    "verdicts": {
+     "CORRECT": 6,
+     "UNCLEAR": 1,
+     "UNJUDGED": 5
+    }
+   },
+   "count_rule": {
+    "after": false,
+    "before": true
+   },
+   "label_disagree": 0,
+   "refused": 12,
+   "refused_non_trivial": 0,
+   "refused_reasons": {
+    "narrow_echo": 12
+   },
+   "rows": [
+    {
+     "goal": "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNCLEAR"
+    },
+    {
+     "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_recall_1__i_ep_note_20261028T153222Z top)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acld)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    }
+   ]
+  },
+  "r2": {
+   "admit_sha256": "0c194fc8fbbb114c7816aaa4f5e02270d51ce53b2d5062d561a2f52cfeb0894d",
+   "after": {
+    "n": 0,
+    "split": {
+     "non_trivial": 0,
+     "trivial": 0
+    },
+    "verdicts": {}
+   },
+   "before": {
+    "n": 14,
+    "split": {
+     "non_trivial": 0,
+     "trivial": 14
+    },
+    "verdicts": {
+     "CORRECT": 6,
+     "UNCLEAR": 1,
+     "UNJUDGED": 5,
+     "WRONG": 2
+    }
+   },
+   "count_rule": {
+    "after": false,
+    "before": true
+   },
+   "label_disagree": 0,
+   "refused": 14,
+   "refused_non_trivial": 0,
+   "refused_reasons": {
+    "narrow_echo": 14
+   },
+   "rows": [
+    {
+     "goal": "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNCLEAR"
+    },
+    {
+     "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_recall_1__i_ep_note_20261028T153222Z top)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_diff_1__i_ep_note_20261104T051320Z tested)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acl_d)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_diff_1__i_ep_note_20261028T122745Z inline)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "WRONG"
+    },
+    {
+     "goal": "(Member sk_config_1__i_ep_note_20261028T185959Z effective)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "WRONG"
+    },
+    {
+     "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    }
+   ]
+  },
+  "r3": {
+   "admit_sha256": "f77b9739c7fb1d73be1e6d71f68b2265f18a64d33b5d0c20a34913f667221fa2",
+   "after": {
+    "n": 0,
+    "split": {
+     "non_trivial": 0,
+     "trivial": 0
+    },
+    "verdicts": {}
+   },
+   "before": {
+    "n": 10,
+    "split": {
+     "non_trivial": 0,
+     "trivial": 10
+    },
+    "verdicts": {
+     "CORRECT": 5,
+     "UNCLEAR": 1,
+     "UNJUDGED": 4
+    }
+   },
+   "count_rule": {
+    "after": false,
+    "before": true
+   },
+   "label_disagree": 0,
+   "refused": 10,
+   "refused_non_trivial": 0,
+   "refused_reasons": {
+    "narrow_echo": 10
+   },
+   "rows": [
+    {
+     "goal": "(Member sk_gain_1__i_ep_note_20261104T151833Z shown)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNCLEAR"
+    },
+    {
+     "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_recall_1__i_ep_note_20261028T153222Z top)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    },
+    {
+     "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "UNJUDGED"
+    },
+    {
+     "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+     "reason": "narrow_echo",
+     "refused": true,
+     "trivial_by_label": true,
+     "verdict": "CORRECT"
+    }
+   ]
+  }
+ }
+}
