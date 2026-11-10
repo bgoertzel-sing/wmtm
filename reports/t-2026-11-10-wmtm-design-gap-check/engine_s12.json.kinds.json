@@ -1,0 +1,15 @@
+{
+ "kinds_in_proofs": {
+  "deduction": false,
+  "induction": false,
+  "abduction": false,
+  "modusponens": false,
+  "revision": false
+ },
+ "proved": [
+  [
+   "(Inheritance cat animal)",
+   "(: (conditional-implication (by sp1 (by sp0 (ctx proof 0)))) (Inheritance cat animal) (STV 1.0 0.8709625388003415))"
+  ]
+ ]
+}

@@ -1,0 +1,145 @@
+{
+ "round1": {
+  "rec": {
+   "mem_cap_mb": 3072,
+   "prio": {
+    "nice": 19,
+    "policy": "idle"
+   },
+   "source": null,
+   "cycle": 0,
+   "spec_ts": 1794278143.3223107,
+   "start_ts": 1794278143.345262,
+   "k": 200,
+   "items": 4,
+   "atoms": 4,
+   "goals_n": 1,
+   "timeout_s": 2.0,
+   "budget_s": 20.0,
+   "steps": 30,
+   "warm_s": 29.126,
+   "add_fail": 0,
+   "petta": "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/petta-3681b9b/python/petta/__init__.py",
+   "canary": {
+    "goal": "(Member grace person)",
+    "s": 0.04,
+    "timeout": false,
+    "ok": true,
+    "n": 1,
+    "stv": [
+     1.0,
+     0.9867
+    ],
+    "proof": "(: (by cg cf) (Member grace person) (STV 1.0 0.9867109082677673))"
+   },
+   "neg": {
+    "goal": "(Member grace robot)",
+    "s": 0.002,
+    "timeout": false,
+    "ok": false,
+    "n": 0
+   },
+   "status": "ok",
+   "prequery_s": 29.169,
+   "skipped_budget": 0,
+   "semparse_items": 4,
+   "unparsed_items": 0,
+   "facts": 4,
+   "build_s": null,
+   "build_error": null,
+   "skolem_goals": false,
+   "gate": {
+    "rejected": {},
+    "discounted": {},
+    "on": true,
+    "decisions": []
+   },
+   "goal_rank": {
+    "pool": 1,
+    "user_items": 0,
+    "req_entities": 0,
+    "req_tokens": 0,
+    "hops": {
+     "1": 1,
+     "2": 0,
+     "3": 0
+    }
+   },
+   "queries": [
+    {
+     "goal": "(Inheritance cat animal)",
+     "s": 0.016,
+     "timeout": false,
+     "ok": true,
+     "n": 1,
+     "stv": [
+      1.0,
+      0.871
+     ],
+     "proof": "(: (conditional-implication (by sp1 (by sp0 (ctx proof 0)))) (Inheritance cat animal) (STV 1.0 0.8709625388003415))",
+     "hops": 1,
+     "score": 0.5,
+     "overlap": 0.0
+    }
+   ],
+   "pc_proved": 1,
+   "timeouts": 0,
+   "prio_end": {
+    "nice": 19,
+    "policy": "idle",
+    "end": {
+     "nice": 19,
+     "policy": "idle"
+    },
+    "resets": 0,
+    "checks": 30
+   },
+   "total_s": 29.244
+  },
+  "admit_info": {
+   "run": "1794278143.3223107/1794278172.6089175",
+   "age_s": 29.3,
+   "run_cycle": 0,
+   "status": "ok",
+   "results": 1,
+   "candidates": 1,
+   "dropped": {
+    "asserted": 0,
+    "no_live_source": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "cap_hit": {},
+   "gate": {
+    "on": true,
+    "rejected": {},
+    "discounted": {}
+   },
+   "admitted": 1
+  },
+  "admitted": [
+   {
+    "id": "derived-pc_deduction-0-a5b6809c",
+    "content": "cat is a animal",
+    "derived_from": [
+     "s1",
+     "s0"
+    ],
+    "provenance": {
+     "reasoner": "pettachainer",
+     "goal": "(Inheritance cat animal)",
+     "stv": [
+      1.0,
+      0.871
+     ],
+     "polarity": "positive",
+     "proof": "(: (conditional-implication (by sp1 (by sp0 (ctx proof 0)))) (Inheritance cat animal) (STV 1.0 0.8709625388003415))",
+     "run_ts": 1794278143.3223107,
+     "query_s": 0.016
+    }
+   }
+  ]
+ }
+}
