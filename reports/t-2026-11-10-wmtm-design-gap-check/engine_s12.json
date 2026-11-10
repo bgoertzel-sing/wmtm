@@ -1,4 +1,15 @@
 {
+ "engine": {
+  "pettachainer_dir": "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/pettachainer-b6aacc68",
+  "pettachainer_tree_sha256": "26636ebfbcb8e5b7e404ee8cbf21a9d177580e188128a24e0232e46a7f20f7c0",
+  "petta_dir": "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/petta-3681b9b",
+  "petta_tree_sha256": "f438eb3d6add7c15e4562a641465996a042da7f11efb98a07e29b12b67a7e8a0",
+  "swipl_bin": "/hive/protocosmo/opt/swipl929/bin",
+  "stated_pins": {
+   "pettachainer": "b6aacc686675c2c3fd5758adbd2ee245e3e7a5a5",
+   "petta": "3681b9baa28d005dfbad21ad9b5d46b243b1e323"
+  }
+ },
  "round1": {
   "rec": {
    "mem_cap_mb": 3072,
@@ -8,8 +19,8 @@
    },
    "source": null,
    "cycle": 0,
-   "spec_ts": 1794278143.3223107,
-   "start_ts": 1794278143.345262,
+   "spec_ts": 1794279365.2317722,
+   "start_ts": 1794279365.2562916,
    "k": 200,
    "items": 4,
    "atoms": 4,
@@ -17,12 +28,12 @@
    "timeout_s": 2.0,
    "budget_s": 20.0,
    "steps": 30,
-   "warm_s": 29.126,
+   "warm_s": 25.425,
    "add_fail": 0,
    "petta": "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/petta-3681b9b/python/petta/__init__.py",
    "canary": {
     "goal": "(Member grace person)",
-    "s": 0.04,
+    "s": 0.083,
     "timeout": false,
     "ok": true,
     "n": 1,
@@ -40,7 +51,7 @@
     "n": 0
    },
    "status": "ok",
-   "prequery_s": 29.169,
+   "prequery_s": 25.511,
    "skipped_budget": 0,
    "semparse_items": 4,
    "unparsed_items": 0,
@@ -92,13 +103,13 @@
      "policy": "idle"
     },
     "resets": 0,
-    "checks": 30
+    "checks": 26
    },
-   "total_s": 29.244
+   "total_s": 25.579
   },
   "admit_info": {
-   "run": "1794278143.3223107/1794278172.6089175",
-   "age_s": 29.3,
+   "run": "1794279365.2317722/1794279390.8707461",
+   "age_s": 25.6,
    "run_cycle": 0,
    "status": "ok",
    "results": 1,
@@ -136,10 +147,142 @@
      ],
      "polarity": "positive",
      "proof": "(: (conditional-implication (by sp1 (by sp0 (ctx proof 0)))) (Inheritance cat animal) (STV 1.0 0.8709625388003415))",
-     "run_ts": 1794278143.3223107,
+     "run_ts": 1794279365.2317722,
      "query_s": 0.016
     }
    }
   ]
+ },
+ "between_rounds": {
+  "forgotten_item": "derived-pc_deduction-0-a5b6809c",
+  "forgotten_content": "cat is a animal",
+  "forgotten_sources": [
+   "s1",
+   "s0"
+  ],
+  "in_forget_log": true
+ },
+ "round2": {
+  "rec": {
+   "mem_cap_mb": 3072,
+   "prio": {
+    "nice": 19,
+    "policy": "idle"
+   },
+   "source": null,
+   "cycle": 0,
+   "spec_ts": 1794279390.9145517,
+   "start_ts": 1794279390.937925,
+   "k": 200,
+   "items": 4,
+   "atoms": 4,
+   "goals_n": 1,
+   "timeout_s": 2.0,
+   "budget_s": 20.0,
+   "steps": 30,
+   "warm_s": 23.08,
+   "add_fail": 0,
+   "petta": "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/petta-3681b9b/python/petta/__init__.py",
+   "canary": {
+    "goal": "(Member grace person)",
+    "s": 0.072,
+    "timeout": false,
+    "ok": true,
+    "n": 1,
+    "stv": [
+     1.0,
+     0.9867
+    ],
+    "proof": "(: (by cg cf) (Member grace person) (STV 1.0 0.9867109082677673))"
+   },
+   "neg": {
+    "goal": "(Member grace robot)",
+    "s": 0.002,
+    "timeout": false,
+    "ok": false,
+    "n": 0
+   },
+   "status": "ok",
+   "prequery_s": 23.155,
+   "skipped_budget": 0,
+   "semparse_items": 4,
+   "unparsed_items": 0,
+   "facts": 4,
+   "build_s": null,
+   "build_error": null,
+   "skolem_goals": false,
+   "gate": {
+    "rejected": {},
+    "discounted": {},
+    "on": true,
+    "decisions": []
+   },
+   "goal_rank": {
+    "pool": 1,
+    "user_items": 0,
+    "req_entities": 0,
+    "req_tokens": 0,
+    "hops": {
+     "1": 1,
+     "2": 0,
+     "3": 0
+    }
+   },
+   "queries": [
+    {
+     "goal": "(Inheritance cat animal)",
+     "s": 0.017,
+     "timeout": false,
+     "ok": true,
+     "n": 1,
+     "stv": [
+      1.0,
+      0.871
+     ],
+     "proof": "(: (conditional-implication (by sp1 (by sp0 (ctx proof 0)))) (Inheritance cat animal) (STV 1.0 0.8709625388003415))",
+     "hops": 1,
+     "score": 0.5,
+     "overlap": 0.0
+    }
+   ],
+   "pc_proved": 1,
+   "timeouts": 0,
+   "prio_end": {
+    "nice": 19,
+    "policy": "idle",
+    "end": {
+     "nice": 19,
+     "policy": "idle"
+    },
+    "resets": 0,
+    "checks": 24
+   },
+   "total_s": 23.22
+  },
+  "admit_info": {
+   "run": "1794279390.9145517/1794279414.188874",
+   "age_s": 23.3,
+   "run_cycle": 0,
+   "status": "ok",
+   "results": 1,
+   "candidates": 0,
+   "dropped": {
+    "asserted": 0,
+    "no_live_source": 0,
+    "bad": 0,
+    "known": 1,
+    "negative": 0,
+    "per_fact_cap": 0
+   },
+   "cap_hit": {},
+   "gate": {
+    "on": true,
+    "rejected": {},
+    "discounted": {}
+   },
+   "skipped": "no_candidates",
+   "admitted": 0
+  },
+  "admitted": []
  }
 }

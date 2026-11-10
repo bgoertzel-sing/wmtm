@@ -5,6 +5,7 @@ tests/test_pc_shadow.py; the PeTTaChainer worker (wmtm.workers.pc_shadow) runs f
 WMTM_PC_VENDOR (and WMTM_SWIPL_BIN) at the vendored runtime; without it the tests skip ("not run: environment").
 Set WMTM_GAPCHECK_ENGINE_OUT to a file to keep the worker record.
 """
+import hashlib
 import json
 import os
 import subprocess
@@ -36,6 +37,46 @@ def _store(texts):
     return st
 
 
+_SKIP_DIRS = {"__pycache__", ".pytest_cache", ".git"}
+
+
+def tree_sha256(root):
+    """Content hash of a source tree: sha256 over sorted 'relpath\\0sha256(file)\\n' lines.  Byte caches
+    (__pycache__, *.pyc) and .git are left out, so a tree that has been run hashes the same as a fresh extract of
+    the same tarball.  reports/t-2026-11-10-wmtm-design-gap-check/tree_sha256.py computes the same value."""
+    h = hashlib.sha256()
+    for d, dirs, files in os.walk(root):
+        dirs[:] = sorted(x for x in dirs if x not in _SKIP_DIRS)
+        for fn in sorted(files):
+            if fn.endswith(".pyc"):
+                continue
+            p = os.path.join(d, fn)
+            if os.path.islink(p):
+                data = ("link:" + os.readlink(p)).encode()
+            else:
+                with open(p, "rb") as f:
+                    data = f.read()
+            h.update(("%s\0%s\n" % (os.path.relpath(p, root), hashlib.sha256(data).hexdigest())).encode())
+    return h.hexdigest()
+
+
+def _engine_identity():
+    """Which engine trees the worker was given (pc_shadow.py:33 and :50 take them from this config)."""
+    return {"pettachainer_dir": os.path.realpath(_CFG["pettachainer_dir"]),
+            "pettachainer_tree_sha256": tree_sha256(_CFG["pettachainer_dir"]),
+            "petta_dir": os.path.realpath(_CFG["petta_dir"]),
+            "petta_tree_sha256": tree_sha256(_CFG["petta_dir"]),
+            "swipl_bin": _CFG.get("swipl_bin"),
+            "stated_pins": {"pettachainer": os.environ.get("WMTM_GAPCHECK_PC_SHA"),
+                            "petta": os.environ.get("WMTM_GAPCHECK_PETTA_SHA")}}
+
+
+def _dump_round(rec, items, info):
+    return {"rec": rec, "admit_info": info,
+            "admitted": [{"id": i.id, "content": i.content, "derived_from": i.derived_from,
+                          "provenance": i.provenance} for i in items]}
+
+
 def _run_worker(tmp_path, spec, tag):
     sp = tmp_path / ("spec-%s.json" % tag); sp.write_text(json.dumps(spec)); out = tmp_path / ("shadow-%s.jsonl" % tag)
     code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out)],
@@ -60,11 +101,10 @@ def test_engine_s12_2_full_cycle_and_no_rederivation(tmp_path):
     orch = WMTMOrchestrator(_store(SYN))
     rec, items, info = _admit_round(orch, tmp_path, "1")
     out = os.environ.get("WMTM_GAPCHECK_ENGINE_OUT")
+    record = {"engine": _engine_identity(), "round1": _dump_round(rec, items, info)}
     if out:
         with open(out, "w") as f:
-            json.dump({"round1": {"rec": rec, "admit_info": info,
-                                  "admitted": [{"id": i.id, "content": i.content, "derived_from": i.derived_from,
-                                                "provenance": i.provenance} for i in items]}}, f, indent=1, default=str)
+            json.dump(record, f, indent=1, default=str)
     proved = {q["goal"] for q in rec["queries"] if q["ok"]}
     assert "(Inheritance cat animal)" in proved                                     # deduction runs
     ded = [i for i in items if "cat" in i.content and "animal" in i.content]
@@ -80,6 +120,13 @@ def test_engine_s12_2_full_cycle_and_no_rederivation(tmp_path):
             break
     assert d.id not in orch.store and orch.forget_log.is_forgotten(d.content, list(d.derived_from))
     rec2, items2, info2 = _admit_round(orch, tmp_path, "2")
+    if out:                                     # round 2 (re-proved, then dropped as known) kept in the artifact too
+        record["between_rounds"] = {"forgotten_item": d.id, "forgotten_content": d.content,
+                                    "forgotten_sources": list(d.derived_from),
+                                    "in_forget_log": orch.forget_log.is_forgotten(d.content, list(d.derived_from))}
+        record["round2"] = _dump_round(rec2, items2, info2)
+        with open(out, "w") as f:
+            json.dump(record, f, indent=1, default=str)
     assert "(Inheritance cat animal)" in {q["goal"] for q in rec2["queries"] if q["ok"]}
     assert not any(i.content == d.content for i in items2), info2
     assert (info2.get("dropped") or {}).get("known", 0) >= 1 or info2.get("skipped") == "no_candidates"
