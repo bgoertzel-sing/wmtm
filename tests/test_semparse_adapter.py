@@ -362,3 +362,34 @@ def test_narrow_preload_f2_modifier_never_a_property(tmp_path):
     # control: a statement that really names harbour keeps it (the check can see the token)
     ad2, _, _ = mk("(: h (Member sk_a harbour) (STV 1.0 0.9))", FakeLoader(), tmp_path)
     assert "harbour" in sp.tokenize(ad2.parse_item("m2", {"content": "x"}).accepted[0])
+
+
+def test_recover_rejected_uses_live_admit(tmp_path, monkeypatch):
+    """A logged petta reject (already named) loads via recover_rejected; it calls the same _admit as parse_item."""
+    L = NarrowRefusingLoader()
+    ad, _, log = mk("", L, tmp_path)
+    logged = "(: i_m1__f (Member sk_a__i_m1 (Narrow pilot (Mod harbour))) (STV 1.0 0.9))"
+    seen = []
+    real = sp.SemParseAdapter._admit
+    monkeypatch.setattr(sp.SemParseAdapter, "_admit", lambda self, *a, **k: seen.append(1) or real(self, *a, **k))
+    r = ad.recover_rejected("m1", [logged])
+    assert seen == [1] and len(r.accepted) == 2 and r.accepted[0].startswith("(: i_m1__f (Member sk_a__i_m1 pilot__nw_")
+
+
+def test_recover_rejected_inheritance_narrow_is_m2_mapped(tmp_path):
+    """Inheritance over a Narrow is an M2-mapped shape (as in parse_normalise): recovered as symbol + one nwdef;
+    the modifier never becomes a property (F2)."""
+    L = NarrowRefusingLoader()
+    ad, _, log = mk("", L, tmp_path)
+    r = ad.recover_rejected("m1", ["(: i_m1__k (Inheritance (Narrow request (Mod user)) open) (STV 0.0 0.9))"])
+    assert len(r.accepted) == 2 and r.accepted[0].startswith("(: i_m1__k (Inheritance request__nw_")
+    assert "user" not in [x for a in r.accepted for x in sp.tokenize(a)]
+
+
+def test_recover_rejected_negative_control_groupof_narrow_stays_refused(tmp_path):
+    """GroupOf over a Narrow is not mapped (F1: no bridge): recovery leaves it as written, refused at petta."""
+    L = FakeLoader(fail_on="(GroupOf")
+    ad, _, log = mk("", L, tmp_path)
+    r = ad.recover_rejected("m1", ["(: i_m1__g (GroupOf sk_g__i_m1 (Narrow pilot (Mod harbour))) (STV 1.0 0.9))"])
+    assert r.accepted == [] and [d["stage"] for d in read_log(log)] == ["petta"]
+    assert not any("PartOf" in a for a in L.atoms)

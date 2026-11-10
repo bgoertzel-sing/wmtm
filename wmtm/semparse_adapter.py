@@ -456,20 +456,37 @@ class SemParseAdapter:
                 pn = prefix_names(n, prefix)
                 if sprefix != prefix:
                     pn = _rescope(pn, prefix, sprefix)
-                pn, nwdefs = narrow_preload(pn)
-                atom = to_str(pn)
-                if ctx_bodies and atom_body(atom) in ctx_bodies:
-                    self._log(res, atom, "context atom re-emitted", "context")
-                    continue
-                if not self._load(res, atom):
-                    continue
-                res.accepted.append(atom)
-                for r in nwdefs:                     # STOPGAP (narrow_preload): the one head-noun link per symbol
-                    if r in res.accepted:
-                        continue
-                    if r in self._nwdef_loaded or self._load(res, r):
-                        self._nwdef_loaded.add(r)
-                        res.accepted.append(r)
+                self._admit(res, pn, ctx_bodies)
+
+    def _admit(self, res, pn, ctx_bodies=()):
+        """The load step for one named statement (after prefix/rescope): narrow_preload, context check, PeTTa load.
+        recover_rejected() feeds logged petta-stage rejects through this same method."""
+        from .semparse_context import atom_body
+        pn, nwdefs = narrow_preload(pn)
+        atom = to_str(pn)
+        if ctx_bodies and atom_body(atom) in ctx_bodies:
+            self._log(res, atom, "context atom re-emitted", "context")
+            return
+        if not self._load(res, atom):
+            return
+        res.accepted.append(atom)
+        for r in nwdefs:                     # STOPGAP (narrow_preload): the one head-noun link per symbol
+            if r in res.accepted:
+                continue
+            if r in self._nwdef_loaded or self._load(res, r):
+                self._nwdef_loaded.add(r)
+                res.accepted.append(r)
+
+    def recover_rejected(self, item_id, atoms) -> "ParseResult":
+        """Re-admit statements a rejects log dropped at stage petta (already named and scoped by _accept_forms),
+        through _admit, the same step the live path uses.  No parse call."""
+        res = ParseResult(str(item_id), "")
+        for src, node, err in split_toplevel("\n".join(atoms)):
+            if err or is_query(node) or check_statement(node):
+                self._log(res, src, "recover: not a statement", "recover")
+                continue
+            self._admit(res, node)
+        return res
 
     def _load(self, res, atom) -> bool:
         """PeTTa load check (loader None = no check).  False = refused and logged at stage petta."""
