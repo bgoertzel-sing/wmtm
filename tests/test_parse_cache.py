@@ -169,7 +169,8 @@ def test_parse_log_size_cap_keeps_hourly_count(tmp_path):
     assert len(open(c.log_path).read().splitlines()) == 5                               # old hour moved out
 
 
-def test_cache_compaction_bounds_size(tmp_path):
+def test_cache_compaction_bounds_size(tmp_path, monkeypatch):
+    monkeypatch.setenv("WMTM_PARSE_SHARE_TASKS", "100")   # this test needs 20 parses; the task share (10/h) is tested in test_parse_budget
     c = _cache(tmp_path, per_hour=100, cache_max_bytes=600); llm = FakeLLM()
     c.enqueue([("i%d" % i, "text %d" % i, 1.0) for i in range(20)])
     process_queue(c, llm, adapter=_ad(llm))

@@ -424,3 +424,91 @@ def test_load_baseline_split_known_from_total(tmp_path):
         "prompt_tokens": 4, "completion_tokens": 4305, "total_tokens": 94094}) + "\n")
     b = M.load_baseline(str(tmp_path))["e5118c2f"]
     assert b["cache_split_known"] and b["cache_write"] == 89785 and abs(b["weighted"] - 133760.25) <= 0.05
+
+
+# ---------------------------------------------------------------- t-2026-11-10-wmtm-shared-parse-count-v2
+def _counted(out):
+    return [json.loads(x) for x in (out / "parse_log.jsonl").read_text().splitlines()]
+
+
+@needs_hitl
+def test_main_writes_a_counted_row_per_call(tmp_path, monkeypatch):
+    """measure_parse (gateway path, synthetic local gateway) writes one counted row per call: a task-ledger row from
+    the provider gate and a parse_log row with the same call id, registered as a task log; counted once."""
+    from wmtm import parse_budget as pb, runtime_config as rc
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    sd, h1 = make_state(tmp_path)
+    gw = _FakeGateway(REPLY, GW_USAGE)
+    out = tmp_path / "out"
+    try:
+        assert M.main(["--state-dir", str(sd), "-n", "3", "--out", str(out), "--per-hour", "0",
+                       "--provider", "openclaw", "--base-url", gw.base_url, "--model", "openclaw/x"]) == 0
+    finally:
+        gw.close()
+    rows = _counted(out)
+    assert len(gw.seen) == 3 and len(rows) == 3                    # one row per gateway call
+    assert all(len(r["call_ids"]) == 1 and r["tool"] == "measure_parse" and not r["mocked"] for r in rows)
+    task = pb.ParseBudget("task", cfg=rc.resolve(str(sd)))
+    led = [json.loads(x) for x in open(task.ledger)]
+    assert sorted(r["call_id"] for r in led) == sorted(r["call_ids"][0] for r in rows)
+    assert str(out / "parse_log.jsonl") in task.logs()             # a counted log of the task share
+    assert task.used() == 3                                        # ledger and log joined: counted once
+    os.unlink(task.ledger)                                         # control: the log alone still counts them
+    assert task.used() == 3
+    s = json.loads((out / "summary.json").read_text())
+    assert s["stopped"] is None and s["task_share"]["share_per_hour"] == 10
+
+
+@needs_hitl
+def test_main_stops_when_task_share_is_full(tmp_path, monkeypatch):
+    from wmtm import parse_budget as pb, runtime_config as rc
+    monkeypatch.setenv("OPENCLAW_GATEWAY_TOKEN", "gw-test")
+    sd, h1 = make_state(tmp_path)
+    other = pb.ParseBudget("task", cfg=rc.resolve(str(sd)), own_log=str(tmp_path / "other" / "parse_log.jsonl"))
+    for _ in range(10):
+        assert other.reserve({"tool": "another task"})             # another task used the whole share
+    gw = _FakeGateway(REPLY, GW_USAGE)
+    out = tmp_path / "out"
+    try:
+        assert M.main(["--state-dir", str(sd), "-n", "3", "--out", str(out), "--per-hour", "0",
+                       "--on-share-full", "stop", "--provider", "openclaw", "--base-url", gw.base_url,
+                       "--model", "openclaw/x"]) == 0
+    finally:
+        gw.close()
+    assert gw.seen == []                                           # nothing sent
+    s = json.loads((out / "summary.json").read_text())
+    assert s["stopped"] == "task_share_full" and s["parsed"] == 0 and s["task_share"]["remaining"] == 0
+    assert not (out / "parse_log.jsonl").exists() or _counted(out) == []
+
+
+def test_gateway_llm_without_budget_is_still_counted(tmp_path, monkeypatch):
+    """Any tool that builds the provider without a budget gets the default (task) share: no uncounted path."""
+    from wmtm import parse_budget as pb
+
+    class _Mod:
+        class Anthropic:
+            key = None
+        PROVIDERS = {}
+
+        @staticmethod
+        def add_provider_args(ap):
+            ap.add_argument("--provider"); ap.add_argument("--base-url"); ap.add_argument("--api-key-env")
+
+    class _Prov:
+        default_model = "m"
+
+        def __init__(self, args):
+            pass
+
+        def complete(self, system, user, model):
+            class R:
+                text, usage, raw_usage = "ok", {"input": 1, "cached": 0, "cache_write": 0, "output": 1}, None
+            return R()
+    _Mod.PROVIDERS["chat-completions"] = _Prov
+    monkeypatch.setattr(P, "load_upstream", lambda hitl, workdir=None: _Mod)
+    import wmtm.semparse_catalog as sc
+    monkeypatch.setattr(sc, "hitl_root", lambda h=None: "/nonexistent")
+    llm = P.gateway_llm("http://127.0.0.1:9/v1", model="openclaw/x")
+    assert llm("s", "u") == "ok" and len(llm.call_ids) == 1
+    led = [json.loads(x) for x in open(pb.default_budget().ledger)]
+    assert [r["call_id"] for r in led] == llm.call_ids and led[0]["provider"] == "chat-completions"

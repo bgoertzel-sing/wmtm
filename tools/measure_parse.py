@@ -2,7 +2,8 @@
 """Measure the P2 parser (catalog mode + configurable provider) on N notes of a wmtm state dir.
 
     python tools/measure_parse.py --state-dir <sd> [-n 30] [--seed 0] [--hashes h1,h2|@file]
-                                  [--out <dir>] [--mock-replies <jsonl>] [--per-hour 20]
+                                  [--out <dir>] [--mock-replies <jsonl>] [--per-hour <task share>]
+                                  [--on-share-full wait|stop] [--max-wait-s S]
                                   [--provider openclaw --base-url http://127.0.0.1:18789/v1 --model openclaw/<agent>]
 
 * notes: <sd>/_wmtm_state.json -> store.items[*].content; sample seeded (reproducible) or given content hashes
@@ -17,6 +18,12 @@
   are counted.  Medians, ratios and budget verdicts need EVERY parsed note measured (measured_rows gives the
   coverage); the usage ratio pairs new and live on the same notes.  Notes longer than --max-chars (default
   parse_max_chars, as the live feed) are skipped and reported, never truncated.  --mock-replies {"hash": ..., "reply": ...} lines replace the provider (no network, tokens null).
+* counted (t-2026-11-10-wmtm-shared-parse-count-v2): every provider call first reserves one call in the TASK share
+  (wmtm.parse_budget, parse_share_tasks_per_hour, default 10/h for all hive tasks together, counted across the
+  host-wide task ledger and every registered task log), and each parse writes a row with its call_ids to
+  <out>/parse_log.jsonl, which is registered as a task log.  When the share is full the run waits (default, up to
+  --max-wait-s) or, with --on-share-full stop, stops with summary stopped = "task_share_full".  The live state
+  dir's parse logs are only read (baseline).  --mock-replies rows are marked mocked (no gateway call, not counted).
 * provider (answer 7): --provider openclaw (default) = OpenAI-compatible Chat Completions at --base-url
   (default http://127.0.0.1:18789/v1), --model an agent target such as openclaw/protocosmo2, bearer token from
   $OPENCLAW_GATEWAY_TOKEN (--token-env); built on upstream semantic-parse.py's DeepSeek client (wmtm.semparse_provider
@@ -29,6 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from wmtm import runtime_config as rc                       # noqa: E402
 from wmtm import semparse_adapter as sp                     # noqa: E402
+from wmtm import parse_budget as pb                         # noqa: E402
 from wmtm.semparse_provider import upstream_llm, gateway_llm, GATEWAY_TOKEN_ENV  # noqa: E402  (upstream providers)
 
 DEFAULT_BASE_URL = "http://127.0.0.1:18789/v1"
@@ -167,7 +175,11 @@ def main(argv=None):
     ap.add_argument("--model", default=None, help="e.g. openclaw/protocosmo2 (gateway agent target)")
     ap.add_argument("--effort", default="low", help="upstream semantic-parse.py --effort (default: low)")
     ap.add_argument("--mock-replies", default="", help="jsonl of {hash, reply}: no network, tokens not measured")
-    ap.add_argument("--per-hour", type=float, default=20.0, help="parse cap (0 = no pacing)")
+    ap.add_argument("--per-hour", type=float, default=None,
+                    help="pacing (0 = no pacing; default: the task share parse_share_tasks_per_hour)")
+    ap.add_argument("--on-share-full", choices=("wait", "stop"), default="wait",
+                    help="task share full: wait for room (bounded by --max-wait-s) or stop with a clear status")
+    ap.add_argument("--max-wait-s", type=float, default=None, help="default: parse_share_max_wait_s")
     ap.add_argument("--max-chars", type=int, default=None,
                     help="notes longer than this are skipped and reported, never truncated "
                          "(default: the state dir's parse_max_chars, as the live feed uses)")
@@ -180,6 +192,13 @@ def main(argv=None):
         hashes = [h.strip() for h in src if h.strip()]
     cfg = rc.resolve(sd)
     semparse_dir = cfg["semparse_dir"]
+    if a.per_hour is None:
+        a.per_hour = float(cfg["parse_share_tasks_per_hour"])
+    plog = os.path.join(os.path.abspath(a.out), "parse_log.jsonl")
+    budget = pb.ParseBudget("task", cfg=cfg, own_log=plog)    # always the task share, whatever the state dir says
+    budget.register_log(plog)
+    gate = {"budget": budget, "meta": {"tool": "measure_parse"}, "wait": a.on_share_full == "wait",
+            "max_wait_s": a.max_wait_s}
     # review-5 #2: like the live feed (parse_cache skips items > parse_max_chars), a note longer than the limit
     # is skipped and reported, never measured as a truncated prefix under the full note's hash.
     max_chars = a.max_chars if a.max_chars is not None else int(cfg["parse_max_chars"])
@@ -196,15 +215,15 @@ def main(argv=None):
         llm.last_usage, model = None, "mock"
     else:
         if a.provider == "openclaw":                        # answer 7: the OpenClaw gateway (OpenAI-compatible)
-            llm = gateway_llm(a.base_url, model=a.model, token_env=a.token_env)
+            llm = gateway_llm(a.base_url, model=a.model, token_env=a.token_env, **gate)
         else:
             llm = upstream_llm("anthropic", model=a.model, flags=["--effort", a.effort],
-                               workdir=os.path.join(a.out, "_provider"))
+                               workdir=os.path.join(a.out, "_provider"), **gate)
         model = llm.model
     ad = sp.SemParseAdapter(llm, mode="catalog", reject_log=os.path.join(a.out, "rejects.local.jsonl"),
                             max_chars=max_chars)
     gap = 0 if (mock is not None or not a.per_hour) else 3600.0 / a.per_hour
-    rows, limit_errors, last = [], 0, None
+    rows, limit_errors, last, stopped = [], 0, None, None
     bad = open(os.path.join(a.out, "bad_parses.local.jsonl"), "w", encoding="utf-8")
     for i, h in enumerate(chosen):
         if gap and last is not None:
@@ -212,7 +231,18 @@ def main(argv=None):
         last = time.monotonic()
         iid, txt = notes[h]
         llm.cur = h
+        llm.call_ids = []
+        t_call = time.time()
         res = ad.parse_item(iid, {"text": txt})
+        if pb.is_share_full(res.error):                    # the gate refused: nothing was sent, nothing measured
+            stopped = "task_share_full"
+            print(f"STOP: {res.error[:200]}", file=sys.stderr, flush=True)
+            break
+        with open(plog, "a", encoding="utf-8") as fh:      # counted row (task share), ids and numbers only
+            fh.write(json.dumps({"ts": t_call, "tool": "measure_parse", "hash": h, "item_id": iid,
+                                 "call_ids": list(getattr(llm, "call_ids", None) or []),
+                                 "mocked": mock is not None, "error": bool(res.error),
+                                 "total_tokens": (res.usage or {}).get("total_tokens")}) + "\n")
         if res.truncated_chars:                             # structural check: never report a prefix
             raise RuntimeError(f"note {h} was truncated by {res.truncated_chars} chars; refusing the measurement")
         err = res.error or ""
@@ -244,7 +274,8 @@ def main(argv=None):
             fh.write(json.dumps(r) + "\n")
     summary = summarize(rows, model, mock is not None, semparse_dir, len(notes), missing, limit_errors, a,
                         {"max_chars": max_chars, "notes_over_max_chars_in_state": len(too_long),
-                         "hashes_skipped_long": skipped_long})
+                         "hashes_skipped_long": skipped_long, "stopped": stopped,
+                         "task_share": budget.status()})
     with open(os.path.join(a.out, "summary.json"), "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=1)
     print(json.dumps(summary, indent=1))
