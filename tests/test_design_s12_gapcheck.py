@@ -137,8 +137,6 @@ def test_s12_4_recall_never_admits_superseded():
 
 # ------------------------------------------------------------------------------------- s3.3 / s8 recall rules
 
-@pytest.mark.xfail(strict=True, reason="GAP-1 recall: a cluster linked by EvidenceFor to an active item but sharing no "
-                   "query keyword scores 0 (recall_bridge._score_cluster returns before spreading activation, layer 5)")
 def test_s3_3_spreading_activation_recalls_linked_cluster_without_keywords():
     """s3.3 'key insight' / s13.5: graph neighbours of active items are recalled even with no shared keyword."""
     lines = _journal([
@@ -152,8 +150,6 @@ def test_s3_3_spreading_activation_recalls_linked_cluster_without_keywords():
     assert "c-b" in ids
 
 
-@pytest.mark.xfail(strict=True, reason="GAP-2 recall: spreading activation follows EvidenceFor only; PromotesFrom is "
-                   "parsed (recall_bridge.py:34,99) but never traversed (_collect_activation_neighbors)")
 def test_s8_1_spreading_activation_follows_promotes_from():
     """s8.1b: spreading activation follows PromotesFrom edges (depth 1)."""
     lines = _journal([

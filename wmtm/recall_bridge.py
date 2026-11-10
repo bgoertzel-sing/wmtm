@@ -182,9 +182,14 @@ class RecallBridge:
         self._clusters: list[LTMCluster] = ltm_clusters
         self._by_id: dict[str, LTMCluster] = {c.id: c for c in ltm_clusters}
         self._evidence_for_targets: dict[str, list[str]] = {}
+        # GAP-2 (t-2026-11-10-wmtm-graph-recall): reverse PromotesFrom index, so spreading activation follows that
+        # edge in both directions, as it does EvidenceFor.
+        self._promotes_from_targets: dict[str, list[str]] = {}
         for c in ltm_clusters:
             for target in c.evidence_for:
                 self._evidence_for_targets.setdefault(target, []).append(c.id)
+            for target in c.promotes_from:
+                self._promotes_from_targets.setdefault(target, []).append(c.id)
 
     def get_cluster_timestamp(self, cluster_id: str) -> float:
         """Return the parsed Unix timestamp for a cluster ID, or 0.0 if unknown.
@@ -204,7 +209,13 @@ class RecallBridge:
         store: WMTMStore,
         top_k: int = 20,
     ) -> list[RecallCandidate]:
-        """Recall items from LTM matching query_context."""
+        """Recall items from LTM matching query_context, or linked to the active set (design s3.3, s8.1).
+
+        A cluster is a candidate when it matches the query (layers 1-2 of _score_cluster) or when spreading
+        activation from the active items reaches it (GAP-1: graph=True), so a linked cluster is recalled without a
+        shared keyword.  Active and superseded clusters are never candidates (parse_journal drops superseded ones);
+        at most top_k are returned, best first.
+        """
         query_terms: set[str] = self._tokenize(query_context)
         active_ids: set[str] = {item.id for item in store.get_active_set()}
         candidates: list[RecallCandidate] = []
@@ -212,7 +223,7 @@ class RecallBridge:
         for cluster in self._clusters:
             if cluster.id in active_ids:
                 continue
-            score = self._score_cluster(cluster, query_terms, active_ids, store)
+            score = self._score_cluster(cluster, query_terms, active_ids, store, graph=True)
             if score <= 0:
                 continue
             candidates.append(RecallCandidate(
@@ -232,9 +243,17 @@ class RecallBridge:
         query_terms: set[str],
         active_ids: set[str],
         store: WMTMStore,
+        graph: bool = False,
     ) -> float:
         """Compute relevance score for a cluster against query terms.
-        
+
+        graph (GAP-1, t-2026-11-10-wmtm-graph-recall; design s3.3 "key insight", s13.5): recall() passes True.  A
+        cluster with no keyword match (layers 1-2 score 0) is then scored by its links to the active set alone
+        (layer 5, with the existing weights), followed by the noise and recency factors: a linked cluster is
+        recalled without a shared keyword, an unlinked one still scores 0.  Layers 3-4 belong to a keyword match and
+        are not applied to such a cluster.  The default (False) keeps the keyword gate for the resident relevance
+        stimulus (context.relevance_stimulus), where each resident is itself an activation seed.
+
         Scoring layers:
         1. Term overlap with IDF-like weighting (rare terms score higher)
         2. Substring matching for multi-word phrases
@@ -261,20 +280,25 @@ class RecallBridge:
                 score += 0.5
 
         if score == 0:
-            return 0.0
+            if not graph:
+                return 0.0
+            # GAP-1: no keyword match; the graph alone (layer 5) decides.
+            score = self._spreading_activation_for(cluster, active_ids, store)
+            if score <= 0:
+                return 0.0
+        else:
+            # Layer 3: Bigram matching (consecutive word pairs)
+            query_bigrams = self._bigrams(query_terms)
+            cluster_bigrams = self._bigrams(cluster_text)
+            bigram_matches = query_bigrams & cluster_bigrams
+            score += len(bigram_matches) * 1.5  # bigrams are stronger signals
 
-        # Layer 3: Bigram matching (consecutive word pairs)
-        query_bigrams = self._bigrams(query_terms)
-        cluster_bigrams = self._bigrams(cluster_text)
-        bigram_matches = query_bigrams & cluster_bigrams
-        score += len(bigram_matches) * 1.5  # bigrams are stronger signals
+            # Layer 4: Evidence support
+            score += min(cluster.evidence_support_count * 0.01, 2.0)
 
-        # Layer 4: Evidence support
-        score += min(cluster.evidence_support_count * 0.01, 2.0)
-
-        # Layer 5: Spreading activation
-        spread_score: float = self._spreading_activation_for(cluster, active_ids, store)
-        score += spread_score
+            # Layer 5: Spreading activation
+            spread_score: float = self._spreading_activation_for(cluster, active_ids, store)
+            score += spread_score
 
         # F29: down-weight autonomous-loop heartbeat notes (AUTOCYCLE / Nop).
         # They match generic words like "status"/"check" without carrying
@@ -389,16 +413,22 @@ class RecallBridge:
         depth: int = 2,
         decay: float = 0.5,
     ) -> dict[str, float]:
-        """Follow EvidenceFor/PromotesFrom edges from seed items."""
+        """Follow EvidenceFor/PromotesFrom edges from seed items (design s8.1b).
+
+        EvidenceFor is followed in both directions at every hop up to depth.  PromotesFrom is followed in both
+        directions at depth 1 only, i.e. from the seeds (GAP-2, t-2026-11-10-wmtm-graph-recall); a node reached that
+        way still follows EvidenceFor on the next hop.  Supersedes is not an edge here.  Activation decays by
+        decay per hop.
+        """
         visited: set[str] = set()
         scores: dict[str, float] = {}
         frontier: list[tuple[str, float]] = [
             (sid, 1.0) for sid in seed_ids if sid in self._by_id
         ]
 
-        for _hop in range(depth + 1):
+        for hop in range(depth + 1):
             frontier = self._activation_hop(
-                frontier, visited, scores, decay
+                frontier, visited, scores, decay, hop=hop
             )
 
         return scores
@@ -409,9 +439,11 @@ class RecallBridge:
         visited: set[str],
         scores: dict[str, float],
         decay: float,
+        hop: int = 0,
     ) -> list[tuple[str, float]]:
         """Process one hop of spreading activation, updating visited/scores.
 
+        hop is the depth of the frontier (0 = the seeds); PromotesFrom neighbours are collected only from hop 0.
         Returns the next frontier to explore.
         """
         next_frontier: list[tuple[str, float]] = []
@@ -424,7 +456,8 @@ class RecallBridge:
             if not cluster:
                 continue
             self._collect_activation_neighbors(
-                cluster, activation, decay, visited, next_frontier
+                cluster, activation, decay, visited, next_frontier,
+                follow_promotes=(hop == 0),
             )
         return next_frontier
 
@@ -435,14 +468,23 @@ class RecallBridge:
         decay: float,
         visited: set[str],
         next_frontier: list[tuple[str, float]],
+        follow_promotes: bool = False,
     ) -> None:
-        """Add unvisited EvidenceFor targets and reverse-evidence sources."""
+        """Add unvisited EvidenceFor targets and reverse-evidence sources; with follow_promotes, also PromotesFrom
+        targets and reverse-promotion sources (GAP-2)."""
         for target in cluster.evidence_for:
             if target not in visited:
                 next_frontier.append((target, activation * decay))
         for source_id in self._evidence_for_targets.get(cluster.id, []):
             if source_id not in visited:
                 next_frontier.append((source_id, activation * decay))
+        if follow_promotes:
+            for target in cluster.promotes_from:
+                if target not in visited:
+                    next_frontier.append((target, activation * decay))
+            for source_id in self._promotes_from_targets.get(cluster.id, []):
+                if source_id not in visited:
+                    next_frontier.append((source_id, activation * decay))
 
     def _spreading_activation_for(
         self,

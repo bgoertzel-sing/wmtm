@@ -1,0 +1,41 @@
+# 2026-11-10T20:33:37Z HEAD=265062eb3d9b0900d2b1ea991521f52351a394b2 branch=hive/t-2026-11-10-wmtm-graph-recall status=0 loadavg 2.44 3.14 3.41 2/483 2475362
+..............................................xx.x..x..x..xxx........... [  8%]
+.....................s.................................................. [ 16%]
+........................................................................ [ 24%]
+........................................................................ [ 33%]
+..........................................sss....ssssssss...sssss....... [ 41%]
+........................................................................ [ 49%]
+........................................................................ [ 57%]
+.....................s.s.s.............................................. [ 66%]
+...................ssss..s.............................................. [ 74%]
+........................................................................ [ 82%]
+.........................................s.............................. [ 90%]
+........................................................................ [ 99%]
+.......                                                                  [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_f2_context_goals.py:260: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_goals_v2.py:372: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_goals_v2.py:378: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_goals_v2.py:394: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_measure_parse.py:78: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:103: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:119: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:176: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:199: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:207: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [2] tests/test_measure_parse.py:228: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:287: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:316: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:336: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:359: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:375: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [3] tests/test_replay_equivalence.py:48: real-data replay skipped: set WMTM_REPLAY_DATA=<dir outside the repo> containing _wmtm_state.json and _journal/journal.metta (see README)
+SKIPPED [1] tests/test_semparse_catalog.py:58: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:65: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:72: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:87: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:113: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_wmtm_metta_codec.py:25: set PETTA_PARSER and SWIPL to run against real PeTTa sread
+837 passed, 26 skipped, 8 xfailed in 501.36s (0:08:21)
+EXIT=0
+# end 2026-11-10T20:42:02Z

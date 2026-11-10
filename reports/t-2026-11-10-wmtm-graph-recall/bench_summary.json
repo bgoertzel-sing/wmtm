@@ -1,0 +1,54 @@
+{
+ "before": {
+  "A_mean_us_runs": [
+   213.6,
+   220.0,
+   197.9,
+   202.9,
+   208.0
+  ],
+  "A_median_of_run_medians_us": 195.0,
+  "B_mean_ms_runs": [
+   46.3,
+   48.4,
+   48.2,
+   47.8,
+   46.7
+  ],
+  "B_median_of_run_medians_ms": 46.2,
+  "A_candidates_max": 7,
+  "A_candidates_mean": 3.69,
+  "A_graph_only_mean": 0,
+  "A_graph_only_max": 0,
+  "A_occupancy_max": 20,
+  "A_useful_resident_end": 6,
+  "B_candidates_max": 15,
+  "B_graph_only_mean": 0
+ },
+ "after": {
+  "A_mean_us_runs": [
+   387.9,
+   376.0,
+   346.5,
+   363.1,
+   332.0
+  ],
+  "A_median_of_run_medians_us": 334.7,
+  "B_mean_ms_runs": [
+   66.5,
+   63.0,
+   60.3,
+   63.5,
+   66.4
+  ],
+  "B_median_of_run_medians_ms": 60.6,
+  "A_candidates_max": 15,
+  "A_candidates_mean": 14.92,
+  "A_graph_only_mean": 11.13,
+  "A_graph_only_max": 14,
+  "A_occupancy_max": 20,
+  "A_useful_resident_end": 6,
+  "B_candidates_max": 15,
+  "B_graph_only_mean": 0
+ }
+}

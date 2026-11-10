@@ -1,0 +1,30 @@
+{
+ "label": "before-265062e-run2",
+ "part_a_s12_3": {
+  "cycles": 100,
+  "top_k": 15,
+  "clusters": 60,
+  "recall_s_mean": 0.0002200481330510229,
+  "recall_s_median": 0.0001949705183506012,
+  "recall_s_max": 0.0008525740122422576,
+  "recall_s_total": 0.02200481330510229,
+  "candidates_max": 7,
+  "candidates_mean": 3.69,
+  "graph_only_candidates_mean": 0,
+  "graph_only_candidates_max": 0,
+  "occupancy_max": 20,
+  "useful_resident_end": 6
+ },
+ "part_b_scale": {
+  "clusters": 7900,
+  "active": 40,
+  "queries": 30,
+  "top_k": 15,
+  "recall_s_mean": 0.04841255866922438,
+  "recall_s_median": 0.04602362145669758,
+  "recall_s_max": 0.06258906400762498,
+  "candidates_max": 15,
+  "candidates_mean": 15,
+  "graph_only_candidates_mean": 0
+ }
+}

@@ -1,0 +1,11 @@
+# tests/test_graph_recall.py from the task branch, run on git archive 265062e
+FAILED tests/test_graph_recall.py::test_linked_cluster_without_keyword_overlap_is_recalled[(EvidenceFor c-b c-a)]
+FAILED tests/test_graph_recall.py::test_linked_cluster_without_keyword_overlap_is_recalled[(EvidenceFor c-a c-b)]
+FAILED tests/test_graph_recall.py::test_unlinked_cluster_without_keyword_overlap_is_not_recalled
+FAILED tests/test_graph_recall.py::test_keyword_match_outranks_graph_only_neighbour
+FAILED tests/test_graph_recall.py::test_resident_relevance_stimulus_keeps_keyword_gate
+FAILED tests/test_graph_recall.py::test_graph_only_score_uses_existing_spread_weights
+FAILED tests/test_graph_recall.py::test_promotes_from_neighbour_reached_at_depth_1_not_depth_2
+FAILED tests/test_graph_recall.py::test_promotes_from_followed_forward_from_the_promoted_item
+FAILED tests/test_graph_recall.py::test_promotes_from_neighbour_recalled_without_keywords_but_not_at_depth_2
+9 failed, 303 passed in 0.73s
