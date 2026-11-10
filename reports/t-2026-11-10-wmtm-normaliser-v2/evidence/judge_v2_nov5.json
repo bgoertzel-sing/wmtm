@@ -1,0 +1,74 @@
+{
+ "A_full": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  },
+  "unjudged": [],
+  "v2_rule": {
+   "CORRECT": 2,
+   "UNCLEAR": 0,
+   "UNJUDGED": 0,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 2
+  }
+ },
+ "Bp3_after": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 6,
+   "UNCLEAR": 1,
+   "UNJUDGED": 2,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 0
+  },
+  "unjudged": [
+   "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+   "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)"
+  ],
+  "v2_rule": {
+   "CORRECT": 6,
+   "UNCLEAR": 1,
+   "UNJUDGED": 2,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 0
+  }
+ },
+ "Bp3_before": {
+  "changed": {},
+  "f3v3_rule": {
+   "CORRECT": 6,
+   "UNCLEAR": 1,
+   "UNJUDGED": 2,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 0
+  },
+  "unjudged": [
+   "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+   "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)"
+  ],
+  "v2_rule": {
+   "CORRECT": 6,
+   "UNCLEAR": 1,
+   "UNJUDGED": 2,
+   "W1": 0,
+   "W2": 0,
+   "W3": 0,
+   "WRONG": 0
+  }
+ }
+}

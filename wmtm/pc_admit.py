@@ -109,7 +109,8 @@ def write_admit_file(out_dir, rec, spec, now=None):
                 lf = spec.get("label_fact") or {}
                 results.append({"goal": q["goal"], "stv": q["stv"], "proof": q["proof"], "s": q.get("s"),
                                 "sources": sources_for(q["goal"], q["proof"], spec),
-                                "facts": sorted({lf.get(x, x) for x in _LABEL.findall(q["proof"] or "")})})
+                                "facts": sorted({lf.get(x, x) for x in _LABEL.findall(q["proof"] or "")}),
+                                "rules": proof_rules(q["proof"], spec.get("atoms"))})
     doc = {"ts": now or time.time(), "spec_ts": spec.get("ts"), "cycle": spec.get("cycle"), "status": rec.get("status"),
            "canary_ok": canary_ok, "timeout_s": rec.get("timeout_s"), "budget_s": rec.get("budget_s"),
            "skipped_budget": rec.get("skipped_budget"), "timeouts": rec.get("timeouts"),
@@ -176,6 +177,8 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
     live = set(live_ids) if live_ids is not None else {it.id for it in store.get_active_set()}
     cands, cand_facts, drop = [], [], {"asserted": 0, "no_live_source": 0, "bad": 0, "known": 0,
                                        "negative": 0}
+    n_triv = 0      # GAP-5: dropped["trivial"] appears only when > 0, so existing dropped records keep their shape
+    triv_on, triv_log = trivial_filter_on(cfg), []
     min_s, neg_mode = min_strength(cfg), negation_mode(cfg)
     for r in doc["results"]:
         try:
@@ -187,6 +190,13 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
         if not is_derivation(r.get("proof")):
             # proved straight from asserted facts (or their revision): already in WMTM, not a new conclusion
             drop["asserted"] += 1; continue
+        if triv_on:   # GAP-5 TRIVIAL_RULE: proof-shape check, before the caps so a restatement takes no slot
+            why = trivial_reason(r.get("proof"), r.get("rules"))
+            if why:
+                n_triv += 1; drop["trivial"] = n_triv
+                triv_log.append({"rule": TRIVIAL_RULE, "reason": why, "goal": g,
+                                 "steps": sorted(set(re.findall(r"\(by\s+(\S+)", str(r.get("proof")))))})
+                continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))
         # Track O: strength is a probability.  s < reasoner_min_strength means "probably not", never a weak yes.
         neg = s < min_s
@@ -203,7 +213,7 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
         cands.append(InferenceCandidate(
             content=text, confidence=c, derived_from=srcs, inference_type="pc_deduction",
             initial_sti=initial_sti(text, context_rel, cfg),
-            provenance={"reasoner": "pettachainer", "goal": g, "stv": [s, c], "polarity": "negative" if neg else "positive", "proof": str(r["proof"])[:2000],
+            provenance={"reasoner": "pettachainer", "goal": g, "stv": [s, c], "polarity": "negative" if neg else "positive", "proof": str(r["proof"])[:2000], "rules": r.get("rules"),
                         "run_ts": doc.get("spec_ts"), "query_s": r.get("s")}))
     # Track J: cap admitted conclusions per KB fact per cycle (best first)
     from . import parse_gate as _pg
@@ -218,7 +228,8 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
     drop["per_fact_cap"] = n_cap
     cap = int(cfg.get("reasoner_max_admit") or 5)
     info.update(results=len(doc["results"]), candidates=min(len(cands), cap), dropped=drop, cap_hit=over,
-                gate=doc.get("gate"))
+                gate=doc.get("gate"), trivial_filter=triv_on, trivial_refused=triv_log,
+                trivial_refused_n=n_triv)
     return cands[:cap], info
 
 
@@ -256,6 +267,7 @@ def admit_on_snapshot(snapshot, cfg, now=None):
     from .store import WMTMStore
     orch = WMTMOrchestrator(WMTMStore(), use_goalchainer=False)
     orch.restore_state(snapshot)
+    orch.trivial_filter = trivial_filter_on(cfg)   # GAP-5: same flag as load_candidates (flag off = guard off too)
     admitted, info = orch.admit_pc_candidates(cands, info)
     new = orch.snapshot_state()
     for k in ("store", "utility", "forgetting_log", "pc_admit"):
@@ -275,6 +287,8 @@ def log_admission(cfg, path, info, timing=None, now=None):
                "age_s": info.get("age_s"), "status": info.get("status"), "results": info.get("results"),
                "candidates": info.get("candidates"), "admitted": info.get("admitted"),
                "skipped": info.get("skipped"), "dropped": info.get("dropped")}
+        if info.get("trivial_refused"):   # GAP-5: one entry per refusal (rule, reason, goal symbols, step labels)
+            rec["trivial_refused"] = info["trivial_refused"]
         for k in ("admit_error", "error"):
             if info.get(k):
                 rec[k] = info[k]
@@ -286,3 +300,153 @@ def log_admission(cfg, path, info, timing=None, now=None):
         return rec
     except Exception:
         return None
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# GAP-5 (S part), t-2026-11-10-wmtm-trivial-filter: named admission rule TRIVIAL_RULE, flag admit_trivial_filter
+# (default on).  It looks at the PROOF TERM and the rule atoms the proof cites, never at symbol names or text.
+# A derived conclusion is trivial (refused) when every inference step on a weighted path of its proof is one of
+#   nwdef_head_noun : a defining rule  (: L (Implication (Member $x S) (Member $x B)) (CTV ..))  -- "an X_Y is a Y"
+#   narrow_echo     : a rule  (Implication (Member $x S) (Member $x C))  whose premise class S is the named form of
+#                     (Narrow B (Member C)) or (Narrow B (Mod C)), B taken from S's defining rule; i.e. the rule only
+#                     restates the restriction already inside its own premise ("a staged commit is staged")
+# and every such step is applied DIRECTLY to asserted fact labels (sp<n>/wm<n>), possibly revised together.
+# Weighted path: a factored-revision branch whose prior has confidence 0 (e.g. "(inverted L with cpu (prior (STV
+# 0.5 0.0)))") contributes nothing to the conclusion and is skipped.  A weighted "(inverted L ...)" branch is
+# counted as one more step through rule L (so an inverted nwdef over an asserted fact is still head-noun only).  Anything else (another rule, a step over a
+# derived premise = two-step chain, a weighted inverted/reported branch, an unknown head, missing rule atoms) means
+# NOT trivial: the filter fails open and admits.
+TRIVIAL_RULE = "trivial_restatement"
+_STEP_HEADS = ("by",)
+
+
+def _sx(text):
+    from .semparse_adapter import split_toplevel
+    for _src, node, err in split_toplevel(str(text or "")):
+        return None if err else node
+    return None
+
+
+def _member_imp(atom):
+    """-> (label, S, C, is_defining) for (: L (Implication (Member v S) (Member v C)) tv), same subject v, symbol S, C."""
+    n = _sx(atom)
+    if not (isinstance(n, list) and len(n) == 4 and n[0] == ":" and isinstance(n[1], str)):
+        return None
+    imp, tv = n[2], n[3]
+    if not (isinstance(imp, list) and len(imp) == 3 and imp[0] == "Implication"):
+        return None
+    a, b = imp[1], imp[2]
+    if not all(isinstance(t, list) and len(t) == 3 and t[0] == "Member" and all(isinstance(z, str) for z in t[1:])
+               for t in (a, b)):
+        return None
+    if a[1] != b[1]:          # same subject on both sides: a variable ($x, nwdef) or one ground witness (parser rule)
+        return None
+    return n[1], a[2], b[2], bool(isinstance(tv, list) and tv and tv[0] == "CTV")
+
+
+def proof_rules(proof, atoms):
+    """Worker side: the rule atoms a proof cites (by its step labels) plus the defining rule of each cited rule's
+    premise class.  -> {label: atom}.  Lets the cycle side classify steps without the KB."""
+    labs = set(re.findall(r"\((?:by|inverted)\s+(\S+)", str(proof or "")))
+    by_lab, defining = {}, {}
+    for a in atoms or []:
+        a = str(a)
+        if not a.startswith("(: ") or "(Implication" not in a:
+            continue
+        lab = a[3:].split(None, 1)[0]
+        by_lab[lab] = a
+        m = _member_imp(a)
+        if m and m[3]:
+            defining.setdefault(m[1], (lab, a))
+    out = {}
+    for lab in sorted(labs):
+        if lab in by_lab:
+            out[lab] = by_lab[lab]
+            m = _member_imp(by_lab[lab])
+            if m and m[1] in defining:
+                out[defining[m[1]][0]] = defining[m[1]][1]
+    return out
+
+
+def _step_kind(label, rules):
+    """'nwdef_head_noun' | 'narrow_echo' | None (any other rule, or atoms missing)."""
+    from .pc_shadow import narrow_symbol
+    m = _member_imp((rules or {}).get(label))
+    if not m:
+        return None
+    _l, S, C, is_def = m
+    if is_def:
+        return "nwdef_head_noun"
+    for a in (rules or {}).values():          # S's defining rule gives the base B
+        d = _member_imp(a)
+        if d and d[3] and d[1] == S:
+            B = d[2]
+            if any(narrow_symbol(["Narrow", B, [h, C]]) == S for h in ("Member", "Mod")):
+                return "narrow_echo"
+    return None
+
+
+def _zero_weight(head):
+    """A revision branch head carrying (prior (STV s 0.0)): confidence 0, contributes nothing."""
+    if not isinstance(head, list):
+        return False
+    for x in head:
+        if isinstance(x, list) and len(x) == 2 and x[0] == "prior" and isinstance(x[1], list) and len(x[1]) == 3 \
+                and x[1][0] == "STV":
+            try:
+                return float(x[1][2]) == 0.0
+            except ValueError:
+                return False
+    return False
+
+
+def trivial_reason(proof, rules):
+    """-> 'nwdef_head_noun' | 'narrow_echo' if the proof is trivial (see TRIVIAL_RULE above), else None."""
+    n = _sx(proof)
+    if not (isinstance(n, list) and len(n) == 4 and n[0] == ":"):
+        return None
+    steps, bad = [], []
+
+    def walk(t):          # -> True if t's weighted support is asserted fact labels only
+        if isinstance(t, str):
+            if _LABEL.fullmatch(t):
+                return True
+            bad.append(t); return False
+        if not isinstance(t, list) or not t:
+            bad.append(t); return False
+        h = t[0]
+        if h == "by" and len(t) == 3 and isinstance(t[1], str):
+            steps.append((t[1], walk(t[2])))
+            return False
+        if h == "merge/revision" and len(t) == 3:
+            a, b = walk(t[1]), walk(t[2])
+            return a and b
+        if h == "factored-revision" and len(t) == 4 and isinstance(t[3], list):
+            base = walk(t[1])
+            for br in t[3]:
+                if not (isinstance(br, list) and len(br) == 2):
+                    bad.append(br); return False
+                if _zero_weight(br[0]):
+                    continue
+                hd = br[0]
+                if (isinstance(hd, list) and len(hd) >= 2 and hd[0] == "inverted" and isinstance(hd[1], str)):
+                    # weighted inverted branch: the same rule read backwards over its argument; it is a step
+                    # like any other (classified by _step_kind; an inverted nwdef over a fact stays trivial)
+                    steps.append((hd[1], walk(br[1])))
+                    continue
+                bad.append(hd); walk(br[1]); return False
+            return base
+        bad.append(h); return False
+
+    walk(n[1])
+    if bad or not steps or not all(on_fact for _l, on_fact in steps):
+        return None
+    kinds = [_step_kind(l, rules) for l, _f in steps]
+    if any(k is None for k in kinds):
+        return None
+    return "narrow_echo" if "narrow_echo" in kinds else "nwdef_head_noun"
+
+
+def trivial_filter_on(cfg) -> bool:
+    v = (cfg or {}).get("admit_trivial_filter", True)
+    return v if isinstance(v, bool) else str(v).strip().lower() not in ("0", "false", "off", "no", "")

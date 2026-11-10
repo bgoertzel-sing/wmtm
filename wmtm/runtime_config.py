@@ -48,6 +48,8 @@ SPEC = {
     "reasoner_min_strength": ("WMTM_REASONER_MIN_STRENGTH", float, 0.5, None),
     "reasoner_negation":   ("WMTM_REASONER_NEGATION", str, "skip", None),        # skip | unlikely ("unlikely: <text>")
     "reasoner_initial_sti": ("WMTM_REASONER_INITIAL_STI", float, 1.0, None),   # F1 §4: a conclusion's base STI
+    # GAP-5 (t-2026-11-10-wmtm-trivial-filter): refuse proof-shape-trivial conclusions (pc_admit.TRIVIAL_RULE)
+    "admit_trivial_filter": ("WMTM_ADMIT_TRIVIAL_FILTER", bool, True, None),
     "reasoner_initial_sti_rel": ("WMTM_REASONER_INITIAL_STI_REL", float, 4.0, None),  # F1 §4: + this * request relevance
     # Track O: CONTEXT coreference (off by default; results go to <semparse_dir>/ctx1, the old cache is kept)
     "semparse_context":    ("WMTM_SEMPARSE_CONTEXT", bool, False, None),
@@ -134,6 +136,7 @@ SPEC = {
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),
     "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
     "shadow_nwdef":        ("WMTM_PC_SHADOW_NWDEF", bool, True, None),           # P4 rev5: add nwdef_* defining rules for narrowed classes (False: leave out, upstream R2 lowers c)
+    "shadow_normalise":    ("WMTM_PC_SHADOW_NORMALISE", bool, True, None),       # t-2026-11-10: parse_normalise layer before the KB build (Narrow anywhere, Premises/Conclusions, unrecognised shapes counted)
     "shadow_skolem_goals": ("WMTM_PC_SHADOW_SKOLEM_GOALS", bool, False, None),
     "shadow_scoped_witness_goals": ("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> goals allowed
     "shadow_goal_rank":    ("WMTM_PC_SHADOW_GOAL_RANK", bool, True, None),       # Track N: Design A ranked goal pool (off = Track M 2-step goals)

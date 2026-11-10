@@ -292,6 +292,7 @@ class SemParseAdapter:
             if preamble is None:
                 preamble = False      # the legacy pre-instruction block targets MeTTa output, not JSON
         self.loader = loader          # object with add_atom(str); None = no PeTTa check
+        self._nwdef_loaded = set()    # nwdef rules already loaded into self.loader (narrow_preload stopgap)
         if system is None:
             with open(prompt_path, encoding="utf-8") as fh:
                 system = fh.read()
@@ -455,22 +456,78 @@ class SemParseAdapter:
                 pn = prefix_names(n, prefix)
                 if sprefix != prefix:
                     pn = _rescope(pn, prefix, sprefix)
-                atom = to_str(pn)
-                if ctx_bodies and atom_body(atom) in ctx_bodies:
-                    self._log(res, atom, "context atom re-emitted", "context")
-                    continue
-                if self.loader is not None:
-                    try:
-                        out = self.loader.add_atom(atom)
-                        if _looks_like_error(out):
-                            raise RuntimeError(str(out)[:200])
-                    except Exception as e:           # noqa: BLE001
-                        self._log(res, atom, f"petta load: {str(e)[:200]}", "petta")
-                        continue
-                res.accepted.append(atom)
+                self._admit(res, pn, ctx_bodies)
+
+    def _admit(self, res, pn, ctx_bodies=()):
+        """The load step for one named statement (after prefix/rescope): narrow_preload, context check, PeTTa load.
+        recover_rejected() feeds logged petta-stage rejects through this same method."""
+        from .semparse_context import atom_body
+        pn, nwdefs = narrow_preload(pn)
+        atom = to_str(pn)
+        if ctx_bodies and atom_body(atom) in ctx_bodies:
+            self._log(res, atom, "context atom re-emitted", "context")
+            return
+        if not self._load(res, atom):
+            return
+        res.accepted.append(atom)
+        for r in nwdefs:                     # STOPGAP (narrow_preload): the one head-noun link per symbol
+            if r in res.accepted:
+                continue
+            if r in self._nwdef_loaded or self._load(res, r):
+                self._nwdef_loaded.add(r)
+                res.accepted.append(r)
+
+    def recover_rejected(self, item_id, atoms) -> "ParseResult":
+        """Re-admit statements a rejects log dropped at stage petta (already named and scoped by _accept_forms),
+        through _admit, the same step the live path uses.  No parse call."""
+        res = ParseResult(str(item_id), "")
+        for src, node, err in split_toplevel("\n".join(atoms)):
+            if err or is_query(node) or check_statement(node):
+                self._log(res, src, "recover: not a statement", "recover")
+                continue
+            self._admit(res, node)
+        return res
+
+    def _load(self, res, atom) -> bool:
+        """PeTTa load check (loader None = no check).  False = refused and logged at stage petta."""
+        if self.loader is None:
+            return True
+        try:
+            out = self.loader.add_atom(atom)
+            if _looks_like_error(out):
+                raise RuntimeError(str(out)[:200])
+        except Exception as e:           # noqa: BLE001
+            self._log(res, atom, f"petta load: {str(e)[:200]}", "petta")
+            return False
+        return True
 
     def parse_items(self, items: Iterable) -> list:
         return [self.parse_item(i, it) for i, it in items]
+
+
+# STOPGAP (t-2026-11-10-wmtm-narrow-preload, andy order 2026-11-10): PeTTaChainer refuses a narrowed class
+# under Member, so (Member x (Narrow base (Mod m))) never loaded and was dropped here, before the cache.  Until
+# Man Hin's upstream tmpl/lower.py target lands (one class symbol plus (Inheritance <symbol> <head>)), apply
+# parse_normalise's M2 rewrite just before the PeTTa load: the Narrow class becomes the deterministic symbol
+# pc_shadow.narrow_symbol() plus ONE head-noun defining rule (nwdef).  When the upstream lowering lands, switch to
+# its naming and delete this function.  Forbidden readings stay out: the modifier is never made a property (F2),
+# and a statement whose named form is not a mapped shape (e.g. GroupOf, F1) is left exactly as the parser wrote it.
+def narrow_preload(node):
+    """-> (node with M2 applied if its named form is mapped, sorted nwdef rule strings for its symbols)."""
+    from .parse_normalise import name_narrow_anywhere, classify
+    from .pc_shadow import narrow_defining_rules
+    if not (isinstance(node, list) and len(node) == 4 and node[0] == ":"):
+        return node, []
+    defs = {}
+    named = name_narrow_anywhere(node, defs)
+    if not defs or classify(named[2])[0] != "mapped":
+        return node, []
+    used, todo = set(defs), list(defs)          # nested Narrow: its base symbol is defined too
+    while todo:
+        b = defs.get(todo.pop())
+        if b in defs and b not in used:
+            used.add(b); todo.append(b)
+    return named, narrow_defining_rules({k: defs[k] for k in used})
 
 
 def _looks_like_error(out) -> bool:

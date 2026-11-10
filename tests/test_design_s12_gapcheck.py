@@ -327,18 +327,29 @@ def test_s6_3_forgotten_derived_belief_noted_in_ltm():
 
 # ---------------------------------------------------------------------------------- s3.5 / s13.3 useful vs trivial
 
-@pytest.mark.xfail(strict=True, reason="GAP-5 usefulness: nothing in admission, utility or eviction distinguishes a "
-                   "one-hop restatement ('an X_Y is a Y') from a non-trivial conclusion; both are treated identically")
 def test_s3_5_trivial_restatement_ranked_below_nontrivial_conclusion():
+    # t-2026-11-10-wmtm-trivial-filter (GAP-5 S part): a PeTTaChainer candidate always carries its proof term and
+    # (worker side, pc_admit.proof_rules) the rule atoms it cites; the filter classifies that proof SHAPE, so the two
+    # candidates now carry realistic provenance.  The texts, sources and the assertion are unchanged.
+    from wmtm.pc_shadow import narrow_symbol
+    sym = narrow_symbol(["Narrow", "tree", ["Mod", "apple"]])
+    nwdef = "(: nwdef_%s (Implication (Member $x %s) (Member $x tree)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))" % (sym, sym)
+    r1 = "(: n2_r (Implication (Member $x cat) (Member $x mammal)) (STV 0.9 0.9))"
+    r2 = "(: n3_r (Implication (Member $x mammal) (Member $x animal)) (STV 0.9 0.9))"
+    triv_prov = dict(PC, goal="(Member sk_t tree)", proof="(: (by nwdef_%s sp1) (Member sk_t tree) (STV 1.0 0.98))" % sym,
+                     rules={"nwdef_" + sym: nwdef})
+    real_prov = dict(PC, goal="(Member sk_c animal)", proof="(: (by n3_r (by n2_r sp2)) (Member sk_c animal) (STV 0.81 0.7))",
+                     rules={"n2_r": r1, "n3_r": r2})
     orch = _orch(capacity=50)
     orch.store.admit("n1", "the apple_tree in the yard", initial_sti=5.0)
     orch.store.admit("n2", "cats are mammals", initial_sti=5.0)
     orch.store.admit("n3", "mammals are animals", initial_sti=5.0)
-    [triv] = orch._admit_derived([_cand("an apple_tree is a tree", ["n1"], sti=1.0)])
-    [real] = orch._admit_derived([_cand("cats are animals", ["n2", "n3"], sti=1.0)])
+    triv_l = orch._admit_derived([_cand("an apple_tree is a tree", ["n1"], sti=1.0, prov=triv_prov)])
+    [real] = orch._admit_derived([_cand("cats are animals", ["n2", "n3"], sti=1.0, prov=real_prov)])
     for _ in range(3):
         orch.forget_phase()
-    t, r = orch.store.get(triv.id), orch.store.get(real.id)
+    t = orch.store.get(triv_l[0].id) if triv_l else None
+    r = orch.store.get(real.id)
     assert t is None or (r is not None and (t.attention.total, t.utility) < (r.attention.total, r.utility))
 
 

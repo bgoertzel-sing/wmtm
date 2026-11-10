@@ -1,0 +1,964 @@
+{
+ "goals": {
+  "r1": [
+   {
+    "goal": "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "narrow_base": "gain",
+    "recovered_rule": true,
+    "restriction": "shown",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261104T151833Z__c1_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "narrow_base": "bundle",
+    "recovered_rule": true,
+    "restriction": "whole",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261103T203949Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "narrow_base": "commit",
+    "recovered_rule": true,
+    "restriction": "staged",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "narrow_base": "commit",
+    "recovered_rule": true,
+    "restriction": "single",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x4_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "narrow_base": "config",
+    "recovered_rule": true,
+    "restriction": "effective",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x10_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+    "narrow_base": "output",
+    "recovered_rule": true,
+    "restriction": "verbatim",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x9_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_recall_1__i_ep_note_20261028T153222Z top)",
+    "narrow_base": "recall",
+    "recovered_rule": true,
+    "restriction": "top",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T153222Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+    "narrow_base": "tree",
+    "recovered_rule": true,
+    "restriction": "working",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261103T004843Z__x5_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_check_py_1__i_ep_note_20261028T185959Z stdlib_only)",
+    "narrow_base": "check_py",
+    "recovered_rule": true,
+    "restriction": "stdlib_only",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185959Z__x5_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acld)",
+    "narrow_base": "bundle",
+    "recovered_rule": true,
+    "restriction": "acld",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T190214Z__x1_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+    "narrow_base": "note",
+    "recovered_rule": true,
+    "restriction": "closed",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T153222Z__x3_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "narrow_base": "branch",
+    "recovered_rule": true,
+    "restriction": "local",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T190214Z__n7_implication",
+    "trivial_echo": true
+   }
+  ],
+  "r2": [
+   {
+    "goal": "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "narrow_base": "gain",
+    "recovered_rule": true,
+    "restriction": "shown",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261104T151833Z__c1_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "narrow_base": "bundle",
+    "recovered_rule": true,
+    "restriction": "whole",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261103T203949Z__x1_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "narrow_base": "commit",
+    "recovered_rule": true,
+    "restriction": "staged",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "narrow_base": "commit",
+    "recovered_rule": true,
+    "restriction": "single",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x5_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+    "narrow_base": "note",
+    "recovered_rule": true,
+    "restriction": "closed",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T153222Z__x3_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+    "narrow_base": "output",
+    "recovered_rule": true,
+    "restriction": "verbatim",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x10_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_recall_1__i_ep_note_20261028T153222Z top)",
+    "narrow_base": "recall",
+    "recovered_rule": true,
+    "restriction": "top",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T153222Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+    "narrow_base": "tree",
+    "recovered_rule": true,
+    "restriction": "working",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261103T004843Z__x5_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_diff_1__i_ep_note_20261104T051320Z tested)",
+    "narrow_base": "diff",
+    "recovered_rule": true,
+    "restriction": "tested",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261104T051320Z__x5_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261028T190214Z acl_d)",
+    "narrow_base": "bundle",
+    "recovered_rule": true,
+    "restriction": "acl_d",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T190214Z__x1_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_diff_1__i_ep_note_20261028T122745Z inline)",
+    "narrow_base": "diff",
+    "recovered_rule": true,
+    "restriction": "inline",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T122745Z__x1_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "narrow_base": "config",
+    "recovered_rule": true,
+    "restriction": "effective",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x11_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_config_1__i_ep_note_20261028T185959Z effective)",
+    "narrow_base": "config",
+    "recovered_rule": true,
+    "restriction": "effective",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185959Z__x6_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "narrow_base": "branch",
+    "recovered_rule": true,
+    "restriction": "local",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T190214Z__n7_implication",
+    "trivial_echo": true
+   }
+  ],
+  "r3": [
+   {
+    "goal": "(Member sk_gain_1__i_ep_note_20261104T151833Z shown)",
+    "narrow_base": "gain",
+    "recovered_rule": true,
+    "restriction": "shown",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261104T151833Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_bundle_1__i_ep_note_20261103T203949Z whole)",
+    "narrow_base": "bundle",
+    "recovered_rule": true,
+    "restriction": "whole",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261103T203949Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_commit_1__i_ep_note_20261028T185132Z staged)",
+    "narrow_base": "commit",
+    "recovered_rule": true,
+    "restriction": "staged",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_commit_2__i_ep_note_20261028T185132Z single)",
+    "narrow_base": "commit",
+    "recovered_rule": true,
+    "restriction": "single",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x4_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "narrow_base": "config",
+    "recovered_rule": true,
+    "restriction": "effective",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x9_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_output_1__i_ep_note_20261028T185132Z verbatim)",
+    "narrow_base": "output",
+    "recovered_rule": true,
+    "restriction": "verbatim",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T185132Z__x8_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_recall_1__i_ep_note_20261028T153222Z top)",
+    "narrow_base": "recall",
+    "recovered_rule": true,
+    "restriction": "top",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T153222Z__x2_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_tree_1__i_ep_note_20261103T004843Z working)",
+    "narrow_base": "tree",
+    "recovered_rule": true,
+    "restriction": "working",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261103T004843Z__x8_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+    "narrow_base": "note",
+    "recovered_rule": true,
+    "restriction": "closed",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T153222Z__x3_implication",
+    "trivial_echo": true
+   },
+   {
+    "goal": "(Member hive_t_2026_10_28_goalchainer_v2_status local)",
+    "narrow_base": "branch",
+    "recovered_rule": true,
+    "restriction": "local",
+    "restriction_head": "Member",
+    "stv": [
+     0.9,
+     0.7
+    ],
+    "top_rule": "i_ep_note_20261028T190214Z__n6_implication",
+    "trivial_echo": true
+   }
+  ]
+ },
+ "inputs": {
+  "f44d7b74": {
+   "cache_sha256": "b96748ca2aad51bb5fe6e53dd8567612e7a62fc3c42bf268c0d8c64ef96c5092",
+   "rejects_log": "missing (/tmp/nrm/parse_f44d7b74 deleted)"
+  },
+  "ppv_r1": {
+   "cache_sha256": "a839f2972a888b3bda653193a28d225e20870fe071b122c78f5cd852a6c1b20d",
+   "rejects_sha256": "d6b8bec8dd73b080890dd9eecc02a3c260e9e67459e56dde834ab557044c3648"
+  },
+  "ppv_r2": {
+   "cache_sha256": "8e14bb9dfff121a9ee5a2c44482c0e1f8ec1f5630badf29815f01cbb33712732",
+   "rejects_sha256": "9e0cdfa8f47b8fef86eb79e0064a3d20cdff692793796fa2991303700f41d008"
+  },
+  "ppv_r3": {
+   "cache_sha256": "3a148d3c3e1df3d7580bd576050019008946fa274050654b4f163a176d52d6b4",
+   "rejects_sha256": "6d9ba77b598133ec45f78571bb948ae2a01d36b7fd7deda9433c6e96b890f8f4"
+  }
+ },
+ "judge": {
+  "A_A_v3": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 2,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 2
+   },
+   "unjudged": [],
+   "v2_rule": {
+    "CORRECT": 2,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 2
+   }
+  },
+  "A_A_v3r1": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 2,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 2
+   },
+   "unjudged": [],
+   "v2_rule": {
+    "CORRECT": 2,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 2
+   }
+  },
+  "B_f44_before": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   },
+   "unjudged": [],
+   "v2_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   }
+  },
+  "B_r1_after": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 6,
+    "UNCLEAR": 1,
+    "UNJUDGED": 5,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   },
+   "unjudged": [
+    "(Member sk_bundle_1__i_ep_note_20261028T190214Z acld)",
+    "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+    "(Member sk_recall_1__i_ep_note_20261028T153222Z top)"
+   ],
+   "v2_rule": {
+    "CORRECT": 6,
+    "UNCLEAR": 1,
+    "UNJUDGED": 5,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   }
+  },
+  "B_r1_before": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   },
+   "unjudged": [],
+   "v2_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   }
+  },
+  "B_r2_after": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 6,
+    "UNCLEAR": 1,
+    "UNJUDGED": 5,
+    "W1": 2,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 2
+   },
+   "unjudged": [
+    "(Member sk_coverage_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_diff_1__i_ep_note_20261028T122745Z inline)",
+    "(Member sk_diff_1__i_ep_note_20261104T051320Z tested)",
+    "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+    "(Member sk_recall_1__i_ep_note_20261028T153222Z top)"
+   ],
+   "v2_rule": {
+    "CORRECT": 6,
+    "UNCLEAR": 1,
+    "UNJUDGED": 5,
+    "W1": 2,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 2
+   }
+  },
+  "B_r2_before": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   },
+   "unjudged": [],
+   "v2_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   }
+  },
+  "B_r3_after": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 5,
+    "UNCLEAR": 1,
+    "UNJUDGED": 4,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   },
+   "unjudged": [
+    "(Member sk_config_1__i_ep_note_20261028T185132Z effective)",
+    "(Member sk_gain_1__i_ep_note_20261104T151833Z shown)",
+    "(Member sk_note_2__i_ep_note_20261028T153222Z closed)",
+    "(Member sk_recall_1__i_ep_note_20261028T153222Z top)"
+   ],
+   "v2_rule": {
+    "CORRECT": 5,
+    "UNCLEAR": 1,
+    "UNJUDGED": 4,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   }
+  },
+  "B_r3_before": {
+   "changed": {},
+   "f3v3_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   },
+   "unjudged": [],
+   "v2_rule": {
+    "CORRECT": 0,
+    "UNCLEAR": 0,
+    "UNJUDGED": 0,
+    "W1": 0,
+    "W2": 0,
+    "W3": 0,
+    "WRONG": 0
+   }
+  }
+ },
+ "recovery": {
+  "r1": {
+   "cache_sha256": "a839f2972a888b3bda653193a28d225e20870fe071b122c78f5cd852a6c1b20d",
+   "canary": true,
+   "in_by_reason": {
+    "inheritance_class": 1,
+    "member_class": 98
+   },
+   "items": 20,
+   "nwdef_loaded": 64,
+   "petta_rejects_in": 99,
+   "recovered_sha256": "644e8c4af5cd2fc16e49c93aa0be9d568ac97e054adcabc511282962687cd06f",
+   "refused_reasons": {
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1091468": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1098954": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1108298": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1113454": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1119244": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1124454": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1130404": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1138204": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1149764": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1169704": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1174906": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',correct]": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',earlier]": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',failed]'": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',human]' ": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',known]' ": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sanitize": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_branc": 2,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_cover": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_reque": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_text_": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_workt": 1
+   },
+   "rejects_sha256": "d6b8bec8dd73b080890dd9eecc02a3c260e9e67459e56dde834ab557044c3648",
+   "run": "r1",
+   "statements_recovered": 76,
+   "still_refused": 23,
+   "still_refused_by_shape": {
+    "Directive>Narrow(Member ..)": 3,
+    "Directive>Narrow(Mod ..)": 1,
+    "For>Narrow(Member ..)": 1,
+    "GroupOf>Narrow(Member ..)": 3,
+    "Holds>Narrow(Member ..)": 1,
+    "Implication>Narrow(Member ..)": 3,
+    "Implication>Narrow(Mod ..)": 6,
+    "Not>Narrow(Member ..)": 1,
+    "Not>Narrow(Mod ..)": 1,
+    "Theme>Narrow(Member ..)": 2,
+    "Theme>Narrow(Mod ..)": 1
+   }
+  },
+  "r2": {
+   "cache_sha256": "8e14bb9dfff121a9ee5a2c44482c0e1f8ec1f5630badf29815f01cbb33712732",
+   "canary": true,
+   "in_by_reason": {
+    "inheritance_class": 1,
+    "member_class": 108
+   },
+   "items": 20,
+   "nwdef_loaded": 72,
+   "petta_rejects_in": 109,
+   "recovered_sha256": "73e09a7013bafa526c471468726c04447a70d607c224eab2c1e450cb9421be27",
+   "refused_reasons": {
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',[sk_sour": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1060888": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1087930": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1095416": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1165476": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1170632": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1176422": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1181632": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1187582": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1198962": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',correct]": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',earlier]": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',failed]'": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',known]' ": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',live]' (": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sanitize": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_branc": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_cover": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_reque": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_text_": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_workt": 1
+   },
+   "rejects_sha256": "9e0cdfa8f47b8fef86eb79e0064a3d20cdff692793796fa2991303700f41d008",
+   "run": "r2",
+   "statements_recovered": 88,
+   "still_refused": 21,
+   "still_refused_by_shape": {
+    "Directive>Narrow(Member ..)": 4,
+    "Directive>Narrow(Mod ..)": 1,
+    "GroupOf>Narrow(Member ..)": 4,
+    "Holds>Narrow(Member ..)": 1,
+    "Implication>Narrow(Member ..)": 1,
+    "Implication>Narrow(Mod ..)": 6,
+    "Not>Narrow(Member ..)": 1,
+    "Not>Narrow(Mod ..)": 1,
+    "Theme>Narrow(Member ..)": 1,
+    "Theme>Narrow(Mod ..)": 1
+   }
+  },
+  "r3": {
+   "cache_sha256": "3a148d3c3e1df3d7580bd576050019008946fa274050654b4f163a176d52d6b4",
+   "canary": true,
+   "in_by_reason": {
+    "inheritance_class": 1,
+    "member_class": 100
+   },
+   "items": 20,
+   "nwdef_loaded": 65,
+   "petta_rejects_in": 101,
+   "recovered_sha256": "3e097daa4905395e635fa319f8833f539f87831116088bada28767c8e85b4181",
+   "refused_reasons": {
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1008594": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1014324": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1019480": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1024444": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1029628": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1035346": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1040506": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1045690": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1072718": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1080204": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1089548": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1094704": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1100494": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1105704": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1111654": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1123034": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1134594": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1139872": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',_1145074": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',correct]": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',earlier]": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',failed]'": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',known]' ": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',live]' (": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sanitize": 1,
+    "petta|petta load: compileadd/2: Domain error: `member_class' expected, found `['Member',sk_branc": 1
+   },
+   "rejects_sha256": "6d9ba77b598133ec45f78571bb948ae2a01d36b7fd7deda9433c6e96b890f8f4",
+   "run": "r3",
+   "statements_recovered": 75,
+   "still_refused": 26,
+   "still_refused_by_shape": {
+    "Directive>Narrow(Member ..)": 2,
+    "GroupOf>Narrow(Member ..)": 4,
+    "Implication>Narrow(Member ..)": 11,
+    "Implication>Narrow(Mod ..)": 6,
+    "Theme>Narrow(Member ..)": 2,
+    "Theme>Narrow(Mod ..)": 1
+   }
+  }
+ },
+ "runs": {
+  "f44_before": {
+   "add_fail": 0,
+   "atoms": 260,
+   "canary": true,
+   "facts": 206,
+   "goals_n": 0,
+   "pc_proved": 0,
+   "shadow_sha256": "a59220543e881114deb80557c3a0c6a55e3053de1693d86df33d310ad8a0e5fb",
+   "status": "ok",
+   "store_sha256": "5dadf2b1f03f876f7a8bfc19ded416c43584834b4ce00e46fb43f622518a5868",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "r1_after": {
+   "add_fail": 0,
+   "atoms": 356,
+   "canary": true,
+   "facts": 248,
+   "goals_n": 12,
+   "pc_proved": 12,
+   "shadow_sha256": "bc7e6e55d1ec1eb2295eb4d36f790f19ac04d68f00df6b063eff6c2a6693d6bd",
+   "status": "ok",
+   "store_sha256": "aed0afc18d6925ddfb8b00cb15e24f69426db24230a29a7d89eea5cf29564ec7",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "r1_before": {
+   "add_fail": 0,
+   "atoms": 217,
+   "canary": true,
+   "facts": 184,
+   "goals_n": 0,
+   "pc_proved": 0,
+   "shadow_sha256": "e03ee4cb3ca4b86e8cee70331f9e19205ee87a6de41cc68cd5002a6090bad142",
+   "status": "ok",
+   "store_sha256": "5db54b90edbc0ba87c7c11878f1dec5082b69f40e3dd99ed0933e33d619e17cb",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "r2_after": {
+   "add_fail": 0,
+   "atoms": 413,
+   "canary": true,
+   "facts": 280,
+   "goals_n": 14,
+   "pc_proved": 14,
+   "shadow_sha256": "8ede770ab228cb2d9b384741833a40e4dd22c55460cd643c51af8721a3c105cb",
+   "status": "ok",
+   "store_sha256": "e82200c659f0637e889f567a63ff9ef68ab8b431cb2c34e60f8d4590c412691a",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "r2_before": {
+   "add_fail": 0,
+   "atoms": 254,
+   "canary": true,
+   "facts": 206,
+   "goals_n": 0,
+   "pc_proved": 0,
+   "shadow_sha256": "ce9587f767b70c425ec8ccc370d282ad315ebf299009c00da923c6b5b1a32543",
+   "status": "ok",
+   "store_sha256": "86626a6fe237b4c8c4411e2a35d5b6c268ad387cc0f88e3d395593a23ddacc13",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "r3_after": {
+   "add_fail": 0,
+   "atoms": 375,
+   "canary": true,
+   "facts": 256,
+   "goals_n": 10,
+   "pc_proved": 10,
+   "shadow_sha256": "5518a9efca931a12549908ff88da5f5de4c6ff25c09992ad921d7e54034f60ca",
+   "status": "ok",
+   "store_sha256": "54ad46cb8b1d737b1e8bd5e367de2b15907f24a8cd05f65fd8196fa24bb57178",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "r3_before": {
+   "add_fail": 0,
+   "atoms": 236,
+   "canary": true,
+   "facts": 191,
+   "goals_n": 0,
+   "pc_proved": 0,
+   "shadow_sha256": "65d790e0fae6a2469054a9d33554595e6bef4e305d6c6ca35baa1e9095c08f06",
+   "status": "ok",
+   "store_sha256": "1d7c23119e3d65dfc1a51195ebe344e55bb1f22f1d0fd1e256cc9ebf2487ba81",
+   "timeouts": 0,
+   "unparsed_items": 0
+  }
+ }
+}
