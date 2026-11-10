@@ -1,0 +1,30 @@
+{
+ "label": "after-run3",
+ "part_a_s12_3": {
+  "cycles": 100,
+  "top_k": 15,
+  "clusters": 60,
+  "recall_s_mean": 0.0003464855393394828,
+  "recall_s_median": 0.0003317914670333266,
+  "recall_s_max": 0.0008133139926940203,
+  "recall_s_total": 0.03464855393394828,
+  "candidates_max": 15,
+  "candidates_mean": 14.92,
+  "graph_only_candidates_mean": 11.13,
+  "graph_only_candidates_max": 14,
+  "occupancy_max": 20,
+  "useful_resident_end": 6
+ },
+ "part_b_scale": {
+  "clusters": 7900,
+  "active": 40,
+  "queries": 30,
+  "top_k": 15,
+  "recall_s_mean": 0.060257981764152646,
+  "recall_s_median": 0.06009030347922817,
+  "recall_s_max": 0.06216552993282676,
+  "candidates_max": 15,
+  "candidates_mean": 15,
+  "graph_only_candidates_mean": 0
+ }
+}

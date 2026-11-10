@@ -1,0 +1,345 @@
+.......................................FF..........................s.... [  8%]
+..........F.....FF...................................................... [ 17%]
+........................................................................ [ 25%]
+........................................................................ [ 34%]
+................sss....ssssssss...sssss........F....F................... [ 42%]
+........................................F............................... [ 51%]
+............FF....................................................ssssss [ 59%]
+.ss.........................................................F....ssss..s [ 68%]
+........................................................................ [ 76%]
+........................................................................ [ 85%]
+...............s........................................................ [ 93%]
+.....................................................                    [100%]
+=================================== FAILURES ===================================
+____________ test_sub_unit_premises_low_confidence_answer_admitted _____________
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_sub_unit_premises_low_con0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3f982a50>
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_sub_unit_premises_low_confidence_answer_admitted(tmp_path, monkeypatch):
+>       stv, cands = _run(tmp_path, monkeypatch, [(0.6, 0.4), (0.6, 0.3)])   # F3 v2: native chain keeps more c ((0.9,0.8)/(0.8,0.7) -> 0.195); these premises pass gate_min_conf 0.3 and give s 0.56 c ~0.021
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_f1_s11_subunit.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_sub_unit_premises_low_con0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3f982a50>
+tvs = [(0.6, 0.4), (0.6, 0.3)]
+
+    def _run(tmp_path, monkeypatch, tvs):
+        _install(monkeypatch, tvs)
+        st = _store()
+        spec = pc_shadow.build_snapshot(st, cycle=1)
+        sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow.jsonl"
+        code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out)],
+                              env=rc.worker_env(_CFG), cwd=rc.DIST_ROOT, timeout=300).returncode
+        rec = json.loads(out.read_text().strip().splitlines()[-1])
+>       assert code == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"], rec.get("status")
+E       AssertionError: warm_fail
+E       assert (3 == 0)
+
+tests/test_f1_s11_subunit.py:47: AssertionError
+________________ test_control_unit_premises_hide_the_regression ________________
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_control_unit_premises_hid0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3fb4e250>
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_control_unit_premises_hide_the_regression(tmp_path, monkeypatch):
+>       stv, cands = _run(tmp_path, monkeypatch, [(1.0, 0.9)])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_f1_s11_subunit.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_control_unit_premises_hid0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3fb4e250>
+tvs = [(1.0, 0.9)]
+
+    def _run(tmp_path, monkeypatch, tvs):
+        _install(monkeypatch, tvs)
+        st = _store()
+        spec = pc_shadow.build_snapshot(st, cycle=1)
+        sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow.jsonl"
+        code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out)],
+                              env=rc.worker_env(_CFG), cwd=rc.DIST_ROOT, timeout=300).returncode
+        rec = json.loads(out.read_text().strip().splitlines()[-1])
+>       assert code == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"], rec.get("status")
+E       AssertionError: warm_fail
+E       assert (3 == 0)
+
+tests/test_f1_s11_subunit.py:47: AssertionError
+__________ test_repro_native_beats_wmtm_rule_and_canary_without_rules __________
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_repro_native_beats_wmtm_rule_and_canary_without_rules():
+        PC = _engine()
+>       native = _conf(PC, A, "(Inheritance harbour_pilot licensed)")         # kbH
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_f3v2_native_chain.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_f3v2_native_chain.py:53: in _conf
+    h = PC()
+        ^^^^
+../../env-gapcheck/pettachainer-b6aacc68/pettachainer/pettachainer.py:122: in __init__
+    self.handler = PeTTa()
+                   ^^^^^^^
+../../env-gapcheck/petta-3681b9b/python/petta/__init__.py:47: in __init__
+    janus = importlib.import_module("janus_swi")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1206: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1178: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'janus_swi', import_ = <function _gcd_import at 0x7fba4160fd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'janus_swi'
+
+<frozen importlib._bootstrap>:1142: ModuleNotFoundError
+__________________________ test_repro_kbA_kbD_values ___________________________
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_repro_kbA_kbD_values():
+        """andy's r9 repro: kbA (no wmtm rules) proves (by r1 f1) at (0.9, 0.7);
+        kbD (mem_inh + inh_trans put back) specializes down to (0.977, 0.018)."""
+        PC = _engine()
+>       pa, sa, ca = _stv(PC, KB_F, "(Member b1 acl_d)")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_f3v2_native_chain.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_f3v2_native_chain.py:97: in _stv
+    h = PC()
+        ^^^^
+../../env-gapcheck/pettachainer-b6aacc68/pettachainer/pettachainer.py:122: in __init__
+    self.handler = PeTTa()
+                   ^^^^^^^
+../../env-gapcheck/petta-3681b9b/python/petta/__init__.py:47: in __init__
+    janus = importlib.import_module("janus_swi")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1206: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1178: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'janus_swi', import_ = <function _gcd_import at 0x7fba4160fd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'janus_swi'
+
+<frozen importlib._bootstrap>:1142: ModuleNotFoundError
+__________________________ test_repro_kbH_kbI_values ___________________________
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_repro_kbH_kbI_values():
+        PC = _engine()
+>       _, sh, ch = _stv(PC, A, "(Inheritance harbour_pilot licensed)")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_f3v2_native_chain.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_f3v2_native_chain.py:97: in _stv
+    h = PC()
+        ^^^^
+../../env-gapcheck/pettachainer-b6aacc68/pettachainer/pettachainer.py:122: in __init__
+    self.handler = PeTTa()
+                   ^^^^^^^
+../../env-gapcheck/petta-3681b9b/python/petta/__init__.py:47: in __init__
+    janus = importlib.import_module("janus_swi")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1206: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1178: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'janus_swi', import_ = <function _gcd_import at 0x7fba4160fd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'janus_swi'
+
+<frozen importlib._bootstrap>:1142: ModuleNotFoundError
+______________ test_real_engine_resolved_cross_note_fact_derives _______________
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_real_engine_resolved_cros0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3e7ed490>
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_real_engine_resolved_cross_note_fact_derives(tmp_path, monkeypatch):
+        """Real PeTTaChainer: a name in note n1 and the same name in note n2 link only after resolution, and derive."""
+        import json, subprocess, sys
+        from wmtm import runtime_config as rc
+        from wmtm.store import WMTMStore
+        notes = {"n1": ['Name sk_github_1__i_n1 "GitHub"', 'Inheritance sk_github_1__i_n1 forge'],
+                 "n2": ['Name sk_github_4__i_n2 "GitHub"', 'Inheritance sk_github_4__i_n2 host',
+                        'Inheritance forge service']}
+        st = WMTMStore()
+        for k, n in enumerate(notes):
+            st.admit(n, "note " + n, source_type="recalled", initial_sti=1.0 - k * 0.01)
+        monkeypatch.setattr(pc_shadow, "_cache_lookup", lambda items, *a, **kw: {it.id: _note(it.id, notes[it.id]) for it in items})
+        cfg = dict(_CFG, name_resolve=False)
+        before = pc_shadow.build_snapshot(st, cycle=1, cfg=cfg)["goals"]
+        # before: no cross-note link (P4 rev3 keeps in-note goals about scoped witnesses sk_<x>__i_<note>)
+        assert "(Inheritance github service)" not in before and all("__i_" in g for g in before)
+        cfg["name_resolve"] = True
+        spec = pc_shadow.build_snapshot(st, cycle=1, cfg=cfg)
+        assert "(Inheritance github service)" in spec["goals"]
+        sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow.jsonl"
+        code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out)],
+                              env=rc.worker_env(_CFG), cwd=rc.DIST_ROOT, timeout=120).returncode
+        rec = json.loads(out.read_text().strip().splitlines()[-1])
+>       assert code == 0 and rec["status"] == "ok" and rec["canary"]["ok"]
+E       assert (3 == 0)
+
+tests/test_name_resolve.py:77: AssertionError
+____________________ test_parsed_note_chains_on_real_engine ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3e811850>
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_parsed_note_chains_on_rea0')
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_parsed_note_chains_on_real_engine(monkeypatch, tmp_path):
+        spec = ps.build_snapshot(_parsed_store(monkeypatch), cycle=1)
+        sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec)); out = tmp_path / "shadow.jsonl"
+        code = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(out), "--timeout", "10"],
+                              env=rc.worker_env(_CFG), cwd=rc.DIST_ROOT, timeout=300).returncode
+        rec = json.loads(out.read_text().strip().splitlines()[-1])
+>       assert code == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
+E       assert (3 == 0)
+
+tests/test_p4_rule_goals.py:59: AssertionError
+__________ test_integration_worker_writes_admit_file_and_cycle_admits __________
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_integration_worker_writes0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fba3e849ed0>
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_integration_worker_writes_admit_file_and_cycle_admits(tmp_path, monkeypatch):
+        import subprocess, sys
+        import _fake_semparse; _fake_semparse.install(monkeypatch)
+        spec = pc_shadow.build_snapshot(_store(), cycle=1)
+        sp = tmp_path / "spec.json"; sp.write_text(json.dumps(spec))
+        p = subprocess.run([sys.executable, "-m", "wmtm.workers.pc_shadow", "--spec", str(sp), "--out", str(tmp_path / "shadow.jsonl")],
+                           cwd=rc.DIST_ROOT, env=rc.worker_env(_CFG), timeout=120)
+>       assert p.returncode == 0
+E       AssertionError: assert 3 == 0
+E        +  where 3 = CompletedProcess(args=['/usr/bin/python3', '-m', 'wmtm.workers.pc_shadow', '--spec', '/hive/protocosmo/state/.tmp/pyte.../hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_integration_worker_writes0/shadow.jsonl'], returncode=3).returncode
+
+tests/test_pc_admit.py:217: AssertionError
+__________________________ test_integration_synthetic __________________________
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_integration_synthetic0')
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_integration_synthetic(tmp_path):
+        spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
+        rc, rec, sp = _run_worker(tmp_path, spec)
+>       assert rc == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
+E       assert (3 == 0)
+
+tests/test_pc_shadow.py:109: AssertionError
+__________________ test_fault_timeout_is_canary_fail_not_hang __________________
+
+tmp_path = PosixPath('/hive/protocosmo/state/.tmp/pytest-of-protocosmo/pytest-1/test_fault_timeout_is_canary_f0')
+
+    @pytest.mark.skipif(not HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_fault_timeout_is_canary_fail_not_hang(tmp_path):
+        spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
+        t = time.time(); rc, rec, _ = _run_worker(tmp_path, spec, "--timeout", "0.0001")
+        # 120 s: proves "no hang" while leaving margin for ~20 s 202b9379 warm-up on a loaded 4-core box (review 6: 62 s at 60 s limit)
+>       assert rc == 3 and rec["status"] == "canary_fail" and rec["queries"] == [] and time.time() - t < 120
+E       AssertionError: assert (3 == 3 and 'warm_fail' == 'canary_fail'
+E         
+E         - canary_fail
+E         + warm_fail)
+
+tests/test_pc_shadow.py:122: AssertionError
+________ test_integration_normalise_output_loads_and_derives_on_engine _________
+
+    @pytest.mark.skipif(not _HAVE_PC, reason="vendored PeTTa / PeTTaChainer not present")
+    def test_integration_normalise_output_loads_and_derives_on_engine():
+        """answer 6: normalise() output must compile on 202b9379 and chain (Premises form was rejected)."""
+        rules = ["(: r (Implication (Premises (P $a) (Q $a)) (Conclusions (R $a))) (STV 1.0 0.9))",
+                 "(: m (Implication (Premises (P $a)) (Conclusions (S $a) (T $a))) (STV 1.0 0.9))"]
+        atoms = []
+        for r in rules:
+            atoms += [sp.to_str(n) for n in sp.normalise(sp.parse_one(sp.tokenize(r), 0)[0])]
+        assert not any("Premises" in a or "Conclusions" in a for a in atoms)
+        atoms += ["(: f1 (P x) (STV 1.0 0.9))", "(: f2 (Q x) (STV 1.0 0.9))"]
+>       out = _engine(atoms, ["(R x)", "(S x)", "(T x)", "(R y)"])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_semparse_adapter.py:279: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+atoms = ['(: r (Implication (And (P $a) (Q $a)) (R $a)) (STV 1.0 0.9))', '(: m_c1 (Implication (P $a) (S $a)) (STV 1.0 0.9))', '(: m_c2 (Implication (P $a) (T $a)) (STV 1.0 0.9))', '(: f1 (P x) (STV 1.0 0.9))', '(: f2 (Q x) (STV 1.0 0.9))']
+goals = ['(R x)', '(S x)', '(T x)', '(R y)']
+
+    def _engine(atoms, goals):
+        p = _sp.run([_sys.executable, "-c", _ENGINE_SCRIPT, _CFG["petta_dir"], _CFG["pettachainer_dir"]],
+                    input=_json.dumps({"atoms": atoms, "goals": goals}), capture_output=True, text=True,
+                    env=_rc.worker_env(_CFG), timeout=180)
+        line = [l for l in p.stdout.splitlines() if l.startswith("JSON ")]
+>       assert line, p.stderr[-2000:]
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 8, in <module>
+E           File "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/pettachainer-b6aacc68/pettachainer/pettachainer.py", line 122, in __init__
+E             self.handler = PeTTa()
+E                            ^^^^^^^
+E           File "/hive/protocosmo/workspace/projects/wmtm/env-gapcheck/petta-3681b9b/python/petta/__init__.py", line 47, in __init__
+E             janus = importlib.import_module("janus_swi")
+E                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/usr/lib/python3.11/importlib/__init__.py", line 126, in import_module
+E             return _bootstrap._gcd_import(name[level:], package, level)
+E                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "<frozen importlib._bootstrap>", line 1206, in _gcd_import
+E           File "<frozen importlib._bootstrap>", line 1178, in _find_and_load
+E           File "<frozen importlib._bootstrap>", line 1142, in _find_and_load_unlocked
+E         ModuleNotFoundError: No module named 'janus_swi'
+E         
+E       assert []
+
+tests/test_semparse_adapter.py:265: AssertionError
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_f2_context_goals.py:260: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_goals_v2.py:372: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_goals_v2.py:378: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_goals_v2.py:394: WMTM_TEST_GC2_PYTHON not set
+SKIPPED [1] tests/test_measure_parse.py:78: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:103: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:119: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:176: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:199: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:207: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [2] tests/test_measure_parse.py:228: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:287: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:316: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:336: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:359: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_measure_parse.py:375: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [4] tests/test_replay_equivalence.py:114: needs git + tag v0.1.0 for the original package: [Errno 2] No such file or directory: 'git'
+SKIPPED [2] tests/test_replay_equivalence.py:127: needs git + tag v0.1.0 for the original package: [Errno 2] No such file or directory: 'git'
+SKIPPED [2] tests/test_replay_equivalence.py:150: needs git + tag v0.1.0 for the original package: [Errno 2] No such file or directory: 'git'
+SKIPPED [1] tests/test_semparse_catalog.py:58: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:65: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:72: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:87: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_semparse_catalog.py:113: WMTM_SEMPARSE_HITL checkout not available
+SKIPPED [1] tests/test_wmtm_metta_codec.py:25: set PETTA_PARSER and SWIPL to run against real PeTTa sread
+11 failed, 803 passed, 31 skipped in 16.71s
