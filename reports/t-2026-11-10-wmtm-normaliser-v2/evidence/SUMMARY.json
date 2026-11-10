@@ -24,7 +24,28 @@
    },
    "unrecognised": 291
   },
-  "nov9_f44d7b74": null,
+  "nov9_f44d7b74": {
+   "known_unused": 405,
+   "mapped": 207,
+   "member_narrow": 0,
+   "notes": 20,
+   "nwdef": 0,
+   "raw_sha256": "b96748ca2aad51bb5fe6e53dd8567612e7a62fc3c42bf268c0d8c64ef96c5092",
+   "rewrites": {},
+   "top_unrecognised": {
+    "(Agent sk sk)": 18,
+    "(Bearer sk sk)": 8,
+    "(GroupOf sk (Narrow S (Mod ..)))": 11,
+    "(GroupOf sk S)": 31,
+    "(Holds sk (Member sk S))": 6,
+    "(LocatedIn sk sk)": 5,
+    "(On sk sk)": 8,
+    "(PartOf sk sk)": 15,
+    "(Patient sk sk)": 53,
+    "(Theme sk sk)": 14
+   },
+   "unrecognised": 306
+  },
   "ppv_r1_533c2274": {
    "known_unused": 365,
    "mapped": 185,
@@ -109,6 +130,30 @@
    "atoms": 217,
    "canary": true,
    "facts": 184,
+   "goals": [],
+   "goals_n": 0,
+   "pc_proved": 0,
+   "semparse_items": 20,
+   "status": "ok",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "pf44_after": {
+   "atoms": 260,
+   "canary": true,
+   "facts": 206,
+   "goals": [],
+   "goals_n": 0,
+   "pc_proved": 0,
+   "semparse_items": 20,
+   "status": "ok",
+   "timeouts": 0,
+   "unparsed_items": 0
+  },
+  "pf44_before": {
+   "atoms": 260,
+   "canary": true,
+   "facts": 206,
    "goals": [],
    "goals_n": 0,
    "pc_proved": 0,
