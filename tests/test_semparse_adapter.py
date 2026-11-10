@@ -281,3 +281,84 @@ def test_integration_normalise_output_loads_and_derives_on_engine():
     for g in ("(R x)", "(S x)", "(T x)"):
         assert any("STV" in x for x in out["res"][g]), (g, out["res"][g])
     assert not any("STV" in x for x in out["res"]["(R y)"])          # negative control
+
+
+# --- narrow_preload STOPGAP (t-2026-11-10-wmtm-narrow-preload): M2 rewrite before the PeTTa load ---------------
+
+class NarrowRefusingLoader(FakeLoader):
+    """Mimics PeTTaChainer: a narrowed class under Member is refused."""
+    def add_atom(self, a):
+        if "(Member" in a and "(Narrow" in a:
+            raise RuntimeError("member_class: narrowed class under Member")
+        return super().add_atom(a)
+
+
+NARROW_REPLY = "(: f (Member sk_a (Narrow pilot (Mod harbour))) (STV 1.0 0.9))"
+
+
+def test_narrow_preload_member_narrow_loads(tmp_path):
+    L = NarrowRefusingLoader()
+    ad, _, log = mk(NARROW_REPLY, L, tmp_path)
+    r = ad.parse_item("m1", {"content": "x"})
+    assert len(r.accepted) == 2 and not r.rejected
+    fact, rule = r.accepted
+    assert "(Narrow" not in fact and "pilot__nw_" in fact and fact.startswith("(: i_m1__f (Member ")
+    assert rule.startswith("(: nwdef_pilot__nw_") and "(Member $x pilot))" in rule
+    assert L.atoms == r.accepted and read_log(log) == []
+
+
+def test_narrow_preload_negative_control_unrewritten_is_refused(tmp_path, monkeypatch):
+    """Without the rewrite the same statement is refused at stage petta (the pre-fix behaviour)."""
+    monkeypatch.setattr(sp, "narrow_preload", lambda n: (n, []))
+    L = NarrowRefusingLoader()
+    ad, _, log = mk(NARROW_REPLY, L, tmp_path)
+    r = ad.parse_item("m1", {"content": "x"})
+    assert r.accepted == [] and [d["stage"] for d in read_log(log)] == ["petta"]
+
+
+def test_narrow_preload_plain_member_untouched():
+    n = [":", "m", ["Member", "a", "pilot"], ["STV", "1.0", "0.9"]]
+    assert sp.narrow_preload(n) == (n, [])
+
+
+def test_narrow_preload_nwdef_once_per_symbol(tmp_path):
+    L = NarrowRefusingLoader()
+    ad, _, _ = mk(NARROW_REPLY + "\n(: g (Member sk_b (Narrow pilot (Mod harbour))) (STV 1.0 0.9))", L, tmp_path)
+    r = ad.parse_item("m1", {"content": "x"})
+    assert sum(a.startswith("(: nwdef_") for a in r.accepted) == 1 and len(r.accepted) == 3
+    r2 = ad.parse_item("m2", {"content": "x"})          # same symbol, later note: rule not loaded again
+    assert sum(a.startswith("(: nwdef_") for a in L.atoms) == 1
+    assert sum(a.startswith("(: nwdef_") for a in r2.accepted) == 1   # still reported as part of the parse
+
+
+def test_narrow_preload_nested_defines_chain():
+    n = [":", "n", ["Member", "a", ["Narrow", ["Narrow", "pilot", ["Mod", "harbour"]], ["Mod", "night"]]],
+         ["STV", "1.0", "0.9"]]
+    out, rules = sp.narrow_preload(n)
+    assert "Narrow" not in sp.to_str(out) and len(rules) == 2
+    assert any("(Member $x pilot))" in r for r in rules)
+
+
+def test_narrow_preload_f1_groupof_left_as_written(tmp_path):
+    """F1 guard: no GroupOf->PartOf bridge and no rename of a GroupOf narrow; it stays refused as before."""
+    g = [":", "g", ["GroupOf", "sk_g", ["Narrow", "pilot", ["Mod", "harbour"]]], ["STV", "1.0", "0.9"]]
+    assert sp.narrow_preload(g) == (g, [])
+    L = FakeLoader(fail_on="(GroupOf")
+    ad, _, log = mk(sp.to_str(g), L, tmp_path)
+    r = ad.parse_item("m1", {"content": "x"})
+    assert r.accepted == [] and not any("PartOf" in a for a in L.atoms)
+    # control: the mapped Member form in the same reply IS rewritten, so the guard is shape-specific
+    ad2, _, _ = mk(sp.to_str(g) + "\n" + NARROW_REPLY, FakeLoader(fail_on="(GroupOf"), tmp_path)
+    assert len(ad2.parse_item("m2", {"content": "x"}).accepted) == 2
+
+
+def test_narrow_preload_f2_modifier_never_a_property(tmp_path):
+    """F2 guard: the modifier (harbour) appears in no loaded atom as a predicate or argument."""
+    L = NarrowRefusingLoader()
+    ad, _, _ = mk(NARROW_REPLY, L, tmp_path)
+    r = ad.parse_item("m1", {"content": "x"})
+    toks = [t for a in r.accepted for t in sp.tokenize(a)]
+    assert "harbour" not in toks and "Mod" not in toks
+    # control: a statement that really names harbour keeps it (the check can see the token)
+    ad2, _, _ = mk("(: h (Member sk_a harbour) (STV 1.0 0.9))", FakeLoader(), tmp_path)
+    assert "harbour" in sp.tokenize(ad2.parse_item("m2", {"content": "x"}).accepted[0])
