@@ -48,6 +48,8 @@ SPEC = {
     "reasoner_min_strength": ("WMTM_REASONER_MIN_STRENGTH", float, 0.5, None),
     "reasoner_negation":   ("WMTM_REASONER_NEGATION", str, "skip", None),        # skip | unlikely ("unlikely: <text>")
     "reasoner_initial_sti": ("WMTM_REASONER_INITIAL_STI", float, 1.0, None),   # F1 §4: a conclusion's base STI
+    # GAP-5 (t-2026-11-10-wmtm-trivial-filter): refuse proof-shape-trivial conclusions (pc_admit.TRIVIAL_RULE)
+    "admit_trivial_filter": ("WMTM_ADMIT_TRIVIAL_FILTER", bool, True, None),
     "reasoner_initial_sti_rel": ("WMTM_REASONER_INITIAL_STI_REL", float, 4.0, None),  # F1 §4: + this * request relevance
     # Track O: CONTEXT coreference (off by default; results go to <semparse_dir>/ctx1, the old cache is kept)
     "semparse_context":    ("WMTM_SEMPARSE_CONTEXT", bool, False, None),

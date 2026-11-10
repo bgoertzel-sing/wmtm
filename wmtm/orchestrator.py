@@ -81,6 +81,9 @@ class WMTMOrchestrator:
         self.runtime_state_dir = None
         self.default_reasoner = "pettachainer"   # used when the flags file / env does not set "reasoner"
         self.pc_admit_state = {}           # rc2: {"consumed_run": id, ...} - each admit.json run is admitted once
+        self.trivial_filter = True         # GAP-5: pc_admit.TRIVIAL_RULE on PeTTaChainer candidates (flag admit_trivial_filter)
+        self.trivial_refused = []          # GAP-5: last 200 refusals {cycle, rule, reason, goal}; count in trivial_refused_n
+        self.trivial_refused_n = 0
         self.context_rel = None            # Track P: relevance of items to the last real request (context.request_relevance)
 
 
@@ -187,7 +190,7 @@ class WMTMOrchestrator:
         """Admit novel, non-forgotten derived candidates; return admitted items."""
         admitted = []
         for i, cand in enumerate(candidates):
-            if self._is_skipworthy(cand):
+            if self._is_skipworthy(cand) or self._is_trivial(cand):
                 continue
             item = self._admit_candidate(cand, i)
             if item is not None:
@@ -196,6 +199,21 @@ class WMTMOrchestrator:
                     self.utility.record_inferred_from(pid)
         self._log_capacity_evictions()
         return admitted
+
+    def _is_trivial(self, cand) -> bool:
+        """GAP-5 TRIVIAL_RULE (pc_admit.trivial_reason): refuse a PeTTaChainer conclusion whose proof is only an nwdef
+        head-noun step or a Narrow-restriction echo applied to asserted facts.  Logged and counted."""
+        prov = getattr(cand, "provenance", None) or {}
+        if not self.trivial_filter or cand.inference_type != "pc_deduction" or not prov.get("proof"):
+            return False
+        from .pc_admit import trivial_reason, TRIVIAL_RULE
+        why = trivial_reason(prov.get("proof"), prov.get("rules"))
+        if not why:
+            return False
+        self.trivial_refused_n += 1
+        self.trivial_refused = (self.trivial_refused + [{"cycle": self._cycle, "rule": TRIVIAL_RULE, "reason": why,
+                                                          "goal": prov.get("goal")}])[-200:]
+        return True
 
     def _is_skipworthy(self, cand) -> bool:
         """Check if a candidate should be skipped (forgotten or duplicate)."""
@@ -257,8 +275,9 @@ class WMTMOrchestrator:
 
         -> (items | None, info).  None = nothing may be admitted (missing/stale/failed run, already consumed)."""
         try:
-            from .pc_admit import load_candidates
+            from .pc_admit import load_candidates, trivial_filter_on
             from .candidate import InferenceCandidate
+            self.trivial_filter = trivial_filter_on(cfg)
 
             def known(text, srcs=()):   # same tests as _is_skipworthy; F1 §4: forgotten = this derivation (text + sources)
                 c = InferenceCandidate(content=text, confidence=0.0, derived_from=list(srcs), inference_type="pc_deduction")
