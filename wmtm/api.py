@@ -55,6 +55,14 @@ class WMTMConfig:
     pending_filename: str = "_wmtm_pending_derives.jsonl"
 
 
+def _recall_floor(cfg):
+    """recall_relevance_floor (design s8.2) from the resolved flags, SPEC default when absent.  Never raises."""
+    try:
+        return float(_ctx.setting(cfg, "recall_relevance_floor"))
+    except Exception:
+        return 0.1
+
+
 def drain_pending_derives(pending_path):
     """Read + clear the pending-derives file under the same flock that
     derive() uses, so an append landing between read and clear is never
@@ -250,7 +258,7 @@ class WMTM:
             t = lap("journal_s", t)
             if user_msg and self._recall_bridge and self._budget_ok():
                 rb = self._recall_bridge
-                candidates = rb.recall(user_msg, store, top_k=15)
+                candidates = rb.recall(user_msg, store, top_k=15, floor=_recall_floor(pcfg))
                 admitted_snippets = []
                 for c in candidates:
                     if c.cluster_id not in store:

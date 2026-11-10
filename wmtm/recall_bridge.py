@@ -208,6 +208,7 @@ class RecallBridge:
         query_context: str,
         store: WMTMStore,
         top_k: int = 20,
+        floor: float = 0.0,
     ) -> list[RecallCandidate]:
         """Recall items from LTM matching query_context, or linked to the active set (design s3.3, s8.1).
 
@@ -215,6 +216,10 @@ class RecallBridge:
         activation from the active items reaches it (GAP-1: graph=True), so a linked cluster is recalled without a
         shared keyword.  Active and superseded clusters are never candidates (parse_journal drops superseded ones);
         at most top_k are returned, best first.
+
+        floor (design s8.2 "Relevance threshold: only admit items with activation above a floor"; the flag
+        recall_relevance_floor, default 0.1, is passed by api.py): a candidate whose final score is not above floor is
+        dropped.  The default 0.0 keeps the old behaviour (score > 0) for direct callers.
         """
         query_terms: set[str] = self._tokenize(query_context)
         active_ids: set[str] = {item.id for item in store.get_active_set()}
@@ -224,7 +229,7 @@ class RecallBridge:
             if cluster.id in active_ids:
                 continue
             score = self._score_cluster(cluster, query_terms, active_ids, store, graph=True)
-            if score <= 0:
+            if score <= 0 or score <= floor:
                 continue
             candidates.append(RecallCandidate(
                 cluster_id=cluster.id,
@@ -498,6 +503,15 @@ class RecallBridge:
             if target in active_ids:
                 boost += 0.5
         for source_id in self._evidence_for_targets.get(cluster.id, []):
+            if source_id in active_ids:
+                boost += 0.5
+        # t-2026-11-10-wmtm-graph-recall-floor-replay: a direct PromotesFrom link (either direction) gets the same 0.5
+        # direct weight as a direct EvidenceFor link, so recall_relevance_floor does not drop it (it scored only the
+        # depth-1 spread 0.3 * 0.2 = 0.06 before).
+        for target in cluster.promotes_from:
+            if target in active_ids:
+                boost += 0.5
+        for source_id in self._promotes_from_targets.get(cluster.id, []):
             if source_id in active_ids:
                 boost += 0.5
         # Track P: the spread depends only on the active set, not on the cluster: compute it once per active-set
