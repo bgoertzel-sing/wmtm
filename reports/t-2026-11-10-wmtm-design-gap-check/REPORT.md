@@ -16,7 +16,7 @@ Command: `. env.sh && python -m pytest -q -rfs tests` at 27c1a41, before the new
 - Before (no janus or swipl): 803 passed, 11 failed, 31 skipped.
 - **Now: 819 passed, 0 failed, 26 skipped (395.7 s).** All 11 failures are gone: the 4 "janus_swi missing" and the 7 warm_fail/exit 3 (test_f1_s11_subunit x2, test_name_resolve real-engine, test_p4_rule_goals, test_pc_admit, test_pc_shadow x2). Five tests that skipped before now run (the PC integration skips).
 - The 26 remaining skips are all external inputs, not part of this order: WMTM_SEMPARSE_HITL checkout (18), WMTM_TEST_GC2_PYTHON (4), real-data replay WMTM_REPLAY_DATA (3), PETTA_PARSER/SWIPL for the codec test (1).
-- With the new tests included: `full_suite.log` (result below).
+- With the new tests included (`full_suite.log`): **837 passed, 26 skipped, 8 xfailed, 0 failed, 0 xpassed** (468.7 s, exit 0). That is 819 upstream tests + 18 new passes, with the 8 strict xfails being the GAP tests.
 
 ## 1. Component table
 "Live" means the flags file of the live bot. It is **not reachable** from this container, so I did not check it. Per the order, `reasoner_writeback` was absent from the live file on Oct 28. Per reports/t-2026-11-09-wmtm-live-path-replay-v3/PINS.md (quoted in the deploy-split report), live runs vendor rc2 4d2ab315, not main. "Seen working" uses this task's tests plus existing reports. No live evidence was gathered here.
