@@ -1,0 +1,326 @@
+{
+ "full_A_533": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 6,
+  "evictions_by_source": {
+   "recalled": 6
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 4,
+   "propose": 38
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 0,
+  "focus_lines": 0,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "full_A_f44": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 6,
+  "evictions_by_source": {
+   "recalled": 6
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 4,
+   "propose": 38
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 0,
+  "focus_lines": 0,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "full_A_p3": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 6,
+  "evictions_by_source": {
+   "recalled": 6
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 4,
+   "propose": 38
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 1,
+  "focus_lines": 1,
+  "derived_lines": 1,
+  "derived_with_tv": 1,
+  "derived_with_src": 1,
+  "shadow_runs": 40,
+  "shadow_goals_max": 1,
+  "shadow_proved_max": 1
+ },
+ "full_B_533": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 6,
+  "evictions_by_source": {
+   "recalled": 6
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 4,
+   "propose": 38
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 0,
+  "focus_lines": 0,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "full_B_f44": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 6,
+  "evictions_by_source": {
+   "recalled": 6
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 4,
+   "propose": 38
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 0,
+  "focus_lines": 0,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "full_B_p3": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 6,
+  "evictions_by_source": {
+   "recalled": 6
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 4,
+   "propose": 38
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 1,
+  "focus_lines": 1,
+  "derived_lines": 1,
+  "derived_with_tv": 1,
+  "derived_with_src": 1,
+  "shadow_runs": 40,
+  "shadow_goals_max": 1,
+  "shadow_proved_max": 1
+ },
+ "noseed_A_533": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 7,
+  "evictions_by_source": {
+   "recalled": 7
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 20,
+   "propose": 20
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 32,
+  "focus_lines": 64,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "noseed_A_f44": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 7,
+  "evictions_by_source": {
+   "recalled": 7
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 20,
+   "propose": 20
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 32,
+  "focus_lines": 64,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "noseed_A_p3": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 7,
+  "evictions_by_source": {
+   "recalled": 7
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 20,
+   "propose": 20
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 32,
+  "focus_lines": 64,
+  "derived_lines": 45,
+  "derived_with_tv": 45,
+  "derived_with_src": 45,
+  "shadow_runs": 40,
+  "shadow_goals_max": 8,
+  "shadow_proved_max": 8
+ },
+ "noseed_B_533": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 7,
+  "evictions_by_source": {
+   "recalled": 7
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 20,
+   "propose": 20
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 32,
+  "focus_lines": 64,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "noseed_B_f44": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 7,
+  "evictions_by_source": {
+   "recalled": 7
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 20,
+   "propose": 20
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 32,
+  "focus_lines": 64,
+  "derived_lines": 0,
+  "derived_with_tv": 0,
+  "derived_with_src": 0,
+  "shadow_runs": 40,
+  "shadow_goals_max": 0,
+  "shadow_proved_max": 0
+ },
+ "noseed_B_p3": {
+  "turns": 40,
+  "errors": 0,
+  "user_turns": 20,
+  "auto_ticks": 20,
+  "evictions_total": 7,
+  "evictions_by_source": {
+   "recalled": 7
+  },
+  "gc_runs": 40,
+  "gc_ok": 40,
+  "gc_canary_ok": 40,
+  "gc_decisions": {
+   "no-candidates": 20,
+   "propose": 20
+  },
+  "escalations": 0,
+  "choices": 0,
+  "focus_headers": 32,
+  "focus_lines": 64,
+  "derived_lines": 45,
+  "derived_with_tv": 45,
+  "derived_with_src": 45,
+  "shadow_runs": 40,
+  "shadow_goals_max": 8,
+  "shadow_proved_max": 8
+ }
+}

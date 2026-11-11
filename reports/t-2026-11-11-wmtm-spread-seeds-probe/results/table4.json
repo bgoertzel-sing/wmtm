@@ -1,0 +1,211 @@
+{
+ "A": {
+  "admitted": 32,
+  "admitted_graph_only": 0,
+  "admitted_keyword": 32,
+  "admitted_on_topic_useful": 18,
+  "precision_admitted_on_topic": 0.5625,
+  "evictions": 0,
+  "evicted_by_graph_only_admit": 0,
+  "useful_evicted": 0,
+  "useful_hubs_evicted": 0,
+  "first_turn_with_eviction": null,
+  "max_store": 26,
+  "turns_recall_cut_full": 0,
+  "max_new_in_one_turn": 4,
+  "useful_shown_on_topic": 50,
+  "shown_total": 261,
+  "precision_shown": 0.1916,
+  "first_visit_coverage": [
+   17,
+   70,
+   17,
+   0
+  ],
+  "revisit_coverage": [
+   9,
+   47
+  ],
+  "graph_only_off_topic_share": null,
+  "graph_only_composition": {},
+  "hubs_lost_vs_A": 0,
+  "hubs_lost_turns": 0,
+  "hubs_lost_turn_kinds": {},
+  "hubs_lost_evicted_in_turn": 0,
+  "hubs_lost_evicted_turns": [],
+  "disp_vs_A": {}
+ },
+ "C": {
+  "admitted": 339,
+  "admitted_graph_only": 304,
+  "admitted_keyword": 35,
+  "admitted_on_topic_useful": 50,
+  "precision_admitted_on_topic": 0.1475,
+  "evictions": 243,
+  "evicted_by_graph_only_admit": 224,
+  "useful_evicted": 111,
+  "useful_hubs_evicted": 35,
+  "first_turn_with_eviction": 14,
+  "max_store": 60,
+  "turns_recall_cut_full": 29,
+  "max_new_in_one_turn": 10,
+  "useful_shown_on_topic": 50,
+  "shown_total": 241,
+  "precision_shown": 0.2075,
+  "first_visit_coverage": [
+   33,
+   70,
+   17,
+   16
+  ],
+  "revisit_coverage": [
+   10,
+   47
+  ],
+  "graph_only_off_topic_share": 0.7599,
+  "graph_only_composition": {
+   "other_topic_useful": 109,
+   "on_topic_useful": 30,
+   "other_topic_noise": 122,
+   "on_topic_noise": 43
+  },
+  "hubs_lost_vs_A": 19,
+  "hubs_lost_turns": 13,
+  "hubs_lost_turn_kinds": {
+   "Q3": 7,
+   "Q1": 1,
+   "R3": 3,
+   "R2": 2
+  },
+  "hubs_lost_evicted_in_turn": 4,
+  "hubs_lost_evicted_turns": [
+   27,
+   32,
+   36
+  ],
+  "disp_vs_A": {
+   "turns_lost_a_useful_A_showed": 13,
+   "turn_kinds_lost": {
+    "Q3": 7,
+    "Q1": 1,
+    "R3": 3,
+    "R2": 2
+   },
+   "useful_lost": 19,
+   "useful_lost_kinds": {
+    "hub-U": 19
+   },
+   "useful_gained": 19
+  }
+ },
+ "D": {
+  "admitted": 290,
+  "admitted_graph_only": 252,
+  "admitted_keyword": 38,
+  "admitted_on_topic_useful": 74,
+  "precision_admitted_on_topic": 0.2552,
+  "evictions": 158,
+  "evicted_by_graph_only_admit": 146,
+  "useful_evicted": 64,
+  "useful_hubs_evicted": 9,
+  "first_turn_with_eviction": 17,
+  "max_store": 60,
+  "turns_recall_cut_full": 19,
+  "max_new_in_one_turn": 10,
+  "useful_shown_on_topic": 67,
+  "shown_total": 237,
+  "precision_shown": 0.2827,
+  "first_visit_coverage": [
+   43,
+   70,
+   17,
+   26
+  ],
+  "revisit_coverage": [
+   16,
+   47
+  ],
+  "graph_only_off_topic_share": 0.5437,
+  "graph_only_composition": {
+   "on_topic_useful": 50,
+   "on_topic_noise": 65,
+   "other_topic_useful": 49,
+   "other_topic_noise": 88
+  },
+  "hubs_lost_vs_A": 18,
+  "hubs_lost_turns": 11,
+  "hubs_lost_turn_kinds": {
+   "Q3": 7,
+   "R3": 4
+  },
+  "hubs_lost_evicted_in_turn": 0,
+  "hubs_lost_evicted_turns": [],
+  "disp_vs_A": {
+   "turns_lost_a_useful_A_showed": 11,
+   "turn_kinds_lost": {
+    "Q3": 7,
+    "R3": 4
+   },
+   "useful_lost": 18,
+   "useful_lost_kinds": {
+    "hub-U": 18
+   },
+   "useful_gained": 35
+  }
+ },
+ "E": {
+  "admitted": 119,
+  "admitted_graph_only": 83,
+  "admitted_keyword": 36,
+  "admitted_on_topic_useful": 62,
+  "precision_admitted_on_topic": 0.521,
+  "evictions": 0,
+  "evicted_by_graph_only_admit": 0,
+  "useful_evicted": 0,
+  "useful_hubs_evicted": 0,
+  "first_turn_with_eviction": null,
+  "max_store": 51,
+  "turns_recall_cut_full": 6,
+  "max_new_in_one_turn": 10,
+  "useful_shown_on_topic": 73,
+  "shown_total": 323,
+  "precision_shown": 0.226,
+  "first_visit_coverage": [
+   36,
+   70,
+   17,
+   19
+  ],
+  "revisit_coverage": [
+   14,
+   47
+  ],
+  "graph_only_off_topic_share": 0.1325,
+  "graph_only_composition": {
+   "other_topic_useful": 6,
+   "on_topic_useful": 40,
+   "other_topic_noise": 5,
+   "on_topic_noise": 32
+  },
+  "hubs_lost_vs_A": 9,
+  "hubs_lost_turns": 8,
+  "hubs_lost_turn_kinds": {
+   "Q3": 4,
+   "R3": 4
+  },
+  "hubs_lost_evicted_in_turn": 0,
+  "hubs_lost_evicted_turns": [],
+  "disp_vs_A": {
+   "turns_lost_a_useful_A_showed": 8,
+   "turn_kinds_lost": {
+    "Q3": 4,
+    "R3": 4
+   },
+   "useful_lost": 9,
+   "useful_lost_kinds": {
+    "hub-U": 9
+   },
+   "useful_gained": 32
+  }
+ }
+}

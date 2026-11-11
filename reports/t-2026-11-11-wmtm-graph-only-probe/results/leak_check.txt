@@ -1,0 +1,3 @@
+{"keyword_hits_per_query_A": {"min": 0, "max": 4, "hist": {"0": 21, "1": 11, "2": 4, "3": 3, "4": 1}}, "keyword_hits_per_query_B": {"min": 0, "max": 4}}
+{"useful": {"n": 633, "mean": 0.658, "median": 0.728}, "noise": {"n": 1138, "mean": 0.4848, "median": 0.728}}
+{"linked_text_words": {"useful": [6], "noise": [6]}}

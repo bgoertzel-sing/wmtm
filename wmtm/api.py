@@ -55,6 +55,14 @@ class WMTMConfig:
     pending_filename: str = "_wmtm_pending_derives.jsonl"
 
 
+def _recall_floor(cfg):
+    """recall_relevance_floor (design s8.2) from the resolved flags, SPEC default when absent.  Never raises."""
+    try:
+        return float(_ctx.setting(cfg, "recall_relevance_floor"))
+    except Exception:
+        return 0.1
+
+
 def drain_pending_derives(pending_path):
     """Read + clear the pending-derives file under the same flock that
     derive() uses, so an append landing between read and clear is never
@@ -250,12 +258,23 @@ class WMTM:
             t = lap("journal_s", t)
             if user_msg and self._recall_bridge and self._budget_ok():
                 rb = self._recall_bridge
-                candidates = rb.recall(user_msg, store, top_k=15)
+                # design s8.3: at most recall_budget new recalled items per cycle, shared with cycle(recall_fn=...);
+                # the recall cut is what this cycle's budget has left (no budget: the old top-15 cut)
+                budget = _ctx.recall_budget(pcfg)
+                slots = orch.recall_slots(budget)
+                top_k = _ctx.RECALL_TOP_K_UNBUDGETED if slots is None else slots
+                # recall_spread_seeds (default all = every resident seeds the spread, as before the flag)
+                seeds = _ctx.recall_spread_seeds(pcfg)
+                skw = {} if seeds == "all" else {"spread_seeds": seeds,
+                                                 "request_id": _ctx.request_item_id(user_msg, pcfg)}
+                candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg), **skw) if top_k > 0 else []
                 admitted_snippets = []
                 for c in candidates:
                     if c.cluster_id not in store:
                         if _ctx.is_duplicate_topic(c.content, admitted_snippets):
                             continue
+                        if not orch.take_recall_slot(budget):
+                            break
                         origin_ts = rb.get_cluster_timestamp(c.cluster_id)
                         it = store.admit(
                             c.cluster_id, c.content,

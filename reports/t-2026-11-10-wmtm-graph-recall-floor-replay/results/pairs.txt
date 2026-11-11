@@ -1,0 +1,12 @@
+PAIR full_A_533 spec_c3_6eygtx7n.json cycle 3 atoms 27 goals 0 proved 0
+PAIR full_A_f44 spec_c3_n_495i2n.json cycle 3 atoms 25 goals 0 proved 0
+PAIR full_A_p3 spec_c2_6r64s2ki.json cycle 2 atoms 46 goals 1 proved 1
+PAIR full_B_533 spec_c3_r_0g0ytn.json cycle 3 atoms 27 goals 0 proved 0
+PAIR full_B_f44 spec_c3_zkn7wkv4.json cycle 3 atoms 25 goals 0 proved 0
+PAIR full_B_p3 spec_c2_ov55gzqj.json cycle 2 atoms 46 goals 1 proved 1
+PAIR noseed_A_533 spec_c20_ftvvd64g.json cycle 20 atoms 160 goals 0 proved 0
+PAIR noseed_A_f44 spec_c20_xfedf46d.json cycle 20 atoms 198 goals 0 proved 0
+PAIR noseed_A_p3 spec_c18_hrvaa6k8.json cycle 18 atoms 291 goals 8 proved 8
+PAIR noseed_B_533 spec_c20_3cfgpc53.json cycle 20 atoms 160 goals 0 proved 0
+PAIR noseed_B_f44 spec_c20_1tb_35z_.json cycle 20 atoms 198 goals 0 proved 0
+PAIR noseed_B_p3 spec_c18_pu4tic8s.json cycle 18 atoms 291 goals 8 proved 8

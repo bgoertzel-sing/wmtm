@@ -164,6 +164,12 @@ SPEC = {
     "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
     # Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour.
     "forget_one_rule":     ("WMTM_FORGET_ONE_RULE", bool, True, None),   # F1 §9: every path records evictions in the forgetting log
+    "recall_relevance_floor": ("WMTM_RECALL_RELEVANCE_FLOOR", float, 0.1, None),  # design s8.2: recall drops score <= floor
+    "recall_budget":       ("WMTM_RECALL_BUDGET", int, 10, None),         # design s8.3/s10: max new recalled items per cycle; <= 0 = no budget
+    # t-2026-11-11-wmtm-spread-seeds-probe: where recall's spreading activation starts (design s3.3 / s8.1b).
+    # all = every resident (the behaviour before the flag); focus = top 50% of residents by STI (s9.2 "attention
+    # focus"); turn = this turn's keyword-matched clusters + the request item.  Invalid = all.
+    "recall_spread_seeds": ("WMTM_RECALL_SPREAD_SEEDS", str, "all", None),
     "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
     "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
     "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds

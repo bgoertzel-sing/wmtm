@@ -208,6 +208,9 @@ class RecallBridge:
         query_context: str,
         store: WMTMStore,
         top_k: int = 20,
+        floor: float = 0.0,
+        spread_seeds: str = "all",
+        request_id: Optional[str] = None,
     ) -> list[RecallCandidate]:
         """Recall items from LTM matching query_context, or linked to the active set (design s3.3, s8.1).
 
@@ -215,16 +218,29 @@ class RecallBridge:
         activation from the active items reaches it (GAP-1: graph=True), so a linked cluster is recalled without a
         shared keyword.  Active and superseded clusters are never candidates (parse_journal drops superseded ones);
         at most top_k are returned, best first.
+
+        floor (design s8.2 "Relevance threshold: only admit items with activation above a floor"; the flag
+        recall_relevance_floor, default 0.1, is passed by api.py): a candidate whose final score is not above floor is
+        dropped.  The default 0.0 keeps the old behaviour (score > 0) for direct callers.
+
+        spread_seeds (flag recall_spread_seeds, t-2026-11-11-wmtm-spread-seeds-probe): which items layer 5 (direct
+        links + spreading activation) starts from; see spread_seed_ids.  Residents are never candidates whatever the
+        seeds.  The default "all" is the behaviour before the flag (every resident seeds).
         """
         query_terms: set[str] = self._tokenize(query_context)
         active_ids: set[str] = {item.id for item in store.get_active_set()}
         candidates: list[RecallCandidate] = []
+        if spread_seeds in (None, "all"):
+            seeds, own = active_ids, {}
+        else:
+            seeds = self.spread_seed_ids(spread_seeds, query_terms, store, request_id)
+            own = {"exclude_seed_self": True}   # a keyword hit seeding the spread is not "connected" to itself
 
         for cluster in self._clusters:
             if cluster.id in active_ids:
                 continue
-            score = self._score_cluster(cluster, query_terms, active_ids, store, graph=True)
-            if score <= 0:
+            score = self._score_cluster(cluster, query_terms, seeds, store, graph=True, **own)
+            if score <= 0 or score <= floor:
                 continue
             candidates.append(RecallCandidate(
                 cluster_id=cluster.id,
@@ -237,6 +253,42 @@ class RecallBridge:
         candidates.sort(key=lambda c: c.score, reverse=True)
         return candidates[:top_k]
 
+    def spread_seed_ids(
+        self,
+        mode: str,
+        query_terms: set[str],
+        store: WMTMStore,
+        request_id: Optional[str] = None,
+    ) -> set[str]:
+        """Seeds of recall's layer 5 for a recall_spread_seeds mode (t-2026-11-11-wmtm-spread-seeds-probe).
+
+        all:   every resident (the behaviour before the flag).
+        focus: the attention focus, the top 50% of residents by STI (design s9.2 "top-50% STI (the attention
+               focus)"; s3.1 get_active_set "sorted by STI"): ceil(n/2) of n residents, ties in get_active_set order.
+        turn:  this turn only: every cluster (resident or not) matching the query by keyword (layers 1-2 of
+               _score_cluster score > 0), plus the request item id.  The request item is not a journal cluster,
+               so it has no EvidenceFor/PromotesFrom edges and spreads nothing in the LTM graph.
+        Unknown mode = all.
+        """
+        residents = store.get_active_set()
+        if mode == "focus":
+            ranked = sorted(residents, key=lambda it: it.attention.sti, reverse=True)   # stable: ties keep order
+            return {it.id for it in ranked[:(len(ranked) + 1) // 2]}
+        if mode == "turn":
+            seeds = {c.id for c in self._clusters if self._keyword_matches(c, query_terms)}
+            if request_id:
+                seeds.add(request_id)
+            return seeds
+        return {it.id for it in residents}
+
+    def _keyword_matches(self, cluster: LTMCluster, query_terms: set[str]) -> bool:
+        """True when layers 1-2 of _score_cluster give cluster a score > 0 (a shared token, or a query term of 4+
+        characters inside its text).  Every IDF weight is >= 1, so a shared token alone is a match."""
+        if query_terms & self._tokenize(cluster.text):
+            return True
+        raw = cluster.text.lower()
+        return any(len(t) >= 4 and t in raw for t in query_terms)
+
     def _score_cluster(
         self,
         cluster: LTMCluster,
@@ -244,6 +296,7 @@ class RecallBridge:
         active_ids: set[str],
         store: WMTMStore,
         graph: bool = False,
+        exclude_seed_self: bool = False,
     ) -> float:
         """Compute relevance score for a cluster against query terms.
 
@@ -283,7 +336,7 @@ class RecallBridge:
             if not graph:
                 return 0.0
             # GAP-1: no keyword match; the graph alone (layer 5) decides.
-            score = self._spreading_activation_for(cluster, active_ids, store)
+            score = self._spreading_activation_for(cluster, active_ids, store, exclude_seed_self)
             if score <= 0:
                 return 0.0
         else:
@@ -297,7 +350,7 @@ class RecallBridge:
             score += min(cluster.evidence_support_count * 0.01, 2.0)
 
             # Layer 5: Spreading activation
-            spread_score: float = self._spreading_activation_for(cluster, active_ids, store)
+            spread_score: float = self._spreading_activation_for(cluster, active_ids, store, exclude_seed_self)
             score += spread_score
 
         # F29: down-weight autonomous-loop heartbeat notes (AUTOCYCLE / Nop).
@@ -491,13 +544,27 @@ class RecallBridge:
         cluster: LTMCluster,
         active_ids: set[str],
         store: WMTMStore,
+        exclude_seed_self: bool = False,
     ) -> float:
-        """Compute spreading activation for a single token across the active set."""
+        """Compute spreading activation for a single token across the active set (the spread's seeds).
+
+        exclude_seed_self (recall with recall_spread_seeds focus/turn): a cluster that is itself a seed gets no
+        spread term (it would only be its own hop-0 activation 1.0, never a link).  Off by default: the resident
+        relevance stimulus scores residents against the residents, as before."""
         boost: float = 0.0
         for target in cluster.evidence_for:
             if target in active_ids:
                 boost += 0.5
         for source_id in self._evidence_for_targets.get(cluster.id, []):
+            if source_id in active_ids:
+                boost += 0.5
+        # t-2026-11-10-wmtm-graph-recall-floor-replay: a direct PromotesFrom link (either direction) gets the same 0.5
+        # direct weight as a direct EvidenceFor link, so recall_relevance_floor does not drop it (it scored only the
+        # depth-1 spread 0.3 * 0.2 = 0.06 before).
+        for target in cluster.promotes_from:
+            if target in active_ids:
+                boost += 0.5
+        for source_id in self._promotes_from_targets.get(cluster.id, []):
             if source_id in active_ids:
                 boost += 0.5
         # Track P: the spread depends only on the active set, not on the cluster: compute it once per active-set
@@ -509,7 +576,7 @@ class RecallBridge:
             cached = (key, self.spreading_activation(list(active_ids), depth=2, decay=0.3))
             self._spread_cache = cached
         spread: dict[str, float] = cached[1]
-        if cluster.id in spread:
+        if cluster.id in spread and not (exclude_seed_self and cluster.id in active_ids):
             boost += spread[cluster.id] * 0.2
         return boost
 

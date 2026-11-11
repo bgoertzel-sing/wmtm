@@ -1,0 +1,16 @@
+# command: . env-gapcheck/env.sh (PeTTaChainer b6aacc68 on PeTTa 3681b9b, swipl 9.2.9); python -m pytest -v -p no:cacheprovider tests/test_design_s12_engine.py
+Wed Nov 11 05:15:14 UTC 2026
+oom_kill 19
+============================= test session starts ==============================
+platform linux -- Python 3.10.22, pytest-9.2.0, pluggy-1.7.0 -- /hive/protocosmo/workspace/projects/wmtm/env-gapcheck/venv310/bin/python
+rootdir: /hive/protocosmo/workspace/projects/wmtm/repos/budget
+configfile: pyproject.toml
+collecting ... collected 2 items
+
+tests/test_design_s12_engine.py::test_engine_s12_2_full_cycle_and_no_rederivation PASSED [ 50%]
+tests/test_design_s12_engine.py::test_engine_s3_4_which_inference_kinds_run PASSED [100%]
+
+========================= 2 passed in 74.64s (0:01:14) =========================
+EXIT 0
+oom_kill 19
+Wed Nov 11 05:16:29 UTC 2026
