@@ -1,0 +1,2 @@
+A {"identical_modulo_writeback_ids": true, "writeback_note_ids": 5, "writeback_positive_scores": 0}
+B {"identical_modulo_writeback_ids": true, "writeback_note_ids": 0, "writeback_positive_scores": 0}
