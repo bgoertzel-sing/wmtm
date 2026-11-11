@@ -73,7 +73,7 @@ Same per-turn rows in all six full arms (A and B, caches p3/533/f44): True
 Same per-turn rows in all six noseed arms (A and B, caches p3/533/f44): True
 
 
-Totals per seeded arm (A and B the same): 20 user turns, 300 candidates, 72 admitted, 0 graph-only candidates, 0 graph-only admitted. Unseeded arms: 0 candidates. Evictions are 6 in each seeded arm and 7 in each unseeded arm, the same in A and B.
+Totals per seeded arm (A and B the same): 20 user turns, 300 candidates, 72 admitted, 0 graph-only candidates, 0 graph-only admitted. Scope: the harness logs the candidates recall() returns (top 15 per turn), so "0 graph-only" means none reached the top 15. Graph-only candidates ranked below the cut were not logged, and this replay cannot say how many there were. Unseeded arms: 0 candidates. Evictions are 6 in each seeded arm and 7 in each unseeded arm, the same in A and B.
 
 ## Count rule and Mesto §11 per arm
 Offline pc_shadow spec, judged by v3 tools/judge.py with the F3 v3 W1-W4 rules (DEVIATION_1 nwdef join kept) and the W4 table. No new hand verdicts. Per arm the judged spec is the non-empty spec with the most goals, and among those the latest (results/pairs.txt).
@@ -90,7 +90,7 @@ Offline pc_shadow spec, judged by v3 tools/judge.py with the F3 v3 W1-W4 rules (
 In the seeded arms the KB is near-empty. Keyword recall admits 15 seed clusters per user turn, the store reaches 60 items, and the 20 parsed notes get crowded out (1 of 20 resident at turn 10). So the seeded arms test recall admission, and the unseeded arms test the count rule and §11. 533 and f44 give 0 goals in A and B alike: this is the parser drift found in v3, not this branch.
 
 ## Does filling the budget hurt?
-This replay cannot say. Review 1 finding 1 (direct EvidenceFor neighbours at 0.56-2.06 filling the budget) did not happen here. Every admitted item had a keyword score above 0, and the candidate lists of A and B were the same on every turn. The floor and the PromotesFrom weight therefore changed nothing on these 20 notes. No fix proposed (andy's decision).
+This replay cannot say. Review 1 finding 1 (direct EvidenceFor neighbours at 0.56-2.06 filling the budget) did not happen here. Every returned and admitted item had a keyword score above 0 (graph-only ones below the top-15 cut were not logged), and the candidate lists of A and B were the same on every turn. The floor and the PromotesFrom weight therefore changed nothing on these 20 notes. No fix proposed (andy's decision).
 
 ## Deviations
 - Fixed clock: the first run admitted different ids in A and B on p3 turns 9-10. The cause was wall-clock recency (B ran about 8 min later; T185901Z scored 4.4120 vs 4.4112). All arms were rerun with the fixed clock. The wall-clock runs are kept in /tmp/gfr/loop_wallclock as evidence (NOTES.txt 16:33-16:50).
