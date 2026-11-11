@@ -726,6 +726,21 @@ def recall_budget(cfg):
     return n if n > 0 else None
 
 
+SPREAD_SEED_MODES = ("all", "focus", "turn")
+
+
+def recall_spread_seeds(cfg):
+    """recall_spread_seeds (t-2026-11-11-wmtm-spread-seeds-probe): where recall's spreading activation starts.
+
+    -> "all" (every resident; the default and the behaviour before the flag), "focus" (top 50% of residents by STI)
+    or "turn" (this turn's keyword-matched clusters + the request item).  Absent or invalid -> "all".  Never raises."""
+    try:
+        v = str(setting(cfg, "recall_spread_seeds")).strip().lower()
+    except Exception:
+        return "all"
+    return v if v in SPREAD_SEED_MODES else "all"
+
+
 def protect_settings(cfg):
     """-> {"turns", "s"} for cleanup_stale_items / the fast path, or None (rc2 behaviour) when the flag is off."""
     try:
@@ -1082,6 +1097,25 @@ def _format_context_core(store, cycle, cfg, context_rel):
     return render_ranked(_entries_from_items(items, _t.time()), context_rel, cycle, cfg)
 
 
+def _request_item_key(user_msg, cfg):
+    """-> (item id, text) of the request item for user_msg (id None when the text is empty)."""
+    import hashlib
+    text = " ".join((user_msg or "").split())[:max(20, int(setting(cfg, "request_item_chars")))]
+    if not text:
+        return None, text
+    return "user-" + hashlib.md5(text.encode("utf-8")).hexdigest()[:12], text
+
+
+def request_item_id(user_msg, cfg):
+    """Id admit_request_item gives (or would give) this request's item, or None (flag off / empty).  Never raises."""
+    try:
+        if not setting(cfg, "request_item") or not user_msg:
+            return None
+        return _request_item_key(user_msg, cfg)[0]
+    except Exception:
+        return None
+
+
 def admit_request_item(store, user_msg, cycle, cfg, source=None):
     """Track P: the current real request as a source_type=user item (feeds request-overlap goal ranking in the
     shadow worker; never displayed, never written back).  Earlier request items are evicted.  -> item or None.
@@ -1089,11 +1123,9 @@ def admit_request_item(store, user_msg, cycle, cfg, source=None):
     first_person="speaker" (it is the human's own text: I/me/my = the requester, never the bot)."""
     if not setting(cfg, "request_item") or not user_msg:
         return None
-    import hashlib
-    text = " ".join(user_msg.split())[:max(20, int(setting(cfg, "request_item_chars")))]
+    iid, text = _request_item_key(user_msg, cfg)
     if not text:
         return None
-    iid = "user-" + hashlib.md5(text.encode("utf-8")).hexdigest()[:12]
     for it in list(store.get_active_set()):
         if it.source_type == "user" and it.id != iid:
             store.evict(it.id)

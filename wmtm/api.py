@@ -263,7 +263,11 @@ class WMTM:
                 budget = _ctx.recall_budget(pcfg)
                 slots = orch.recall_slots(budget)
                 top_k = _ctx.RECALL_TOP_K_UNBUDGETED if slots is None else slots
-                candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg)) if top_k > 0 else []
+                # recall_spread_seeds (default all = every resident seeds the spread, as before the flag)
+                seeds = _ctx.recall_spread_seeds(pcfg)
+                skw = {} if seeds == "all" else {"spread_seeds": seeds,
+                                                 "request_id": _ctx.request_item_id(user_msg, pcfg)}
+                candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg), **skw) if top_k > 0 else []
                 admitted_snippets = []
                 for c in candidates:
                     if c.cluster_id not in store:

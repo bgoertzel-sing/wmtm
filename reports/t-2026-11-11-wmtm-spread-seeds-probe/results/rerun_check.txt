@@ -1,0 +1,3 @@
+# this run vs the committed recall-budget-10 run (207c382): A vs its A, C (flag unset) vs its C
+A {"identical_modulo_writeback_ids": true, "writeback_note_ids": 5, "writeback_positive_scores": 0}
+C {"identical_modulo_writeback_ids": true, "writeback_note_ids": 0, "writeback_positive_scores": 0}
