@@ -1,0 +1,16 @@
+runs_v1	nov5_False	9	9	True	False	ok	
+runs_v1	nov5_True	11	11	True	False	ok	(Inheritance result result__nw_b5881f6f23);(Inheritance result__nw_b5881f6f23 result)
+runs_v1	r1_False	12	12	True	False	ok	
+runs_v1	r1_True	12	12	True	False	ok	
+runs_v1	r2_False	14	14	True	False	ok	
+runs_v1	r2_True	14	14	True	False	ok	
+runs_v1	r3_False	10	10	True	False	ok	
+runs_v1	r3_True	10	10	True	False	ok	
+runs	nov5_False	9	9	True	False	ok	
+runs	nov5_True	9	9	True	False	ok	
+runs	r1_False	12	12	True	False	ok	
+runs	r1_True	12	12	True	False	ok	
+runs	r2_False	14	14	True	False	ok	
+runs	r2_True	14	14	True	False	ok	
+runs	r3_False	10	10	True	False	ok	
+runs	r3_True	10	10	True	False	ok	

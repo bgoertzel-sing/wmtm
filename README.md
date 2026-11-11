@@ -177,6 +177,8 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `shadow_skolem_goals` | `WMTM_PC_SHADOW_SKOLEM_GOALS` | bool | `false` | True keeps goals about parser placeholder entities (`sk_*`). By default they are dropped. | `wmtm/pc_shadow.py:249` |
 | `shadow_goal_rank` | `WMTM_PC_SHADOW_GOAL_RANK` | bool | `true` | Track N: Design A ranked goal pool (off = Track M 2-step goals) | `wmtm/pc_shadow.py:282` |
 | `shadow_max_hops` | `WMTM_PC_SHADOW_MAX_HOPS` | int | `3` | Track N: longest chain in the pool (derivation steps) | `wmtm/pc_shadow.py:291` |
+| `shadow_induction` | `WMTM_PC_SHADOW_INDUCTION` | bool | `False` | t-2026-11-11: propose (Inheritance A B) goals from shared Member instances | `wmtm/pc_shadow.py:540` |
+| `shadow_induction_min` | `WMTM_PC_SHADOW_INDUCTION_MIN` | int | `3` | t-2026-11-11: min shared instances for an induction goal | `wmtm/pc_shadow.py:541` |
 | `shadow_min_hops` | `WMTM_PC_SHADOW_MIN_HOPS` | int | `1` | Track N: only ask goals needing &gt;= N steps | `wmtm/pc_shadow.py:292` |
 | `shadow_goal_weights` | `WMTM_PC_SHADOW_GOAL_WEIGHTS` | str | `'2,1,1,0.5'` | Track N: w_req,w_depth,w_info,w_sti | `wmtm/pc_shadow.py:293` |
 | `shadow_timeout_s` | `WMTM_PC_SHADOW_TIMEOUT` | float | `2.0` | Shadow worker: timeout in seconds for each PeTTa query, including the canary and negative-control queries. The worker's `--timeout` option overrides it. | `wmtm/workers/pc_shadow.py:34` |

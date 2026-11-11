@@ -360,6 +360,35 @@ def rule_goal_pool(rel, rule_strs, max_hops=3, skolem_goals=False, max_pool=MAX_
     return pool
 
 
+def induction_goal_pool(rel, min_shared=3, skolem_goals=False, max_pool=MAX_POOL, pool=None):
+    """t-2026-11-11 induction: (Inheritance A B) goals for class pairs that share >= min_shared Member instances
+    and are not already related.  The engine answers them by implication-instance-fold over the Member facts
+    (confidence grows ~0.001 per instance at the pins).  -> pool entry (1, [shared Member facts of A and B])."""
+    pool = {} if pool is None else pool
+    mem = {}
+    for (h, x, c) in rel:
+        if h == "Member":
+            mem.setdefault(c, set()).add(x)
+    for a in sorted(mem):
+        for b in sorted(mem):
+            if a == b:
+                continue
+            t = ("Inheritance", a, b)
+            if t in rel or t in pool:
+                continue
+            if not skolem_goals and (is_skolem(a) or is_skolem(b)):
+                continue
+            if a.split("__nw_")[0] == b.split("__nw_")[0]:   # X vs X__nw_*: nwdef alias, definitional, not induction
+                continue
+            shared = sorted(mem[a] & mem[b])
+            if len(shared) < max(1, int(min_shared)):
+                continue
+            if len(pool) >= max_pool:
+                return pool
+            pool[t] = (1, [f for x in shared for f in (("Member", x, a), ("Member", x, b))])
+    return pool
+
+
 def request_terms(facts_by_item, user_items, rel):
     """(entities, tokens) of the current user request: entities from the parse of source_type=user items plus
     their 1-hop KB neighbours; tokens from the request text (so an unparsed request still anchors by name)."""
@@ -508,6 +537,8 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
         if cfg.get("shadow_rules", True):   # P4 rev3: parser Implication + defining rules also propose goals
             rule_goal_pool(rel, [a for a in metta if "(Implication" in a], int(cfg.get("shadow_max_hops") or 3),
                            skolem_goals, pool=pool)
+        if cfg.get("shadow_induction", False):   # t-2026-11-11: induction goals (shared Member instances)
+            induction_goal_pool(rel, int(cfg.get("shadow_induction_min") or 3), skolem_goals, pool=pool)
         ranked = rank_goals(pool, rel, req, fsti, max_goals, int(cfg.get("shadow_min_hops") or 1),
                             _weights(cfg.get("shadow_goal_weights")))
         goals = [g for g, _ in ranked]
