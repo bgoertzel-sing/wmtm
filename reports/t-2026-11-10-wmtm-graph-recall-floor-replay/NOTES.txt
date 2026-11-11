@@ -1,0 +1,73 @@
+2026-11-10T16:09:46-07:00 LOOP start pilot_A n=2 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/A 265062e cache_sha=839129a6f0b23639
+2026-11-10T16:10:26-07:00 LOOP end pilot_A rc=0
+2026-11-10T16:10:26-07:00 LOOP start pilot_B n=2 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/B 26e7769 cache_sha=839129a6f0b23639
+2026-11-10T16:11:11-07:00 LOOP end pilot_B rc=0
+2026-11-10T16:11:11-07:00 LOOP_STAGE_DONE pilot
+SEED live journal snapshot sha e0b6f1d93714038a -> seed (20 note blocks removed: 20) sha 77c7f485c02be6bc; same seed for both arms, read-only copy
+2026-11-10T16:12:58-07:00 LOOP start pilotseed_A n=2 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/A 265062e cache_sha=839129a6f0b23639
+2026-11-10T16:13:40-07:00 LOOP end pilotseed_A rc=0
+2026-11-10T16:13:40-07:00 LOOP start pilotseed_B n=2 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/B 26e7769 cache_sha=839129a6f0b23639
+2026-11-10T16:14:31-08:00 pilotseed v1 INVALID: seed copy never ran (sed pattern missed; then pkill -f self-matched its own shell). Killed pilotseed_B by pid 2979880/2979881. Rerun as pilotseed2.
+2026-11-10T16:14:31-07:00 SEED pilotseed2_A 77c7f485c02be6bc
+2026-11-10T16:14:31-07:00 LOOP start pilotseed2_A n=2 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/A 265062e cache_sha=839129a6f0b23639
+2026-11-10T16:15:22-07:00 LOOP end pilotseed2_A rc=0
+2026-11-10T16:15:22-07:00 SEED pilotseed2_B 77c7f485c02be6bc
+2026-11-10T16:15:22-07:00 LOOP start pilotseed2_B n=2 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/B 26e7769 cache_sha=839129a6f0b23639
+2026-11-10T16:15:29-07:00 NOTE: the 16:14:31-08:00 line above has a wrong tz suffix (written by python strftime); real time is 16:14:31-07:00
+2026-11-10T16:16:13-07:00 LOOP end pilotseed2_B rc=0
+2026-11-10T16:16:13-07:00 LOOP_STAGE_DONE pilotseed2
+2026-11-10T16:16:45-07:00 PILOT pilotseed2 OK: A and B 4/4 turns, 0 errors, same ctx sha per turn; recall 15/15 admitted per user turn, 0 graph-only (keyword fills the budget)
+2026-11-10T16:16:45-07:00 SEED full_A_p3 77c7f485c02be6bc
+2026-11-10T16:16:45-07:00 LOOP start full_A_p3 n=20 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/A 265062e cache_sha=839129a6f0b23639
+2026-11-10T16:21:22-07:00 STRUCTURAL FINDING full_A_p3: from cycle 3 the pc_shadow spec has semparse_items 0 (items 57-60, all unparsed). With the seed journal, keyword recall admits 15 seed clusters per user turn, store reaches 60 and the 20 frozen-parsed notes are crowded out (1 of 20 resident at turn 10). So seeded arms test recall admission (per-turn table) but give a near-empty KB for count rule/s11. Plan: keep seeded 6-arm run for the admit/graph-only/STI table; then run the v3-identical unseeded 6 arms (no SEED) for count rule and s11, same harness, notes, caches and pins.
+2026-11-10T16:21:39-07:00 keep_specs.sh on disk was broken by a sed edit at 16:21 (full_* glob lost its suffix). The running keeper (pid 2983895) still runs the old, correct text for the full stage. noseed specs are kept by tools/keep_specs_noseed.sh.
+2026-11-10T16:24:33-07:00 LOOP end full_A_p3 rc=0
+2026-11-10T16:24:33-07:00 SEED full_B_p3 77c7f485c02be6bc
+2026-11-10T16:24:33-07:00 LOOP start full_B_p3 n=20 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/B 26e7769 cache_sha=839129a6f0b23639
+2026-11-10T16:29:17-07:00 HOOK CHECK: A (265062e) _score_cluster has no graph arg and is keyword-gated (returns 0 without a keyword hit), so A candidates are never graph-only by construction; B calls it with default graph=False = keyword-only score. graph_only = (kw_score == 0) is valid for both arms. Unseeded arms: the journal holds only the 20 notes with 0 EF/PF edges, so graph-only recall cannot fire there (report this).
+2026-11-10T16:32:14-07:00 LOOP end full_B_p3 rc=0
+2026-11-10T16:32:14-07:00 PINS: A 265062eb, B 26e77694, PeTTaChainer ~/scratch/ppv/pc b6aacc68 (HEAD exact), PeTTa p1-engine/petta-3681b9b (plain dir inside ~/research-agent repo, no own .git; tree sha ea8227004b29b3bc over 637 files, same dir for every arm), Man Hin 533c2274 commit present in scratch/upstream-latest/sph (not exercised: 0 parse calls)
+2026-11-10T16:32:14-07:00 SEED full_A_533 77c7f485c02be6bc
+2026-11-10T16:32:14-07:00 LOOP start full_A_533 n=20 cache=/tmp/gfr/caches/ppv_r1_533c2274 code=/tmp/gfr/A 265062e cache_sha=a839f2972a888b3b
+2026-11-10T16:33:00-07:00 p3 seeded A vs B: same admitted counts per user turn (72 each), 0 graph-only both, same candidate SET every turn; order differs on turns 7-10 and the admitted id differs on turns 9-10 (T002444Z vs T185901Z), both keyword candidates; cause under check (recency factor uses wall clock; B ran ~8 min later)
+2026-11-10T16:33:13-07:00 CAUSE: T185901Z scores 4.4120 in A vs 4.4112 in B (T002444Z identical 4.4114), so the swap at rank 12-14 is the wall-clock recency factor (B ran ~8 min later), not the code. Checking whether a fixed clock can be injected identically into all arms.
+2026-11-10T16:34:12-07:00 RESTART with fixed clock: wall-clock recency made A/B admit different ids on p3 turns 9-10 (harness noise, not code). Killed the chain by pid; old runs moved to loop_wallclock/ and specs_wallclock/ (kept as evidence). turn_loop now fixes time.time()=1794350000 inside RecallBridge.recall and _score_cluster only, same for every arm. Rerunning 6 seeded + 6 unseeded arms via tools/chain_all.sh.
+2026-11-10T16:34:13-07:00 SEED full_A_p3 77c7f485c02be6bc
+2026-11-10T16:34:13-07:00 LOOP start full_A_p3 n=20 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/A 265062e cache_sha=839129a6f0b23639
+2026-11-10T16:36:16-07:00 FIXED-CLOCK CHECK: turns 0-2 scores identical to the wall-clock run; turns 3-4 differ by +0.005 (recency now pinned at 1794350000, earlier than the wall clock). The clock is the same for every arm, so A/B are now comparable.
+2026-11-10T16:41:56-07:00 LOOP end full_A_p3 rc=0
+2026-11-10T16:41:56-07:00 SEED full_B_p3 77c7f485c02be6bc
+2026-11-10T16:41:56-07:00 LOOP start full_B_p3 n=20 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/B 26e7769 cache_sha=839129a6f0b23639
+2026-11-10T16:49:23-07:00 LOOP end full_B_p3 rc=0
+2026-11-10T16:49:24-07:00 SEED full_A_533 77c7f485c02be6bc
+2026-11-10T16:49:24-07:00 LOOP start full_A_533 n=20 cache=/tmp/gfr/caches/ppv_r1_533c2274 code=/tmp/gfr/A 265062e cache_sha=a839f2972a888b3b
+2026-11-10T16:50:05-07:00 FIXED-CLOCK p3 A vs B: 40/40 turns each, 0 errors, admitted identical on all turns (wall-clock turn 9-10 divergence gone, confirming harness cause).
+2026-11-10T16:56:51-07:00 LOOP end full_A_533 rc=0
+2026-11-10T16:56:51-07:00 SEED full_B_533 77c7f485c02be6bc
+2026-11-10T16:56:51-07:00 LOOP start full_B_533 n=20 cache=/tmp/gfr/caches/ppv_r1_533c2274 code=/tmp/gfr/B 26e7769 cache_sha=a839f2972a888b3b
+2026-11-10T17:04:21-07:00 LOOP end full_B_533 rc=0
+2026-11-10T17:04:21-07:00 SEED full_A_f44 77c7f485c02be6bc
+2026-11-10T17:04:21-07:00 LOOP start full_A_f44 n=20 cache=/tmp/gfr/caches/nov9_f44d7b74 code=/tmp/gfr/A 265062e cache_sha=b96748ca2aad51bb
+2026-11-10T17:11:49-07:00 LOOP end full_A_f44 rc=0
+2026-11-10T17:11:49-07:00 SEED full_B_f44 77c7f485c02be6bc
+2026-11-10T17:11:50-07:00 LOOP start full_B_f44 n=20 cache=/tmp/gfr/caches/nov9_f44d7b74 code=/tmp/gfr/B 26e7769 cache_sha=b96748ca2aad51bb
+2026-11-10T17:19:19-07:00 LOOP end full_B_f44 rc=0
+2026-11-10T17:19:19-07:00 LOOP_STAGE_DONE full
+2026-11-10T17:19:19-07:00 LOOP start noseed_A_p3 n=20 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/A 265062e cache_sha=839129a6f0b23639
+2026-11-10T17:26:03-07:00 LOOP end noseed_A_p3 rc=0
+2026-11-10T17:26:03-07:00 LOOP start noseed_B_p3 n=20 cache=/tmp/gfr/caches/nov5_1f1a7a6f code=/tmp/gfr/B 26e7769 cache_sha=839129a6f0b23639
+2026-11-10T17:32:47-07:00 LOOP end noseed_B_p3 rc=0
+2026-11-10T17:32:47-07:00 LOOP start noseed_A_533 n=20 cache=/tmp/gfr/caches/ppv_r1_533c2274 code=/tmp/gfr/A 265062e cache_sha=a839f2972a888b3b
+2026-11-10T17:39:30-07:00 LOOP end noseed_A_533 rc=0
+2026-11-10T17:39:30-07:00 LOOP start noseed_B_533 n=20 cache=/tmp/gfr/caches/ppv_r1_533c2274 code=/tmp/gfr/B 26e7769 cache_sha=a839f2972a888b3b
+2026-11-10T17:46:14-07:00 LOOP end noseed_B_533 rc=0
+2026-11-10T17:46:14-07:00 LOOP start noseed_A_f44 n=20 cache=/tmp/gfr/caches/nov9_f44d7b74 code=/tmp/gfr/A 265062e cache_sha=b96748ca2aad51bb
+2026-11-10T17:52:56-07:00 LOOP end noseed_A_f44 rc=0
+2026-11-10T17:52:56-07:00 LOOP start noseed_B_f44 n=20 cache=/tmp/gfr/caches/nov9_f44d7b74 code=/tmp/gfr/B 26e7769 cache_sha=b96748ca2aad51bb
+2026-11-10T17:59:41-07:00 LOOP end noseed_B_f44 rc=0
+2026-11-10T17:59:41-07:00 LOOP_STAGE_DONE noseed
+2026-11-10T17:59:41-07:00 CHAIN_UNSEEDED_DONE
+2026-11-10T17:59:41-07:00 KEEP_SPECS_DONE
+2026-11-10T17:59:48-07:00 FINALIZE_GFR_DONE
+2026-11-10T18:09:24-07:00 JUDGE2_DONE (rebuilt raw specs, last non-empty spec per arm)
+2026-11-10T18:11:10-07:00 JUDGE3_DONE (pair = max goals_n, then latest ts, non-empty spec)
