@@ -258,12 +258,19 @@ class WMTM:
             t = lap("journal_s", t)
             if user_msg and self._recall_bridge and self._budget_ok():
                 rb = self._recall_bridge
-                candidates = rb.recall(user_msg, store, top_k=15, floor=_recall_floor(pcfg))
+                # design s8.3: at most recall_budget new recalled items per cycle, shared with cycle(recall_fn=...);
+                # the recall cut is what this cycle's budget has left (no budget: the old top-15 cut)
+                budget = _ctx.recall_budget(pcfg)
+                slots = orch.recall_slots(budget)
+                top_k = _ctx.RECALL_TOP_K_UNBUDGETED if slots is None else slots
+                candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg)) if top_k > 0 else []
                 admitted_snippets = []
                 for c in candidates:
                     if c.cluster_id not in store:
                         if _ctx.is_duplicate_topic(c.content, admitted_snippets):
                             continue
+                        if not orch.take_recall_slot(budget):
+                            break
                         origin_ts = rb.get_cluster_timestamp(c.cluster_id)
                         it = store.admit(
                             c.cluster_id, c.content,

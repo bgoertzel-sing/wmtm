@@ -1,0 +1,10215 @@
+{
+ "arms": [
+  "A",
+  "B",
+  "C"
+ ],
+ "per_turn": {
+  "A": [
+   {
+    "i": 0,
+    "topic": 0,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 1,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 2,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     96.4456,
+     6.5
+    ],
+    "shown": 3,
+    "shown_useful": 1,
+    "shown_noise": 2,
+    "store": 4,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 0.65,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 1,
+    "topic": 0,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     87.4347
+    ],
+    "shown": 2,
+    "shown_useful": 2,
+    "shown_noise": 0,
+    "store": 5,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 2,
+    "topic": 0,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 4,
+    "shown_useful": 2,
+    "shown_noise": 2,
+    "store": 5,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 3,
+    "topic": 1,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 2,
+    "scored_kw": 2,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 2,
+    "admitted": 2,
+    "admitted_go": 0,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     183.8803,
+     87.4347
+    ],
+    "shown": 2,
+    "shown_useful": 1,
+    "shown_noise": 1,
+    "store": 7,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 4,
+    "topic": 1,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 1,
+    "shown_useful": 0,
+    "shown_noise": 1,
+    "store": 8,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 5,
+    "topic": 1,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 7,
+    "shown_useful": 1,
+    "shown_noise": 6,
+    "store": 8,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 6,
+    "topic": 2,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 3,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     87.4347,
+     87.4347
+    ],
+    "shown": 3,
+    "shown_useful": 3,
+    "shown_noise": 0,
+    "store": 11,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 7,
+    "topic": 2,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 1,
+    "shown_useful": 1,
+    "shown_noise": 0,
+    "store": 11,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 8,
+    "topic": 2,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 3,
+    "shown_noise": 7,
+    "store": 11,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 9,
+    "topic": 3,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 1,
+    "shown_useful": 0,
+    "shown_noise": 1,
+    "store": 12,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 10,
+    "topic": 3,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 1,
+    "shown_useful": 0,
+    "shown_noise": 1,
+    "store": 13,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 11,
+    "topic": 3,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 12,
+    "shown_useful": 0,
+    "shown_noise": 12,
+    "store": 13,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 12,
+    "topic": 4,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 2,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 2,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     87.4347,
+     87.4347
+    ],
+    "shown": 3,
+    "shown_useful": 2,
+    "shown_noise": 1,
+    "store": 16,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 13,
+    "topic": 4,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 1,
+    "shown_useful": 1,
+    "shown_noise": 0,
+    "store": 16,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 14,
+    "topic": 4,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 16,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 15,
+    "topic": 5,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 1,
+    "shown_useful": 1,
+    "shown_noise": 0,
+    "store": 17,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 16,
+    "topic": 5,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 0,
+    "shown_noise": 15,
+    "store": 17,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 17,
+    "topic": 5,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 0,
+    "shown_noise": 15,
+    "store": 17,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 18,
+    "topic": 6,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 4,
+    "scored_kw": 4,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 4,
+    "admitted": 4,
+    "admitted_go": 0,
+    "admitted_kw": 4,
+    "adm_useful": 3,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     82.1637,
+     82.1637,
+     82.1637
+    ],
+    "shown": 4,
+    "shown_useful": 3,
+    "shown_noise": 1,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.21637,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 19,
+    "topic": 6,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 2,
+    "scored_kw": 2,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 2,
+    "admitted": 2,
+    "admitted_go": 0,
+    "admitted_kw": 2,
+    "adm_useful": 0,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     78.4238,
+     6.5
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 23,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 0.65,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 20,
+    "topic": 6,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 23,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 21,
+    "topic": 7,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 2,
+    "scored_kw": 2,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 2,
+    "admitted": 2,
+    "admitted_go": 0,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     183.8803,
+     87.4347
+    ],
+    "shown": 2,
+    "shown_useful": 1,
+    "shown_noise": 1,
+    "store": 25,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 22,
+    "topic": 7,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 1,
+    "shown_useful": 1,
+    "shown_noise": 0,
+    "store": 26,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 23,
+    "topic": 7,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 26,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 24,
+    "topic": 8,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 2,
+    "scored_kw": 2,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 2,
+    "admitted": 2,
+    "admitted_go": 0,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     87.4347,
+     87.4347
+    ],
+    "shown": 2,
+    "shown_useful": 1,
+    "shown_noise": 1,
+    "store": 25,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 25,
+    "topic": 8,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 1,
+    "shown_useful": 0,
+    "shown_noise": 1,
+    "store": 25,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 26,
+    "topic": 8,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 23,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 27,
+    "topic": 9,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 2,
+    "shown_useful": 2,
+    "shown_noise": 0,
+    "store": 23,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 28,
+    "topic": 9,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 2,
+    "shown_useful": 2,
+    "shown_noise": 0,
+    "store": 23,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 29,
+    "topic": 9,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 0,
+    "shown_noise": 15,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 30,
+    "topic": 0,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     87.5044
+    ],
+    "shown": 2,
+    "shown_useful": 2,
+    "shown_noise": 0,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.75044,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 31,
+    "topic": 0,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 32,
+    "topic": 2,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 1,
+    "shown_useful": 1,
+    "shown_noise": 0,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 33,
+    "topic": 2,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 34,
+    "topic": 4,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     96.5153
+    ],
+    "shown": 1,
+    "shown_useful": 1,
+    "shown_noise": 0,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.65153,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 35,
+    "topic": 4,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 0,
+    "shown_noise": 15,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 36,
+    "topic": 6,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [],
+    "sti_kw": [
+     78.5974
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 7.85974,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 37,
+    "topic": 6,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 21,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 38,
+    "topic": 8,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 1,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 0,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [
+     96.6192
+    ],
+    "shown": 1,
+    "shown_useful": 0,
+    "shown_noise": 1,
+    "store": 22,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.66192,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 39,
+    "topic": 8,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 0,
+    "scored_kw": 0,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 0,
+    "admitted": 0,
+    "admitted_go": 0,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 22,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   }
+  ],
+  "B": [
+   {
+    "i": 0,
+    "topic": 0,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 1,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 2,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     96.4456,
+     6.5
+    ],
+    "shown": 3,
+    "shown_useful": 1,
+    "shown_noise": 2,
+    "store": 4,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 0.65,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 1,
+    "topic": 0,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 10,
+    "scored_kw": 1,
+    "scored_go": 9,
+    "cut_floor": 5,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 5,
+    "admitted": 5,
+    "admitted_go": 4,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 3,
+    "adm_go_useful": 1,
+    "adm_any_useful": 4,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 9,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 2,
+    "topic": 0,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 11,
+    "scored_kw": 0,
+    "scored_go": 11,
+    "cut_floor": 1,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 3,
+    "adm_noise": 7,
+    "adm_go_useful": 3,
+    "adm_any_useful": 4,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 3,
+    "shown_noise": 7,
+    "store": 19,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 3,
+    "topic": 1,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 3,
+    "scored_kw": 2,
+    "scored_go": 1,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 1,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [
+     7.28
+    ],
+    "sti_kw": [
+     183.8803,
+     87.4347
+    ],
+    "shown": 3,
+    "shown_useful": 1,
+    "shown_noise": 2,
+    "store": 22,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 4,
+    "topic": 1,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 8,
+    "scored_kw": 1,
+    "scored_go": 7,
+    "cut_floor": 4,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 4,
+    "admitted": 4,
+    "admitted_go": 3,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 2,
+    "adm_go_useful": 2,
+    "adm_any_useful": 2,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 4,
+    "shown_useful": 2,
+    "shown_noise": 2,
+    "store": 26,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 5,
+    "topic": 1,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 4,
+    "scored_kw": 0,
+    "scored_go": 4,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 4,
+    "admitted": 4,
+    "admitted_go": 4,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 3,
+    "adm_go_useful": 1,
+    "adm_any_useful": 1,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 4,
+    "shown_useful": 1,
+    "shown_noise": 3,
+    "store": 30,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 6,
+    "topic": 2,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 3,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     87.4347,
+     87.4347
+    ],
+    "shown": 3,
+    "shown_useful": 3,
+    "shown_noise": 0,
+    "store": 33,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 7,
+    "topic": 2,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 13,
+    "scored_kw": 0,
+    "scored_go": 13,
+    "cut_floor": 6,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 7,
+    "admitted": 7,
+    "admitted_go": 7,
+    "admitted_kw": 0,
+    "adm_useful": 5,
+    "adm_noise": 2,
+    "adm_go_useful": 5,
+    "adm_any_useful": 5,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 39,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 8,
+    "topic": 2,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 7,
+    "scored_kw": 0,
+    "scored_go": 7,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 7,
+    "admitted": 7,
+    "admitted_go": 7,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 5,
+    "adm_go_useful": 2,
+    "adm_any_useful": 3,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 7,
+    "shown_useful": 2,
+    "shown_noise": 5,
+    "store": 42,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 9,
+    "topic": 3,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 5,
+    "scored_kw": 1,
+    "scored_go": 4,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 5,
+    "admitted": 5,
+    "admitted_go": 4,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 5,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [
+     20.28,
+     13.78,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 37,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 10,
+    "topic": 3,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 11,
+    "scored_kw": 1,
+    "scored_go": 10,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 11,
+    "admitted": 11,
+    "admitted_go": 10,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 11,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 47,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 11,
+    "topic": 3,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 1,
+    "scored_kw": 0,
+    "scored_go": 1,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 1,
+    "admitted": 1,
+    "admitted_go": 1,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 1,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 1,
+    "shown_useful": 0,
+    "shown_noise": 1,
+    "store": 44,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 12,
+    "topic": 4,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 6,
+    "scored_kw": 3,
+    "scored_go": 3,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 6,
+    "admitted": 6,
+    "admitted_go": 3,
+    "admitted_kw": 3,
+    "adm_useful": 2,
+    "adm_noise": 4,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78
+    ],
+    "sti_kw": [
+     96.4456,
+     87.4347,
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 44,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 13,
+    "topic": 4,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 34,
+    "scored_kw": 0,
+    "scored_go": 34,
+    "cut_floor": 14,
+    "cut_topk": 5,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 3,
+    "adm_noise": 12,
+    "adm_go_useful": 3,
+    "adm_any_useful": 6,
+    "sti_go": [
+     33.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 56,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 3.328,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 14,
+    "topic": 4,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 22,
+    "scored_kw": 0,
+    "scored_go": 22,
+    "cut_floor": 3,
+    "cut_topk": 4,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 1,
+    "adm_any_useful": 3,
+    "sti_go": [
+     20.28,
+     20.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 60,
+    "evicted": 11,
+    "evicted_by_go": 11,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "distractor-N": 1,
+     "linked-d1-U": 2,
+     "linked-d1-N": 2,
+     "hub-U": 1,
+     "linked-d2-U": 2,
+     "linked-d2-N": 3
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 15,
+    "topic": 5,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 18,
+    "scored_kw": 1,
+    "scored_go": 17,
+    "cut_floor": 1,
+    "cut_topk": 2,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 0,
+    "adm_any_useful": 8,
+    "sti_go": [
+     20.28,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d1-U": 5,
+     "linked-d2-N": 3,
+     "distractor-N": 1,
+     "linked-d2-U": 2,
+     "linked-d1-N": 3,
+     "hub-U": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 16,
+    "topic": 5,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 19,
+    "scored_kw": 0,
+    "scored_go": 19,
+    "cut_floor": 7,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 12,
+    "admitted": 12,
+    "admitted_go": 12,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 11,
+    "adm_go_useful": 1,
+    "adm_any_useful": 6,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 12,
+    "shown_useful": 1,
+    "shown_noise": 11,
+    "store": 60,
+    "evicted": 12,
+    "evicted_by_go": 12,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d2-N": 2,
+     "hub-U": 2,
+     "linked-d1-N": 6,
+     "linked-d1-U": 1,
+     "linked-d2-U": 1
+    },
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 17,
+    "topic": 5,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 19,
+    "scored_kw": 0,
+    "scored_go": 19,
+    "cut_floor": 1,
+    "cut_topk": 3,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 1,
+    "adm_any_useful": 7,
+    "sti_go": [
+     20.28,
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d1-N": 4,
+     "linked-d2-N": 2,
+     "linked-d1-U": 5,
+     "hub-U": 2,
+     "distractor-N": 1,
+     "linked-d2-U": 1
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 18,
+    "topic": 6,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 25,
+    "scored_kw": 4,
+    "scored_go": 21,
+    "cut_floor": 4,
+    "cut_topk": 6,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 11,
+    "admitted_kw": 4,
+    "adm_useful": 3,
+    "adm_noise": 12,
+    "adm_go_useful": 0,
+    "adm_any_useful": 8,
+    "sti_go": [
+     20.28,
+     20.28,
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456,
+     82.1637,
+     82.1637,
+     82.1637
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 11,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "linked-d1-N": 2,
+     "linked-d2-N": 10,
+     "linked-d1-U": 2,
+     "linked-d2-U": 1
+    },
+    "kw_min": 8.21637,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 19,
+    "topic": 6,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 46,
+    "scored_kw": 2,
+    "scored_go": 44,
+    "cut_floor": 11,
+    "cut_topk": 20,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 1,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 5,
+    "adm_noise": 10,
+    "adm_go_useful": 5,
+    "adm_any_useful": 7,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     78.4238
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d2-N": 4,
+     "linked-d1-N": 2,
+     "hub-U": 2,
+     "distractor-N": 1,
+     "linked-d1-U": 5,
+     "linked-d2-U": 1
+    },
+    "kw_min": 0.65,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 20,
+    "topic": 6,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 41,
+    "scored_kw": 0,
+    "scored_go": 41,
+    "cut_floor": 14,
+    "cut_topk": 12,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 8,
+    "sti_go": [
+     26.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 6,
+    "shown_useful": 0,
+    "shown_noise": 6,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-N": 4,
+     "linked-d2-U": 2,
+     "linked-d1-U": 3,
+     "linked-d2-N": 4,
+     "distractor-N": 1,
+     "hub-U": 1
+    },
+    "kw_min": null,
+    "go_max": 2.678,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 21,
+    "topic": 7,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 43,
+    "scored_kw": 2,
+    "scored_go": 41,
+    "cut_floor": 8,
+    "cut_topk": 20,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 13,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 0,
+    "adm_any_useful": 8,
+    "sti_go": [
+     78.78,
+     20.28,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     183.8803,
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 13,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-N": 6,
+     "linked-d2-N": 3,
+     "hub-U": 2,
+     "linked-d2-U": 3,
+     "linked-d1-U": 1
+    },
+    "kw_min": 8.74347,
+    "go_max": 7.878,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 22,
+    "topic": 7,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 49,
+    "scored_kw": 1,
+    "scored_go": 48,
+    "cut_floor": 10,
+    "cut_topk": 24,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 1,
+    "adm_any_useful": 7,
+    "sti_go": [
+     20.28,
+     20.28,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d1-U": 6,
+     "linked-d1-N": 2,
+     "hub-U": 1,
+     "linked-d2-N": 5,
+     "linked-d2-U": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 23,
+    "topic": 7,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 58,
+    "scored_kw": 0,
+    "scored_go": 58,
+    "cut_floor": 17,
+    "cut_topk": 26,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 7,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 7,
+    "evicted_kinds": {
+     "linked-d1-U": 6,
+     "linked-d1-N": 3,
+     "hub-U": 1,
+     "linked-d2-N": 5
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 24,
+    "topic": 8,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 56,
+    "scored_kw": 2,
+    "scored_go": 54,
+    "cut_floor": 20,
+    "cut_topk": 21,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 13,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 0,
+    "adm_any_useful": 8,
+    "sti_go": [
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     87.4347,
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 13,
+    "evicted_useful_any": 9,
+    "evicted_kinds": {
+     "linked-d2-N": 4,
+     "hub-U": 3,
+     "linked-d2-U": 3,
+     "linked-d1-N": 2,
+     "linked-d1-U": 3
+    },
+    "kw_min": 8.74347,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 25,
+    "topic": 8,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 88,
+    "scored_kw": 1,
+    "scored_go": 87,
+    "cut_floor": 34,
+    "cut_topk": 39,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 15,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d1-N": 6,
+     "linked-d1-U": 2,
+     "hub-U": 3,
+     "linked-d2-U": 3,
+     "linked-d2-N": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 26,
+    "topic": 8,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 85,
+    "scored_kw": 0,
+    "scored_go": 85,
+    "cut_floor": 31,
+    "cut_topk": 39,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 9,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-U": 6,
+     "distractor-N": 1,
+     "linked-d2-N": 4,
+     "linked-d1-N": 4
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 27,
+    "topic": 9,
+    "kind": "Q1",
+    "top_k": 15,
+    "scored_pos": 84,
+    "scored_kw": 1,
+    "scored_go": 83,
+    "cut_floor": 29,
+    "cut_topk": 40,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 0,
+    "adm_any_useful": 10,
+    "sti_go": [
+     20.28,
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-U": 3,
+     "linked-d2-N": 4,
+     "linked-d1-N": 4,
+     "linked-d2-U": 2,
+     "hub-U": 1,
+     "distractor-N": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 28,
+    "topic": 9,
+    "kind": "Q2",
+    "top_k": 15,
+    "scored_pos": 85,
+    "scored_kw": 0,
+    "scored_go": 85,
+    "cut_floor": 28,
+    "cut_topk": 42,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 1,
+    "adm_any_useful": 7,
+    "sti_go": [
+     46.28,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-U": 3,
+     "hub-U": 3,
+     "linked-d2-N": 3,
+     "linked-d1-N": 6
+    },
+    "kw_min": null,
+    "go_max": 4.628,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 29,
+    "topic": 9,
+    "kind": "Q3",
+    "top_k": 15,
+    "scored_pos": 83,
+    "scored_kw": 0,
+    "scored_go": 83,
+    "cut_floor": 29,
+    "cut_topk": 39,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 1,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 11,
+    "evicted_kinds": {
+     "linked-d1-N": 2,
+     "linked-d1-U": 4,
+     "distractor-N": 1,
+     "linked-d2-U": 3,
+     "hub-U": 4,
+     "linked-d2-N": 1
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 30,
+    "topic": 0,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 81,
+    "scored_kw": 1,
+    "scored_go": 80,
+    "cut_floor": 29,
+    "cut_topk": 37,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 1,
+    "adm_any_useful": 11,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     87.6687
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 7,
+    "evicted_kinds": {
+     "linked-d2-N": 5,
+     "linked-d1-U": 3,
+     "linked-d1-N": 3,
+     "hub-U": 1,
+     "linked-d2-U": 3
+    },
+    "kw_min": 8.76687,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 31,
+    "topic": 0,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 84,
+    "scored_kw": 0,
+    "scored_go": 84,
+    "cut_floor": 30,
+    "cut_topk": 39,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 7,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 10,
+    "evicted_kinds": {
+     "linked-d1-U": 7,
+     "linked-d1-N": 3,
+     "hub-U": 1,
+     "linked-d2-N": 2,
+     "linked-d2-U": 2
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 32,
+    "topic": 2,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 88,
+    "scored_kw": 1,
+    "scored_go": 87,
+    "cut_floor": 31,
+    "cut_topk": 42,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 1,
+    "adm_any_useful": 11,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d2-N": 3,
+     "linked-d1-N": 3,
+     "linked-d1-U": 4,
+     "hub-U": 1,
+     "distractor-N": 1,
+     "linked-d2-U": 3
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 33,
+    "topic": 2,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 85,
+    "scored_kw": 0,
+    "scored_go": 85,
+    "cut_floor": 27,
+    "cut_topk": 43,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 1,
+    "adm_any_useful": 10,
+    "sti_go": [
+     52.78,
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "hub-U": 4,
+     "linked-d1-U": 1,
+     "linked-d2-N": 4,
+     "linked-d1-N": 5,
+     "linked-d2-U": 1
+    },
+    "kw_min": null,
+    "go_max": 5.278,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 34,
+    "topic": 4,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 91,
+    "scored_kw": 1,
+    "scored_go": 90,
+    "cut_floor": 31,
+    "cut_topk": 45,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 7,
+    "evicted_kinds": {
+     "linked-d1-N": 6,
+     "hub-U": 3,
+     "distractor-N": 1,
+     "linked-d1-U": 3,
+     "linked-d2-N": 1,
+     "linked-d2-U": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 35,
+    "topic": 4,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 76,
+    "scored_kw": 0,
+    "scored_go": 76,
+    "cut_floor": 27,
+    "cut_topk": 34,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 8,
+    "sti_go": [
+     39.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 8,
+    "shown_useful": 1,
+    "shown_noise": 7,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 8,
+    "evicted_kinds": {
+     "linked-d2-U": 2,
+     "hub-U": 3,
+     "linked-d2-N": 4,
+     "linked-d1-U": 3,
+     "linked-d1-N": 3
+    },
+    "kw_min": null,
+    "go_max": 3.978,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 36,
+    "topic": 6,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 87,
+    "scored_kw": 1,
+    "scored_go": 86,
+    "cut_floor": 29,
+    "cut_topk": 43,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 8,
+    "sti_go": [
+     26.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     78.4238
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 10,
+    "evicted_kinds": {
+     "linked-d2-U": 5,
+     "linked-d2-N": 3,
+     "linked-d1-U": 5,
+     "linked-d1-N": 2
+    },
+    "kw_min": 7.84238,
+    "go_max": 2.678,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 37,
+    "topic": 6,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 91,
+    "scored_kw": 0,
+    "scored_go": 91,
+    "cut_floor": 32,
+    "cut_topk": 44,
+    "cut_topk_useful": 4,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 8,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 2,
+    "shown_noise": 13,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "linked-d2-N": 4,
+     "linked-d1-N": 6,
+     "linked-d1-U": 4,
+     "hub-U": 1
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 38,
+    "topic": 8,
+    "kind": "R2",
+    "top_k": 15,
+    "scored_pos": 92,
+    "scored_kw": 1,
+    "scored_go": 91,
+    "cut_floor": 33,
+    "cut_topk": 44,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 14,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 13,
+    "adm_go_useful": 2,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 14,
+    "evicted_useful_any": 9,
+    "evicted_kinds": {
+     "linked-d1-U": 5,
+     "linked-d1-N": 3,
+     "linked-d2-N": 3,
+     "linked-d2-U": 2,
+     "hub-U": 2
+    },
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 39,
+    "topic": 8,
+    "kind": "R3",
+    "top_k": 15,
+    "scored_pos": 90,
+    "scored_kw": 0,
+    "scored_go": 90,
+    "cut_floor": 37,
+    "cut_topk": 38,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 15,
+    "admitted": 15,
+    "admitted_go": 15,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 14,
+    "adm_go_useful": 1,
+    "adm_any_useful": 9,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 15,
+    "shown_useful": 1,
+    "shown_noise": 14,
+    "store": 60,
+    "evicted": 15,
+    "evicted_by_go": 15,
+    "evicted_useful_any": 7,
+    "evicted_kinds": {
+     "hub-U": 3,
+     "linked-d1-U": 3,
+     "linked-d2-N": 3,
+     "linked-d1-N": 5,
+     "linked-d2-U": 1
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   }
+  ],
+  "C": [
+   {
+    "i": 0,
+    "topic": 0,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 1,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 2,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     96.4456,
+     6.5
+    ],
+    "shown": 3,
+    "shown_useful": 1,
+    "shown_noise": 2,
+    "store": 4,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 0.65,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 1,
+    "topic": 0,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 10,
+    "scored_kw": 1,
+    "scored_go": 9,
+    "cut_floor": 5,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 5,
+    "admitted": 5,
+    "admitted_go": 4,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 3,
+    "adm_go_useful": 1,
+    "adm_any_useful": 4,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 9,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 2,
+    "topic": 0,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 11,
+    "scored_kw": 0,
+    "scored_go": 11,
+    "cut_floor": 1,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 3,
+    "adm_noise": 7,
+    "adm_go_useful": 3,
+    "adm_any_useful": 4,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 3,
+    "shown_noise": 7,
+    "store": 19,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 3,
+    "topic": 1,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 3,
+    "scored_kw": 2,
+    "scored_go": 1,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 1,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 1,
+    "sti_go": [
+     7.28
+    ],
+    "sti_kw": [
+     183.8803,
+     87.4347
+    ],
+    "shown": 3,
+    "shown_useful": 1,
+    "shown_noise": 2,
+    "store": 22,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 4,
+    "topic": 1,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 8,
+    "scored_kw": 1,
+    "scored_go": 7,
+    "cut_floor": 4,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 4,
+    "admitted": 4,
+    "admitted_go": 3,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 2,
+    "adm_go_useful": 2,
+    "adm_any_useful": 2,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 4,
+    "shown_useful": 2,
+    "shown_noise": 2,
+    "store": 26,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 5,
+    "topic": 1,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 4,
+    "scored_kw": 0,
+    "scored_go": 4,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 4,
+    "admitted": 4,
+    "admitted_go": 4,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 3,
+    "adm_go_useful": 1,
+    "adm_any_useful": 1,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 4,
+    "shown_useful": 1,
+    "shown_noise": 3,
+    "store": 30,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 6,
+    "topic": 2,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 3,
+    "scored_kw": 3,
+    "scored_go": 0,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 3,
+    "admitted": 3,
+    "admitted_go": 0,
+    "admitted_kw": 3,
+    "adm_useful": 3,
+    "adm_noise": 0,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [],
+    "sti_kw": [
+     96.4456,
+     87.4347,
+     87.4347
+    ],
+    "shown": 3,
+    "shown_useful": 3,
+    "shown_noise": 0,
+    "store": 33,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": null,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 7,
+    "topic": 2,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 13,
+    "scored_kw": 0,
+    "scored_go": 13,
+    "cut_floor": 6,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 7,
+    "admitted": 7,
+    "admitted_go": 7,
+    "admitted_kw": 0,
+    "adm_useful": 5,
+    "adm_noise": 2,
+    "adm_go_useful": 5,
+    "adm_any_useful": 5,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 39,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 8,
+    "topic": 2,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 7,
+    "scored_kw": 0,
+    "scored_go": 7,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 7,
+    "admitted": 7,
+    "admitted_go": 7,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 5,
+    "adm_go_useful": 2,
+    "adm_any_useful": 3,
+    "sti_go": [
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 7,
+    "shown_useful": 2,
+    "shown_noise": 5,
+    "store": 42,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 9,
+    "topic": 3,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 5,
+    "scored_kw": 1,
+    "scored_go": 4,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 5,
+    "admitted": 5,
+    "admitted_go": 4,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 5,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [
+     20.28,
+     13.78,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 37,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 10,
+    "topic": 3,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 11,
+    "scored_kw": 1,
+    "scored_go": 10,
+    "cut_floor": 0,
+    "cut_topk": 1,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 46,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 11,
+    "topic": 3,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 2,
+    "scored_kw": 0,
+    "scored_go": 2,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 2,
+    "admitted": 2,
+    "admitted_go": 2,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 2,
+    "adm_go_useful": 0,
+    "adm_any_useful": 0,
+    "sti_go": [
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 2,
+    "shown_useful": 0,
+    "shown_noise": 2,
+    "store": 44,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 0.728,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 12,
+    "topic": 4,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 6,
+    "scored_kw": 3,
+    "scored_go": 3,
+    "cut_floor": 0,
+    "cut_topk": 0,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 6,
+    "admitted": 6,
+    "admitted_go": 3,
+    "admitted_kw": 3,
+    "adm_useful": 2,
+    "adm_noise": 4,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78
+    ],
+    "sti_kw": [
+     96.4456,
+     87.4347,
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 44,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": 8.74347,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 13,
+    "topic": 4,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 34,
+    "scored_kw": 0,
+    "scored_go": 34,
+    "cut_floor": 14,
+    "cut_topk": 10,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 8,
+    "adm_go_useful": 2,
+    "adm_any_useful": 4,
+    "sti_go": [
+     33.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 51,
+    "evicted": 0,
+    "evicted_by_go": 0,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {},
+    "kw_min": null,
+    "go_max": 3.328,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 14,
+    "topic": 4,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 27,
+    "scored_kw": 0,
+    "scored_go": 27,
+    "cut_floor": 6,
+    "cut_topk": 11,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 1,
+    "adm_any_useful": 3,
+    "sti_go": [
+     20.28,
+     20.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 1,
+    "shown_noise": 9,
+    "store": 56,
+    "evicted": 1,
+    "evicted_by_go": 1,
+    "evicted_useful_any": 0,
+    "evicted_kinds": {
+     "distractor-N": 1
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 15,
+    "topic": 5,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 22,
+    "scored_kw": 1,
+    "scored_go": 21,
+    "cut_floor": 4,
+    "cut_topk": 8,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 5,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 58,
+    "evicted": 6,
+    "evicted_by_go": 6,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "hub-U": 1,
+     "linked-d2-U": 2,
+     "linked-d2-N": 3
+    },
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 16,
+    "topic": 5,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 25,
+    "scored_kw": 0,
+    "scored_go": 25,
+    "cut_floor": 6,
+    "cut_topk": 9,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [
+     20.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 0,
+    "shown_noise": 10,
+    "store": 58,
+    "evicted": 8,
+    "evicted_by_go": 8,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "distractor-N": 1,
+     "linked-d1-U": 2,
+     "linked-d2-N": 2,
+     "linked-d2-U": 1,
+     "hub-U": 1,
+     "linked-d1-N": 1
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 17,
+    "topic": 5,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 21,
+    "scored_kw": 0,
+    "scored_go": 21,
+    "cut_floor": 7,
+    "cut_topk": 4,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 1,
+    "adm_any_useful": 6,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 1,
+    "shown_noise": 9,
+    "store": 60,
+    "evicted": 8,
+    "evicted_by_go": 8,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "linked-d1-N": 3,
+     "linked-d2-U": 1,
+     "linked-d2-N": 2,
+     "hub-U": 2
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 18,
+    "topic": 6,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 23,
+    "scored_kw": 4,
+    "scored_go": 19,
+    "cut_floor": 1,
+    "cut_topk": 12,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 6,
+    "admitted_kw": 4,
+    "adm_useful": 3,
+    "adm_noise": 7,
+    "adm_go_useful": 0,
+    "adm_any_useful": 6,
+    "sti_go": [
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456,
+     82.1637,
+     82.1637,
+     82.1637
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 6,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "linked-d1-N": 5,
+     "linked-d1-U": 3,
+     "linked-d2-U": 1,
+     "hub-U": 1
+    },
+    "kw_min": 8.21637,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 19,
+    "topic": 6,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 44,
+    "scored_kw": 3,
+    "scored_go": 41,
+    "cut_floor": 13,
+    "cut_topk": 21,
+    "cut_topk_useful": 6,
+    "cut_topk_kw": 1,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 8,
+    "admitted_kw": 2,
+    "adm_useful": 2,
+    "adm_noise": 8,
+    "adm_go_useful": 2,
+    "adm_any_useful": 7,
+    "sti_go": [
+     20.28,
+     20.28,
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     78.4238,
+     13.78
+    ],
+    "shown": 5,
+    "shown_useful": 3,
+    "shown_noise": 2,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 8,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "linked-d1-U": 2,
+     "linked-d1-N": 3,
+     "distractor-N": 1,
+     "linked-d2-N": 3,
+     "hub-U": 1
+    },
+    "kw_min": 0.65,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 20,
+    "topic": 6,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 45,
+    "scored_kw": 0,
+    "scored_go": 45,
+    "cut_floor": 14,
+    "cut_topk": 21,
+    "cut_topk_useful": 4,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 8,
+    "adm_go_useful": 2,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 2,
+    "shown_noise": 8,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "linked-d2-U": 1,
+     "linked-d2-N": 4,
+     "linked-d1-N": 2,
+     "hub-U": 1,
+     "distractor-N": 1,
+     "linked-d1-U": 1
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 21,
+    "topic": 7,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 45,
+    "scored_kw": 2,
+    "scored_go": 43,
+    "cut_floor": 12,
+    "cut_topk": 23,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 8,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     183.8803,
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 8,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d1-U": 3,
+     "linked-d2-N": 4,
+     "linked-d1-N": 2,
+     "linked-d2-U": 1
+    },
+    "kw_min": 8.74347,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 22,
+    "topic": 7,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 53,
+    "scored_kw": 1,
+    "scored_go": 52,
+    "cut_floor": 14,
+    "cut_topk": 29,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 6,
+    "sti_go": [
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d2-U": 1,
+     "linked-d2-N": 4,
+     "linked-d1-N": 1,
+     "distractor-N": 1,
+     "hub-U": 3
+    },
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 23,
+    "topic": 7,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 57,
+    "scored_kw": 0,
+    "scored_go": 57,
+    "cut_floor": 16,
+    "cut_topk": 31,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 1,
+    "adm_any_useful": 3,
+    "sti_go": [
+     65.78,
+     20.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "linked-d1-N": 2,
+     "linked-d2-U": 2,
+     "linked-d1-U": 3,
+     "linked-d2-N": 3
+    },
+    "kw_min": null,
+    "go_max": 6.578,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 24,
+    "topic": 8,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 61,
+    "scored_kw": 2,
+    "scored_go": 59,
+    "cut_floor": 16,
+    "cut_topk": 35,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 8,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     20.28,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     87.4347,
+     87.4347
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 8,
+    "evicted_useful_any": 9,
+    "evicted_kinds": {
+     "linked-d1-U": 7,
+     "hub-U": 2,
+     "linked-d1-N": 1
+    },
+    "kw_min": 8.74347,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 25,
+    "topic": 8,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 92,
+    "scored_kw": 1,
+    "scored_go": 91,
+    "cut_floor": 37,
+    "cut_topk": 45,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 6,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "hub-U": 2,
+     "linked-d1-N": 1,
+     "linked-d2-U": 1,
+     "linked-d2-N": 5,
+     "linked-d1-U": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 26,
+    "topic": 8,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 92,
+    "scored_kw": 0,
+    "scored_go": 92,
+    "cut_floor": 36,
+    "cut_topk": 46,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     20.28,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 0,
+    "shown_noise": 10,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d1-N": 6,
+     "linked-d1-U": 4
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 27,
+    "topic": 9,
+    "kind": "Q1",
+    "top_k": 10,
+    "scored_pos": 93,
+    "scored_kw": 1,
+    "scored_go": 92,
+    "cut_floor": 32,
+    "cut_topk": 51,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 7,
+    "evicted_kinds": {
+     "linked-d2-U": 2,
+     "linked-d1-U": 3,
+     "hub-U": 2,
+     "linked-d1-N": 2,
+     "distractor-N": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 28,
+    "topic": 9,
+    "kind": "Q2",
+    "top_k": 10,
+    "scored_pos": 95,
+    "scored_kw": 1,
+    "scored_go": 94,
+    "cut_floor": 41,
+    "cut_topk": 44,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 2,
+    "adm_noise": 8,
+    "adm_go_useful": 1,
+    "adm_any_useful": 7,
+    "sti_go": [
+     13.78,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     94.7147
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 2,
+    "evicted_kinds": {
+     "linked-d1-N": 4,
+     "linked-d2-N": 4,
+     "linked-d1-U": 1,
+     "linked-d2-U": 1
+    },
+    "kw_min": 9.47147,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 29,
+    "topic": 9,
+    "kind": "Q3",
+    "top_k": 10,
+    "scored_pos": 100,
+    "scored_kw": 0,
+    "scored_go": 100,
+    "cut_floor": 34,
+    "cut_topk": 56,
+    "cut_topk_useful": 4,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 2,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 0,
+    "shown_noise": 10,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d2-N": 4,
+     "linked-d1-N": 1,
+     "distractor-N": 1,
+     "hub-U": 4
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 30,
+    "topic": 0,
+    "kind": "R2",
+    "top_k": 10,
+    "scored_pos": 87,
+    "scored_kw": 1,
+    "scored_go": 86,
+    "cut_floor": 25,
+    "cut_topk": 52,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 5,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     94.7147
+    ],
+    "shown": 5,
+    "shown_useful": 2,
+    "shown_noise": 3,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "linked-d1-U": 4,
+     "linked-d1-N": 4,
+     "distractor-N": 1,
+     "hub-U": 1
+    },
+    "kw_min": 9.47147,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 31,
+    "topic": 0,
+    "kind": "R3",
+    "top_k": 10,
+    "scored_pos": 92,
+    "scored_kw": 0,
+    "scored_go": 92,
+    "cut_floor": 33,
+    "cut_topk": 49,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 7,
+    "sti_go": [
+     52.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-U": 4,
+     "hub-U": 2,
+     "linked-d1-N": 2,
+     "linked-d2-N": 2
+    },
+    "kw_min": null,
+    "go_max": 5.278,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 32,
+    "topic": 2,
+    "kind": "R2",
+    "top_k": 10,
+    "scored_pos": 90,
+    "scored_kw": 0,
+    "scored_go": 90,
+    "cut_floor": 29,
+    "cut_topk": 51,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 2,
+    "adm_noise": 8,
+    "adm_go_useful": 2,
+    "adm_any_useful": 5,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 2,
+    "shown_noise": 8,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d1-U": 1,
+     "linked-d2-N": 3,
+     "linked-d2-U": 1,
+     "linked-d1-N": 3,
+     "hub-U": 2
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 33,
+    "topic": 2,
+    "kind": "R3",
+    "top_k": 10,
+    "scored_pos": 88,
+    "scored_kw": 0,
+    "scored_go": 88,
+    "cut_floor": 29,
+    "cut_topk": 49,
+    "cut_topk_useful": 0,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 1,
+    "adm_any_useful": 4,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 1,
+    "shown_noise": 9,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "hub-U": 1,
+     "linked-d1-U": 5,
+     "linked-d1-N": 3,
+     "linked-d2-N": 1
+    },
+    "kw_min": null,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 34,
+    "topic": 4,
+    "kind": "R2",
+    "top_k": 10,
+    "scored_pos": 85,
+    "scored_kw": 1,
+    "scored_go": 84,
+    "cut_floor": 30,
+    "cut_topk": 45,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 5,
+    "sti_go": [
+     20.28,
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "hub-U": 2,
+     "distractor-N": 1,
+     "linked-d1-N": 3,
+     "linked-d1-U": 1,
+     "linked-d2-N": 3
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 35,
+    "topic": 4,
+    "kind": "R3",
+    "top_k": 10,
+    "scored_pos": 71,
+    "scored_kw": 0,
+    "scored_go": 71,
+    "cut_floor": 22,
+    "cut_topk": 39,
+    "cut_topk_useful": 2,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 3,
+    "sti_go": [
+     46.28,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 3,
+    "evicted_kinds": {
+     "linked-d1-U": 2,
+     "linked-d2-N": 2,
+     "linked-d1-N": 5,
+     "linked-d2-U": 1
+    },
+    "kw_min": null,
+    "go_max": 4.628,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 36,
+    "topic": 6,
+    "kind": "R2",
+    "top_k": 10,
+    "scored_pos": 90,
+    "scored_kw": 2,
+    "scored_go": 88,
+    "cut_floor": 33,
+    "cut_topk": 47,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 8,
+    "admitted_kw": 2,
+    "adm_useful": 1,
+    "adm_noise": 9,
+    "adm_go_useful": 0,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     78.4238,
+     78.4238
+    ],
+    "shown": 5,
+    "shown_useful": 1,
+    "shown_noise": 4,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 8,
+    "evicted_useful_any": 4,
+    "evicted_kinds": {
+     "linked-d1-N": 4,
+     "distractor-N": 1,
+     "linked-d2-U": 2,
+     "linked-d2-N": 1,
+     "hub-U": 2
+    },
+    "kw_min": 7.84238,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 37,
+    "topic": 6,
+    "kind": "R3",
+    "top_k": 10,
+    "scored_pos": 83,
+    "scored_kw": 0,
+    "scored_go": 83,
+    "cut_floor": 29,
+    "cut_topk": 44,
+    "cut_topk_useful": 1,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 3,
+    "adm_noise": 7,
+    "adm_go_useful": 3,
+    "adm_any_useful": 4,
+    "sti_go": [
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 10,
+    "shown_useful": 3,
+    "shown_noise": 7,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 6,
+    "evicted_kinds": {
+     "linked-d1-U": 6,
+     "linked-d1-N": 2,
+     "linked-d2-N": 2
+    },
+    "kw_min": null,
+    "go_max": 1.378,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 38,
+    "topic": 8,
+    "kind": "R2",
+    "top_k": 10,
+    "scored_pos": 93,
+    "scored_kw": 1,
+    "scored_go": 92,
+    "cut_floor": 33,
+    "cut_topk": 50,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 9,
+    "admitted_kw": 1,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 5,
+    "sti_go": [
+     20.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [
+     96.4456
+    ],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 9,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "linked-d1-U": 2,
+     "hub-U": 2,
+     "linked-d1-N": 3,
+     "linked-d2-N": 2,
+     "linked-d2-U": 1
+    },
+    "kw_min": 9.64456,
+    "go_max": 2.028,
+    "violations": 0,
+    "err": null
+   },
+   {
+    "i": 39,
+    "topic": 8,
+    "kind": "R3",
+    "top_k": 10,
+    "scored_pos": 84,
+    "scored_kw": 0,
+    "scored_go": 84,
+    "cut_floor": 31,
+    "cut_topk": 43,
+    "cut_topk_useful": 3,
+    "cut_topk_kw": 0,
+    "cut_topk_kw_useful": 0,
+    "returned": 10,
+    "admitted": 10,
+    "admitted_go": 10,
+    "admitted_kw": 0,
+    "adm_useful": 0,
+    "adm_noise": 10,
+    "adm_go_useful": 0,
+    "adm_any_useful": 6,
+    "sti_go": [
+     39.78,
+     13.78,
+     13.78,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28,
+     7.28
+    ],
+    "sti_kw": [],
+    "shown": 5,
+    "shown_useful": 0,
+    "shown_noise": 5,
+    "store": 60,
+    "evicted": 10,
+    "evicted_by_go": 10,
+    "evicted_useful_any": 5,
+    "evicted_kinds": {
+     "linked-d1-U": 1,
+     "linked-d2-N": 3,
+     "linked-d2-U": 1,
+     "linked-d1-N": 2,
+     "hub-U": 3
+    },
+    "kw_min": null,
+    "go_max": 3.978,
+    "violations": 0,
+    "err": null
+   }
+  ]
+ },
+ "whole_run": {
+  "A": {
+   "turns": 40,
+   "admitted": 32,
+   "admitted_graph_only": 0,
+   "admitted_keyword": 32,
+   "admitted_useful": 18,
+   "admitted_noise": 14,
+   "max_new_recalled_in_one_turn": 4,
+   "precision_admitted_on_topic": 0.5625,
+   "precision_admitted_any_useful": 0.625,
+   "precision_graph_only_admitted_on_topic": null,
+   "shown_total": 261,
+   "shown_useful": 50,
+   "shown_noise": 211,
+   "precision_shown_on_topic": 0.1916,
+   "coverage_useful_shown_first_visit": {
+    "shown": 17,
+    "planted": 70,
+    "hubs": 17,
+    "linked": 0,
+    "frac": 0.2429
+   },
+   "useful_admitted_during_topic_turns": 15,
+   "coverage_by_topic_first_visit": {
+    "0": [
+     2,
+     6
+    ],
+    "1": [
+     1,
+     4
+    ],
+    "2": [
+     3,
+     10
+    ],
+    "4": [
+     2,
+     8
+    ],
+    "5": [
+     1,
+     3
+    ],
+    "6": [
+     3,
+     13
+    ],
+    "7": [
+     2,
+     8
+    ],
+    "8": [
+     1,
+     10
+    ],
+    "9": [
+     2,
+     8
+    ]
+   },
+   "coverage_revisit": {
+    "0": [
+     2,
+     6
+    ],
+    "2": [
+     2,
+     10
+    ],
+    "4": [
+     1,
+     8
+    ],
+    "6": [
+     3,
+     13
+    ],
+    "8": [
+     1,
+     10
+    ]
+   },
+   "coverage_revisit_total": [
+    9,
+    47
+   ],
+   "revisit_turns": [
+    {
+     "i": 30,
+     "topic": 0,
+     "kind": "R2",
+     "resident_useful": 2,
+     "shown_useful": 2,
+     "shown": 2
+    },
+    {
+     "i": 31,
+     "topic": 0,
+     "kind": "R3",
+     "resident_useful": 2,
+     "shown_useful": 1,
+     "shown": 15
+    },
+    {
+     "i": 32,
+     "topic": 2,
+     "kind": "R2",
+     "resident_useful": 2,
+     "shown_useful": 1,
+     "shown": 1
+    },
+    {
+     "i": 33,
+     "topic": 2,
+     "kind": "R3",
+     "resident_useful": 2,
+     "shown_useful": 2,
+     "shown": 15
+    },
+    {
+     "i": 34,
+     "topic": 4,
+     "kind": "R2",
+     "resident_useful": 1,
+     "shown_useful": 1,
+     "shown": 1
+    },
+    {
+     "i": 35,
+     "topic": 4,
+     "kind": "R3",
+     "resident_useful": 1,
+     "shown_useful": 0,
+     "shown": 15
+    },
+    {
+     "i": 36,
+     "topic": 6,
+     "kind": "R2",
+     "resident_useful": 3,
+     "shown_useful": 3,
+     "shown": 5
+    },
+    {
+     "i": 37,
+     "topic": 6,
+     "kind": "R3",
+     "resident_useful": 3,
+     "shown_useful": 2,
+     "shown": 15
+    },
+    {
+     "i": 38,
+     "topic": 8,
+     "kind": "R2",
+     "resident_useful": 1,
+     "shown_useful": 0,
+     "shown": 1
+    },
+    {
+     "i": 39,
+     "topic": 8,
+     "kind": "R3",
+     "resident_useful": 1,
+     "shown_useful": 1,
+     "shown": 15
+    }
+   ],
+   "evicted": 0,
+   "evicted_by_graph_only_admit": 0,
+   "evicted_useful_any_topic": 0,
+   "evicted_useful_hubs": 0,
+   "max_store": 26,
+   "first_turn_store_full": null,
+   "cut_by_floor": 0,
+   "cut_by_top_k": 0,
+   "cut_by_top_k_on_topic_useful": 0,
+   "cut_by_top_k_keyword": 0,
+   "cut_by_top_k_keyword_on_topic_useful": 0,
+   "top_k_values": [
+    15
+   ],
+   "turns_top_k_full": 0,
+   "sti_on_admit": {
+    "graph_only": [
+     null,
+     null,
+     null
+    ],
+    "keyword": [
+     6.5,
+     183.8803,
+     91.023
+    ]
+   },
+   "min_keyword_score_vs_max_graph_only": [
+    0.65,
+    null
+   ],
+   "violations": 0,
+   "errors": 0
+  },
+  "B": {
+   "turns": 40,
+   "admitted": 471,
+   "admitted_graph_only": 438,
+   "admitted_keyword": 33,
+   "admitted_useful": 67,
+   "admitted_noise": 404,
+   "max_new_recalled_in_one_turn": 15,
+   "precision_admitted_on_topic": 0.1423,
+   "precision_admitted_any_useful": 0.4947,
+   "precision_graph_only_admitted_on_topic": 0.1096,
+   "shown_total": 286,
+   "shown_useful": 60,
+   "shown_noise": 226,
+   "precision_shown_on_topic": 0.2098,
+   "coverage_useful_shown_first_visit": {
+    "shown": 37,
+    "planted": 70,
+    "hubs": 17,
+    "linked": 20,
+    "frac": 0.5286
+   },
+   "useful_admitted_during_topic_turns": 52,
+   "coverage_by_topic_first_visit": {
+    "0": [
+     6,
+     6
+    ],
+    "1": [
+     4,
+     4
+    ],
+    "2": [
+     7,
+     10
+    ],
+    "4": [
+     4,
+     8
+    ],
+    "5": [
+     3,
+     3
+    ],
+    "6": [
+     3,
+     13
+    ],
+    "7": [
+     4,
+     8
+    ],
+    "8": [
+     3,
+     10
+    ],
+    "9": [
+     3,
+     8
+    ]
+   },
+   "coverage_revisit": {
+    "0": [
+     3,
+     6
+    ],
+    "2": [
+     2,
+     10
+    ],
+    "4": [
+     2,
+     8
+    ],
+    "6": [
+     5,
+     13
+    ],
+    "8": [
+     3,
+     10
+    ]
+   },
+   "coverage_revisit_total": [
+    15,
+    47
+   ],
+   "revisit_turns": [
+    {
+     "i": 30,
+     "topic": 0,
+     "kind": "R2",
+     "resident_useful": 2,
+     "shown_useful": 1,
+     "shown": 5
+    },
+    {
+     "i": 31,
+     "topic": 0,
+     "kind": "R3",
+     "resident_useful": 4,
+     "shown_useful": 2,
+     "shown": 15
+    },
+    {
+     "i": 32,
+     "topic": 2,
+     "kind": "R2",
+     "resident_useful": 3,
+     "shown_useful": 2,
+     "shown": 5
+    },
+    {
+     "i": 33,
+     "topic": 2,
+     "kind": "R3",
+     "resident_useful": 3,
+     "shown_useful": 0,
+     "shown": 5
+    },
+    {
+     "i": 34,
+     "topic": 4,
+     "kind": "R2",
+     "resident_useful": 2,
+     "shown_useful": 1,
+     "shown": 5
+    },
+    {
+     "i": 35,
+     "topic": 4,
+     "kind": "R3",
+     "resident_useful": 4,
+     "shown_useful": 1,
+     "shown": 8
+    },
+    {
+     "i": 36,
+     "topic": 6,
+     "kind": "R2",
+     "resident_useful": 6,
+     "shown_useful": 3,
+     "shown": 5
+    },
+    {
+     "i": 37,
+     "topic": 6,
+     "kind": "R3",
+     "resident_useful": 8,
+     "shown_useful": 2,
+     "shown": 15
+    },
+    {
+     "i": 38,
+     "topic": 8,
+     "kind": "R2",
+     "resident_useful": 5,
+     "shown_useful": 2,
+     "shown": 5
+    },
+    {
+     "i": 39,
+     "topic": 8,
+     "kind": "R3",
+     "resident_useful": 5,
+     "shown_useful": 1,
+     "shown": 15
+    }
+   ],
+   "evicted": 383,
+   "evicted_by_graph_only_admit": 365,
+   "evicted_useful_any_topic": 186,
+   "evicted_useful_hubs": 46,
+   "max_store": 60,
+   "first_turn_store_full": 14,
+   "cut_by_floor": 583,
+   "cut_by_top_k": 751,
+   "cut_by_top_k_on_topic_useful": 38,
+   "cut_by_top_k_keyword": 1,
+   "cut_by_top_k_keyword_on_topic_useful": 0,
+   "top_k_values": [
+    15
+   ],
+   "turns_top_k_full": 26,
+   "sti_on_admit": {
+    "graph_only": [
+     7.28,
+     78.78,
+     9.328
+    ],
+    "keyword": [
+     6.5,
+     183.8803,
+     93.905
+    ]
+   },
+   "min_keyword_score_vs_max_graph_only": [
+    0.65,
+    7.878
+   ],
+   "violations": 0,
+   "errors": 0
+  },
+  "C": {
+   "turns": 40,
+   "admitted": 339,
+   "admitted_graph_only": 304,
+   "admitted_keyword": 35,
+   "admitted_useful": 50,
+   "admitted_noise": 289,
+   "max_new_recalled_in_one_turn": 10,
+   "precision_admitted_on_topic": 0.1475,
+   "precision_admitted_any_useful": 0.4749,
+   "precision_graph_only_admitted_on_topic": 0.0987,
+   "shown_total": 241,
+   "shown_useful": 50,
+   "shown_noise": 191,
+   "precision_shown_on_topic": 0.2075,
+   "coverage_useful_shown_first_visit": {
+    "shown": 33,
+    "planted": 70,
+    "hubs": 17,
+    "linked": 16,
+    "frac": 0.4714
+   },
+   "useful_admitted_during_topic_turns": 41,
+   "coverage_by_topic_first_visit": {
+    "0": [
+     6,
+     6
+    ],
+    "1": [
+     4,
+     4
+    ],
+    "2": [
+     7,
+     10
+    ],
+    "4": [
+     4,
+     8
+    ],
+    "5": [
+     2,
+     3
+    ],
+    "6": [
+     5,
+     13
+    ],
+    "7": [
+     2,
+     8
+    ],
+    "8": [
+     1,
+     10
+    ],
+    "9": [
+     2,
+     8
+    ]
+   },
+   "coverage_revisit": {
+    "0": [
+     2,
+     6
+    ],
+    "2": [
+     3,
+     10
+    ],
+    "4": [
+     1,
+     8
+    ],
+    "6": [
+     4,
+     13
+    ],
+    "8": [
+     0,
+     10
+    ]
+   },
+   "coverage_revisit_total": [
+    10,
+    47
+   ],
+   "revisit_turns": [
+    {
+     "i": 30,
+     "topic": 0,
+     "kind": "R2",
+     "resident_useful": 4,
+     "shown_useful": 2,
+     "shown": 5
+    },
+    {
+     "i": 31,
+     "topic": 0,
+     "kind": "R3",
+     "resident_useful": 3,
+     "shown_useful": 0,
+     "shown": 5
+    },
+    {
+     "i": 32,
+     "topic": 2,
+     "kind": "R2",
+     "resident_useful": 4,
+     "shown_useful": 2,
+     "shown": 10
+    },
+    {
+     "i": 33,
+     "topic": 2,
+     "kind": "R3",
+     "resident_useful": 4,
+     "shown_useful": 1,
+     "shown": 10
+    },
+    {
+     "i": 34,
+     "topic": 4,
+     "kind": "R2",
+     "resident_useful": 5,
+     "shown_useful": 1,
+     "shown": 5
+    },
+    {
+     "i": 35,
+     "topic": 4,
+     "kind": "R3",
+     "resident_useful": 5,
+     "shown_useful": 0,
+     "shown": 5
+    },
+    {
+     "i": 36,
+     "topic": 6,
+     "kind": "R2",
+     "resident_useful": 4,
+     "shown_useful": 1,
+     "shown": 5
+    },
+    {
+     "i": 37,
+     "topic": 6,
+     "kind": "R3",
+     "resident_useful": 5,
+     "shown_useful": 3,
+     "shown": 10
+    },
+    {
+     "i": 38,
+     "topic": 8,
+     "kind": "R2",
+     "resident_useful": 3,
+     "shown_useful": 0,
+     "shown": 5
+    },
+    {
+     "i": 39,
+     "topic": 8,
+     "kind": "R3",
+     "resident_useful": 3,
+     "shown_useful": 0,
+     "shown": 5
+    }
+   ],
+   "evicted": 243,
+   "evicted_by_graph_only_admit": 224,
+   "evicted_useful_any_topic": 111,
+   "evicted_useful_hubs": 35,
+   "max_store": 60,
+   "first_turn_store_full": 14,
+   "cut_by_floor": 613,
+   "cut_by_top_k": 926,
+   "cut_by_top_k_on_topic_useful": 51,
+   "cut_by_top_k_keyword": 1,
+   "cut_by_top_k_keyword_on_topic_useful": 0,
+   "top_k_values": [
+    10
+   ],
+   "turns_top_k_full": 29,
+   "sti_on_admit": {
+    "graph_only": [
+     7.28,
+     65.78,
+     9.76
+    ],
+    "keyword": [
+     6.5,
+     183.8803,
+     91.325
+    ]
+   },
+   "min_keyword_score_vs_max_graph_only": [
+    0.65,
+    6.578
+   ],
+   "violations": 0,
+   "errors": 0
+  },
+  "context_displacement_B_vs_A": {
+   "turns_lost_a_useful_A_showed": 12,
+   "turn_kinds_lost": {
+    "Q3": 7,
+    "R2": 1,
+    "R3": 4
+   },
+   "useful_lost": 19,
+   "useful_lost_kinds": {
+    "hub-U": 19
+   },
+   "useful_gained": 29,
+   "by_turn": [
+    {
+     "i": 1,
+     "kind": "Q2",
+     "topic": 0,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-f6cbd33c51"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 2,
+     "kind": "Q3",
+     "topic": 0,
+     "A_only_useful": [
+      "syn-3e576cb742",
+      "syn-f149d2bef8"
+     ],
+     "X_only_useful": [
+      "syn-01a350e9f3",
+      "syn-8908a6d326",
+      "syn-e47a41fd41"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 4,
+     "kind": "Q2",
+     "topic": 1,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-0cf68f4705",
+      "syn-510f77f268"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 5,
+     "kind": "Q3",
+     "topic": 1,
+     "A_only_useful": [
+      "syn-633ceeb993"
+     ],
+     "X_only_useful": [
+      "syn-74ff831c60"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 7,
+     "kind": "Q2",
+     "topic": 2,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-00b5876eb8",
+      "syn-c0765efa3e"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 8,
+     "kind": "Q3",
+     "topic": 2,
+     "A_only_useful": [
+      "syn-1c292fc719",
+      "syn-35bfb4960f",
+      "syn-a27e104953"
+     ],
+     "X_only_useful": [
+      "syn-33a9cb6b93",
+      "syn-75dd359eee"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 13,
+     "kind": "Q2",
+     "topic": 4,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-d25f7a56d6"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 14,
+     "kind": "Q3",
+     "topic": 4,
+     "A_only_useful": [
+      "syn-babcaf5bd3",
+      "syn-f8ad422a73"
+     ],
+     "X_only_useful": [
+      "syn-840a7ff0e7"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 16,
+     "kind": "Q2",
+     "topic": 5,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-d2d7291ad5"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 17,
+     "kind": "Q3",
+     "topic": 5,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-ed212613c7"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 20,
+     "kind": "Q3",
+     "topic": 6,
+     "A_only_useful": [
+      "syn-26cc3babc4",
+      "syn-8eb6b3d4ce"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 23,
+     "kind": "Q3",
+     "topic": 7,
+     "A_only_useful": [
+      "syn-1efbb00c36"
+     ],
+     "X_only_useful": [
+      "syn-206c74c3c1",
+      "syn-cd42f8c0a2"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 26,
+     "kind": "Q3",
+     "topic": 8,
+     "A_only_useful": [
+      "syn-35d1071bca"
+     ],
+     "X_only_useful": [
+      "syn-33256cc5ed",
+      "syn-7b08a02ff9"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 29,
+     "kind": "Q3",
+     "topic": 9,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-395b928cd7"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 30,
+     "kind": "R2",
+     "topic": 0,
+     "A_only_useful": [
+      "syn-f149d2bef8"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 31,
+     "kind": "R3",
+     "topic": 0,
+     "A_only_useful": [
+      "syn-3e576cb742"
+     ],
+     "X_only_useful": [
+      "syn-e47a41fd41",
+      "syn-f149d2bef8"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 32,
+     "kind": "R2",
+     "topic": 2,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-e37e2254b5"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 33,
+     "kind": "R3",
+     "topic": 2,
+     "A_only_useful": [
+      "syn-1c292fc719",
+      "syn-35bfb4960f"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 35,
+     "kind": "R3",
+     "topic": 4,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-f8ad422a73"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 37,
+     "kind": "R3",
+     "topic": 6,
+     "A_only_useful": [
+      "syn-26cc3babc4",
+      "syn-8eb6b3d4ce"
+     ],
+     "X_only_useful": [
+      "syn-600076e537",
+      "syn-c959813f8a"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 38,
+     "kind": "R2",
+     "topic": 8,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-33256cc5ed",
+      "syn-62d458127c"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 39,
+     "kind": "R3",
+     "topic": 8,
+     "A_only_useful": [
+      "syn-35d1071bca"
+     ],
+     "X_only_useful": [
+      "syn-c96374f60a"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    }
+   ]
+  },
+  "B_evicted_kinds": {
+   "distractor-N": 10,
+   "linked-d1-U": 95,
+   "linked-d1-N": 97,
+   "hub-U": 46,
+   "linked-d2-U": 45,
+   "linked-d2-N": 90
+  },
+  "B_evicted_useful": [
+   {
+    "turn": 14,
+    "id": "syn-00b5876eb8",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.0623,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 14,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.0623,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 14,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.1116,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 14,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 14,
+    "id": "syn-75dd359eee",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-4097980b35",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.0623,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-8908a6d326",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.1343,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-fa4d1cb8f0",
+    "kind": "linked-d2-U",
+    "topic": 9,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-01a350e9f3",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.1343,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-90ba8bd2b2",
+    "kind": "hub-U",
+    "topic": 9,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.2463,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.3075,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1609,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-35bfb4960f",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1609,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 17,
+    "id": "syn-6cf906ed0d",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.2985,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-3e576cb742",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-1c292fc719",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.31,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-510f77f268",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 17,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.5474,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 17,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-a2dca66027",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 18,
+    "id": "syn-b1e5371b77",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 18,
+    "id": "syn-3a6bdf7cb9",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 18,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.3543,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-baa5b0be42",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.5474,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-e37e2254b5",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.5474,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-00b5876eb8",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.9498,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 1.2164,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 19,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 1.5184,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 1.5184,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-75dd359eee",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-8908a6d326",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 20,
+    "id": "syn-01a350e9f3",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-f8ad422a73",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.7769,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-a2dca66027",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-ed212613c7",
+    "kind": "linked-d2-U",
+    "topic": 5,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 21,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 21,
+    "id": "syn-35bfb4960f",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.9498,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 1.2164,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.5651,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-6cf906ed0d",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.5651,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-babcaf5bd3",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.5845,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-ec0ed2101e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-600076e537",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-1c292fc719",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.3742,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.5474,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 23,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-4fcda29d40",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-820607492d",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-fdc84094f1",
+    "kind": "hub-U",
+    "topic": 5,
+    "sti": 0.3794,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 24,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-a2dca66027",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-75dd359eee",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-8908a6d326",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-3e576cb742",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.9498,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-00b5876eb8",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.9498,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.9498,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 25,
+    "id": "syn-e37e2254b5",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.4274,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-90ba8bd2b2",
+    "kind": "hub-U",
+    "topic": 9,
+    "sti": 0.5819,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-ed212613c7",
+    "kind": "linked-d2-U",
+    "topic": 5,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 25,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 25,
+    "id": "syn-b81a07945e",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 25,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.6673,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.5474,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 26,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 1.2164,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 1.4742,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-ec0ed2101e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 1.4742,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-600076e537",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 1.5184,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6833,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-cd42f8c0a2",
+    "kind": "linked-d2-U",
+    "topic": 7,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 27,
+    "id": "syn-206c74c3c1",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 27,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-f8ad422a73",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.7321,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-6cf906ed0d",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.4274,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-e10a6a1c6d",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.4591,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-26cc3babc4",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.4761,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-8eb6b3d4ce",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.5138,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-4fcda29d40",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.5651,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-820607492d",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.5651,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 29,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 29,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.9498,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 29,
+    "id": "syn-fdc84094f1",
+    "kind": "hub-U",
+    "topic": 5,
+    "sti": 0.9498,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 29,
+    "id": "syn-1efbb00c36",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 1.2248,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 29,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-62d458127c",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 1.4742,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-732546b19e",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 1.4742,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-600076e537",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     31
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     31
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-7b08a02ff9",
+    "kind": "linked-d1-U",
+    "topic": 8,
+    "sti": 0.6833,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-ed212613c7",
+    "kind": "linked-d2-U",
+    "topic": 5,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 30,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.6833,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-33256cc5ed",
+    "kind": "linked-d1-U",
+    "topic": 8,
+    "sti": 0.3075,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 31,
+    "id": "syn-b81a07945e",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-e37e2254b5",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.4274,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 31,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.5651,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-df54b50604",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 0.6197,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 31,
+    "id": "syn-cd42f8c0a2",
+    "kind": "linked-d2-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-dc33c64299",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-206c74c3c1",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-ec0ed2101e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.5474,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-35d1071bca",
+    "kind": "hub-U",
+    "topic": 8,
+    "sti": 0.8428,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 32,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 1.4742,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     33
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-62d458127c",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-732546b19e",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 1.4742,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 33,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-1efbb00c36",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-fdc84094f1",
+    "kind": "hub-U",
+    "topic": 5,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-395b928cd7",
+    "kind": "linked-d2-U",
+    "topic": 9,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-e10a6a1c6d",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-8eb6b3d4ce",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-26cc3babc4",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.4274,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-f8ad422a73",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.4622,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     35
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     35
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 34,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 1.4742,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 1.4742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     35
+    ]
+   },
+   {
+    "turn": 35,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-df54b50604",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-b81a07945e",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-4fcda29d40",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 35,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.6833,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6833,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 35,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.6833,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-ed212613c7",
+    "kind": "linked-d2-U",
+    "topic": 5,
+    "sti": 0.3075,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-7b08a02ff9",
+    "kind": "linked-d1-U",
+    "topic": 8,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 36,
+    "id": "syn-600076e537",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.4274,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     37
+    ]
+   },
+   {
+    "turn": 36,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.5651,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     37
+    ]
+   },
+   {
+    "turn": 36,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-62d458127c",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 36,
+    "id": "syn-cd42f8c0a2",
+    "kind": "linked-d2-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-206c74c3c1",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-732546b19e",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 37,
+    "id": "syn-dc33c64299",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.4274,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-33256cc5ed",
+    "kind": "linked-d1-U",
+    "topic": 8,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 37,
+    "id": "syn-e37e2254b5",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.5474,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.4274,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-ec0ed2101e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.4274,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.5474,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-395b928cd7",
+    "kind": "linked-d2-U",
+    "topic": 9,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-1efbb00c36",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-3e576cb742",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.786,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.9498,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-35d1071bca",
+    "kind": "hub-U",
+    "topic": 8,
+    "sti": 0.5162,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.6634,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.6634,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.6634,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   }
+  ],
+  "B_graph_only_admit_composition": {
+   "other_topic_useful": 165,
+   "on_topic_useful": 48,
+   "other_topic_noise": 164,
+   "on_topic_noise": 61
+  },
+  "B_graph_only_admit_score_hist": {
+   "0.73": 349,
+   "1.38": 65,
+   "2.03": 17,
+   "2.68": 2,
+   "3.33": 1,
+   "3.98": 1,
+   "4.63": 1,
+   "5.28": 1,
+   "7.88": 1
+  },
+  "B_floor_cut_kinds": {
+   "linked-d2-U": 38,
+   "linked-d2-N-offtopic": 304,
+   "linked-d2-U-offtopic": 94,
+   "linked-d2-N": 98,
+   "hub-U-offtopic": 6,
+   "linked-d1-U-offtopic": 18,
+   "linked-d1-N-offtopic": 19,
+   "linked-d1-N": 5,
+   "linked-d1-U": 1
+  },
+  "context_displacement_C_vs_A": {
+   "turns_lost_a_useful_A_showed": 13,
+   "turn_kinds_lost": {
+    "Q3": 7,
+    "Q1": 1,
+    "R3": 3,
+    "R2": 2
+   },
+   "useful_lost": 19,
+   "useful_lost_kinds": {
+    "hub-U": 19
+   },
+   "useful_gained": 19,
+   "by_turn": [
+    {
+     "i": 1,
+     "kind": "Q2",
+     "topic": 0,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-f6cbd33c51"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 2,
+     "kind": "Q3",
+     "topic": 0,
+     "A_only_useful": [
+      "syn-3e576cb742",
+      "syn-f149d2bef8"
+     ],
+     "X_only_useful": [
+      "syn-01a350e9f3",
+      "syn-8908a6d326",
+      "syn-e47a41fd41"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 4,
+     "kind": "Q2",
+     "topic": 1,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-0cf68f4705",
+      "syn-510f77f268"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 5,
+     "kind": "Q3",
+     "topic": 1,
+     "A_only_useful": [
+      "syn-633ceeb993"
+     ],
+     "X_only_useful": [
+      "syn-74ff831c60"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 7,
+     "kind": "Q2",
+     "topic": 2,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-00b5876eb8",
+      "syn-c0765efa3e"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 8,
+     "kind": "Q3",
+     "topic": 2,
+     "A_only_useful": [
+      "syn-1c292fc719",
+      "syn-35bfb4960f",
+      "syn-a27e104953"
+     ],
+     "X_only_useful": [
+      "syn-33a9cb6b93",
+      "syn-75dd359eee"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 13,
+     "kind": "Q2",
+     "topic": 4,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-d25f7a56d6"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 14,
+     "kind": "Q3",
+     "topic": 4,
+     "A_only_useful": [
+      "syn-babcaf5bd3",
+      "syn-f8ad422a73"
+     ],
+     "X_only_useful": [
+      "syn-840a7ff0e7"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 17,
+     "kind": "Q3",
+     "topic": 5,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-d2d7291ad5"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 20,
+     "kind": "Q3",
+     "topic": 6,
+     "A_only_useful": [
+      "syn-26cc3babc4",
+      "syn-8eb6b3d4ce"
+     ],
+     "X_only_useful": [
+      "syn-3475505fe6",
+      "syn-ec0ed2101e"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 23,
+     "kind": "Q3",
+     "topic": 7,
+     "A_only_useful": [
+      "syn-1efbb00c36"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 26,
+     "kind": "Q3",
+     "topic": 8,
+     "A_only_useful": [
+      "syn-35d1071bca"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 27,
+     "kind": "Q1",
+     "topic": 9,
+     "A_only_useful": [
+      "syn-90ba8bd2b2"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 31,
+     "kind": "R3",
+     "topic": 0,
+     "A_only_useful": [
+      "syn-3e576cb742"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 32,
+     "kind": "R2",
+     "topic": 2,
+     "A_only_useful": [
+      "syn-1c292fc719"
+     ],
+     "X_only_useful": [
+      "syn-35bfb4960f",
+      "syn-c0765efa3e"
+     ],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 33,
+     "kind": "R3",
+     "topic": 2,
+     "A_only_useful": [
+      "syn-35bfb4960f"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    },
+    {
+     "i": 36,
+     "kind": "R2",
+     "topic": 6,
+     "A_only_useful": [
+      "syn-26cc3babc4",
+      "syn-8eb6b3d4ce"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U",
+      "hub-U"
+     ]
+    },
+    {
+     "i": 37,
+     "kind": "R3",
+     "topic": 6,
+     "A_only_useful": [],
+     "X_only_useful": [
+      "syn-3475505fe6"
+     ],
+     "A_only_useful_kinds": []
+    },
+    {
+     "i": 39,
+     "kind": "R3",
+     "topic": 8,
+     "A_only_useful": [
+      "syn-35d1071bca"
+     ],
+     "X_only_useful": [],
+     "A_only_useful_kinds": [
+      "hub-U"
+     ]
+    }
+   ]
+  },
+  "C_evicted_kinds": {
+   "distractor-N": 10,
+   "hub-U": 35,
+   "linked-d2-U": 20,
+   "linked-d2-N": 57,
+   "linked-d1-U": 56,
+   "linked-d1-N": 65
+  },
+  "C_evicted_useful": [
+   {
+    "turn": 15,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.0502,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 15,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.0623,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 15,
+    "id": "syn-75dd359eee",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.0623,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-8908a6d326",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.0605,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-fa4d1cb8f0",
+    "kind": "linked-d2-U",
+    "topic": 9,
+    "sti": 0.0605,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-01a350e9f3",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.0605,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 16,
+    "id": "syn-90ba8bd2b2",
+    "kind": "hub-U",
+    "topic": 9,
+    "sti": 0.0623,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.0623,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.0724,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 17,
+    "id": "syn-35bfb4960f",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.0724,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 18,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 18,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.1343,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 18,
+    "id": "syn-1c292fc719",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1395,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 18,
+    "id": "syn-510f77f268",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 18,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.2463,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 19,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-6cf906ed0d",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 19,
+    "id": "syn-3e576cb742",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.1594,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 20,
+    "id": "syn-baa5b0be42",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.2463,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-e37e2254b5",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.1108,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-00b5876eb8",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.1923,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 21,
+    "id": "syn-33a9cb6b93",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.3075,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-75dd359eee",
+    "kind": "linked-d2-U",
+    "topic": 2,
+    "sti": 0.1384,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-f8ad422a73",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.1573,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 22,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.2463,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 22,
+    "id": "syn-a27e104953",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     27,
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-a2dca66027",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-8908a6d326",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 23,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 24,
+    "id": "syn-b1e5371b77",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.0623,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.0866,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-babcaf5bd3",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.1184,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-35bfb4960f",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 24,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.2543,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 24,
+    "id": "syn-510f77f268",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.2543,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 24,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.3742,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-1c292fc719",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1684,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-fdc84094f1",
+    "kind": "hub-U",
+    "topic": 5,
+    "sti": 0.1707,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 25,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.2985,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 25,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.3075,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-ec0ed2101e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-6cf906ed0d",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 26,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-ed212613c7",
+    "kind": "linked-d2-U",
+    "topic": 5,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 27,
+    "id": "syn-74ff831c60",
+    "kind": "linked-d2-U",
+    "topic": 1,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 27,
+    "id": "syn-600076e537",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-90ba8bd2b2",
+    "kind": "hub-U",
+    "topic": 9,
+    "sti": 0.1438,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     28,
+     29
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-baa5b0be42",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.2463,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 27,
+    "id": "syn-206c74c3c1",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 28,
+    "id": "syn-00b5876eb8",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 28,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.2985,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     30,
+     31
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-e10a6a1c6d",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.206,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-26cc3babc4",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.2143,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-8eb6b3d4ce",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.2312,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 29,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.2463,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 30,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 30,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 30,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.2463,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 30,
+    "id": "syn-f8ad422a73",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.2809,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 31,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.1384,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-35bfb4960f",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 31,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.2463,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 31,
+    "id": "syn-1efbb00c36",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 0.248,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 31,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.2985,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     32,
+     33
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     34,
+     35
+    ]
+   },
+   {
+    "turn": 32,
+    "id": "syn-fdc84094f1",
+    "kind": "hub-U",
+    "topic": 5,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 32,
+    "id": "syn-1c292fc719",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.2463,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     33
+    ]
+   },
+   {
+    "turn": 33,
+    "id": "syn-df54b50604",
+    "kind": "hub-U",
+    "topic": 7,
+    "sti": 0.1255,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-dc33c64299",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-206c74c3c1",
+    "kind": "linked-d1-U",
+    "topic": 7,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 33,
+    "id": "syn-3475505fe6",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 33,
+    "id": "syn-ec0ed2101e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 33,
+    "id": "syn-baa5b0be42",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.2543,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 34,
+    "id": "syn-35d1071bca",
+    "kind": "hub-U",
+    "topic": 8,
+    "sti": 0.1707,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-600076e537",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": [
+     36,
+     37
+    ]
+   },
+   {
+    "turn": 34,
+    "id": "syn-633ceeb993",
+    "kind": "hub-U",
+    "topic": 1,
+    "sti": 0.2985,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-7b08a02ff9",
+    "kind": "linked-d1-U",
+    "topic": 8,
+    "sti": 0.1343,
+    "evicted_by": "hub-U",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 35,
+    "id": "syn-00b5876eb8",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 35,
+    "id": "syn-e47a41fd41",
+    "kind": "linked-d2-U",
+    "topic": 0,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-62d458127c",
+    "kind": "linked-d2-U",
+    "topic": 8,
+    "sti": 0.1343,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     38,
+     39
+    ]
+   },
+   {
+    "turn": 36,
+    "id": "syn-395b928cd7",
+    "kind": "linked-d2-U",
+    "topic": 9,
+    "sti": 0.1343,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 36,
+    "id": "syn-8eb6b3d4ce",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": [
+     37
+    ]
+   },
+   {
+    "turn": 36,
+    "id": "syn-26cc3babc4",
+    "kind": "hub-U",
+    "topic": 6,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": [
+     37
+    ]
+   },
+   {
+    "turn": 37,
+    "id": "syn-e6f9037e93",
+    "kind": "linked-d1-U",
+    "topic": 9,
+    "sti": 0.1384,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-c959813f8a",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-80383c4f3e",
+    "kind": "linked-d1-U",
+    "topic": 6,
+    "sti": 0.1384,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-d2d7291ad5",
+    "kind": "linked-d1-U",
+    "topic": 5,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-0cf68f4705",
+    "kind": "linked-d1-U",
+    "topic": 1,
+    "sti": 0.3075,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 37,
+    "id": "syn-c0765efa3e",
+    "kind": "linked-d1-U",
+    "topic": 2,
+    "sti": 0.3075,
+    "evicted_by": "linked-d1-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-f6cbd33c51",
+    "kind": "linked-d1-U",
+    "topic": 0,
+    "sti": 0.1923,
+    "evicted_by": "distractor-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-35bfb4960f",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1923,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-f8ad422a73",
+    "kind": "hub-U",
+    "topic": 4,
+    "sti": 0.2323,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-9f87681a29",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.2463,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 38,
+    "id": "syn-ed212613c7",
+    "kind": "linked-d2-U",
+    "topic": 5,
+    "sti": 0.2985,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-d25f7a56d6",
+    "kind": "linked-d1-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "hub-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-840a7ff0e7",
+    "kind": "linked-d2-U",
+    "topic": 4,
+    "sti": 0.1384,
+    "evicted_by": "linked-d1-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-fdc84094f1",
+    "kind": "hub-U",
+    "topic": 5,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-1c292fc719",
+    "kind": "hub-U",
+    "topic": 2,
+    "sti": 0.1923,
+    "evicted_by": "linked-d2-U",
+    "topic_turns_after": []
+   },
+   {
+    "turn": 39,
+    "id": "syn-f149d2bef8",
+    "kind": "hub-U",
+    "topic": 0,
+    "sti": 0.2376,
+    "evicted_by": "linked-d2-N",
+    "topic_turns_after": []
+   }
+  ],
+  "C_graph_only_admit_composition": {
+   "other_topic_useful": 109,
+   "on_topic_useful": 30,
+   "other_topic_noise": 122,
+   "on_topic_noise": 43
+  },
+  "C_graph_only_admit_score_hist": {
+   "0.73": 231,
+   "1.38": 51,
+   "2.03": 17,
+   "3.33": 1,
+   "3.98": 1,
+   "4.63": 1,
+   "5.28": 1,
+   "6.58": 1
+  },
+  "C_floor_cut_kinds": {
+   "linked-d2-U": 44,
+   "linked-d2-N-offtopic": 322,
+   "linked-d2-U-offtopic": 114,
+   "linked-d2-N": 107,
+   "hub-U-offtopic": 2,
+   "linked-d1-U-offtopic": 8,
+   "linked-d1-N-offtopic": 12,
+   "linked-d1-U": 4
+  },
+  "by_turn_kind": {
+   "A": {
+    "Q1": {
+     "admitted": 21,
+     "admitted_go": 0,
+     "adm_useful": 13,
+     "adm_noise": 8,
+     "shown": 23,
+     "shown_useful": 15,
+     "shown_noise": 8,
+     "turns": 10
+    },
+    "Q2": {
+     "admitted": 7,
+     "admitted_go": 0,
+     "adm_useful": 2,
+     "adm_noise": 5,
+     "shown": 30,
+     "shown_useful": 10,
+     "shown_noise": 20,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 0,
+     "admitted_go": 0,
+     "adm_useful": 0,
+     "adm_noise": 0,
+     "shown": 198,
+     "shown_useful": 18,
+     "shown_noise": 180,
+     "turns": 15
+    },
+    "R2": {
+     "admitted": 4,
+     "admitted_go": 0,
+     "adm_useful": 3,
+     "adm_noise": 1,
+     "shown": 10,
+     "shown_useful": 7,
+     "shown_noise": 3,
+     "turns": 5
+    }
+   },
+   "B": {
+    "Q1": {
+     "admitted": 95,
+     "admitted_go": 73,
+     "adm_useful": 14,
+     "adm_noise": 81,
+     "shown": 44,
+     "shown_useful": 15,
+     "shown_noise": 29,
+     "turns": 10
+    },
+    "Q2": {
+     "admitted": 114,
+     "admitted_go": 108,
+     "adm_useful": 21,
+     "adm_noise": 93,
+     "shown": 56,
+     "shown_useful": 17,
+     "shown_noise": 39,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 187,
+     "admitted_go": 187,
+     "adm_useful": 23,
+     "adm_noise": 164,
+     "shown": 161,
+     "shown_useful": 19,
+     "shown_noise": 142,
+     "turns": 15
+    },
+    "R2": {
+     "admitted": 75,
+     "admitted_go": 70,
+     "adm_useful": 9,
+     "adm_noise": 66,
+     "shown": 25,
+     "shown_useful": 9,
+     "shown_noise": 16,
+     "turns": 5
+    }
+   },
+   "C": {
+    "Q1": {
+     "admitted": 70,
+     "admitted_go": 48,
+     "adm_useful": 14,
+     "adm_noise": 56,
+     "shown": 44,
+     "shown_useful": 14,
+     "shown_noise": 30,
+     "turns": 10
+    },
+    "Q2": {
+     "admitted": 86,
+     "admitted_go": 78,
+     "adm_useful": 16,
+     "adm_noise": 70,
+     "shown": 54,
+     "shown_useful": 16,
+     "shown_noise": 38,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 133,
+     "admitted_go": 133,
+     "adm_useful": 15,
+     "adm_noise": 118,
+     "shown": 113,
+     "shown_useful": 14,
+     "shown_noise": 99,
+     "turns": 15
+    },
+    "R2": {
+     "admitted": 50,
+     "admitted_go": 45,
+     "adm_useful": 5,
+     "adm_noise": 45,
+     "shown": 30,
+     "shown_useful": 6,
+     "shown_noise": 24,
+     "turns": 5
+    }
+   }
+  }
+ }
+}

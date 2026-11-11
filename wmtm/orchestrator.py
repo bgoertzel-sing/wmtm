@@ -82,6 +82,7 @@ class WMTMOrchestrator:
         self.default_reasoner = "pettachainer"   # used when the flags file / env does not set "reasoner"
         self.pc_admit_state = {}           # rc2: {"consumed_run": id, ...} - each admit.json run is admitted once
         self.context_rel = None            # Track P: relevance of items to the last real request (context.request_relevance)
+        self._recall_used = [-1, 0]        # design s8.3: [cycle, new recalled items admitted in that cycle]
 
 
     def active_goal(self):
@@ -113,6 +114,8 @@ class WMTMOrchestrator:
         }
         if self.pc_admit_state:
             snap["pc_admit"] = dict(self.pc_admit_state)      # rc2: consumed admit.json run (absent until one)
+        if self._recall_used[1] and self._recall_used[0] == self._cycle:
+            snap["recall_used"] = list(self._recall_used)       # design s8.3: this cycle's recall budget use (absent if none)
         if self.context_rel:
             live = set(self.store._items)
             rel = dict(self.context_rel)
@@ -145,17 +148,73 @@ class WMTMOrchestrator:
             self.pc_admit_state = dict(snapshot["pc_admit"])
         if isinstance(snapshot.get("context_rel"), dict):
             self.context_rel = dict(snapshot["context_rel"])
+        ru = snapshot.get("recall_used")
+        if isinstance(ru, (list, tuple)) and len(ru) == 2:
+            try:
+                self._recall_used = [int(ru[0]), max(0, int(ru[1]))]
+            except (TypeError, ValueError):
+                pass
 
     # ── Phase helpers ──────────────────────────────────────────────
+
+    # ── Design s8.3 recall budget ──────────────────────────────────
+    # "Each cycle: admit at most N new items (default: 10)".  One budget per WMTM cycle (the cycle counter), shared by
+    # every path that admits recalled items in that cycle: the user-turn recall in api.context_for (which runs before
+    # cycle() under the same counter) and cycle(recall_fn=...).  Re-admitting a resident item is not a new item.
+
+    def recall_slots(self, budget) -> Optional[int]:
+        """New recalled items this cycle may still admit under budget (an int > 0, or None = no budget)."""
+        if budget is None:
+            return None
+        used = self._recall_used[1] if self._recall_used[0] == self._cycle else 0
+        return max(0, int(budget) - used)
+
+    def take_recall_slot(self, budget) -> bool:
+        """Count one new recalled item against this cycle's budget; False (nothing counted) when it is spent."""
+        slots = self.recall_slots(budget)
+        if slots is not None and slots <= 0:
+            return False
+        if self._recall_used[0] != self._cycle:
+            self._recall_used = [self._cycle, 0]
+        self._recall_used[1] += 1
+        return True
+
+    def _recall_budget(self):
+        try:
+            from . import runtime_config as _rc
+            from .context import recall_budget
+            return recall_budget(_rc.resolve(self.runtime_state_dir))
+        except Exception:
+            return 10
 
     def _recall_from_ltm(
         self,
         recall_fn: Optional[Callable[[], list[tuple[str, str, float]]]],
     ) -> None:
-        """Pull items from LTM into the store via recall_fn."""
+        """Pull items from LTM into the store via recall_fn, at most recall_budget new items this cycle (design s8.3).
+
+        When recall_fn offers more new items than the budget has left, the ones with the highest STI are admitted
+        (ties: recall_fn's order); re-admissions of resident items are not limited."""
         if recall_fn is None:
             return
-        for item_id, content, sti in recall_fn():
+        rows = list(recall_fn())
+        budget = self._recall_budget()
+        slots = self.recall_slots(budget)
+        keep = None
+        if slots is not None:
+            new, seen = [], set()
+            for i, (item_id, _c, sti) in enumerate(rows):
+                if item_id not in self.store and item_id not in seen:
+                    seen.add(item_id)
+                    new.append((-float(sti), i, item_id))
+            if len(new) > slots:
+                keep = {iid for _s, _i, iid in sorted(new)[:slots]}
+        for item_id, content, sti in rows:
+            if item_id not in self.store:
+                if keep is not None and item_id not in keep:
+                    continue
+                if not self.take_recall_slot(budget):
+                    continue
             self.store.admit(
                 item_id=item_id,
                 content=content,

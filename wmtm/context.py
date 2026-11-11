@@ -710,6 +710,22 @@ def setting(cfg, key):
     return SPEC[key][2]
 
 
+RECALL_TOP_K_UNBUDGETED = 15     # the user-turn recall cut before the design s8.3 budget (recall_budget <= 0)
+
+
+def recall_budget(cfg):
+    """Design s8.3 / s10 recall_budget: the most new recalled items one WMTM cycle may admit, over all its recall paths.
+
+    -> int > 0, or None when the flag is 0 or less (no budget).  An absent or invalid value gives the SPEC default (10).
+    Never raises."""
+    try:
+        n = int(setting(cfg, "recall_budget"))
+    except (TypeError, ValueError):
+        from .runtime_config import SPEC
+        n = SPEC["recall_budget"][2]
+    return n if n > 0 else None
+
+
 def protect_settings(cfg):
     """-> {"turns", "s"} for cleanup_stale_items / the fast path, or None (rc2 behaviour) when the flag is off."""
     try:
