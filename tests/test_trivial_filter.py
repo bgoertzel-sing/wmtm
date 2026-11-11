@@ -170,3 +170,112 @@ def test_admit_on_snapshot_honours_flag(tmp_path):
         snap = o.snapshot_state()
         info = P.admit_on_snapshot(snap, cfg)
         assert info["admitted"] == want, (on, info)
+
+
+# ------------------------------------------------------------------ followup-v2 finding 2: nwdef by EXACT shape
+R1 = "(: r1 (Implication (Member $x pilot) (Member $x person)) (CTV (STV 0.95 0.9) (STV 0.0 0.0)))"  # p4 parser rule
+NWDEF_REAL = "(: nwdef_%s (Implication (Member $x %s) (Member $x commit)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))" % (S, S)
+
+
+def test_parser_class_rule_r1_admitted():
+    # a real parser class rule (tests/test_p4_semparse_rules.py r1) is a CTV Member implication but NOT nwdef
+    assert P.trivial_reason(pf("(by r1 sp1)", "(Member sk_a person)"), rules(R1)) is None
+    assert P.trivial_reason(pf("(merge/revision (by r1 sp1) (by r1 sp2))", "(Member sk_a person)"), rules(R1)) is None
+
+
+def test_parser_rule_r1_admitted_through_load_candidates(tmp_path):
+    r = _res("(Member sk_a person)", pf("(by r1 sp1)", "(Member sk_a person)"), rules(R1))
+    cands, info = P.load_candidates(_admit_doc(tmp_path, [r]), None, live_ids=["n1"])
+    assert len(cands) == 1 and info["trivial_refused_n"] == 0
+
+
+def test_narrow_defining_rules_output_is_nwdef_shape():
+    from wmtm.pc_shadow import narrow_defining_rules
+    (atom,) = narrow_defining_rules({S: "commit"})
+    assert P.trivial_reason(pf("(by nwdef_%s sp1)" % S, "(Member a commit)"), rules(atom)) == "nwdef_head_noun"
+    assert atom == NWDEF_REAL
+
+
+@pytest.mark.parametrize("atom", [
+    # each differs from the exact nwdef shape in one place -> not a defining rule -> admitted
+    "(: d (Implication (Member $x %s) (Member $x commit)) (CTV (STV 0.95 0.9) (STV 0.0 0.0)))" % S,   # tv
+    "(: d (Implication (Member $x %s) (Member $x commit)) (STV 1.0 0.99))" % S,                       # not CTV
+    "(: d (Implication (Member $x %s) (Member $x pushed)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))" % S,   # base != B
+    "(: d (Implication (Member sk_c %s) (Member sk_c commit)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))" % S,  # ground
+    "(: d (Implication (Member $x commit__nw_xyz) (Member $x commit)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))",  # bad hash
+])
+def test_near_nwdef_shapes_admitted(atom):
+    assert P.trivial_reason(pf("(by d sp1)", "(Member a commit)"), rules(atom)) is None
+
+
+def test_echo_needs_exact_nwdef_for_base():
+    # the echo rule's base comes only from an exact defining rule; a parser rule over S does not supply it
+    fake = "(: r_fake (Implication (Member $x %s) (Member $x commit)) (CTV (STV 0.95 0.9) (STV 0.0 0.0)))" % S
+    assert P.trivial_reason(pf("(by r_echo sp1)", "(Member sk_c staged)"), rules(ECHO, fake)) is None
+
+
+# ------------------------------------------------------------------ followup-v2 finding 4: guard refusals are logged
+def test_guard_refusals_reach_admit_log(tmp_path):
+    sd = tmp_path / "sh"; sd.mkdir()
+    cfg = {"shadow_dir": str(sd)}
+    o = WMTMOrchestrator(WMTMStore(capacity=50), use_goalchainer=False)
+    o.store.admit("n1", "note", initial_sti=5.0)
+    info = {"run": "r1", "dropped": {"asserted": 0}}
+    items, info = o.admit_pc_candidates(
+        [_cand("(Member sk_c staged)", pf("(by r_echo sp1)", "(Member sk_c staged)"), rules(ECHO, DEF)),
+         _cand("(Member sk_c pushed)", pf("(by r_other sp1)", "(Member sk_c pushed)"), rules(OTHER, DEF))], info)
+    assert info["admitted"] == 1 and info["trivial_refused_guard_n"] == 1 and info["dropped"]["trivial"] == 1
+    rec = P.log_admission(cfg, "cycle", info)
+    assert rec["trivial_refused"][0]["by"] == "guard" and rec["trivial_refused"][0]["reason"] == "narrow_echo"
+    line = json.loads((sd / P.ADMIT_LOG).read_text().splitlines()[-1])
+    assert line["trivial_refused"][0]["rule"] == P.TRIVIAL_RULE
+
+
+def test_no_guard_refusal_leaves_info_shape(tmp_path):
+    o = WMTMOrchestrator(WMTMStore(capacity=50), use_goalchainer=False)
+    o.store.admit("n1", "note", initial_sti=5.0)
+    _, info = o.admit_pc_candidates(
+        [_cand("(Member sk_c pushed)", pf("(by r_other sp1)", "(Member sk_c pushed)"), rules(OTHER, DEF))], {"run": "r2"})
+    assert "trivial_refused" not in info and "trivial_refused_guard_n" not in info
+
+
+# ------------------------------------------------------------------ followup-v2 finding 5: trivial canaries as tests
+# Known answers from the frozen B rerun (evidence/runs/r{1,2,3}/admit.json) and the s49 non-trivial control.
+_EV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "reports", "t-2026-11-10-wmtm-trivial-filter", "evidence")
+_KNOWN_REFUSED = {"r1": 12, "r2": 14, "r3": 10}
+
+
+@pytest.mark.parametrize("run", sorted(_KNOWN_REFUSED))
+def test_canary_frozen_b_run_refuses_known_trivial(run, tmp_path):
+    p = os.path.join(_EV, "runs", run, "admit.json")
+    if not os.path.exists(p):
+        pytest.skip("evidence not on this branch")
+    d = json.load(open(p))
+    why = [P.trivial_reason(x["proof"], x.get("rules")) for x in d["results"]]
+    assert sum(1 for w in why if w) == _KNOWN_REFUSED[run]
+    assert {w for w in why if w} == {"narrow_echo"}
+    # same answer through the real admission path
+    sd = tmp_path / "sh"; sd.mkdir(); (sd / P.ADMIT_FILE).write_text(json.dumps(d))
+    _, info = P.load_candidates({"shadow_dir": str(sd), "reasoner_max_admit": 100, "gate_max_per_fact": 0},
+                                None, now=float(d.get("spec_ts") or d["ts"]) + 1,
+                                live_ids=sorted({s for x in d["results"] for s in x.get("sources") or []}))
+    assert info["trivial_refused_n"] == _KNOWN_REFUSED[run]
+
+
+def test_canary_s49_control_admitted_with_full_step_coverage():
+    p = os.path.join(_EV, "controls_s49.json")
+    if not os.path.exists(p):
+        pytest.skip("evidence not on this branch")
+    C = json.load(open(p))
+    assert C, "no controls"
+    for k, rows in C.items():
+        assert len(rows) == 49, k
+        for x in rows:
+            assert x["rules"], (k, x["goal"])                       # control is not fail-open
+            assert P.step_coverage(x["proof"], x["rules"])["missing"] == [], (k, x["goal"])
+            assert P.trivial_reason(x["proof"], x["rules"]) is None, (k, x["goal"])
+
+
+def test_step_coverage_counts_missing():
+    c = P.step_coverage(pf("(by r_echo (by r_gone sp1))", "(Member sk_c staged)"), rules(ECHO))
+    assert c == {"steps": 2, "known": 1, "missing": ["r_gone"]}

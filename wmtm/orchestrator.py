@@ -215,6 +215,22 @@ class WMTMOrchestrator:
                                                           "goal": prov.get("goal")}])[-200:]
         return True
 
+    def _note_guard_refusals(self, info, n0) -> None:
+        """followup-v2 finding 4: copy refusals made by the orchestrator guard (_is_trivial) during this admit into
+        info, so pc_admit.log_admission writes them to admit_log.jsonl like the load_candidates (primary) path.
+        Each entry is tagged by="guard"; trivial_refused_n and dropped["trivial"] count both paths."""
+        k = self.trivial_refused_n - n0
+        if k <= 0:
+            return
+        new = [dict(e, by="guard") for e in self.trivial_refused[-k:]] if k <= len(self.trivial_refused) else \
+            [dict(e, by="guard") for e in self.trivial_refused]
+        info["trivial_refused"] = list(info.get("trivial_refused") or []) + new
+        info["trivial_refused_n"] = int(info.get("trivial_refused_n") or 0) + k
+        info["trivial_refused_guard_n"] = k
+        drop = info.get("dropped")
+        if isinstance(drop, dict):
+            drop["trivial"] = int(drop.get("trivial") or 0) + k
+
     def _is_skipworthy(self, cand) -> bool:
         """Check if a candidate should be skipped (forgotten or duplicate)."""
         if self.forget_log.is_forgotten(cand.content, list(cand.derived_from or [])):   # F1 §4: derivation key
@@ -298,12 +314,14 @@ class WMTMOrchestrator:
         if not cands:
             info["skipped"] = "no_candidates"
         else:
+            n0 = self.trivial_refused_n
             try:
                 items = self._admit_derived(cands)
             except Exception as e:
                 info["admit_error"] = type(e).__name__
                 info["admitted"] = 0
                 return items, info
+            self._note_guard_refusals(info, n0)
             import time as _t
             self.pc_admit_state = {"consumed_run": info.get("run"), "consumed_at": round(_t.time(), 3),
                                    "admitted": len(items), "cycle": self._cycle}

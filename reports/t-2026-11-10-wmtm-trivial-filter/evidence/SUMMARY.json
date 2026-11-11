@@ -27,13 +27,19 @@
   },
   "s49_run_live": {
    "admit_sha256": "b7125a499aac2a32faf8a3fe50602507d917626d4f19c29b34b19a08d822983a",
+   "missing": 0,
    "refused": 0,
-   "results": 49
+   "results": 49,
+   "steps": 67,
+   "with_rules": 49
   },
   "s49_run_snap": {
    "admit_sha256": "1467d078fbb3db6eee45cddd3c7e22c45179a84525271d9f97c8779018980987",
+   "missing": 0,
    "refused": 0,
-   "results": 49
+   "results": 49,
+   "steps": 67,
+   "with_rules": 49
   }
  },
  "parses": {
