@@ -1,0 +1,5 @@
+M0 no mutation (harness check) -> exit 0 ['39 passed in 7.09s'] []
+M1 task counts only its own log -> exit 1 ['2 failed in 0.29s'] ["E        +  and   10 = len([{'ts'", "E        +  where 10 = len([{'ts'"]
+M2 live logs counted in the task share -> exit 1 ['1 failed in 0.12s'] ['E        +    where used = <wmtm.parse_budget.ParseBudget object at 0x728830f12050>.used', 'E        +  where 15 = used()']
+M3 measure_parse writes no counted row -> exit 1 ['1 failed in 2.61s'] ['E       FileNotFoundError']
+M4 provider not gated -> exit 1 ['3 failed in 3.73s'] ['E         ', 'E           ok and 0 == 1)']

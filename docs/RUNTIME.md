@@ -14,6 +14,12 @@ niced worker processes, the cycle never waits for them, and every error is swall
   worker parses them with the semantic-parsing-hitl prompt through the bot's existing OpenAI-compatible gateway,
   load-checks every atom in PeTTaChainer and caches the accepted atoms (`semparse_cache/cache.jsonl`). The same
   content is never parsed twice. At most `parse_cap_per_hour` (default 20) parse attempts run per rolling hour.
+  Fixed shares on top of that (`wmtm/parse_budget.py`, andy 2026-11-10): the live feed gets
+  `parse_share_live_per_hour` (10) gateway calls per rolling hour, counted across its base, ctx1 and spk1 logs
+  together, and all hive tasks together get `parse_share_tasks_per_hour` (10), counted across a host-wide task
+  ledger and every registered task log (`parse_budget_dir`). Each provider call writes one ledger row before it is
+  sent; a full share stops the worker with status `share_full` (measure_parse waits by default). The live feed's
+  deploy-time flags must say `"parse_role": "live"`; every other caller is a task. Tasks only read `parse_live_dir`.
   v0.5 (Track M): the worker prepends an instruction block (`wmtm/semparse_preamble.py`, flag `semparse_preamble`,
   default on) to the pinned prompt; the pin is still checked against the unedited file. The cache key stays the
   content hash, so entries parsed with an earlier prompt are reused, not re-parsed; `worker_runs.jsonl` records
@@ -248,6 +254,9 @@ Environment variables override the file (development/tests). Full list: `wmtm/ru
 | `pc_shadow` | `WMTM_PC_SHADOW` | false | run the PeTTaChainer shadow |
 | `semparse_feed` | `WMTM_SEMPARSE_FEED` | false | queue + parse top-K items |
 | `parse_cap_per_hour` | `WMTM_SEMPARSE_PER_HOUR` | 20 | parse attempts per rolling hour |
+| `parse_role` | `WMTM_PARSE_ROLE` | task | which share this caller uses: `live` (live feed only) or `task` |
+| `parse_share_live_per_hour` / `parse_share_tasks_per_hour` | `WMTM_PARSE_SHARE_LIVE` / `..._TASKS` | 10 / 10 | fixed gateway-call shares per rolling hour |
+| `parse_live_dir` / `parse_budget_dir` | `WMTM_PARSE_LIVE_DIR` / `WMTM_PARSE_BUDGET_DIR` | '' / ~/.wmtm/parse_budget | live semparse dir (read-only for tasks) / host-wide task ledger |
 | `semparse_preamble` | `WMTM_SEMPARSE_PREAMBLE` | true | v0.5: prepend `wmtm/semparse_preamble.py` to the (pinned, unedited) prompt |
 | `parse_max_chars` / `parse_max_attempts` | `WMTM_SEMPARSE_MAX_CHARS` / `..._MAX_ATTEMPTS` | 1500 / 2 | skip longer items; retries on gateway errors |
 | `shadow_k` / `shadow_max_goals` | `WMTM_PC_SHADOW_K` / `..._MAX_GOALS` | 200 / 60 | items per snapshot; chain goals per run |

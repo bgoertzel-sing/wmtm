@@ -8,6 +8,19 @@ import pytest  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
+def _isolated_parse_budget(tmp_path_factory, monkeypatch):
+    """Each test gets its own host-wide parse budget dir (task ledger + task-log registry), so tests never read or
+    write ~/.wmtm/parse_budget and never share counted calls with each other."""
+    from wmtm import runtime_config as rc
+    d = str(tmp_path_factory.mktemp("parse_budget"))
+    e, t, _d, b = rc.SPEC["parse_budget_dir"]
+    monkeypatch.setitem(rc.SPEC, "parse_budget_dir", (e, t, d, b))   # holds even where a test clears WMTM_* env
+    monkeypatch.setenv("WMTM_PARSE_BUDGET_DIR", d)
+    monkeypatch.delenv("WMTM_PARSE_LIVE_DIR", raising=False)
+    monkeypatch.delenv("WMTM_PARSE_ROLE", raising=False)
+
+
+@pytest.fixture(autouse=True)
 def _fake_goalchainer_v2(monkeypatch):
     """v0.7: the goal engine defaults to GoalChainer v2, run as a subprocess in its own environment.  Unit tests use
     a protocol-compatible test double (tests/_fake_v2_runner.py, run by this interpreter) through the same

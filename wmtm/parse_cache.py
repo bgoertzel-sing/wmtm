@@ -10,7 +10,9 @@ the cache.
 Guarantees
   * keyed by sha256(content): the same content is never parsed twice (an LLM/transport error may be retried,
     at most parse_max_attempts=2 attempts in total, then cached as failed);
-  * cost cap: at most parse_cap_per_hour (default 20) parse attempts in any rolling hour;
+  * cost cap: at most parse_cap_per_hour (default 20) parse attempts in any rolling hour from this cache, and the
+    fixed share of its role (wmtm/parse_budget.py: live 10/h, all tasks together 10/h, counted across every log of
+    the share); when the share is full the loop stops with last_stop = {"status": "share_full", ...};
   * order: longest-waiting first, then highest STI;
   * items longer than parse_max_chars (default 1500) are skipped, not truncated;
   * tokens and time are logged per parse (parse_log.jsonl); logs are size-capped (rotated to .1);
@@ -28,6 +30,7 @@ except ImportError:
         from hashlib import sha256 as _sha256
 
 from . import runtime_config as rc
+from .parse_budget import is_share_full
 
 WORKER_MODULE = "wmtm.workers.semparse_feed"
 WORKER_MAX_AGE = 3 * 3600     # s; an older worker is presumed hung and killed by the next launch
@@ -56,6 +59,18 @@ class ParseCache:
         self.log_path = os.path.join(self.d, "parse_log.jsonl")
         self.reject_log = os.path.join(self.d, "rejects.jsonl")
         self.pidfile = os.path.join(self.d, "worker.pid")
+        self.cfg = cfg
+        self._share = None
+        self.last_stop = None
+
+    @property
+    def share(self):
+        """The fixed share (parse_budget.ParseBudget) this cache's calls count against; built lazily (read-only
+        users of the cache, e.g. the shadow, never touch the budget dir)."""
+        if self._share is None:
+            from .parse_budget import for_cache
+            self._share = for_cache(self.d, self.cfg, own_log=self.log_path)
+        return self._share
 
     # ------------------------------------------------------------ storage
     @contextlib.contextmanager
@@ -187,7 +202,24 @@ class ParseCache:
         return len(lines) - len(keep)
 
     def budget(self, now=None) -> int:
-        return max(0, self.per_hour - self.used_last_hour(now))
+        """Calls this cache may still start: its own hourly cap AND its share (counted across all of the share's logs)."""
+        own = max(0, self.per_hour - self.used_last_hour(now))
+        if own <= 0:
+            return 0
+        return min(own, self.share.remaining(now))
+
+    def share_full_stop(self, now=None, err=None):
+        """Record and return a clear stop status for a full share."""
+        st = dict(self.share.status(now), status="share_full")
+        if err:
+            st["error"] = str(err)[:160]
+        self.last_stop = st
+        return st
+
+    def begin(self):
+        """Before a run that may call the parser: register this cache's log with its share (task share)."""
+        self.last_stop = None
+        self.share.register_log(self.log_path)
 
     def next_batch(self, n):
         q, ent = self._queue(), self.entries()
@@ -242,11 +274,14 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
     psha = (getattr(ad, "prompt_sha256", None) or "")[:16] or None
     n = cache.per_hour if n is None else n
     out = []
+    cache.begin()
     for h, q in cache.next_batch(min(n, cache.budget(now()))):
         if cache.budget(now()) <= 0:
             break
         if hasattr(llm, "last_usage"):
             llm.last_usage = {}
+        if hasattr(llm, "call_ids"):          # parse_budget.gated: ids of the counted calls of this item
+            llm.call_ids = []
         t = time.time()
         try:
             res = ad.parse_item(q["item_id"], q["content"])
@@ -254,6 +289,8 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
         except Exception as e:                      # adapter bug: treat as a failed parse, keep going
             res, err = None, "adapter error: %s" % type(e).__name__
         dt = round(time.time() - t, 3)
+        if is_share_full(err):                     # the share gate refused: nothing was sent, nothing is recorded
+            cache.share_full_stop(now(), err); break
         if err and (err.startswith("llm error") or err.startswith("adapter error")):
             status = "llm_error"
         elif err:
@@ -269,21 +306,27 @@ def process_queue(cache: ParseCache, llm, loader=None, n=None, adapter=None, now
                 "prompt_sha": psha}
         if res is not None and getattr(res, "queries", None):   # Track R: parser queries feed the uncertainty need
             cost["queries"] = [str(x)[:300] for x in list(res.queries)[:20]]
+        if hasattr(llm, "call_ids"):             # joins this row to the share ledger (counted once)
+            cost["call_ids"] = list(llm.call_ids)
         if err:
             cost["error"] = err[:160]
         cache.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
         out.append(cost)
+    if cache.last_stop is None and cache.share.remaining(now()) <= 0 and cache.pending():
+        cache.share_full_stop(now())
     return out
 
 
-def gateway_llm_usage(timeout=300.0, env_file=None, hitl=None, workdir=None):
+def gateway_llm_usage(timeout=300.0, env_file=None, hitl=None, workdir=None, budget=None):
     """The production feed's llm(system, user): Man Hin's upstream ``chat-completions`` provider (our upstream
     patch 0003, via semparse_provider.gateway_llm), the same client measure_parse uses -- no WMTM HTTP code.
 
     p2 review-7: BASE_URL / LLM_MODEL / AI_API_KEY come from the environment, else from ``env_file`` (only read,
     never copied); a key found only in the file is exported to this process as AI_API_KEY, the variable the
     upstream provider is told to read (--api-key-env).  Token usage lands in call.last_usage (prompt_tokens /
-    completion_tokens / total_tokens; None when the server does not report it).  If the provider cannot be
+    completion_tokens / total_tokens; None when the server does not report it).  Every call is gated by
+    ``budget`` (parse_budget.ParseBudget; None = the config's default share) and leaves a counted ledger row.
+    If the provider cannot be
     built (no BASE_URL, hitl checkout missing) the returned call raises, so each parse records an llm error."""
     env_file = env_file or os.environ.get("WMTM_LLM_ENV_FILE", "")
     env = {}
@@ -300,7 +343,8 @@ def gateway_llm_usage(timeout=300.0, env_file=None, hitl=None, workdir=None):
         if not base:
             raise RuntimeError("BASE_URL not set (environment or llm_env_file)")
         return gateway_llm(base, model=model, hitl=hitl, token_env="AI_API_KEY", workdir=workdir,
-                           flags=["--timeout", str(float(timeout)), "--temperature", "0"])
+                           flags=["--timeout", str(float(timeout)), "--temperature", "0"], budget=budget,
+                           meta={"tool": "semparse_feed"})
     except Exception as e:                          # noqa: BLE001  (reported per parse as an llm error)
         err = "gateway provider unavailable: %s: %s" % (type(e).__name__, e)
 
@@ -424,6 +468,7 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
     psha = (getattr(adapter, "prompt_sha256", None) or "")[:16] or None
     n = ctx.per_hour if n is None else n
     out = []
+    ctx.begin()
     for h, q in ctx.next_batch(min(n, ctx.budget(now()))):
         if ctx.budget(now()) <= 0:
             break
@@ -435,6 +480,8 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
                                             max_chars=int(cfg["context_max_chars"]))
         if hasattr(llm, "last_usage"):
             llm.last_usage = {}
+        if hasattr(llm, "call_ids"):          # parse_budget.gated: ids of the counted calls of this item
+            llm.call_ids = []
         t = time.time()
         try:
             res = adapter.parse_item_ctx(q["item_id"], q["content"], context_atoms=atoms,
@@ -442,6 +489,8 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
             err = res.error
         except Exception as e:                      # noqa: BLE001
             res, err = None, "adapter error: %s" % type(e).__name__
+        if is_share_full(err):                     # the share gate refused: nothing was sent, nothing is recorded
+            ctx.share_full_stop(now(), err); break
         status = ("llm_error" if err and err.startswith(("llm error", "adapter error")) else "failed" if err
                   else "ok" if res.accepted else "empty")
         u = dict(getattr(llm, "last_usage", None) or {})
@@ -452,10 +501,14 @@ def process_queue_ctx(ctx: ParseCache, base: ParseCache, llm, adapter, n=None, n
                 "shared_terms": shared[:20]}
         if res is not None and getattr(res, "queries", None):   # Track R: parser queries feed the uncertainty need
             cost["queries"] = [str(x)[:300] for x in list(res.queries)[:20]]
+        if hasattr(llm, "call_ids"):             # joins this row to the share ledger (counted once)
+            cost["call_ids"] = list(llm.call_ids)
         if err:
             cost["error"] = err[:160]
         ctx.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
         out.append(cost)
+    if ctx.last_stop is None and ctx.share.remaining(now()) <= 0 and ctx.pending():
+        ctx.share_full_stop(now())
     return out
 
 
@@ -514,12 +567,15 @@ def process_queue_spk(spk: ParseCache, llm, adapter, n=None, now=time.time, cfg=
     psha = (getattr(adapter, "prompt_sha256", None) or "")[:16] or None
     n = spk.per_hour if n is None else n
     out = []
+    spk.begin()
     for h, q in spk.next_batch(min(n, spk.budget(now()))):
         if spk.budget(now()) <= 0:
             break
         text, info = link(q["content"], q.get("source"))
         if hasattr(llm, "last_usage"):
             llm.last_usage = {}
+        if hasattr(llm, "call_ids"):          # parse_budget.gated: ids of the counted calls of this item
+            llm.call_ids = []
         t = time.time()
         ids = []
         try:
@@ -535,6 +591,8 @@ def process_queue_spk(spk: ParseCache, llm, adapter, n=None, now=time.time, cfg=
             err = res.error
         except Exception as e:                      # noqa: BLE001
             res, err = None, "adapter error: %s" % type(e).__name__
+        if is_share_full(err):                     # the share gate refused: nothing was sent, nothing is recorded
+            spk.share_full_stop(now(), err); break
         status = ("llm_error" if err and err.startswith(("llm error", "adapter error")) else "failed" if err
                   else "ok" if res.accepted else "empty")
         u = dict(getattr(llm, "last_usage", None) or {})
@@ -549,8 +607,12 @@ def process_queue_spk(spk: ParseCache, llm, adapter, n=None, now=time.time, cfg=
             cost["context_ids"] = ids
         if res is not None and getattr(res, "queries", None):   # Track R: parser queries feed the uncertainty need
             cost["queries"] = [str(x)[:300] for x in list(res.queries)[:20]]
+        if hasattr(llm, "call_ids"):             # joins this row to the share ledger (counted once)
+            cost["call_ids"] = list(llm.call_ids)
         if err:
             cost["error"] = err[:160]
         spk.record(h, q, status, list(res.accepted) if res and status in ("ok", "empty") else [], cost)
         out.append(cost)
+    if spk.last_stop is None and spk.share.remaining(now()) <= 0 and spk.pending():
+        spk.share_full_stop(now())
     return out

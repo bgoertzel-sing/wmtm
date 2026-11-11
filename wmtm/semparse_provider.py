@@ -73,9 +73,15 @@ def split_usage(u: dict) -> dict:
             "total_tokens": None if None in (inp, out) else inp + out}
 
 
-def upstream_llm(provider: str = "anthropic", model: str = None, hitl: str = None, flags=(), workdir=None):
+def upstream_llm(provider: str = "anthropic", model: str = None, hitl: str = None, flags=(), workdir=None,
+                 budget=None, meta=None, wait=False, max_wait_s=None):
     """llm(system, user) through upstream PROVIDERS[provider]; ``flags`` are upstream provider CLI flags
-    (e.g. ["--effort", "low"]), parsed by upstream add_provider_args so defaults match semantic-parse.py."""
+    (e.g. ["--effort", "low"]), parsed by upstream add_provider_args so defaults match semantic-parse.py.
+
+    Every call is counted: before the request it reserves one call in ``budget`` (wmtm.parse_budget.ParseBudget;
+    None = parse_budget.default_budget(), the task share unless the config says live), which writes a ledger row.
+    A full share raises parse_budget.ShareFull (after waiting up to max_wait_s when ``wait``) and sends nothing.
+    ``call.last_call_id`` / ``call.call_ids`` name the counted calls."""
     from .semparse_catalog import hitl_root
     mod = load_upstream(hitl_root(hitl), workdir)
     ap = argparse.ArgumentParser(add_help=False)
@@ -84,15 +90,23 @@ def upstream_llm(provider: str = "anthropic", model: str = None, hitl: str = Non
     prov = mod.PROVIDERS[provider](args)
     m = model or prov.default_model
 
+    from .parse_budget import default_budget
+    gate = budget if budget is not None else default_budget()
+    tag = dict(meta or {}, provider=provider, model=m)
+
     def call(system: str, user: str) -> str:
         call.last_usage = None
         call.last_raw_usage = None
+        call.last_call_id = None
+        call.last_call_id = gate.acquire(tag, wait=wait, max_wait_s=max_wait_s)   # counted before any request
+        call.call_ids.append(call.last_call_id)
         r = prov.complete(system, user, m)
         call.last_raw_usage = getattr(r, "raw_usage", None)
         call.last_usage = split_usage(r.usage)
         return r.text
 
     call.last_usage, call.model, call.provider, call.module, call.args = None, m, provider, mod, args
+    call.last_call_id, call.call_ids, call.budget = None, [], gate
     return call
 
 
@@ -100,23 +114,29 @@ GATEWAY_TOKEN_ENV = "OPENCLAW_GATEWAY_TOKEN"
 
 
 def gateway_llm(base_url: str, model: str = None, hitl: str = None, flags=(), token_env: str = GATEWAY_TOKEN_ENV,
-                workdir=None):
+                workdir=None, budget=None, meta=None, wait=False, max_wait_s=None):
     """answer 7: llm(system, user) through an OpenAI-compatible gateway (e.g. http://127.0.0.1:18789/v1, model
     openclaw/<agent>) using upstream's own ``chat-completions`` provider (our upstream patch 0003, --base-url /
     --api-key-env); no WMTM-local provider code."""
     inner = upstream_llm("chat-completions", model=model, hitl=hitl, workdir=workdir,
-                         flags=["--base-url", base_url, "--api-key-env", token_env] + list(flags))
+                         flags=["--base-url", base_url, "--api-key-env", token_env] + list(flags),
+                         budget=budget, meta=meta, wait=wait, max_wait_s=max_wait_s)
 
     def call(system: str, user: str) -> str:
         call.last_usage = None
+        call.last_call_id = inner.last_call_id = None
         try:
             return inner(system, user)
         finally:
             call.last_usage = gateway_usage(inner.last_usage, getattr(inner, "last_raw_usage", None))
+            if inner.last_call_id:                 # the counted call (parse_budget ledger row)
+                call.last_call_id = inner.last_call_id
+                call.call_ids.append(inner.last_call_id)
 
     for k in ("model", "provider", "module", "args"):
         setattr(call, k, getattr(inner, k))
     call.last_usage, call.base_url, call.inner = None, base_url, inner
+    call.last_call_id, call.call_ids, call.budget = None, [], inner.budget
     return call
 
 

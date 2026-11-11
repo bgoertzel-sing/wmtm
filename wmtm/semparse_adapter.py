@@ -537,7 +537,12 @@ def _looks_like_error(out) -> bool:
 
 # ---------------------------------------------------------------- real LLM
 def gateway_llm(base_url=None, model=None, key=None, timeout=300.0,
-                env_file=os.environ.get("WMTM_LLM_ENV_FILE", "")) -> LLM:
+                env_file=os.environ.get("WMTM_LLM_ENV_FILE", ""), budget=None, wait=False) -> LLM:
+    """Legacy direct client (no in-repo caller; kept for old scripts).  Every call is counted like the upstream
+    provider's: it first reserves one call in budget (parse_budget.ParseBudget; None = the default share, i.e. the
+    task share unless the config says live) and raises parse_budget.ShareFull when the share is full."""
+    from .parse_budget import default_budget
+    gate = budget if budget is not None else default_budget()
     env = {}
     if env_file and os.path.exists(os.path.expanduser(env_file)):
         env_file = os.path.expanduser(env_file)
@@ -550,6 +555,8 @@ def gateway_llm(base_url=None, model=None, key=None, timeout=300.0,
     key = key or os.environ.get("AI_API_KEY") or env.get("AI_API_KEY")
 
     def call(system: str, user: str) -> str:
+        call.last_call_id = gate.acquire({"tool": "semparse_adapter.gateway_llm", "model": model}, wait=wait)
+        call.call_ids.append(call.last_call_id)
         body = {"model": model, "temperature": 0,
                 "messages": [{"role": "system", "content": system},
                              {"role": "user", "content": user}]}
@@ -559,5 +566,5 @@ def gateway_llm(base_url=None, model=None, key=None, timeout=300.0,
         r = json.loads(urllib.request.urlopen(req, timeout=timeout).read())
         call.last_usage = r.get("usage") if isinstance(r.get("usage"), dict) else None
         return r["choices"][0]["message"]["content"]
-    call.last_usage = None
+    call.last_usage, call.last_call_id, call.call_ids, call.budget = None, None, [], gate
     return call

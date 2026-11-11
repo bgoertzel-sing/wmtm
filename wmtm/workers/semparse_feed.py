@@ -90,18 +90,27 @@ try:
         status["load_canary"] = ("Member grace person" in pos) and ("Member grace robot" not in neg)
         if not status["load_canary"]:
             status["status"] = "canary_fail"; finish(3)
+    if cache.budget() <= 0:      # own cap or share full: stop with a clear status before building anything
+        status.update(status="share_full" if cache.share.remaining() <= 0 else "cap_full",
+                      share=cache.share.status()); finish(0)
     llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None, hitl=HITL,   # upstream provider (review-7)
-                            workdir=os.path.join(a.dir, "provider"))
+                            workdir=os.path.join(a.dir, "provider"), budget=cache.share)   # every call counted
     status["model"] = getattr(llm, "model", None)
     from wmtm.semparse_adapter import SemParseAdapter
     if a.llm_canary:
+        cache.begin()
+        llm.call_ids = []
         r = SemParseAdapter(llm, loader=loader, prompt_path=a.prompt, mode=MODE, hitl_root=HITL,
                            preamble=MODE == "legacy" and bool(CFG.get("semparse_preamble", True))).parse_item("canary1", "Grace is a pilot. Pilots are people.")
         u = llm.last_usage or {}
         with cache._lock():   # canary spend counts against the hourly cap
             rc.append_jsonl(cache.log_path, {"ts": time.time(), "item_id": "canary1", "status": "canary",
                                              "total_tokens": u.get("total_tokens"), "prompt_tokens": u.get("prompt_tokens"),
-                                             "completion_tokens": u.get("completion_tokens")}, cache.log_max_bytes)
+                                             "completion_tokens": u.get("completion_tokens"),
+                                             "call_ids": list(getattr(llm, "call_ids", None) or [])},
+                                cache.log_max_bytes)
+        if r.error and "parse share full" in r.error:
+            status.update(status="share_full", share=cache.share.status()); finish(0)
         ok = bool(r.accepted) and loader is not None and "Member grace person" in str(
             loader.query("(: $prf (Member grace person) $tv)", steps=30, timeout_sec=0))
         status["llm_canary"] = {"ok": ok, "accepted": len(r.accepted), "error": r.error}
@@ -127,7 +136,10 @@ try:
         recs = process_queue_ctx(cache, base, llm, ad, n=a.n, cfg=CFG)
     else:
         recs = process_queue(cache, llm, loader=loader, n=a.n, prompt_path=a.prompt, adapter=ad)
-    status.update(status="ok", parsed=len(recs), by_status={s: sum(r["status"] == s for r in recs) for s in {r["status"] for r in recs}})
+    status["share"] = cache.share.status()
+    if cache.last_stop:
+        status["share_stop"] = cache.last_stop
+    status.update(status="share_full" if cache.last_stop else "ok", parsed=len(recs), by_status={s: sum(r["status"] == s for r in recs) for s in {r["status"] for r in recs}})
     finish(0)
 except SystemExit:
     raise

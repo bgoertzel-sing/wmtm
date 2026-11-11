@@ -128,6 +128,17 @@ SPEC = {
     "gate_max_per_fact":   ("WMTM_GATE_MAX_PER_FACT", int, 3, None),             # admitted conclusions per KB fact per cycle; 0 = no cap
     "gate_review_min":     ("WMTM_GATE_REVIEW_MIN", int, 3, None),               # log facts behind >= N proved conclusions
     "parse_cap_per_hour":  ("WMTM_SEMPARSE_PER_HOUR", int, 20, None),
+    # Fixed parse-call shares (andy 2026-11-10; wmtm/parse_budget.py): live 10 and all hive tasks together 10 gateway
+    # parse calls per rolling hour, each counted across every log of that share.  Raise only after the gateway
+    # cache check passes.  parse_role says which share this caller uses: "task" (default) or "live" (the live feed's
+    # deploy-time flags must say live).  parse_live_dir: the live feed's semparse_dir (read-only for tasks; a task
+    # cache inside it is refused).  parse_budget_dir: host-wide task ledger + registry of task logs.
+    "parse_role":          ("WMTM_PARSE_ROLE", str, "task", None),
+    "parse_share_live_per_hour": ("WMTM_PARSE_SHARE_LIVE", int, 10, None),
+    "parse_share_tasks_per_hour": ("WMTM_PARSE_SHARE_TASKS", int, 10, None),
+    "parse_share_max_wait_s": ("WMTM_PARSE_SHARE_MAX_WAIT", float, 3600.0, None),
+    "parse_live_dir":      ("WMTM_PARSE_LIVE_DIR", str, "", _D),
+    "parse_budget_dir":    ("WMTM_PARSE_BUDGET_DIR", str, "~/.wmtm/parse_budget", None),
     "semparse_preamble":   ("WMTM_SEMPARSE_PREAMBLE", bool, True, None),          # Track M: prepend semparse_preamble.PREAMBLE to the (pinned, unedited) prompt
     "parse_max_chars":     ("WMTM_SEMPARSE_MAX_CHARS", int, 1500, None),
     "parse_max_attempts":  ("WMTM_SEMPARSE_MAX_ATTEMPTS", int, 2, None),
@@ -286,6 +297,12 @@ def resolve(state_dir=None, environ=None):
     cfg["semparse_dir"] = cfg["semparse_dir"] or os.path.join(cfg["runtime_dir"], "semparse_cache")
     cfg["python"] = cfg["python"] or sys.executable
     cfg["parse_cap_per_hour"] = max(0, cfg["parse_cap_per_hour"])
+    for k in ("parse_share_live_per_hour", "parse_share_tasks_per_hour"):
+        cfg[k] = max(0, cfg[k])
+    cfg["parse_role"] = str(cfg["parse_role"] or "task").strip().lower()
+    if cfg["parse_role"] not in ("live", "task"):
+        info.setdefault("invalid", []).append("parse_role"); cfg["parse_role"] = "task"
+    cfg["parse_budget_dir"] = os.path.abspath(os.path.expanduser(cfg["parse_budget_dir"])) if cfg["parse_budget_dir"] else ""
     cfg["reasoner"] = str(cfg["reasoner"] or "").strip().lower()
     if cfg["reasoner"] and cfg["reasoner"] not in ("pettachainer", "off"):
         info.setdefault("invalid", []).append("reasoner"); cfg["reasoner"] = "off"
