@@ -88,6 +88,13 @@ def sources_for(goal, proof, spec):
         iid = src.get(lab)
         if iid and iid not in ids:
             ids.append(iid)
+    if not ids and "implication-instance-fold" in (proof or ""):
+        # t-2026-11-11 rev2: a fold proof carries no fact labels; its premises are the goal's own chain
+        # (the shared Member facts listed by induction_goal_pool), so map those to their WMTM items.
+        chain = set(((spec.get("goal_meta") or {}).get(goal) or {}).get("chain") or [])
+        for (h, x, y, iid) in spec.get("fact_src") or []:
+            if "(%s %s %s)" % (h, x, y) in chain and iid not in ids:
+                ids.append(iid)
     if not ids:
         m = _GOAL.match(goal or "")
         if m:
@@ -95,6 +102,15 @@ def sources_for(goal, proof, spec):
                 if (x == m.group(2) or y == m.group(3)) and iid not in ids:
                     ids.append(iid)
     return ids
+
+
+def proof_facts(goal, proof, spec):
+    """Facts a proof rests on: its fact labels, else (fold proofs) the goal's chain facts."""
+    lf = spec.get("label_fact") or {}
+    out = sorted({lf.get(x, x) for x in _LABEL.findall(proof or "")})
+    if not out and "implication-instance-fold" in (proof or ""):
+        out = sorted(((spec.get("goal_meta") or {}).get(goal) or {}).get("chain") or [])
+    return out
 
 
 def write_admit_file(out_dir, rec, spec, now=None):
@@ -109,7 +125,7 @@ def write_admit_file(out_dir, rec, spec, now=None):
                 lf = spec.get("label_fact") or {}
                 results.append({"goal": q["goal"], "stv": q["stv"], "proof": q["proof"], "s": q.get("s"),
                                 "sources": sources_for(q["goal"], q["proof"], spec),
-                                "facts": sorted({lf.get(x, x) for x in _LABEL.findall(q["proof"] or "")}),
+                                "facts": proof_facts(q["goal"], q["proof"], spec),
                                 "rules": proof_rules(q["proof"], spec.get("atoms"))})
     doc = {"ts": now or time.time(), "spec_ts": spec.get("ts"), "cycle": spec.get("cycle"), "status": rec.get("status"),
            "canary_ok": canary_ok, "timeout_s": rec.get("timeout_s"), "budget_s": rec.get("budget_s"),

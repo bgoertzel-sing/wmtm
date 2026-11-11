@@ -1,0 +1,13 @@
+run	status	goals	proved	canary_ok	induction_goal	proved_stv	admitted	sources	facts
+nov5_False	ok	9	9	True	-	-	-	-	-
+nov5_True	ok	9	9	True	-	-	-	-	-
+nov5_min2	ok	10	10	True	(Inheritance done cleanup)	[1.0, 0.0024]	True	ep-note-20261028T190214Z;ep-note-20261104T051925Z	(Member sk_cleanup_1__i_ep_note_20261028T190214Z cleanup);(Member sk_cleanup_1__i_ep_note_20261028T190214Z done);(Member sk_cleanup_1__i_ep_note_20261104T051925Z cleanup);(Member sk_cleanup_1__i_ep_note_20261104T051925Z done)
+r1_False	ok	12	12	True	-	-	-	-	-
+r1_True	ok	12	12	True	-	-	-	-	-
+r1_min2	ok	13	13	True	(Inheritance cleanup done)	[1.0, 0.0024]	True	ep-note-20261028T190214Z;ep-note-20261104T051925Z	(Member sk_cleanup_1__i_ep_note_20261028T190214Z cleanup);(Member sk_cleanup_1__i_ep_note_20261028T190214Z done);(Member sk_cleanup_1__i_ep_note_20261104T051925Z cleanup);(Member sk_cleanup_1__i_ep_note_20261104T051925Z done)
+r2_False	ok	14	14	True	-	-	-	-	-
+r2_True	ok	14	14	True	-	-	-	-	-
+r2_min2	ok	14	14	True	-	-	-	-	-
+r3_False	ok	10	10	True	-	-	-	-	-
+r3_True	ok	10	10	True	-	-	-	-	-
+r3_min2	ok	11	11	True	(Inheritance cleanup done)	[1.0, 0.0024]	True	ep-note-20261028T190214Z;ep-note-20261104T051925Z	(Member sk_cleanup_1__i_ep_note_20261028T190214Z cleanup);(Member sk_cleanup_1__i_ep_note_20261028T190214Z done);(Member sk_cleanup_1__i_ep_note_20261104T051925Z cleanup);(Member sk_cleanup_1__i_ep_note_20261104T051925Z done)

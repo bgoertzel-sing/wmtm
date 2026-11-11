@@ -1,0 +1,1 @@
+[0m((: (merge/revision nwdef_result__nw_b5881f6f23 (implication-instance-fold cpu)) (Implication (Member $_0 result__nw_b5881f6f23) (Member $_0 result)) (STV 1.0 0.9900003675239921)))

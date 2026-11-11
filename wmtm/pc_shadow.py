@@ -383,6 +383,10 @@ def induction_goal_pool(rel, min_shared=3, skolem_goals=False, max_pool=MAX_POOL
             shared = sorted(mem[a] & mem[b])
             if len(shared) < max(1, int(min_shared)):
                 continue
+            # rev2: one direction per pair -- A->B where the shared set covers more of A (tie: sorted order)
+            ka, kb = len(shared) / len(mem[a]), len(shared) / len(mem[b])
+            if ka < kb or (ka == kb and a > b):
+                continue
             if len(pool) >= max_pool:
                 return pool
             pool[t] = (1, [f for x in shared for f in (("Member", x, a), ("Member", x, b))])

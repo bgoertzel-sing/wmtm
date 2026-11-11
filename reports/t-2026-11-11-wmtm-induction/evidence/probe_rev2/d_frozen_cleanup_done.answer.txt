@@ -1,0 +1,1 @@
+[0m((: (implication-instance-fold cpu) (Implication (Member $_0 cleanup) (Member $_0 done)) (STV 1.0 0.0024442609496082225)))
