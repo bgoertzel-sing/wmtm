@@ -1,0 +1,13 @@
+run	induced_rule	stv	premise_notes	premise_facts	mech_W1	class_level_identical	verdict	B_goals	trivial	non_trivial	B_C	B_W	count_rule
+nov5_False	-	-	-	-	-	-	-	9	9	0	0	0	FAILS
+nov5_True	-	-	-	-	-	-	-	9	9	0	0	0	FAILS
+nov5_min2	(Inheritance done cleanup)	1.0/0.0024	ep-note-20261028T190214Z;ep-note-20261104T051925Z	4	True	True	UNCLEAR	10	9	1	0	0	FAILS
+r1_False	-	-	-	-	-	-	-	12	12	0	0	0	FAILS
+r1_True	-	-	-	-	-	-	-	12	12	0	0	0	FAILS
+r1_min2	(Inheritance cleanup done)	1.0/0.0024	ep-note-20261028T190214Z;ep-note-20261104T051925Z	4	True	True	UNCLEAR	13	12	1	0	0	FAILS
+r2_False	-	-	-	-	-	-	-	14	14	0	0	0	FAILS
+r2_True	-	-	-	-	-	-	-	14	14	0	0	0	FAILS
+r2_min2	-	-	-	-	-	-	-	14	14	0	0	0	FAILS
+r3_False	-	-	-	-	-	-	-	10	10	0	0	0	FAILS
+r3_True	-	-	-	-	-	-	-	10	10	0	0	0	FAILS
+r3_min2	(Inheritance cleanup done)	1.0/0.0024	ep-note-20261028T190214Z;ep-note-20261104T051925Z	4	True	True	UNCLEAR	11	10	1	0	0	FAILS

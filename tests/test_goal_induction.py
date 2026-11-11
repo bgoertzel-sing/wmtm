@@ -92,3 +92,45 @@ def test_fold_proof_sources_and_facts_from_chain():
     proof = "(implication-instance-fold cpu)"
     assert sorted(pa.sources_for(g, proof, spec)) == ["c0", "c1", "c2", "p0", "p1", "p2"]
     assert pa.proof_facts(g, proof, spec) == sorted(chain)
+
+
+# --- rev3 (review 2 finding 2): engine fold strength vs design §9.1b "strength = weighted average" ---
+# Checks the committed engine answers (probe_rev3, PeTTaChainer b6aacc68 / PeTTa 3681b9b) against a reference
+# of ImplicationInstanceAcc (pln_formulas truth_values.metta:243): s = sum(m_i * c_ai * c_bi * s_bi) / sum(m_i * c_ai * c_bi).
+import os as _os, re as _re
+_P3 = _os.path.join(_os.path.dirname(__file__), "..", "reports", "t-2026-11-11-wmtm-induction", "evidence", "probe_rev3")
+
+
+def _probe(name):
+    src = open(_os.path.join(_P3, name + ".metta")).read()
+    facts = {}
+    for inst, cls, s, c in _re.findall(r"\(Member (\w+) (\w+)\) \(STV ([0-9.]+) ([0-9.]+)\)", src):
+        facts[(inst, cls)] = (float(s), float(c))
+    ans = open(_os.path.join(_P3, name + ".answer.txt")).read()
+    s, c = _re.search(r"\(Inheritance A B\) \(STV ([0-9.e-]+) ([0-9.e-]+)\)", ans).groups()
+    return facts, float(s), float(c)
+
+
+def _weighted_average(facts):
+    num = den = 0.0
+    for (i, cls), (m, mc) in facts.items():
+        if cls != "A" or (i, "B") not in facts:
+            continue
+        bs, bc = facts[(i, "B")]
+        w = m * mc * bc
+        num += w * bs; den += w
+    return num / den
+
+
+def test_engine_fold_strength_is_mass_weighted_average():
+    facts, s, c = _probe("f_weighted_fold")
+    assert len([k for k in facts if k[1] == "A"]) == 3          # 3 instances
+    ref = _weighted_average(facts)
+    assert abs(s - ref) < 1e-9                                   # 0.5913..., not the plain mean 0.5333
+    assert abs(s - (1.0 + 0.2 + 0.4) / 3) > 0.05
+    assert 0.0 < c < 0.01                                        # low confidence: 3 instances only
+
+
+def test_engine_fold_one_instance_control():
+    facts, s, c = _probe("g_one_instance")
+    assert s == 1.0 and c < _probe("f_weighted_fold")[2]          # one instance: weaker than three, restates it

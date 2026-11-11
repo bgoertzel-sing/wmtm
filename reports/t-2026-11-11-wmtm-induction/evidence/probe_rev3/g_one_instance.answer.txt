@@ -1,0 +1,1 @@
+((: (implication-instance-fold cpu) (Inheritance A B) (STV 1.0 0.001011475880670821)))

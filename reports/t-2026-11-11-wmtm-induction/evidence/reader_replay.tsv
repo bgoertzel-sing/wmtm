@@ -1,0 +1,13 @@
+run	results	trivial_refused	asserted	admitted_n	admitted_goals	trivial_filter	cap
+nov5_False	9	9	0	0		True	5
+nov5_True	9	9	0	0		True	5
+nov5_min2	10	9	0	1	(Inheritance done cleanup)	True	5
+r1_False	12	12	0	0		True	5
+r1_True	12	12	0	0		True	5
+r1_min2	13	12	0	1	(Inheritance cleanup done)	True	5
+r2_False	14	14	0	0		True	5
+r2_True	14	14	0	0		True	5
+r2_min2	14	14	0	0		True	5
+r3_False	10	10	0	0		True	5
+r3_True	10	10	0	0		True	5
+r3_min2	11	10	0	1	(Inheritance cleanup done)	True	5

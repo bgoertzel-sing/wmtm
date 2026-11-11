@@ -1,0 +1,16 @@
+nov5_False shadow.jsonl DIFF
+nov5_False admit.json same-modulo-timing
+nov5_True shadow.jsonl same-modulo-timing
+nov5_True admit.json same-modulo-timing
+r1_False shadow.jsonl DIFF
+r1_False admit.json same-modulo-timing
+r1_True shadow.jsonl DIFF
+r1_True admit.json same-modulo-timing
+r2_False shadow.jsonl same-modulo-timing
+r2_False admit.json same-modulo-timing
+r2_True shadow.jsonl same-modulo-timing
+r2_True admit.json same-modulo-timing
+r3_False shadow.jsonl same-modulo-timing
+r3_False admit.json same-modulo-timing
+r3_True shadow.jsonl same-modulo-timing
+r3_True admit.json same-modulo-timing
