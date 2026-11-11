@@ -43,6 +43,7 @@ for r in ("r1", "r2", "r3"):
         "rows": rows}
 # non-trivial controls: A (f3-ab-v3) proofs and the s49 snapshot (49 non-trivial conclusions on a real KB)
 ctl = {}
+ctl_rows = {}
 for k in ("A_A_v3", "A_A_v3r1"):
     rec = json.loads(open(H + "/runs/%s/shadow.jsonl" % k).read().strip().splitlines()[-1])
     qs = [q for q in rec.get("queries", []) if q.get("ok")]
@@ -51,9 +52,16 @@ for n in ("run_snap", "run_live"):
     d = "/tmp/s49/" + n
     if os.path.exists(d + "/admit.json"):
         s = json.load(open(d + "/spec.json")); a = json.load(open(d + "/admit.json"))
-        ctl["s49_" + n] = {"results": len(a["results"]), "admit_sha256": sha(d + "/admit.json"),
-                           "refused": sum(1 for x in a["results"] if P.trivial_reason(x["proof"], P.proof_rules(x["proof"], s["atoms"])))}
+        rows = [{"goal": x["goal"], "proof": x["proof"], "rules": P.proof_rules(x["proof"], s["atoms"])} for x in a["results"]]
+        cov = [P.step_coverage(z["proof"], z["rules"]) for z in rows]
+        ctl["s49_" + n] = {"results": len(rows), "admit_sha256": sha(d + "/admit.json"),
+                           "with_rules": sum(1 for z in rows if z["rules"]),
+                           "steps": sum(c["steps"] for c in cov), "missing": sum(len(c["missing"]) for c in cov),
+                           "refused": sum(1 for z in rows if P.trivial_reason(z["proof"], z["rules"]))}
+        ctl_rows["s49_" + n] = rows
 out["controls"] = ctl
+if ctl_rows:
+    json.dump(ctl_rows, open(E + "/controls_s49.json", "w"), indent=1, sort_keys=True)
 json.dump(out, open(E + "/SUMMARY.json", "w"), indent=1, sort_keys=True)
 for r, p in out["parses"].items():
     print(r, "before", p["before"], "after", p["after"], "refused", p["refused"], p["refused_reasons"],

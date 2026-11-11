@@ -33,8 +33,11 @@ for r in ("r1", "r2", "r3"):
     if nref != S["parses"][r]["refused"] or S["parses"][r]["refused_non_trivial"] != 0: print("COUNT MISMATCH", r); ok = False
 C = json.load(open(E + "/controls_s49.json"))
 for k, rows in sorted(C.items()):
-    n = sum(1 for x in rows if P.trivial_reason(x["proof"], x["rules"])); print(k, "results", len(rows), "refused", n)
-    ok = ok and n == 0
+    n = sum(1 for x in rows if P.trivial_reason(x["proof"], x["rules"]))
+    wr = sum(1 for x in rows if x["rules"]); cov = [P.step_coverage(x["proof"], x["rules"]) for x in rows]
+    st = sum(c["steps"] for c in cov); mi = sum(len(c["missing"]) for c in cov)
+    print(k, "results", len(rows), "with_rules", wr, "steps", st, "missing", mi, "refused", n)
+    ok = ok and n == 0 and wr == len(rows) and mi == 0   # followup-v2: control must not be fail-open
 for k in ("A_A_v3", "A_A_v3r1"):
     rec = json.loads(open(H + "/runs/%s/shadow.jsonl" % k).read().strip().splitlines()[-1])
     qs = [q for q in rec.get("queries", []) if q.get("ok")]

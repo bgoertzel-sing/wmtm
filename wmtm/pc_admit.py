@@ -88,6 +88,13 @@ def sources_for(goal, proof, spec):
         iid = src.get(lab)
         if iid and iid not in ids:
             ids.append(iid)
+    if not ids and "implication-instance-fold" in (proof or ""):
+        # t-2026-11-11 rev2: a fold proof carries no fact labels; its premises are the goal's own chain
+        # (the shared Member facts listed by induction_goal_pool), so map those to their WMTM items.
+        chain = set(((spec.get("goal_meta") or {}).get(goal) or {}).get("chain") or [])
+        for (h, x, y, iid) in spec.get("fact_src") or []:
+            if "(%s %s %s)" % (h, x, y) in chain and iid not in ids:
+                ids.append(iid)
     if not ids:
         m = _GOAL.match(goal or "")
         if m:
@@ -95,6 +102,15 @@ def sources_for(goal, proof, spec):
                 if (x == m.group(2) or y == m.group(3)) and iid not in ids:
                     ids.append(iid)
     return ids
+
+
+def proof_facts(goal, proof, spec):
+    """Facts a proof rests on: its fact labels, else (fold proofs) the goal's chain facts."""
+    lf = spec.get("label_fact") or {}
+    out = sorted({lf.get(x, x) for x in _LABEL.findall(proof or "")})
+    if not out and "implication-instance-fold" in (proof or ""):
+        out = sorted(((spec.get("goal_meta") or {}).get(goal) or {}).get("chain") or [])
+    return out
 
 
 def write_admit_file(out_dir, rec, spec, now=None):
@@ -109,7 +125,7 @@ def write_admit_file(out_dir, rec, spec, now=None):
                 lf = spec.get("label_fact") or {}
                 results.append({"goal": q["goal"], "stv": q["stv"], "proof": q["proof"], "s": q.get("s"),
                                 "sources": sources_for(q["goal"], q["proof"], spec),
-                                "facts": sorted({lf.get(x, x) for x in _LABEL.findall(q["proof"] or "")}),
+                                "facts": proof_facts(q["goal"], q["proof"], spec),
                                 "rules": proof_rules(q["proof"], spec.get("atoms"))})
     doc = {"ts": now or time.time(), "spec_ts": spec.get("ts"), "cycle": spec.get("cycle"), "status": rec.get("status"),
            "canary_ok": canary_ok, "timeout_s": rec.get("timeout_s"), "budget_s": rec.get("budget_s"),
@@ -313,9 +329,11 @@ def log_admission(cfg, path, info, timing=None, now=None):
 # and every such step is applied DIRECTLY to asserted fact labels (sp<n>/wm<n>), possibly revised together.
 # Weighted path: a factored-revision branch whose prior has confidence 0 (e.g. "(inverted L with cpu (prior (STV
 # 0.5 0.0)))") contributes nothing to the conclusion and is skipped.  A weighted "(inverted L ...)" branch is
-# counted as one more step through rule L (so an inverted nwdef over an asserted fact is still head-noun only).  Anything else (another rule, a step over a
-# derived premise = two-step chain, a weighted inverted/reported branch, an unknown head, missing rule atoms) means
-# NOT trivial: the filter fails open and admits.
+# counted as one more step through rule L, classified like a (by L ..) step (so an inverted nwdef over an asserted
+# fact is still head-noun only).  Anything else (another rule, a step over a derived premise = two-step chain, a
+# weighted branch of any other head such as "reported", an unknown head, missing rule atoms) means NOT trivial: the
+# filter fails open and admits.  "Defining rule" means the EXACT narrow_defining_rules shape (_is_nwdef_shape), not
+# any CTV Member implication: a parser class rule such as (pilot -> person) is never treated as nwdef.
 TRIVIAL_RULE = "trivial_restatement"
 _STEP_HEADS = ("by",)
 
@@ -341,7 +359,30 @@ def _member_imp(atom):
         return None
     if a[1] != b[1]:          # same subject on both sides: a variable ($x, nwdef) or one ground witness (parser rule)
         return None
-    return n[1], a[2], b[2], bool(isinstance(tv, list) and tv and tv[0] == "CTV")
+    return n[1], a[2], b[2], _is_nwdef_shape(a[1], a[2], b[2], tv)
+
+
+# Exact shape of a pc_shadow.narrow_defining_rules atom (t-2026-11-10-wmtm-trivial-filter-followup-v2, finding 2):
+#   (: L (Implication (Member $x <B>__nw_<10 hex>) (Member $x <B>)) (CTV (STV 1.0 0.99) (STV 0.0 0.0)))
+# i.e. variable subject, premise class = the deterministic Narrow symbol whose base is exactly the conclusion class,
+# and the fixed definitional truth value.  A parser class rule (e.g. r1 pilot -> person, CTV (STV 0.95 0.9) ...)
+# is NOT a defining rule, whatever its truth-value form.  The label is not used (labels may be anything).
+_NWDEF_TV = ["CTV", ["STV", "1.0", "0.99"], ["STV", "0.0", "0.0"]]
+_NW_SYM = re.compile(r"^(.+)__nw_[0-9a-f]{10}$")
+
+
+def _is_nwdef_shape(subj, S, B, tv) -> bool:
+    if not (isinstance(subj, str) and subj.startswith("$")):
+        return False
+    m = _NW_SYM.match(S)
+    if not (m and m.group(1) == B):
+        return False
+    try:
+        return (isinstance(tv, list) and len(tv) == 3 and tv[0] == "CTV"
+                and all(isinstance(x, list) and len(x) == 3 and x[0] == "STV" for x in tv[1:])
+                and [float(v) for v in tv[1][1:] + tv[2][1:]] == [1.0, 0.99, 0.0, 0.0])
+    except (TypeError, ValueError):
+        return False
 
 
 def proof_rules(proof, atoms):
@@ -351,10 +392,12 @@ def proof_rules(proof, atoms):
     by_lab, defining = {}, {}
     for a in atoms or []:
         a = str(a)
-        if not a.startswith("(: ") or "(Implication" not in a:
+        if not a.startswith("(: ") or not ("(Implication" in a or "(Inheritance" in a):
             continue
         lab = a[3:].split(None, 1)[0]
         by_lab[lab] = a
+        if "(Implication" not in a:
+            continue
         m = _member_imp(a)
         if m and m[3]:
             defining.setdefault(m[1], (lab, a))
@@ -366,6 +409,15 @@ def proof_rules(proof, atoms):
             if m and m[1] in defining:
                 out[defining[m[1]][0]] = defining[m[1]][1]
     return out
+
+
+def step_coverage(proof, rules):
+    """followup-v2 finding 1: for evidence, -> {"steps": n, "known": k, "missing": [labels]}.  A step is known when
+    the atom it cites (Implication rule, or Inheritance fact used as a rule) is in rules, so a control that admits
+    with missing == [] admitted because each step was classified, not because the filter failed open."""
+    labs = re.findall(r"\((?:by|inverted)\s+(\S+)", str(proof or ""))
+    miss = sorted({l for l in labs if l not in (rules or {})})
+    return {"steps": len(labs), "known": sum(1 for l in labs if l in (rules or {})), "missing": miss}
 
 
 def _step_kind(label, rules):

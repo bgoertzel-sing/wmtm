@@ -1,0 +1,4 @@
+{"run": "nov5_True", "class_rules": 76, "nwdef": 76, "antecedent_classes": 76, "max_consequents_per_antecedent": 1, "pairs_shared_ge2": {}, "pairs_shared_1": 0}
+{"run": "r1_True", "class_rules": 63, "nwdef": 63, "antecedent_classes": 63, "max_consequents_per_antecedent": 1, "pairs_shared_ge2": {}, "pairs_shared_1": 0}
+{"run": "r2_True", "class_rules": 71, "nwdef": 71, "antecedent_classes": 71, "max_consequents_per_antecedent": 1, "pairs_shared_ge2": {}, "pairs_shared_1": 0}
+{"run": "r3_True", "class_rules": 64, "nwdef": 64, "antecedent_classes": 64, "max_consequents_per_antecedent": 1, "pairs_shared_ge2": {}, "pairs_shared_1": 0}

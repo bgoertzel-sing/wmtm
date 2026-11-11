@@ -1,0 +1,5 @@
+{
+ "_rule": "Hand verdict for induced rules that the mechanical W1 does not settle (order exception: identical class-level fact in two notes). UNCLEAR: 2 instances, each one note's own skolem saying the same cleanup/done pair; the rule generalizes it to all cleanup (or done) items at conf 0.0024, which the store cannot confirm or refute. On Nov5 a third cleanup member is not done, so cleanup->done would be contradicted; the induced direction there is done->cleanup (2/2).",
+ "(Inheritance cleanup done)": "UNCLEAR",
+ "(Inheritance done cleanup)": "UNCLEAR"
+}

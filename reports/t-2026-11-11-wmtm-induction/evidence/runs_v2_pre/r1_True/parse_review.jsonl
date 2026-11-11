@@ -1,0 +1,1 @@
+{"ts": 1794422779.426603, "cycle": 0, "status": "ok", "gated": [{"fact": "(Member sk_group_1__i_ep_note_20261028T183317Z ok)", "stv": [1.0, 0.99], "quant": null, "reason": "broad_category", "action": "reject", "item": "ep-note-20261028T183317Z"}], "gate_summary": {"rejected": {"broad_category": 1}, "discounted": {}}, "many_conclusions": {}}

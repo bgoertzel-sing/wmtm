@@ -152,6 +152,8 @@ SPEC = {
     "shadow_scoped_witness_goals": ("WMTM_PC_SHADOW_SCOPED_WITNESS_GOALS", bool, True, None),   # P4 rev3: sk_<x>__i_<note> goals allowed
     "shadow_goal_rank":    ("WMTM_PC_SHADOW_GOAL_RANK", bool, True, None),       # Track N: Design A ranked goal pool (off = Track M 2-step goals)
     "shadow_max_hops":     ("WMTM_PC_SHADOW_MAX_HOPS", int, 3, None),            # Track N: longest chain in the pool (derivation steps)
+    "shadow_induction":    ("WMTM_PC_SHADOW_INDUCTION", bool, False, None),      # t-2026-11-11: propose (Inheritance A B) goals from shared Member instances
+    "shadow_induction_min": ("WMTM_PC_SHADOW_INDUCTION_MIN", int, 3, None),      # t-2026-11-11: min shared instances for an induction goal
     "shadow_min_hops":     ("WMTM_PC_SHADOW_MIN_HOPS", int, 1, None),            # Track N: only ask goals needing >= N steps
     "shadow_goal_weights": ("WMTM_PC_SHADOW_GOAL_WEIGHTS", str, "2,1,1,0.5", None),  # Track N: w_req,w_depth,w_info,w_sti
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),

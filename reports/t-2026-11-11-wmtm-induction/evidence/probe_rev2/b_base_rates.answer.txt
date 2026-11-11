@@ -1,0 +1,2 @@
+[0m((: (conditional-implication (merge/revision (by r4 ((inverted r2 with cpu (prior (STV 0.25000694425154857 0.9))) (ctx proof 0))) (by r3 ((inverted r1 with cpu (prior (STV 0.25000694425154857 0.9))) (ctx proof 0))))) (Implication (Member $_0 b) (Member $_0 c)) (STV 0.6005517435149221 0.699959750453079)))
+()
