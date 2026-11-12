@@ -1,0 +1,64 @@
+SHA256SUMS files 175 mismatches 0
+parse calls: v3 call log lines before 178 after 178 same sha True | new calls 0 | live parse-cache files in runs 0 | refusal stubs hit 0
+run	notes	goals	proved	canary	C	W	U	unjudged	trivial	non_trivial	non_trivial_C	W1	uncertain	admitted(filter on,cap)	trivial_refused
+M17_r1_False	17	9	9	True	9	0	0	0	9	0	0	0	1	0 (True,5)	9
+M17_r1_True	17	9	9	True	9	0	0	0	9	0	0	0	1	0 (True,5)	9
+M17_r2_False	17	11	11	True	10	0	1	0	11	0	0	0	1	0 (True,5)	11
+M17_r2_True	17	11	11	True	10	0	1	0	11	0	0	0	1	0 (True,5)	11
+M17_r3_False	17	8	8	True	8	0	0	0	8	0	0	0	0	0 (True,5)	8
+M17_r3_True	17	8	8	True	8	0	0	0	8	0	0	0	0	0 (True,5)	8
+M17_s1_False	17	10	10	True	9	0	1	0	10	0	0	0	1	0 (True,5)	10
+M17_s1_True	17	10	10	True	9	0	1	0	10	0	0	0	1	0 (True,5)	10
+P4_r1_False	4	0	0	True	0	0	0	0	0	0	0	0	0	0 (True,5)	0
+P4_r1_True	4	0	0	True	0	0	0	0	0	0	0	0	0	0 (True,5)	0
+P4_r2_False	4	2	2	True	1	0	1	0	2	0	0	0	1	0 (True,5)	2
+P4_r2_True	4	2	2	True	1	0	1	0	2	0	0	0	1	0 (True,5)	2
+P4_r3_False	4	0	0	True	0	0	0	0	0	0	0	0	0	0 (True,5)	0
+P4_r3_True	4	0	0	True	0	0	0	0	0	0	0	0	0	0 (True,5)	0
+P4_s2_False	4	1	1	True	0	0	1	0	1	0	0	0	1	0 (True,5)	1
+P4_s2_True	4	1	1	True	0	0	1	0	1	0	0	0	1	0 (True,5)	1
+P5_r1_False	5	1	1	True	1	0	0	0	1	0	0	0	1	0 (True,5)	1
+P5_r1_True	5	1	1	True	1	0	0	0	1	0	0	0	1	0 (True,5)	1
+P5_r2_False	5	3	3	True	2	0	1	0	3	0	0	0	2	0 (True,5)	3
+P5_r2_True	5	3	3	True	2	0	1	0	3	0	0	0	2	0 (True,5)	3
+P5_r3_False	5	1	1	True	1	0	0	0	1	0	0	0	0	0 (True,5)	1
+P5_r3_True	5	1	1	True	1	0	0	0	1	0	0	0	0	0 (True,5)	1
+P5_s3_False	5	3	3	True	2	0	1	0	3	0	0	0	1	0 (True,5)	3
+P5_s3_True	5	3	3	True	2	0	1	0	3	0	0	0	1	0 (True,5)	3
+induction on (min3) vs off: identical conclusion sets in all pairs: True
+
+count rule (B sentence vs A whole-note, same notes; B C >= A C and B W <= A W), before / after the trivial filter
+M17 s1 vs r1: B 9C/0W vs A 9C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 drop g_d04b848db7 (A r1, CORRECT, trivial=True): not in B goal pool; entity symbol absent from the B store
+   s11 drop g_d4abda542f (A r1, CORRECT, trivial=True): not in B goal pool; entity present, restriction statement absent or not recovered
+   s11 B-only g_e93132d411 (CORRECT, trivial=True)
+   s11 B-only g_c8659570bb (CORRECT, trivial=True)
+   s11 B-only g_654f171ce1 (UNCLEAR, trivial=True)
+M17 s1 vs r2: B 9C/0W vs A 10C/0W -> FAILS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 drop g_d04b848db7 (A r2, CORRECT, trivial=True): not in B goal pool; entity symbol absent from the B store
+M17 s1 vs r3: B 9C/0W vs A 8C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 drop g_d04b848db7 (A r3, CORRECT, trivial=True): not in B goal pool; entity symbol absent from the B store
+   s11 B-only g_e93132d411 (CORRECT, trivial=True)
+   s11 B-only g_c8659570bb (CORRECT, trivial=True)
+   s11 B-only g_654f171ce1 (UNCLEAR, trivial=True)
+P5 s3 vs r1: B 2C/0W vs A 1C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 drop g_c304a30cab (A r1, CORRECT, trivial=True): not in B goal pool; entity present, restriction statement absent or not recovered
+   s11 B-only g_8a4f8ba632 (CORRECT, trivial=True)
+   s11 B-only g_e93132d411 (CORRECT, trivial=True)
+   s11 B-only g_654f171ce1 (UNCLEAR, trivial=True)
+P5 s3 vs r2: B 2C/0W vs A 2C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 drop g_c304a30cab (A r2, CORRECT, trivial=True): not in B goal pool; entity present, restriction statement absent or not recovered
+   s11 B-only g_8a4f8ba632 (CORRECT, trivial=True)
+P5 s3 vs r3: B 2C/0W vs A 1C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 B-only g_e93132d411 (CORRECT, trivial=True)
+   s11 B-only g_654f171ce1 (UNCLEAR, trivial=True)
+P4 s2 vs r1: B 0C/0W vs A 0C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 B-only g_654f171ce1 (UNCLEAR, trivial=True)
+P4 s2 vs r2: B 0C/0W vs A 1C/0W -> FAILS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 drop g_e93132d411 (A r2, CORRECT, trivial=True): not in B goal pool; entity symbol absent from the B store
+P4 s2 vs r3: B 0C/0W vs A 0C/0W -> HOLDS | after filter B 0C/0W vs A 0C/0W -> HOLDS
+   s11 B-only g_654f171ce1 (UNCLEAR, trivial=True)
+
+KEY: B (sentence) conclusions that are non-trivial AND correct: 0 []
+B conclusions not proved by any whole-note parse on the same note sets: 0 []
+RECOMPUTE_OK
