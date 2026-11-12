@@ -266,3 +266,18 @@ def test_integration_master_load_order(tmp_path):
     assert rc_ == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
     assert rec["load_order"] == "master" and rec["master_meta"]["rules"] > 0
     assert rec["load_order"] == "master" and rec["master_meta"] == spec["master_meta"] and rec["pred_fail"] == 0
+
+
+@pytest.mark.skipif(not (HAVE_PC and HAVE_SPH), reason="engine or sph templates not present")
+def test_integration_master_ops_load_order(tmp_path):
+    """master-adopt-v2: the worker runs master_loader ops in order (preds, rules, statements); canary/neg gate holds."""
+    from wmtm import master_loader as ML
+    ops, meta = ML.plan(_SPH, [], kb_once=True, rules=True)
+    ops = ops + [("pred", "pilotx"), ("atom", "(: s1 (Member ann pilotx) (STV 1.0 0.9))"),
+                 ("atom", "(: s2 (Inheritance pilotx person) (STV 1.0 0.9))")]
+    spec = {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": ["(Member ann person)"],
+            "master_meta": {k: v for k, v in meta.items() if k != "notes"}, "cycle": 1, "k": 0, "items": 0}
+    rc_, rec, _ = _run_worker(tmp_path, spec)
+    assert rc_ == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
+    assert rec["load_order"] == "master_ops" and rec["add_fail"] == 0 and rec["pred_fail"] == 0
+    assert rec["master_meta"]["rules"] == meta["rules"] > 0
