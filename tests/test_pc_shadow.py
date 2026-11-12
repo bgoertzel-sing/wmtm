@@ -232,3 +232,35 @@ def test_decision2_maybe_launch_passes_store_ids(monkeypatch):
     monkeypatch.setattr(pc_shadow.rc, "busy", lambda *a, **k: False)
     assert pc_shadow.maybe_launch(st, 3, cfg=cfg) == 7
     assert len(seen["raw_items"]) == 1 and set(seen["live_ids"]) == {"d0", "s0", "s1", "s2", "s3"}
+
+
+# master-adopt-v2: upstream master load order (cfg shadow_load_order=master); legacy path unchanged without it
+_SPH = os.environ.get("WMTM_PC_SHADOW_SPH_TEMPLATES", "")
+HAVE_SPH = bool(_SPH) and os.path.isfile(os.path.join(_SPH, "tmpl", "lower.py"))
+
+
+def test_master_load_off_by_default():
+    spec = pc_shadow.build_snapshot(_store(SYN), cycle=1)
+    assert "load_order" not in spec and "positive_only" not in spec and "master_rules" not in spec
+
+
+def test_master_load_needs_templates_dir():
+    with pytest.raises(RuntimeError):
+        pc_shadow._master_load({"shadow_load_order": "master", "shadow_sph_templates": ""}, [])
+
+
+@pytest.mark.skipif(not HAVE_SPH, reason="WMTM_PC_SHADOW_SPH_TEMPLATES not set")
+def test_master_load_spec_keys():
+    d = pc_shadow._master_load({"shadow_load_order": "master", "shadow_sph_templates": _SPH},
+                               ["(: a (Member alice Pilot) (STV 1.0 0.9))"])
+    assert d["load_order"] == "master" and "Pilot" in d["positive_only"] and d["master_rules"]
+    assert all(not r.startswith(";") for r in d["master_rules"]) and d["master_meta"]["class_symbols"] == 1
+
+
+@pytest.mark.skipif(not (HAVE_PC and HAVE_SPH), reason="engine or sph templates not present")
+def test_integration_master_load_order(tmp_path):
+    cfg = dict(_CFG, shadow_load_order="master", shadow_sph_templates=_SPH)
+    spec = pc_shadow.build_snapshot(_store(SYN), cycle=1, cfg=cfg)
+    assert spec["load_order"] == "master"
+    rc_, rec, _ = _run_worker(tmp_path, spec)
+    assert rc_ == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]

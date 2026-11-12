@@ -51,11 +51,23 @@ if a.inner:  # ---------------- inner PeTTaChainer child ----------------
     os.environ["PETTA_PATH"] = a.petta
     import petta
     from pettachainer.pettachainer import PeTTaChainer
-    h = PeTTaChainer(); spec = json.load(open(a.spec)); fails = 0
-    for s in RULES + spec["atoms"] + CANARY:
+    h = PeTTaChainer(); spec = json.load(open(a.spec)); fails = 0; pfails = 0
+    # master-adopt-v2: upstream PeTTaChainer master load order (sph 24e37182 templates/README.md).  Only when the
+    # spec says load_order == "master": declare every positive-only predicate (the KB-wide lower.predicates list
+    # and each text's class symbols) BEFORE any statement, then the seeded master rules, then the atoms.  On that
+    # engine a declaration after the statements about it changes nothing.  Without the key: the old path (arm A).
+    if spec.get("load_order") == "master":
+        for name in list(spec.get("positive_only") or []):
+            try: h.set_positive_only_predicate(name)
+            except Exception: pfails += 1
+        pre = list(spec.get("master_rules") or [])
+    else:
+        pre = []
+    for s in RULES + pre + spec["atoms"] + CANARY:
         try: h.add_atom(s)
         except Exception: fails += 1
-    print("READY " + json.dumps({"add_fail": fails, "petta": petta.__file__}), flush=True)
+    print("READY " + json.dumps({"add_fail": fails, "pred_fail": pfails, "load_order": spec.get("load_order") or "legacy",
+                                 "petta": petta.__file__}), flush=True)
     for line in sys.stdin:
         g = line.strip()
         if not g: continue
