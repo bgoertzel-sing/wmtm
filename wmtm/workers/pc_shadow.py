@@ -56,7 +56,16 @@ if a.inner:  # ---------------- inner PeTTaChainer child ----------------
     # spec says load_order == "master": declare every positive-only predicate (the KB-wide lower.predicates list
     # and each text's class symbols) BEFORE any statement, then the seeded master rules, then the atoms.  On that
     # engine a declaration after the statements about it changes nothing.  Without the key: the old path (arm A).
-    if spec.get("load_order") == "master":
+    if spec.get("load_order") == "master_ops":   # master-adopt-v2: wmtm/master_loader.plan ops, in recipe order
+        for kind, x in list(spec.get("master_ops") or []):
+            try:
+                if kind == "pred": h.set_positive_only_predicate(x)
+                else: h.add_atom(x)
+            except Exception:
+                if kind == "pred": pfails += 1
+                else: fails += 1
+        pre = []
+    elif spec.get("load_order") == "master":
         for name in list(spec.get("positive_only") or []):
             try: h.set_positive_only_predicate(name)
             except Exception: pfails += 1
