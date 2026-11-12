@@ -264,3 +264,5 @@ def test_integration_master_load_order(tmp_path):
     assert spec["load_order"] == "master"
     rc_, rec, _ = _run_worker(tmp_path, spec)
     assert rc_ == 0 and rec["status"] == "ok" and rec["canary"]["ok"] and not rec["neg"]["ok"]
+    assert rec["load_order"] == "master" and rec["master_meta"]["rules"] > 0
+    assert rec["load_order"] == "master" and rec["master_meta"] == spec["master_meta"] and rec["pred_fail"] == 0

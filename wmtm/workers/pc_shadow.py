@@ -156,6 +156,9 @@ if "raw_items" in spec:  # built here, off the cycle path
     os.replace(a.spec + ".tmp", a.spec)
 rec = {"mem_cap_mb": (MEM_CAP or 0) // (1 << 20), "prio": PRIO, "source": spec.get("source"), "cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
        "atoms": len(spec["atoms"]), "goals_n": len(spec["goals"]), "timeout_s": a.timeout, "budget_s": a.budget, "steps": a.steps}
+if spec.get("master_meta"): rec["master_meta"] = spec["master_meta"]  # master-adopt-v2: record what the master load put in
+if spec.get("master_meta") is not None:   # master-adopt-v2: what arm B loaded (decls/rules), so the record alone shows it
+    rec["master_meta"] = spec["master_meta"]
 w = Inner(); rec["warm_s"] = w.warm_s; rec.update(w.info); res = []
 if not w.ok:
     rec["status"] = "warm_fail"; w.kill()
