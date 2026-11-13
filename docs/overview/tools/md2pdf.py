@@ -1,5 +1,5 @@
 """Minimal Markdown -> PDF for WMTM_OVERVIEW.md (headings, paragraphs, nested bullets, numbered lists, tables).
-Usage: PYTHONPATH=<reportlab dir> python3 md2pdf.py IN.md OUT.pdf"""
+Usage: PYTHONPATH=<reportlab dir> python3 md2pdf.py IN.md OUT.pdf [FOOTER_TITLE]  (also ``` fenced blocks)"""
 import re, sys
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
@@ -11,15 +11,22 @@ from reportlab.pdfbase.ttfonts import TTFont
 D = "/usr/share/fonts/truetype/dejavu/"
 pdfmetrics.registerFont(TTFont("DV", D + "DejaVuSans.ttf"))
 pdfmetrics.registerFont(TTFont("DVB", D + "DejaVuSans-Bold.ttf"))
-pdfmetrics.registerFont(TTFont("DVI", D + "DejaVuSans.ttf"))
+import os as _os
+_RL = _os.path.join(_os.path.dirname(__import__("reportlab").__file__), "fonts") + "/"
+# Italics: this host has no DejaVu Oblique; Bitstream Vera (DejaVu's parent face) ships with reportlab.
+pdfmetrics.registerFont(TTFont("DVI", _RL + "VeraIt.ttf"))
+pdfmetrics.registerFont(TTFont("DVBI", _RL + "VeraBI.ttf"))
 pdfmetrics.registerFont(TTFont("DVM", D + "DejaVuSansMono.ttf"))
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
-registerFontFamily("DV", normal="DV", bold="DVB", italic="DVI", boldItalic="DVB")
+registerFontFamily("DV", normal="DV", bold="DVB", italic="DVI", boldItalic="DVBI")
 base = ParagraphStyle("b", fontName="DV", fontSize=9.5, leading=13, spaceAfter=4)
 H = {1: ParagraphStyle("h1", parent=base, fontName="DVB", fontSize=16, leading=20, spaceAfter=8),
      2: ParagraphStyle("h2", parent=base, fontName="DVB", fontSize=13, leading=17, spaceBefore=10, spaceAfter=6),
      3: ParagraphStyle("h3", parent=base, fontName="DVB", fontSize=11, leading=14, spaceBefore=8, spaceAfter=4)}
 cell = ParagraphStyle("c", parent=base, fontSize=8, leading=10, spaceAfter=0)
+from reportlab.platypus import Preformatted
+mono = ParagraphStyle("m", parent=base, fontName="DVM", fontSize=7.5, leading=9, leftIndent=6,
+                      backColor=colors.HexColor("#f4f4f4"), borderPadding=4, spaceBefore=4, spaceAfter=4)
 def inline(t):
     t = t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     codes = []
@@ -39,6 +46,12 @@ while i < len(lines):
     l = lines[i]
     m = re.match(r"^(#{1,3}) (.*)$", l)
     if m: flush(); out.append(Paragraph(inline(m.group(2)), H[len(m.group(1))])); i += 1; continue
+    if l.startswith("```"):
+        flush(); code = []; i += 1
+        while i < len(lines) and not lines[i].startswith("```"):
+            code.append(lines[i]); i += 1
+        i += 1
+        out += [Preformatted("\n".join(code), mono), Spacer(1, 6)]; continue
     if l.startswith("|"):
         flush(); rows = []
         while i < len(lines) and lines[i].startswith("|"):
@@ -62,9 +75,10 @@ while i < len(lines):
     if not l.strip(): flush(); i += 1; continue
     para.append(l.strip()); i += 1
 flush()
+TITLE = sys.argv[3] if len(sys.argv) > 3 else "WMTM overview"
 def foot(c, d):
-    c.saveState(); c.setFont("DV", 8); c.drawRightString(A4[0] - 2 * cm, 1.2 * cm, "WMTM overview - page %d" % d.page); c.restoreState()
+    c.saveState(); c.setFont("DV", 8); c.drawRightString(A4[0] - 2 * cm, 1.2 * cm, (TITLE + " - page %d") % d.page); c.restoreState()
 doc = SimpleDocTemplate(sys.argv[2], pagesize=A4, leftMargin=2 * cm, rightMargin=2 * cm, topMargin=1.8 * cm, bottomMargin=1.8 * cm,
-                        title="WMTM overview", author="ProtomegaTron")
+                        title=TITLE, author="ProtomegaTron")
 doc.build(out, onFirstPage=foot, onLaterPages=foot)
 print("pages", doc.page)
