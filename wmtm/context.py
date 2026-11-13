@@ -741,6 +741,19 @@ def recall_spread_seeds(cfg):
     return v if v in SPREAD_SEED_MODES else "all"
 
 
+def recall_spread_pct(cfg, key):
+    """recall_spread_fallback_pct / recall_spread_add_pct (t-2026-11-13-wmtm-spread-seed-sweep): the percentage of
+    residents (top by STI) added to recall_spread_seeds=turn's seeds.  -> float in [0, 100]; absent, invalid, NaN or
+    <= 0 -> 0.0 (off); > 100 -> 100.0.  Never raises."""
+    try:
+        v = float(setting(cfg, key))
+    except Exception:
+        return 0.0
+    if v != v or v <= 0:
+        return 0.0
+    return min(v, 100.0)
+
+
 def protect_settings(cfg):
     """-> {"turns", "s"} for cleanup_stale_items / the fast path, or None (rc2 behaviour) when the flag is off."""
     try:

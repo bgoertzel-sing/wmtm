@@ -267,6 +267,11 @@ class WMTM:
                 seeds = _ctx.recall_spread_seeds(pcfg)
                 skw = {} if seeds == "all" else {"spread_seeds": seeds,
                                                  "request_id": _ctx.request_item_id(user_msg, pcfg)}
+                if seeds == "turn":     # t-2026-11-13-wmtm-spread-seed-sweep: top x% residents, fallback / every turn
+                    for k, f in (("fallback_pct", "recall_spread_fallback_pct"), ("add_pct", "recall_spread_add_pct")):
+                        v = _ctx.recall_spread_pct(pcfg, f)
+                        if v > 0:
+                            skw[k] = v
                 candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg), **skw) if top_k > 0 else []
                 admitted_snippets = []
                 for c in candidates:

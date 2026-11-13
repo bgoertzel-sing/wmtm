@@ -156,6 +156,12 @@ SPEC = {
     # all = every resident (the behaviour before the flag); focus = top 50% of residents by STI (s9.2 "attention
     # focus"); turn = this turn's keyword-matched clusters + the request item.  Invalid = all.
     "recall_spread_seeds": ("WMTM_RECALL_SPREAD_SEEDS", str, "all", None),
+    # t-2026-11-13-wmtm-spread-seed-sweep: extra seeds for recall_spread_seeds=turn only (ignored by all/focus), the top
+    # x% of residents by STI (ceil(n*x/100), as focus does for 50).  fallback = only on turns where no cluster matches
+    # the query by keyword (E's empty-seed turns); add = on every turn.  0 = off (the default: plain turn); clamped to
+    # 0..100; invalid = 0.  Both set: a no-match turn uses the larger of the two.
+    "recall_spread_fallback_pct": ("WMTM_RECALL_SPREAD_FALLBACK_PCT", float, 0.0, None),
+    "recall_spread_add_pct": ("WMTM_RECALL_SPREAD_ADD_PCT", float, 0.0, None),
     "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
     "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
     "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds

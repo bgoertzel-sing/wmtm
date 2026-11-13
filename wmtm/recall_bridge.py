@@ -5,6 +5,7 @@ into the WMTM based on current task context and ECAN attention signals.
 """
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass, field
 from typing import Optional
@@ -211,6 +212,8 @@ class RecallBridge:
         floor: float = 0.0,
         spread_seeds: str = "all",
         request_id: Optional[str] = None,
+        fallback_pct: float = 0.0,
+        add_pct: float = 0.0,
     ) -> list[RecallCandidate]:
         """Recall items from LTM matching query_context, or linked to the active set (design s3.3, s8.1).
 
@@ -226,6 +229,9 @@ class RecallBridge:
         spread_seeds (flag recall_spread_seeds, t-2026-11-11-wmtm-spread-seeds-probe): which items layer 5 (direct
         links + spreading activation) starts from; see spread_seed_ids.  Residents are never candidates whatever the
         seeds.  The default "all" is the behaviour before the flag (every resident seeds).
+
+        fallback_pct / add_pct (flags recall_spread_fallback_pct / recall_spread_add_pct,
+        t-2026-11-13-wmtm-spread-seed-sweep): with spread_seeds="turn" only, see spread_seed_ids.  0 = off.
         """
         query_terms: set[str] = self._tokenize(query_context)
         active_ids: set[str] = {item.id for item in store.get_active_set()}
@@ -233,7 +239,8 @@ class RecallBridge:
         if spread_seeds in (None, "all"):
             seeds, own = active_ids, {}
         else:
-            seeds = self.spread_seed_ids(spread_seeds, query_terms, store, request_id)
+            pk = {k: v for k, v in (("fallback_pct", fallback_pct), ("add_pct", add_pct)) if v}
+            seeds = self.spread_seed_ids(spread_seeds, query_terms, store, request_id, **pk)
             own = {"exclude_seed_self": True}   # a keyword hit seeding the spread is not "connected" to itself
 
         for cluster in self._clusters:
@@ -259,6 +266,8 @@ class RecallBridge:
         query_terms: set[str],
         store: WMTMStore,
         request_id: Optional[str] = None,
+        fallback_pct: float = 0.0,
+        add_pct: float = 0.0,
     ) -> set[str]:
         """Seeds of recall's layer 5 for a recall_spread_seeds mode (t-2026-11-11-wmtm-spread-seeds-probe).
 
@@ -268,6 +277,9 @@ class RecallBridge:
         turn:  this turn only: every cluster (resident or not) matching the query by keyword (layers 1-2 of
                _score_cluster score > 0), plus the request item id.  The request item is not a journal cluster,
                so it has no EvidenceFor/PromotesFrom edges and spreads nothing in the LTM graph.
+               turn only (t-2026-11-13-wmtm-spread-seed-sweep): plus the top x% of residents by STI
+               (top_sti_ids), x = add_pct on every turn, or fallback_pct on a turn where no cluster matches the query
+               by keyword (the larger of the two if both are set).  0 = nothing added (plain turn).
         Unknown mode = all.
         """
         residents = store.get_active_set()
@@ -276,10 +288,23 @@ class RecallBridge:
             return {it.id for it in ranked[:(len(ranked) + 1) // 2]}
         if mode == "turn":
             seeds = {c.id for c in self._clusters if self._keyword_matches(c, query_terms)}
+            pct = max(add_pct or 0.0, (fallback_pct or 0.0) if not seeds else 0.0)
             if request_id:
                 seeds.add(request_id)
+            if pct > 0:
+                seeds |= self.top_sti_ids(residents, pct)
             return seeds
         return {it.id for it in residents}
+
+    @staticmethod
+    def top_sti_ids(residents, pct: float) -> set[str]:
+        """The top pct% of residents by attention.sti: ceil(n * pct / 100) of n (at least 1 when pct > 0 and n > 0),
+        ties in the given order (t-2026-11-13-wmtm-spread-seed-sweep; the same ranking as focus, which is pct 50)."""
+        if pct <= 0 or not residents:
+            return set()
+        k = min(len(residents), max(1, math.ceil(len(residents) * min(pct, 100.0) / 100.0 - 1e-9)))
+        ranked = sorted(residents, key=lambda it: it.attention.sti, reverse=True)   # stable: ties keep order
+        return {it.id for it in ranked[:k]}
 
     def _keyword_matches(self, cluster: LTMCluster, query_terms: set[str]) -> bool:
         """True when layers 1-2 of _score_cluster give cluster a score > 0 (a shared token, or a query term of 4+
