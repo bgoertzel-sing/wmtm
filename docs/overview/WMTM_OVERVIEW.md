@@ -19,7 +19,7 @@ exercised. Abduction, analogy, contradiction handling and evidence aggregation i
 The goal chainer runs as a log-only goal engine. Its core is MesTTo's GoalChainer v2, run in a separate process.
 It is off by default and never acts: it writes proposals to a log, and with an extra flag can show at most three
 "suggestions (not instructions)" lines. "Goal-driven guidance" in the reasoning sense is narrower. The shadow ranks
-the chaining goals it asks PeTTaChainer by request overlap, depth and informativeness (Track N).
+the chaining goals it asks PeTTaChainer by request overlap, depth, informativeness and source STI (Track N, which is Track M's Design A).
 
 Evaluation is evidence-first. Unit tests come with negative controls that must fail for the stated reason. A/B
 replays run on frozen parses and are judged by andy's count rule (no more wrong, no fewer correct). Further checks
@@ -220,7 +220,8 @@ brings better structure at the price of LLM cost, run-to-run variance, and depen
   higher-order truth values nor per-packet provenance in the Omega-PLN sense are implemented. Provenance is the
   proof term plus `derived_from` ids.
 - **Rule coverage is the binding limit.** Of 75 conclusions a reader expected on the master-adopt-v2 notes, B
-  reached 8. 33 had a rule but no premise. 34 need rules that don't exist (hour ordering 7, supersession 6, sums 5,
+  reached 8. 33 had a rule but were not derived (32 because the premise was not parsed, 1 with the premise loaded but not
+  derived). 34 need rules that don't exist (hour ordering 7, supersession 6, sums 5,
   contradiction 4) (t-2026-11-12-wmtm-parser-master-adopt-v2, reader-expectation pass).
 
 ### 1.7 The goal chainer and goal-driven guidance of Omega
@@ -231,9 +232,11 @@ brings better structure at the price of LLM cost, run-to-run variance, and depen
 backward-chaining, so it needs goals. The shadow builds a pool of goals that are derivable by Inheritance / Implies
 transitivity and Member + Inheritance chains, up to `shadow_max_hops`. Goals already asserted are left out, and so are
 `sk_*` placeholders by default. Each goal is scored as `w_req`·(overlap with the current request) + `w_depth`·(hops − 1)
-+ `w_info`·(category informativeness), and the top goals are asked. This is the only way the current conversation
-steers inference. Track M (`docs/TRACK_M_GOALS.md`, design only) proposes steering goal generation away from the
-one-hop "X is a Y" conclusions that dominate admissions. **Not built.**
++ `w_info`·(category informativeness) + `w_sti`·(max source STI), default weights 2, 1, 1, 0.5
+(`runtime_config.py:158`), and the top goals are asked. This is the only way the current conversation
+steers inference. Track M (`docs/TRACK_M_GOALS.md`) has three parts. Its Design A (request anchor + depth + informativeness + STI) is
+exactly this ranking, so it **is built**. Design B (goals from open questions; the parser's queries are still
+dropped) and the one-line contradiction check are **not built**.
 
 **(b) The goal engine: GoalChainer (v0.6 native, v0.7 = GoalChainer v2).** Its design is in
 `docs/GOALCHAINER_DESIGN.md` (a proposal for Ben, step 4 of the 2026-10-12 plan). The as-built version is in
@@ -293,7 +296,9 @@ andy's decision of 2026-11-10 (order attachment `SCORING-RULES.md`): "working" i
 tests and Mesto's worked examples**. The A/B count rule is a *no-regression guard*, not a definition of success.
 t-2026-11-10-wmtm-design-gap-check turned both into tests (`tests/test_design_s12_gapcheck.py`,
 `tests/test_design_s12_engine.py`). At 27c1a41 the result was 16 pass + 8 xfail in the gap-check file and 2 pass in
-the engine file. Each xfail names its GAP id, so closing a gap flips a test.
+the engine file. At e59ab57 the gap-check file gives 19 passed + 5 xfailed (GAP-3, 4, 6, 7, 8): later merged tasks
+closed GAP-1, GAP-2 and the S part of GAP-5 (the GAP-5 xfail was removed in 8849379, trivial-filter, PR #21).
+Each xfail names its GAP id, so closing a gap flips a test.
 
 ### 2.2 Unit tests with negative controls
 
@@ -410,7 +415,7 @@ A = live behaviour, 2C/2W on the judged evaluation notes. C/W/U = correct / wron
 | **t-2026-11-12-wmtm-parser-master-adopt-v2** | sph 24e37182 + 280 seeded rules (full_s2) | **105/105 proved, 97C/4W/4U**; 82 of 105 restatements (77 symmetry, 5 coref), trivial filter catches 0; W1 = 0; non-restatement 22C/1W | **fails** as a whole (4W > 2W); **holds** on the 23 non-restatements |
 
 Master-adopt-v2 further: sens_s2 119/119 proved, 110C/4W/5U (fails); Mesto §11: 10 dropped, 4 real losses; reader
-pass: 75 expected, B reached 8 (33 rule present but premise missing, 34 need a missing rule). Worker recommendation:
+pass: 75 expected, B reached 8 (33 rule present but not derived: 32 premise not parsed, 1 premise loaded but not derived; 34 need a missing rule). Worker recommendation:
 do not adopt yet.
 
 ### 3.3 Open, with owner and task
@@ -418,7 +423,7 @@ do not adopt yet.
 | Open item | State | Owner / decider | Task reference |
 |---|---|---|---|
 | Promotion of derived beliefs to LTM (GAP-4) | off by default; XS code change, waits on a triviality signal | Ben / andy decide | t-2026-11-10-wmtm-design-gap-check |
-| Useful-vs-trivial signal (GAP-5) | utility credits display; xfail open | ours (M) | design-gap-check; t-2026-11-10-wmtm-score-49-goals |
+| Useful-vs-trivial signal (GAP-5) | S part closed (trivial-restatement filter, 8849379 on main; xfail removed); M part open: utility still credits display | ours (M) | t-2026-11-10-wmtm-trivial-filter; design-gap-check; t-2026-11-10-wmtm-score-49-goals |
 | Trivial-filter extension to restatements; adjective seeding | 0 of 82 restatements caught | andy decides | t-2026-11-12-wmtm-parser-master-adopt-v2 |
 | Adopt the master loader in live `build_snapshot` | branch only; not recommended yet | andy decides | parser-master-adopt-v2 |
 | Inference breadth: abduction, analogy, aggregation (GAP-9); still in scope? | not present | Roman (PeTTaChainer rules) + ours; Ben decides scope | design-gap-check |
@@ -440,4 +445,7 @@ do not adopt yet.
 | Gateway cache patch | pop-os OpenClaw gateway (guard timer) | Fixed upstream in OpenClaw |
 | Seeded rule file (280 rules) | master-adopt-v2 branch | The parser emits the class-level rules itself |
 
-All entries are listed in `docs/STOPGAPS.md`, with reasons.
+Only PC-EQ1 is listed in `docs/STOPGAPS.md`. The narrow pre-load rewrite is marked `STOPGAP (narrow_preload)` in
+code (`semparse_adapter.py:473`, `:508`) and recorded in t-2026-11-10-wmtm-narrow-preload. The gateway cache patch
+is recorded in t-2026-11-10-wmtm-parse-caching and t-2026-11-11-wmtm-gateway-patch-guard. The seeded rule file is
+recorded on the master-adopt-v2 branch and in its report (t-2026-11-12-wmtm-parser-master-adopt-v2).
