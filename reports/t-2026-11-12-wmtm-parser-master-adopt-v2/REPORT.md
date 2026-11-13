@@ -1,4 +1,4 @@
-# t-2026-11-12-wmtm-parser-master-adopt-v2 (revision 4, review 3 fixes)
+# t-2026-11-12-wmtm-parser-master-adopt-v2 (revision 5, review 4 fixes)
 
 Supersedes: t-2026-11-12-wmtm-parser-master-adopt
 
@@ -6,6 +6,15 @@ Supersedes: t-2026-11-12-wmtm-parser-master-adopt
 The task was to adopt the Man Hin parser master recipe (sph 24e37182) in the WMTM shadow loader, re-parse the 20 f3-ab notes sentence by sentence, and compare the result with the old loader (M17 r1-r3) and with live F3 v3, using the pre-registered f3-ab criterion. The loader works: arm B proves all its goals (105/105, and 119/119 in the sensitivity run), the canary passes and the negative control does not fire. Every goal now has a hand verdict. Main arm: 97 correct, 4 wrong, 4 unclear. Sensitivity arm (which also builds goals from the parser's per-sentence adjective rules): 110 correct, 4 wrong, 5 unclear.
 
 Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= correct(A) and wrong(B) <= wrong(A), A = live F3 v3 at 2C/2W) FAILS for both arms as a whole, because B has 4 wrong goals. It HOLDS for the 23 goals that are not restatements (22C/1W). 82 of the 105 goals are restatements (77 symmetry, 5 coref links) that the shipped trivial filter does not catch, and 3 of the 4 wrong goals are among them. Once labels are unique per note, no goal joins two notes (W1 = 0). Mesto §11: 10 earlier conclusions are dropped, and 4 of those are real losses of correct conclusions. Against the old loader (M17 r1/r2/r3, now fully judged: 8C/1W, 10C/1W, 7C/1W) the count rule also FAILS for B as a whole (4W > 1W) and HOLDS for the non-restatement goals (22C/1W). The per-note label suffix makes a fact that two notes share verbatim count as separate evidence (41 extra copies in s2); no proof in the main arm cites one of them. Open decisions for a human: (1) whether to extend the trivial filter to the symmetry and coref-link restatements, after which the count rule would be re-run; (2) whether to seed the parser's per-sentence adjective implications as goal sources (the sensitivity arm), which recovers 8 of the 12 old-loader goals but also brings back the 2 goals F3 v3 judged wrong (see Disagreement).
+
+Reader-expectation pass (revision 5, order Do item 5): for each of the 20 notes I listed the conclusions a reader would expect, 75 in all (52 firm, 23 uncertain), each with the rule id from the pinned rules file or, where no rule exists, the missing rule shape. B got 8 of the 75. For 33 a rule exists but B did not derive it, almost always because the parse never produced the premise (32 of 33; most often month_class with no Month fact, rank_orders, becauseof_cause). 34 need a rule the file does not have; the most common shapes are clock-time order (hour_order, 7), "superseded means no longer current" (6), sums of counts (5) and "contradicted means no longer holds" (4).
+## Review 4 findings, row by row
+| finding | fix | where |
+|---|---|---|
+| 1 Do item 5 / Acceptance 4 not delivered | done: reader-expectation pass over all 20 notes, 75 expected conclusions (3 to 6 per note), each with a rule id or a gap shape, certainty firm/uncertain, B goal id where B got it, and a status (got / rule exists, premise not parsed / rule exists, premise loaded, not derived / no rule). Paraphrases of note text stay on pop-os; the report carries only ids, rule names and counts. recompute.py recounts it | section "Reader-expectation pass"; armB/verdicts/reader_expect.tsv |
+| 2 stopgap not named | Limits now says the narrow_preload stopgap in wmtm/semparse_adapter.py stays in place and build_snapshot only knows the whole-note master path | Limits |
+| 3 ids of correct non-restatement goals | listed: strict-split survivors b72, b73 (month_class), b103 (subset_is_part), b104 (partof_trans), b105 (becauseof_cause) | Count rule section |
+| 4 lesser | duplicate master_meta assignment removed; the worker now calls master_loader.apply instead of its own copy of the loop (tests/test_master_loader.py + tests/test_pc_shadow.py with the pinned engine: 29 passed, 0 skipped). Evidence was produced before this refactor; the load ops and their order are unchanged. Parse use at exactly 30/hour noted as at the cap, not over | wmtm/workers/pc_shadow.py |
 
 ## Review 3 findings, row by row
 | finding | fix | where |
@@ -53,7 +62,8 @@ Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= c
 - 53e5d9b per-note label suffix + test (R3)
 - bbb27b1 report revision 2, recompute.py extended (verdict counts, count rule, Mesto drop list)
 - 575cb7e report revision 3 (review 2), recompute.py checks M17 count rule, line-up and suffix duplicates
-- this commit: report revision 4 (review 3): SHA256SUMS committed, 5 M17 verdicts, alternative restatement split, missing-list scope
+- 63441e5 report revision 4 (review 3): SHA256SUMS committed, 5 M17 verdicts, alternative restatement split, missing-list scope
+- this commit: report revision 5 (review 4): reader-expectation pass, stopgap named, strict-split ids, pc_shadow uses master_loader.apply
 
 ## Pins (armB/pins.txt)
 PeTTa 3681b9baa28d (clean); PeTTaChainer b6aacc686675 (only untracked examples/indprobe/); sph 24e37182e64a; seeded_rules.pettachainer-master.metta sha256 9c58f2e01f8db9a67553e3b5985de107d1bd5941b2ecb65337d45b4d0c2b0454 (280 rules, 165 KB predicates, 16 shared defs, 1935 ops); rules.yaml sha256 e2c37881...0dcb; prompt sha256 257425b2...4809; worker config armB/worker_config_B.json sha256 8ff675eb...0f76.
@@ -99,7 +109,7 @@ Of the 77 symmetry goals, 29 are KB-only ScaleOpposite symmetries (so_sym on sha
 
 Old loader M17 goals are judged with the F3 v3 B_v3 verdicts plus 5 new hand verdicts (verdicts_m17_extra.tsv); revision 2 left these unjudged.
 
-Restatement split sensitivity (review 3 finding 6): score.py counts only same_coref and coref_bearer as coref links. If all six coref role rules count as restatements, non-restatement is 5C/0W: HOLDS vs A_v3, FAILS vs M17 r1/r2/r3. The 22C/1W line rests on the narrower split.
+Restatement split sensitivity (review 3 finding 6): score.py counts only same_coref and coref_bearer as coref links. If all six coref role rules count as restatements, non-restatement is 5C/0W: HOLDS vs A_v3, FAILS vs M17 r1/r2/r3. The 22C/1W line rests on the narrower split. The 5 strict-split goals, all judged correct: b72 and b73 (month_class), b103 (subset_is_part), b104 (partof_trans), b105 (becauseof_cause).
 
 W1 (cross-note wrong conclusion): 0 in both arms. No proof uses premises from two notes.
 
@@ -121,14 +131,46 @@ Disagreement: F3 v3 judged the 2 "effective" goals (notes 185132Z and 185959Z; b
 
 full_s2 keeps 0 of the 20 earlier conclusions; sens_s2 keeps 10.
 
-Scope: this list is the conclusions earlier runs derived that B dropped (10 rows, 7 notes or entities). It is not a reader-expectation pass over all 20 notes (order Do item 5); that pass was not done.
+Scope: this list is the conclusions earlier runs derived that B dropped (10 rows, 7 notes or entities). The per-note reader-expectation pass follows.
+
+## Reader-expectation pass over all 20 notes (armB/verdicts/reader_expect.tsv)
+Method: I read every parsed sentence of each note and wrote down what a reader would conclude from it, beyond restating it. Each row names a rule id from seeded_rules.pettachainer-master.metta (sph 24e37182) or, where the file has no such rule, a gap shape (GAP:<shape>). Certainty is firm or uncertain. Status is computed: "got" if a proved B goal matches; otherwise, for a rule row, whether the rule's head premise predicate occurs among that note's loaded atoms (a loaded premise does not mean all premises are there). One reader's list, so it is a floor, not a full count.
+
+Totals: 75 rows, 20 notes, 52 firm / 23 uncertain. got 8 (b02, b52, b64, b72, b73, b103, b104, b105); rule exists, premise not parsed 32; rule exists, premise loaded, not derived 1 (coref_theme, 122745Z); no rule 34.
+Rule exists, not derived, by rule: month_class 13, rank_orders 5, becauseof_cause 4, measure_moreby 2, measure_same 2, coref_theme, days_before_day, subset_is_part, located_trans, located_in_part, unit_atmost, unit_measure 1 each.
+No rule, by shape: hour_order 7, supersedes_not_current 6, sum_of_parts 5, contradicts_not 4, directive_inherit 3, group_distribute 2, passed_closes 2, evidence_to_not, note_adjective_impl, exclusive_location, negation_parse 1 each, none_needed_asserted 1 (a fact the parse already asserts; listed for completeness, not a missing rule).
+
+| note | rows | got by B (goal ids) | rule exists, premise not parsed | rule exists, premise loaded, not derived | no rule (gap shape) |
+|---|---|---|---|---|---|
+| 004843Z | 4 | b52 | located_trans, month_class | - | sum_of_parts |
+| 043925Z | 3 | - | located_in_part, month_class, unit_atmost | - | - |
+| 045724Z | 3 | - | month_class, rank_orders | - | directive_inherit |
+| 051320Z | 3 | - | month_class, rank_orders | - | directive_inherit |
+| 051925Z | 3 | - | month_class | - | passed_closes, supersedes_not_current |
+| 121808Z | 6 | b73 | measure_moreby | - | contradicts_not, hour_order, sum_of_parts, supersedes_not_current |
+| 122745Z | 5 | - | - | coref_theme | directive_inherit, evidence_to_not, hour_order, supersedes_not_current |
+| 151833Z | 3 | b02 | month_class | - | contradicts_not |
+| 153222Z | 4 | b64 | measure_same | - | hour_order, supersedes_not_current |
+| 154242Z | 3 | - | measure_moreby, month_class, rank_orders | - | - |
+| 165705Z | 3 | - | month_class, rank_orders, unit_measure | - | - |
+| 181709Z | 4 | b105 | month_class | - | negation_parse, sum_of_parts |
+| 183317Z | 4 | b72 | days_before_day, subset_is_part | - | sum_of_parts |
+| 185132Z | 5 | b103 | becauseof_cause | - | contradicts_not, hour_order, sum_of_parts |
+| 185959Z | 5 | - | - | - | contradicts_not, group_distribute, hour_order, note_adjective_impl, supersedes_not_current |
+| 190214Z | 4 | - | - | - | exclusive_location, hour_order, passed_closes, supersedes_not_current |
+| 193449Z | 3 | - | becauseof_cause, month_class | - | group_distribute |
+| 193740Z | 4 | b104 | becauseof_cause, month_class | - | none_needed_asserted |
+| 194242Z | 3 | - | becauseof_cause, month_class | - | hour_order |
+| 203949Z | 3 | - | measure_same, month_class, rank_orders | - | - |
+
 
 ## Limits
 - The loader is wired only into the worker spec path (pc_shadow worker, load_order=master_ops). wmtm/pc_shadow.build_snapshot (the live shadow) does not use master_loader. Adoption would need that wiring as a separate change.
 - Per-note label suffix: a statement two notes share verbatim is loaded once per note, so the engine counts it as separate evidence (41 extra copies in s2). No main-arm proof relies on one.
 - The shipped trivial filter (pc_admit.trivial_reason) catches 0 of the 82 restatements.
 - Verdicts are by one judge (me) against the source sentence; wording is in EV only.
-- Missing-conclusions list is limited to earlier-run conclusions, not a per-note reader-expectation pass (review 3 finding 4).
+- The reader-expectation pass is one reader's list (75 rows); status checks only the head premise predicate.
+- The narrow_preload stopgap in wmtm/semparse_adapter.py stays in place; build_snapshot only knows the whole-note master path. The recipe path (master_ops) is reachable only through a built spec.
 - goalchainer is off in this offline A/B, so criterion items about goal escalations were not exercised.
 
 ## Open

@@ -106,4 +106,16 @@ if os.path.exists(cs) and os.path.exists(sums):
     same = open(cs, "rb").read() == open(sums, "rb").read()
     print("committed SHA256SUMS equals evidence SHA256SUMS:", same)
     if not same: bad += 1
+# review 4: reader-expectation pass
+import csv as _csv
+_re = os.path.join(EV, "armB/verdicts/reader_expect.tsv")
+if os.path.exists(_re):
+    RR = list(_csv.DictReader(open(_re), delimiter="\t"))
+    _ok = {x["goal_id"] for x in json.load(open(os.path.join(EV, "armB/full_s2/score.json")))["rows"] if x["ok"]}
+    _st = Counter(x["status"] for x in RR)
+    print("reader pass rows=%d notes=%d" % (len(RR), len({x["note"] for x in RR})), dict(sorted(_st.items())),
+          "firm=%d" % sum(x["certainty"] == "firm" for x in RR))
+    _badgot = [x["B_goal"] for x in RR if x["status"] == "got" and x["B_goal"] not in _ok]
+    _gapmis = [x for x in RR if (x["status"] == "gap_no_rule") != x["rule"].startswith("GAP:")]
+    if len(RR) != 75 or len({x["note"] for x in RR}) != 20 or _badgot or _gapmis or _st["got"] != 8: print("reader pass MISMATCH"); bad += 1
 print("RECOMPUTE_FAIL" if bad else "RECOMPUTE_OK")
