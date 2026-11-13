@@ -1,0 +1,206 @@
+{
+ "seed": 20261113,
+ "fixed_now": 1794350000.0,
+ "turns": [
+  {
+   "topic": 0,
+   "kind": "Q1",
+   "q": "status of dratov kafip and what follows"
+  },
+  {
+   "topic": 0,
+   "kind": "Q2",
+   "q": "next update regarding heshri then"
+  },
+  {
+   "topic": 0,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 1,
+   "kind": "Q1",
+   "q": "status of kalorjav velzo and what follows"
+  },
+  {
+   "topic": 1,
+   "kind": "Q2",
+   "q": "next update regarding zomoxvel then"
+  },
+  {
+   "topic": 1,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 2,
+   "kind": "Q1",
+   "q": "status of dexzojav kivyargul and what follows"
+  },
+  {
+   "topic": 2,
+   "kind": "Q2",
+   "q": "next update regarding tovwen then"
+  },
+  {
+   "topic": 2,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 3,
+   "kind": "Q1",
+   "q": "status of nimwenzim drajav and what follows"
+  },
+  {
+   "topic": 3,
+   "kind": "Q2",
+   "q": "next update regarding mundextar then"
+  },
+  {
+   "topic": 3,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 4,
+   "kind": "Q1",
+   "q": "status of kivzokiv bexdexfen and what follows"
+  },
+  {
+   "topic": 4,
+   "kind": "Q2",
+   "q": "next update regarding wenzimgul then"
+  },
+  {
+   "topic": 4,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 5,
+   "kind": "Q1",
+   "q": "status of moxheshvel zimtar and what follows"
+  },
+  {
+   "topic": 5,
+   "kind": "Q2",
+   "q": "next update regarding fipbexka then"
+  },
+  {
+   "topic": 5,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 6,
+   "kind": "Q1",
+   "q": "status of wenwen rijav and what follows"
+  },
+  {
+   "topic": 6,
+   "kind": "Q2",
+   "q": "next update regarding munkivquo then"
+  },
+  {
+   "topic": 6,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 7,
+   "kind": "Q1",
+   "q": "status of nimwenshi gorpra and what follows"
+  },
+  {
+   "topic": 7,
+   "kind": "Q2",
+   "q": "next update regarding gulnim then"
+  },
+  {
+   "topic": 7,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 8,
+   "kind": "Q1",
+   "q": "status of kivtar yarkiv and what follows"
+  },
+  {
+   "topic": 8,
+   "kind": "Q2",
+   "q": "next update regarding fipyaryar then"
+  },
+  {
+   "topic": 8,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 9,
+   "kind": "Q1",
+   "q": "status of fipcro dexmun and what follows"
+  },
+  {
+   "topic": 9,
+   "kind": "Q2",
+   "q": "next update regarding dexyar then"
+  },
+  {
+   "topic": 9,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 0,
+   "kind": "R2",
+   "q": "next update regarding heshri then"
+  },
+  {
+   "topic": 0,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 2,
+   "kind": "R2",
+   "q": "next update regarding tovwen then"
+  },
+  {
+   "topic": 2,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 4,
+   "kind": "R2",
+   "q": "next update regarding wenzimgul then"
+  },
+  {
+   "topic": 4,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 6,
+   "kind": "R2",
+   "q": "next update regarding munkivquo then"
+  },
+  {
+   "topic": 6,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 8,
+   "kind": "R2",
+   "q": "next update regarding fipyaryar then"
+  },
+  {
+   "topic": 8,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  }
+ ]
+}

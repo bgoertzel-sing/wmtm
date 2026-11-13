@@ -3,8 +3,9 @@
 Both apply only with recall_spread_seeds=turn (E).  They add the top x% of residents by STI to E's seeds:
   fallback_pct: only on a turn where no cluster matches the query by keyword (E has no keyword seeds there);
   add_pct:      on every turn.
-0 (the default) = plain E; with recall_spread_seeds unset (all) nothing changes at all.  Every behaviour test has a
-negative control.  Synthetic clusters only.
+0 = plain E; with recall_spread_seeds=all or focus nothing changes at all.  Every behaviour test has a negative
+control.  Synthetic clusters only.  Since t-2026-11-13-wmtm-spread-seed-default the defaults are turn + add 10 (arm
+P10); the tests below that compare against the old behaviour set all / pcts 0 explicitly.
 """
 import json
 import random
@@ -60,18 +61,25 @@ def _ids(rb, st, q, **kw):
 
 # ------------------------------------------------------------------------------------------------------- config
 
-def test_spec_defaults_off():
+def test_spec_defaults():
+    # t-2026-11-13-wmtm-spread-seed-default: add 10 (arm P10), fallback stays 0
     assert rc.SPEC["recall_spread_fallback_pct"][:3] == ("WMTM_RECALL_SPREAD_FALLBACK_PCT", float, 0.0)
-    assert rc.SPEC["recall_spread_add_pct"][:3] == ("WMTM_RECALL_SPREAD_ADD_PCT", float, 0.0)
-    for k in ("recall_spread_fallback_pct", "recall_spread_add_pct"):
-        assert ctx.recall_spread_pct({}, k) == 0.0
-        assert ctx.recall_spread_pct(rc.resolve(None, environ={}), k) == 0.0
+    assert rc.SPEC["recall_spread_add_pct"][:3] == ("WMTM_RECALL_SPREAD_ADD_PCT", float, 10.0)
+    for k, want in (("recall_spread_fallback_pct", 0.0), ("recall_spread_add_pct", 10.0)):
+        assert ctx.recall_spread_pct({}, k) == want
+        assert ctx.recall_spread_pct(rc.resolve(None, environ={}), k) == want
 
 
-@pytest.mark.parametrize("raw,want", [(50, 50.0), ("25", 25.0), (" 10 ", 10.0), (0, 0.0), (-5, 0.0), ("x", 0.0),
-                                      (None, 0.0), (float("nan"), 0.0), (250, 100.0)])
+@pytest.mark.parametrize("raw,want", [(50, 50.0), ("25", 25.0), (" 10 ", 10.0), (0, 0.0), (-5, 0.0), ("x", 10.0),
+                                      (None, 10.0), (float("nan"), 10.0), (250, 100.0)])
 def test_pct_parse(raw, want):
+    """0 and negative = off; invalid (junk, None, NaN) = the SPEC default (add 10)."""
     assert ctx.recall_spread_pct({"recall_spread_add_pct": raw}, "recall_spread_add_pct") == want
+
+
+@pytest.mark.parametrize("raw,want", [("x", 0.0), (None, 0.0), (float("nan"), 0.0), (0, 0.0), (30, 30.0)])
+def test_pct_parse_fallback_default_zero(raw, want):
+    assert ctx.recall_spread_pct({"recall_spread_fallback_pct": raw}, "recall_spread_fallback_pct") == want
 
 
 def test_pct_from_env():
@@ -310,19 +318,21 @@ def _run_api(tmp_path, seed, flags, nomatch_every=0, turns=10):
 
 
 @pytest.mark.parametrize("seed", range(4))
-def test_api_default_unchanged(tmp_path, seed):
-    """Flags unset = all; pct flags without turn = all; turn with pcts 0 = plain turn (same admissions and blocks)."""
-    base = _run_api(tmp_path / "unset", seed, {}, nomatch_every=3)
-    assert _run_api(tmp_path / "pcts", seed, {"recall_spread_fallback_pct": 50, "recall_spread_add_pct": 25},
-                    nomatch_every=3) == base
-    turn = _run_api(tmp_path / "turn", seed, {"recall_spread_seeds": "turn"}, nomatch_every=3)
+def test_api_old_modes_unchanged(tmp_path, seed):
+    """all = all whatever the pct flags; turn with pcts 0 = plain turn (same admissions and blocks).  (Before
+    t-2026-11-13-wmtm-spread-seed-default the first run was "flags unset"; the default is now turn + add 10.)"""
+    base = _run_api(tmp_path / "all", seed, {"recall_spread_seeds": "all"}, nomatch_every=3)
+    assert _run_api(tmp_path / "pcts", seed, {"recall_spread_seeds": "all", "recall_spread_fallback_pct": 50,
+                                              "recall_spread_add_pct": 25}, nomatch_every=3) == base
+    turn = _run_api(tmp_path / "turn", seed, {"recall_spread_seeds": "turn", "recall_spread_add_pct": 0},
+                    nomatch_every=3)
     assert _run_api(tmp_path / "turn0", seed, {"recall_spread_seeds": "turn", "recall_spread_fallback_pct": 0,
                                                "recall_spread_add_pct": 0}, nomatch_every=3) == turn
 
 
 @pytest.mark.parametrize("seed", range(4))
 def test_api_fallback_only_changes_no_match_scripts(tmp_path, seed):
-    f = {"recall_spread_seeds": "turn"}
+    f = {"recall_spread_seeds": "turn", "recall_spread_add_pct": 0}     # plain E (add 0, explicitly: default is 10)
     fb = dict(f, recall_spread_fallback_pct=50)
     # every query matches: the fallback never fires, so the run equals plain E
     assert _run_api(tmp_path / "a", seed, fb) == _run_api(tmp_path / "b", seed, f)
@@ -346,9 +356,9 @@ def test_api_passes_pcts(tmp_path, monkeypatch):
     monkeypatch.setenv("WMTM_RECALL_SPREAD_ADD_PCT", "10")
     m.observe({"user": "amber"}); m.context_for("amber")
     assert seen[-1]["fallback_pct"] == 50.0 and seen[-1]["add_pct"] == 10.0 and seen[-1]["spread_seeds"] == "turn"
-    monkeypatch.delenv("WMTM_RECALL_SPREAD_ADD_PCT"); monkeypatch.setenv("WMTM_RECALL_SPREAD_FALLBACK_PCT", "0")
+    monkeypatch.setenv("WMTM_RECALL_SPREAD_ADD_PCT", "0"); monkeypatch.setenv("WMTM_RECALL_SPREAD_FALLBACK_PCT", "0")
     m.observe({"user": "ember"}); m.context_for("ember")
     assert "fallback_pct" not in seen[-1] and "add_pct" not in seen[-1]          # plain E: the probe's call
-    monkeypatch.delenv("WMTM_RECALL_SPREAD_SEEDS"); monkeypatch.setenv("WMTM_RECALL_SPREAD_ADD_PCT", "25")
+    monkeypatch.setenv("WMTM_RECALL_SPREAD_SEEDS", "all"); monkeypatch.setenv("WMTM_RECALL_SPREAD_ADD_PCT", "25")
     m.observe({"user": "cobalt"}); m.context_for("cobalt")
-    assert "spread_seeds" not in seen[-1] and "add_pct" not in seen[-1]          # default all: the old call
+    assert "spread_seeds" not in seen[-1] and "add_pct" not in seen[-1]          # all: the old call

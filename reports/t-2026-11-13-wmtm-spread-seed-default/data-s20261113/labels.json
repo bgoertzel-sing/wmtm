@@ -1,0 +1,2363 @@
+{
+"seed": 20261113,
+"topics": [
+[
+"kafip",
+"dratov",
+"heshri"
+],
+[
+"velzo",
+"zomoxvel",
+"kalorjav"
+],
+[
+"tovwen",
+"kivyargul",
+"dexzojav"
+],
+[
+"nimwenzim",
+"mundextar",
+"drajav"
+],
+[
+"bexdexfen",
+"kivzokiv",
+"wenzimgul"
+],
+[
+"moxheshvel",
+"fipbexka",
+"zimtar"
+],
+[
+"wenwen",
+"rijav",
+"munkivquo"
+],
+[
+"nimwenshi",
+"gulnim",
+"gorpra"
+],
+[
+"kivtar",
+"yarkiv",
+"fipyaryar"
+],
+[
+"dexmun",
+"dexyar",
+"fipcro"
+]
+],
+"labels": {
+"syn-8b1b71c313": {
+"role": "hub",
+"topic": 0,
+"useful": true,
+"depth": 0
+},
+"syn-d4e7ee5132": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-f9a34c1ec2": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-5baee00153": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-f60d86adbe": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-faa970f33c": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-75942de810": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-6f9b776e2e": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-bdde1d6e67": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-6b65ff8a70": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-2e489664cd": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-af0cf02ab6": {
+"role": "hub",
+"topic": 0,
+"useful": true,
+"depth": 0
+},
+"syn-6fcf025485": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-14a78d15e9": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-fe61d9eaee": {
+"role": "linked",
+"topic": 0,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-a3e4c6973b": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-ffeb833711": {
+"role": "linked",
+"topic": 0,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-3858ebc49d": {
+"role": "distractor",
+"topic": 0,
+"useful": false,
+"depth": 0
+},
+"syn-206ca62285": {
+"role": "hub",
+"topic": 1,
+"useful": true,
+"depth": 0
+},
+"syn-b6bee66b2f": {
+"role": "linked",
+"topic": 1,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-1c50322c83": {
+"role": "linked",
+"topic": 1,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-5b0a6e2769": {
+"role": "linked",
+"topic": 1,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-8bad0cb16b": {
+"role": "linked",
+"topic": 1,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-8b00e57d7c": {
+"role": "distractor",
+"topic": 1,
+"useful": false,
+"depth": 0
+},
+"syn-3b782e8494": {
+"role": "distractor",
+"topic": 1,
+"useful": false,
+"depth": 0
+},
+"syn-b3c365333c": {
+"role": "hub",
+"topic": 2,
+"useful": true,
+"depth": 0
+},
+"syn-8283a77b3b": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-c13c66a0b4": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-b92d5756ad": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-637c2f4e58": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-85480bd7c8": {
+"role": "hub",
+"topic": 2,
+"useful": true,
+"depth": 0
+},
+"syn-65878206bc": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-0b8c289d9a": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-4fbdf2ab46": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-a4691d6b94": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-c677d1a4b2": {
+"role": "hub",
+"topic": 2,
+"useful": true,
+"depth": 0
+},
+"syn-7f7860fe5d": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-70e3ca0477": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-ea54ab30e3": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-be29112557": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-593395c70a": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-2bb8c08e86": {
+"role": "linked",
+"topic": 2,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-0d4d1a6a9a": {
+"role": "linked",
+"topic": 2,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-21eb90c5f3": {
+"role": "distractor",
+"topic": 3,
+"useful": false,
+"depth": 0
+},
+"syn-89c2a57d20": {
+"role": "distractor",
+"topic": 3,
+"useful": false,
+"depth": 0
+},
+"syn-12c7be6c75": {
+"role": "hub",
+"topic": 4,
+"useful": true,
+"depth": 0
+},
+"syn-a82e762fcf": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-3b3e2b7df6": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-24225c3c49": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-e62666091d": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-04f4b5d111": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-d819b4edd0": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-9cd87ebd57": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-3f0a91f8b3": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-51fbd280e8": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-1799598dfc": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-adbe0826e0": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-960af28db2": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-6c07118daa": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-8680c7536e": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-d800fc54d1": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-23a8bd319d": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-1bf66a463a": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-cf73b9bb54": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-7d6ebbfcb3": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-47a9d47263": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-c8f8d12644": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-b2e88d8334": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-7963bdcb60": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-2f67a12279": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-31d1dc74b2": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-8d772d1e46": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-13e464e135": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-c4ecc7482f": {
+"role": "hub",
+"topic": 4,
+"useful": true,
+"depth": 0
+},
+"syn-81c2d30437": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-94d398f769": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-0ffad3dfef": {
+"role": "linked",
+"topic": 4,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-cc4e2e5dd2": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-e18c6fefda": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-469916b491": {
+"role": "linked",
+"topic": 4,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-63edbc76f9": {
+"role": "distractor",
+"topic": 4,
+"useful": false,
+"depth": 0
+},
+"syn-155a00dfcb": {
+"role": "hub",
+"topic": 5,
+"useful": true,
+"depth": 0
+},
+"syn-3fb8c554af": {
+"role": "linked",
+"topic": 5,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-7ceb74a0c6": {
+"role": "linked",
+"topic": 5,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-6319d1667b": {
+"role": "linked",
+"topic": 5,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-7fd10e2bf1": {
+"role": "linked",
+"topic": 5,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-24407b3b03": {
+"role": "linked",
+"topic": 5,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-528fa5ecf2": {
+"role": "hub",
+"topic": 6,
+"useful": true,
+"depth": 0
+},
+"syn-804bbef389": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-28fdb1353b": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-def3695e92": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-fbd226a1ca": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-206a3fddcb": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-311e20a48b": {
+"role": "hub",
+"topic": 6,
+"useful": true,
+"depth": 0
+},
+"syn-3a3583310a": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-621e769d82": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-1226f2b9dd": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-673a670b7b": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-2d45fb728c": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-d5bda81ec2": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-f2a1abc029": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-e3e2342e69": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-02730533e7": {
+"role": "hub",
+"topic": 6,
+"useful": true,
+"depth": 0
+},
+"syn-09b26a1a7e": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-f26e44dcfc": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-d7e4f58420": {
+"role": "linked",
+"topic": 6,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-80e29da510": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-48f9f24db9": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-9925ee3891": {
+"role": "linked",
+"topic": 6,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-1a39463d6a": {
+"role": "distractor",
+"topic": 6,
+"useful": false,
+"depth": 0
+},
+"syn-070d79de52": {
+"role": "distractor",
+"topic": 6,
+"useful": false,
+"depth": 0
+},
+"syn-5e00b6f9e5": {
+"role": "hub",
+"topic": 7,
+"useful": true,
+"depth": 0
+},
+"syn-2f4a3e889c": {
+"role": "linked",
+"topic": 7,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-173d9ea617": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-d9145e2578": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-93a787d7fc": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-715e9c8f30": {
+"role": "hub",
+"topic": 7,
+"useful": true,
+"depth": 0
+},
+"syn-7f01c07ce9": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-7e8bfebc6c": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-8bd9a97380": {
+"role": "linked",
+"topic": 7,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-29b2a855a4": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-8ca535a4ac": {
+"role": "linked",
+"topic": 7,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-ffe902803c": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-080fba9742": {
+"role": "linked",
+"topic": 7,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-d87a71ea0e": {
+"role": "linked",
+"topic": 7,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-4be77cf381": {
+"role": "linked",
+"topic": 7,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-93095b81ad": {
+"role": "distractor",
+"topic": 7,
+"useful": false,
+"depth": 0
+},
+"syn-04c023a2b1": {
+"role": "hub",
+"topic": 8,
+"useful": true,
+"depth": 0
+},
+"syn-79e9d27df2": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-9e0596a656": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-d6e7a2334b": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-92a922b376": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-941e24aa7d": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-7bcd65be14": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-f313d423fd": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-2e57b8a613": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-c540a663aa": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-2f049583cb": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-6ccbe1bd2a": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-6716f56074": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-5f99f1e824": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-79169ff0b3": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-5c5434f287": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-7b22ee6775": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-8861de450d": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-bd2e00eb02": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-e37bea48fe": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-519d9d9c89": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-54f0812a36": {
+"role": "linked",
+"topic": 8,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-06977cedf4": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 1,
+"rel": "EvidenceFor"
+},
+"syn-3988db4575": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-37479450bd": {
+"role": "linked",
+"topic": 8,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-33885bd59f": {
+"role": "distractor",
+"topic": 8,
+"useful": false,
+"depth": 0
+},
+"syn-7f94fccb23": {
+"role": "distractor",
+"topic": 8,
+"useful": false,
+"depth": 0
+},
+"syn-48b5168bd0": {
+"role": "hub",
+"topic": 9,
+"useful": true,
+"depth": 0
+},
+"syn-11b1530958": {
+"role": "linked",
+"topic": 9,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-828d4efeaf": {
+"role": "hub",
+"topic": 9,
+"useful": true,
+"depth": 0
+},
+"syn-91224a99ff": {
+"role": "linked",
+"topic": 9,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-00a5abc7c0": {
+"role": "linked",
+"topic": 9,
+"useful": true,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-820ef70470": {
+"role": "linked",
+"topic": 9,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-25d6aa644c": {
+"role": "linked",
+"topic": 9,
+"useful": true,
+"depth": 1,
+"rel": "PromotesFrom"
+},
+"syn-e1e74f878e": {
+"role": "linked",
+"topic": 9,
+"useful": false,
+"depth": 2,
+"rel": "EvidenceFor"
+},
+"syn-00a874c3d4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-75fa1a7c26": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-996866e90d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c28708872c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6f111c8e9b": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-7a297c2a7b": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-27a52bf430": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-01892e69b0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-cc3bcb0918": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-35f067c738": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-bf4f6c2946": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-55f7e6a17a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e13e12da08": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e5995215be": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-fb141d1429": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-fc3ffbaed6": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-515033943a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-edf660efb7": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ac61751f9d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-cc5a2995b0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3ed90693b3": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-8d3351eb70": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c868862612": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-bb8d906bfb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-abf6a5d0de": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6206b39476": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-0863de5f80": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6008c85025": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f54829cbcd": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-0007352ba9": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-bc76d65be1": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6446d4398a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a66ec88918": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b05461e937": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ed50351a79": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-74e4dcddfe": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-342e1b6e5d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-607bc4870c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-507280f293": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c69160d7e0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-95176df14f": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-071068d01e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6f9f10d363": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e8b0accc75": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f05c1b0e55": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-277b4976f2": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-fa389f9be8": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-fc1a820d6c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-bd06d7e418": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-138a2d6d1c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b45ed399d1": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-5be510d775": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-37a20111f8": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a26740dbda": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-8297bdff08": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f0e9d4ac72": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d47d3500e4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-89bcbe1643": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-0f2273653e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-df21390138": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3e8a823663": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a64d91356b": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-aebfdc1919": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a6ce33cb97": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-50ec818d24": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2a944f2c22": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-fe28c11db9": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-13a6c9050c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-eee39a5776": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d6b49d94fe": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6b3e0ab811": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ca161d33bb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b344fc585d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-59ea29b1f0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-4d5d65e289": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1559856e71": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-9ef6eb24cc": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a5dc71fba6": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-242a356c38": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a37e7f93d1": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3282e28d55": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-356c295b67": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b7340522fb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-531eb333c3": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-61cc05e3e5": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b14f330115": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-88e634c3d2": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-5e2d059dcb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e84807f9f3": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d1f16bad84": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e008b420d4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-04bfba2b33": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-5816ce707a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-aff5c08df9": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-55a0a53066": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-176c390905": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a22d817904": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f9b6d5b790": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-37c9944575": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3d0418a187": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-db3a07b045": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c896124180": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c130dd9389": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d4bcad3672": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-94dadcb678": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3a3346a763": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-673f5c963c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-fb605dd927": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-99b1c487ff": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-12188ba3a6": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-884bcbf75d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-15257311c0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f00c53ab73": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-477603033f": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-86ef21f3d5": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1e3793b127": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f8b037ba5e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1cf1b93b50": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-658540ca15": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c254801dfa": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-07c0bb45cd": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6ded86cc75": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e06164ebdf": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2cf50e6a04": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-190779ca4e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-24d64f3b53": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c09442b77d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e246a86d02": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-30f761a968": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1c7e246df4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-0354bb0078": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ee8329551d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-9c7b17ac2a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1e8f5cdbb6": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-81619a1b2a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-220fd7a4b4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ceb6766995": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-02188e17e2": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f0b6ecde2e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-78afb556c0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c6e3c8421b": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ed8802fdbb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6b15a06c93": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1498128ae9": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-60e419cbd6": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-617cb598de": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-20b8a86dc9": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-52a53b4f62": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d13172a6ed": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-cfcbc02800": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-452e17c578": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-52c29a36cb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d791c27fe7": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a531972b1a": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-e473f0264c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1daed9ef87": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f64960b8cb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-828eb653fb": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-39fca316f4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-5d10357c4b": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-a92acd592b": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-af788095b6": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-926836d133": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-cd4f50d6a2": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3ca59f582e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-bedfd9e3be": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-96cb125811": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6bd660cab5": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2227a46f5e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-730d4dcfbc": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-ba43af7fac": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2858a33312": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-9ba89335d9": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c793856b16": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2615bed1ec": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-8d97e88302": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-07779dc3e1": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f46caba52c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-22aeada2e4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b4384dbeda": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-00cc864fd4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2d0158b89d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1181a1995d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-4ceff16577": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-b215a07347": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-9a2274bd87": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-2252cc1ff4": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-6ca979bbc5": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-4f2185a719": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-18f7efb4c0": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-07d5d20a5d": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-aa8f59f6af": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-cf0d502371": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-1981e8cbf7": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-7e0965c39e": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-3b5b215a8f": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-c05806a397": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-f12ea54e13": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-d16e1d044c": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+},
+"syn-65ca7a4045": {
+"role": "background",
+"topic": null,
+"useful": false,
+"depth": null
+}
+}
+}

@@ -228,10 +228,13 @@ class RecallBridge:
 
         spread_seeds (flag recall_spread_seeds, t-2026-11-11-wmtm-spread-seeds-probe): which items layer 5 (direct
         links + spreading activation) starts from; see spread_seed_ids.  Residents are never candidates whatever the
-        seeds.  The default "all" is the behaviour before the flag (every resident seeds).
+        seeds.  This argument's default "all" is the behaviour before the flag (every resident seeds) and is kept for
+        direct callers, like floor's 0.0; the flag's default (runtime_config SPEC: turn + add_pct 10 since
+        t-2026-11-13-wmtm-spread-seed-default) is what api.py passes.
 
         fallback_pct / add_pct (flags recall_spread_fallback_pct / recall_spread_add_pct,
-        t-2026-11-13-wmtm-spread-seed-sweep): with spread_seeds="turn" only, see spread_seed_ids.  0 = off.
+        t-2026-11-13-wmtm-spread-seed-sweep): with spread_seeds="turn" only, see spread_seed_ids.  0 = off (the
+        argument default; api.py passes the flags, whose add_pct default is 10).
         """
         query_terms: set[str] = self._tokenize(query_context)
         active_ids: set[str] = {item.id for item in store.get_active_set()}

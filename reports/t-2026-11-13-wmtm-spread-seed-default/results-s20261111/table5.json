@@ -1,0 +1,944 @@
+{
+ "no_match_turns": [
+  [
+   2,
+   "Q3"
+  ],
+  [
+   5,
+   "Q3"
+  ],
+  [
+   8,
+   "Q3"
+  ],
+  [
+   11,
+   "Q3"
+  ],
+  [
+   14,
+   "Q3"
+  ],
+  [
+   16,
+   "Q2"
+  ],
+  [
+   17,
+   "Q3"
+  ],
+  [
+   20,
+   "Q3"
+  ],
+  [
+   23,
+   "Q3"
+  ],
+  [
+   26,
+   "Q3"
+  ],
+  [
+   29,
+   "Q3"
+  ],
+  [
+   31,
+   "R3"
+  ],
+  [
+   33,
+   "R3"
+  ],
+  [
+   35,
+   "R3"
+  ],
+  [
+   37,
+   "R3"
+  ],
+  [
+   39,
+   "R3"
+  ]
+ ],
+ "no_match_turn_kinds": {
+  "Q3": 10,
+  "Q2": 1,
+  "R3": 5
+ },
+ "match_turn_kinds": {
+  "Q1": 10,
+  "Q2": 9,
+  "R2": 5
+ },
+ "arms": {
+  "A": {
+   "admitted": 32,
+   "admitted_graph_only": 0,
+   "admitted_on_topic_useful": 18,
+   "precision_admitted_on_topic": 0.5625,
+   "evictions": 0,
+   "useful_evicted": 0,
+   "useful_hubs_evicted": 0,
+   "first_turn_with_eviction": null,
+   "max_store": 26,
+   "turns_store_at_capacity": 0,
+   "turns_budget_binds": 0,
+   "graph_only_off_topic_share": null,
+   "graph_only_off_topic": [
+    0,
+    0
+   ],
+   "useful_shown_on_topic": 50,
+   "shown_total": 261,
+   "precision_shown": 0.1916,
+   "first_visit_coverage": [
+    17,
+    70,
+    17,
+    0
+   ],
+   "revisit_coverage": [
+    9,
+    47
+   ],
+   "hubs_lost_vs_A": 0,
+   "hubs_lost_turns": 0,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": null,
+   "turns_seeds_added": null,
+   "seeds_added_per_turn": null,
+   "by_kind": {
+    "Q1": {
+     "admitted": 21,
+     "admitted_go": 0,
+     "adm_useful": 13,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 23,
+     "shown_useful": 15,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 32,
+     "admitted_go": 0,
+     "adm_useful": 18,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 48,
+     "shown_useful": 32,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 7,
+     "admitted_go": 0,
+     "adm_useful": 2,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 30,
+     "shown_useful": 10,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 0,
+     "admitted_go": 0,
+     "adm_useful": 0,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 198,
+     "shown_useful": 18,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 0,
+     "admitted_go": 0,
+     "adm_useful": 0,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 213,
+     "shown_useful": 18,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 4,
+     "admitted_go": 0,
+     "adm_useful": 3,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 10,
+     "shown_useful": 7,
+     "turns": 5
+    }
+   }
+  },
+  "E": {
+   "admitted": 119,
+   "admitted_graph_only": 83,
+   "admitted_on_topic_useful": 62,
+   "precision_admitted_on_topic": 0.521,
+   "evictions": 0,
+   "useful_evicted": 0,
+   "useful_hubs_evicted": 0,
+   "first_turn_with_eviction": null,
+   "max_store": 51,
+   "turns_store_at_capacity": 0,
+   "turns_budget_binds": 6,
+   "graph_only_off_topic_share": 0.1325,
+   "graph_only_off_topic": [
+    11,
+    83
+   ],
+   "useful_shown_on_topic": 73,
+   "shown_total": 323,
+   "precision_shown": 0.226,
+   "first_visit_coverage": [
+    36,
+    70,
+    17,
+    19
+   ],
+   "revisit_coverage": [
+    14,
+    47
+   ],
+   "hubs_lost_vs_A": 9,
+   "hubs_lost_turns": 8,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": null,
+   "turns_seeds_added": null,
+   "seeds_added_per_turn": null,
+   "by_kind": {
+    "Q1": {
+     "admitted": 69,
+     "admitted_go": 46,
+     "adm_useful": 39,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 44,
+     "shown_useful": 27,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 119,
+     "admitted_go": 83,
+     "adm_useful": 62,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 85,
+     "shown_useful": 52,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 26,
+     "admitted_go": 20,
+     "adm_useful": 9,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 38,
+     "shown_useful": 13,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 0,
+     "admitted_go": 0,
+     "adm_useful": 0,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 223,
+     "shown_useful": 21,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 0,
+     "admitted_go": 0,
+     "adm_useful": 0,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 238,
+     "shown_useful": 21,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 24,
+     "admitted_go": 17,
+     "adm_useful": 14,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 18,
+     "shown_useful": 12,
+     "turns": 5
+    }
+   }
+  },
+  "F50": {
+   "admitted": 248,
+   "admitted_graph_only": 212,
+   "admitted_on_topic_useful": 75,
+   "precision_admitted_on_topic": 0.3024,
+   "evictions": 57,
+   "useful_evicted": 27,
+   "useful_hubs_evicted": 1,
+   "first_turn_with_eviction": 20,
+   "max_store": 60,
+   "turns_store_at_capacity": 2,
+   "turns_budget_binds": 16,
+   "graph_only_off_topic_share": 0.4717,
+   "graph_only_off_topic": [
+    100,
+    212
+   ],
+   "useful_shown_on_topic": 63,
+   "shown_total": 214,
+   "precision_shown": 0.2944,
+   "first_visit_coverage": [
+    40,
+    70,
+    17,
+    23
+   ],
+   "revisit_coverage": [
+    15,
+    47
+   ],
+   "hubs_lost_vs_A": 18,
+   "hubs_lost_turns": 11,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": 344,
+   "turns_seeds_added": 16,
+   "seeds_added_per_turn": [
+    0,
+    0,
+    7,
+    0,
+    0,
+    12,
+    0,
+    0,
+    16,
+    0,
+    0,
+    14,
+    0,
+    0,
+    15,
+    0,
+    18,
+    23,
+    0,
+    0,
+    27,
+    0,
+    0,
+    30,
+    0,
+    0,
+    25,
+    0,
+    0,
+    26,
+    0,
+    23,
+    0,
+    29,
+    0,
+    26,
+    0,
+    27,
+    0,
+    26
+   ],
+   "by_kind": {
+    "Q1": {
+     "admitted": 67,
+     "admitted_go": 46,
+     "adm_useful": 37,
+     "evicted": 16,
+     "evicted_useful_any": 8,
+     "shown": 44,
+     "shown_useful": 27,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 119,
+     "admitted_go": 83,
+     "adm_useful": 64,
+     "evicted": 31,
+     "evicted_useful_any": 14,
+     "shown": 85,
+     "shown_useful": 52,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 36,
+     "admitted_go": 30,
+     "adm_useful": 9,
+     "evicted": 1,
+     "evicted_useful_any": 0,
+     "shown": 33,
+     "shown_useful": 14,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 119,
+     "admitted_go": 119,
+     "adm_useful": 10,
+     "evicted": 26,
+     "evicted_useful_any": 13,
+     "shown": 119,
+     "shown_useful": 10,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 129,
+     "admitted_go": 129,
+     "adm_useful": 11,
+     "evicted": 26,
+     "evicted_useful_any": 13,
+     "shown": 129,
+     "shown_useful": 11,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 26,
+     "admitted_go": 17,
+     "adm_useful": 19,
+     "evicted": 14,
+     "evicted_useful_any": 6,
+     "shown": 18,
+     "shown_useful": 12,
+     "turns": 5
+    }
+   }
+  },
+  "F25": {
+   "admitted": 177,
+   "admitted_graph_only": 141,
+   "admitted_on_topic_useful": 76,
+   "precision_admitted_on_topic": 0.4294,
+   "evictions": 0,
+   "useful_evicted": 0,
+   "useful_hubs_evicted": 0,
+   "first_turn_with_eviction": null,
+   "max_store": 51,
+   "turns_store_at_capacity": 0,
+   "turns_budget_binds": 7,
+   "graph_only_off_topic_share": 0.2553,
+   "graph_only_off_topic": [
+    36,
+    141
+   ],
+   "useful_shown_on_topic": 74,
+   "shown_total": 186,
+   "precision_shown": 0.3978,
+   "first_visit_coverage": [
+    42,
+    70,
+    17,
+    25
+   ],
+   "revisit_coverage": [
+    17,
+    47
+   ],
+   "hubs_lost_vs_A": 15,
+   "hubs_lost_turns": 9,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": 146,
+   "turns_seeds_added": 16,
+   "seeds_added_per_turn": [
+    0,
+    0,
+    4,
+    0,
+    0,
+    5,
+    0,
+    0,
+    8,
+    0,
+    0,
+    8,
+    0,
+    0,
+    7,
+    0,
+    10,
+    10,
+    0,
+    0,
+    11,
+    0,
+    0,
+    13,
+    0,
+    0,
+    11,
+    0,
+    0,
+    11,
+    0,
+    11,
+    0,
+    12,
+    0,
+    8,
+    0,
+    8,
+    0,
+    9
+   ],
+   "by_kind": {
+    "Q1": {
+     "admitted": 67,
+     "admitted_go": 46,
+     "adm_useful": 37,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 44,
+     "shown_useful": 27,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 119,
+     "admitted_go": 83,
+     "adm_useful": 62,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 85,
+     "shown_useful": 52,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 29,
+     "admitted_go": 23,
+     "adm_useful": 8,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 26,
+     "shown_useful": 13,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 55,
+     "admitted_go": 55,
+     "adm_useful": 14,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 98,
+     "shown_useful": 22,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 58,
+     "admitted_go": 58,
+     "adm_useful": 14,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 101,
+     "shown_useful": 22,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 26,
+     "admitted_go": 17,
+     "adm_useful": 17,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 18,
+     "shown_useful": 12,
+     "turns": 5
+    }
+   }
+  },
+  "P10": {
+   "admitted": 141,
+   "admitted_graph_only": 104,
+   "admitted_on_topic_useful": 69,
+   "precision_admitted_on_topic": 0.4894,
+   "evictions": 0,
+   "useful_evicted": 0,
+   "useful_hubs_evicted": 0,
+   "first_turn_with_eviction": null,
+   "max_store": 53,
+   "turns_store_at_capacity": 0,
+   "turns_budget_binds": 6,
+   "graph_only_off_topic_share": 0.1538,
+   "graph_only_off_topic": [
+    16,
+    104
+   ],
+   "useful_shown_on_topic": 77,
+   "shown_total": 323,
+   "precision_shown": 0.2384,
+   "first_visit_coverage": [
+    36,
+    70,
+    17,
+    19
+   ],
+   "revisit_coverage": [
+    19,
+    47
+   ],
+   "hubs_lost_vs_A": 10,
+   "hubs_lost_turns": 8,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": 155,
+   "turns_seeds_added": 39,
+   "seeds_added_per_turn": [
+    0,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5,
+    6,
+    5,
+    6,
+    6,
+    5,
+    6,
+    5,
+    5,
+    5,
+    4,
+    4,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5
+   ],
+   "by_kind": {
+    "Q1": {
+     "admitted": 69,
+     "admitted_go": 46,
+     "adm_useful": 39,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 44,
+     "shown_useful": 27,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 135,
+     "admitted_go": 98,
+     "adm_useful": 64,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 94,
+     "shown_useful": 52,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 40,
+     "admitted_go": 34,
+     "adm_useful": 11,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 45,
+     "shown_useful": 13,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 6,
+     "admitted_go": 6,
+     "adm_useful": 5,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 214,
+     "shown_useful": 25,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 6,
+     "admitted_go": 6,
+     "adm_useful": 5,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 229,
+     "shown_useful": 25,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 26,
+     "admitted_go": 18,
+     "adm_useful": 14,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 20,
+     "shown_useful": 12,
+     "turns": 5
+    }
+   }
+  },
+  "P25": {
+   "admitted": 205,
+   "admitted_graph_only": 169,
+   "admitted_on_topic_useful": 73,
+   "precision_admitted_on_topic": 0.3561,
+   "evictions": 31,
+   "useful_evicted": 13,
+   "useful_hubs_evicted": 2,
+   "first_turn_with_eviction": 20,
+   "max_store": 60,
+   "turns_store_at_capacity": 1,
+   "turns_budget_binds": 9,
+   "graph_only_off_topic_share": 0.3787,
+   "graph_only_off_topic": [
+    64,
+    169
+   ],
+   "useful_shown_on_topic": 67,
+   "shown_total": 240,
+   "precision_shown": 0.2792,
+   "first_visit_coverage": [
+    36,
+    70,
+    17,
+    19
+   ],
+   "revisit_coverage": [
+    15,
+    47
+   ],
+   "hubs_lost_vs_A": 14,
+   "hubs_lost_turns": 9,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": 411,
+   "turns_seeds_added": 39,
+   "seeds_added_per_turn": [
+    0,
+    2,
+    4,
+    4,
+    5,
+    5,
+    5,
+    8,
+    8,
+    7,
+    8,
+    8,
+    5,
+    7,
+    9,
+    9,
+    11,
+    11,
+    11,
+    12,
+    14,
+    15,
+    15,
+    13,
+    13,
+    13,
+    14,
+    15,
+    15,
+    14,
+    13,
+    13,
+    13,
+    14,
+    10,
+    11,
+    13,
+    14,
+    15,
+    15
+   ],
+   "by_kind": {
+    "Q1": {
+     "admitted": 74,
+     "admitted_go": 53,
+     "adm_useful": 36,
+     "evicted": 13,
+     "evicted_useful_any": 5,
+     "shown": 46,
+     "shown_useful": 26,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 157,
+     "admitted_go": 121,
+     "adm_useful": 65,
+     "evicted": 27,
+     "evicted_useful_any": 12,
+     "shown": 104,
+     "shown_useful": 49,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 43,
+     "admitted_go": 37,
+     "adm_useful": 12,
+     "evicted": 8,
+     "evicted_useful_any": 6,
+     "shown": 47,
+     "shown_useful": 14,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 48,
+     "admitted_go": 48,
+     "adm_useful": 8,
+     "evicted": 4,
+     "evicted_useful_any": 1,
+     "shown": 121,
+     "shown_useful": 18,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 48,
+     "admitted_go": 48,
+     "adm_useful": 8,
+     "evicted": 4,
+     "evicted_useful_any": 1,
+     "shown": 136,
+     "shown_useful": 18,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 40,
+     "admitted_go": 31,
+     "adm_useful": 17,
+     "evicted": 6,
+     "evicted_useful_any": 1,
+     "shown": 26,
+     "shown_useful": 9,
+     "turns": 5
+    }
+   }
+  },
+  "D": {
+   "admitted": 141,
+   "admitted_graph_only": 104,
+   "admitted_on_topic_useful": 69,
+   "precision_admitted_on_topic": 0.4894,
+   "evictions": 0,
+   "useful_evicted": 0,
+   "useful_hubs_evicted": 0,
+   "first_turn_with_eviction": null,
+   "max_store": 53,
+   "turns_store_at_capacity": 0,
+   "turns_budget_binds": 6,
+   "graph_only_off_topic_share": 0.1538,
+   "graph_only_off_topic": [
+    16,
+    104
+   ],
+   "useful_shown_on_topic": 77,
+   "shown_total": 323,
+   "precision_shown": 0.2384,
+   "first_visit_coverage": [
+    36,
+    70,
+    17,
+    19
+   ],
+   "revisit_coverage": [
+    19,
+    47
+   ],
+   "hubs_lost_vs_A": 10,
+   "hubs_lost_turns": 8,
+   "hubs_lost_evicted_in_turn": 0,
+   "hubs_lost_evicted_turns": [],
+   "seeds_added_total": null,
+   "turns_seeds_added": null,
+   "seeds_added_per_turn": null,
+   "by_kind": {
+    "Q1": {
+     "admitted": 69,
+     "admitted_go": 46,
+     "adm_useful": 39,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 44,
+     "shown_useful": 27,
+     "turns": 10
+    },
+    "match": {
+     "admitted": 135,
+     "admitted_go": 98,
+     "adm_useful": 64,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 94,
+     "shown_useful": 52,
+     "turns": 24
+    },
+    "Q2": {
+     "admitted": 40,
+     "admitted_go": 34,
+     "adm_useful": 11,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 45,
+     "shown_useful": 13,
+     "turns": 10
+    },
+    "Q3/R3": {
+     "admitted": 6,
+     "admitted_go": 6,
+     "adm_useful": 5,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 214,
+     "shown_useful": 25,
+     "turns": 15
+    },
+    "no-match": {
+     "admitted": 6,
+     "admitted_go": 6,
+     "adm_useful": 5,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 229,
+     "shown_useful": 25,
+     "turns": 16
+    },
+    "R2": {
+     "admitted": 26,
+     "admitted_go": 18,
+     "adm_useful": 14,
+     "evicted": 0,
+     "evicted_useful_any": 0,
+     "shown": 20,
+     "shown_useful": 12,
+     "turns": 5
+    }
+   }
+  }
+ }
+}

@@ -154,14 +154,18 @@ SPEC = {
     "recall_budget":       ("WMTM_RECALL_BUDGET", int, 10, None),         # design s8.3/s10: max new recalled items per cycle; <= 0 = no budget
     # t-2026-11-11-wmtm-spread-seeds-probe: where recall's spreading activation starts (design s3.3 / s8.1b).
     # all = every resident (the behaviour before the flag); focus = top 50% of residents by STI (s9.2 "attention
-    # focus"); turn = this turn's keyword-matched clusters + the request item.  Invalid = all.
-    "recall_spread_seeds": ("WMTM_RECALL_SPREAD_SEEDS", str, "all", None),
+    # focus"); turn = this turn's keyword-matched clusters + the request item.  Invalid = the default.
+    # Default turn since t-2026-11-13-wmtm-spread-seed-default (was all); all and focus stay selectable.
+    "recall_spread_seeds": ("WMTM_RECALL_SPREAD_SEEDS", str, "turn", None),
     # t-2026-11-13-wmtm-spread-seed-sweep: extra seeds for recall_spread_seeds=turn only (ignored by all/focus), the top
     # x% of residents by STI (ceil(n*x/100), as focus does for 50).  fallback = only on turns where no cluster matches
-    # the query by keyword (E's empty-seed turns); add = on every turn.  0 = off (the default: plain turn); clamped to
-    # 0..100; invalid = 0.  Both set: a no-match turn uses the larger of the two.
+    # the query by keyword (E's empty-seed turns); add = on every turn.  0 = off; clamped to 0..100; invalid = the
+    # default.  Both set: a no-match turn uses the larger of the two.
+    # t-2026-11-13-wmtm-spread-seed-default: the default is the sweep's arm P10 = turn + add 10 (this turn's matches +
+    # the top 10% most active on every turn; was 0 = plain turn).  ADD_PCT=0 gives plain turn (E); FALLBACK_PCT=x with
+    # ADD_PCT=0 gives the fallback rule.
     "recall_spread_fallback_pct": ("WMTM_RECALL_SPREAD_FALLBACK_PCT", float, 0.0, None),
-    "recall_spread_add_pct": ("WMTM_RECALL_SPREAD_ADD_PCT", float, 0.0, None),
+    "recall_spread_add_pct": ("WMTM_RECALL_SPREAD_ADD_PCT", float, 10.0, None),
     "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
     "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
     "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds

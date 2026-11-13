@@ -263,7 +263,9 @@ class WMTM:
                 budget = _ctx.recall_budget(pcfg)
                 slots = orch.recall_slots(budget)
                 top_k = _ctx.RECALL_TOP_K_UNBUDGETED if slots is None else slots
-                # recall_spread_seeds (default all = every resident seeds the spread, as before the flag)
+                # recall_spread_seeds (default turn + recall_spread_add_pct 10 since t-2026-11-13-wmtm-spread-seed-default:
+                # this turn's matches + the top 10% most active residents seed the spread; all = every resident, as
+                # before the flag)
                 seeds = _ctx.recall_spread_seeds(pcfg)
                 skw = {} if seeds == "all" else {"spread_seeds": seeds,
                                                  "request_id": _ctx.request_item_id(user_msg, pcfg)}
