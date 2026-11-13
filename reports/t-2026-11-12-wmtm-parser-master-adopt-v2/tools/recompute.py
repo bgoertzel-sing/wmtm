@@ -40,4 +40,25 @@ for sc in sorted(glob.glob(os.path.join(EV, "armB/*/score.json"))):
     s = json.load(open(sc))
     print("armB", os.path.basename(os.path.dirname(sc)), {k: s[k] for k in ("status", "canary", "neg", "goals", "proved", "by_rule",
           "shipped_trivial", "restatement", "multi_note")})
+
+# review 1: hand verdicts, count rule vs A_v3, Mesto s11 drop list
+VD = os.path.join(EV, "armB/verdicts")
+def tsv(f):
+    L = open(os.path.join(VD, f)).read().splitlines()
+    h = L[0].split("\t"); return [dict(zip(h, l.split("\t"))) for l in L[1:] if l.strip()]
+if os.path.isdir(VD) and os.path.exists(os.path.join(VD, "verdicts_restate.tsv")):
+    v = {r["goal"]: r["verdict"] for r in tsv("verdicts_restate.tsv")}
+    nt = {r["goal"]: r["verdict"] for r in tsv("verdicts23.tsv")}
+    v.update(nt); vs = dict(v); vs.update({r["goal"]: r["verdict"] for r in tsv("verdicts_sens_impl.tsv")})
+    J = json.load(open(os.path.join(EV, "baselines/f3v3/JUDGMENTS.json")))
+    aC, aW = J["A_v3"]["counts"]["correct"], J["A_v3"]["counts"]["wrong"]
+    for name, d, run in (("full_s2 all", v, "full_s2"), ("full_s2 non-restatement", nt, None), ("sens_s2 all", vs, "sens_s2")):
+        if run:
+            n = json.load(open(os.path.join(EV, "armB/%s/score.json" % run)))["goals"]
+            if n != len(d): print("VERDICT COUNT MISMATCH", name, n, len(d)); bad += 1
+        c = Counter(d.values()); C, W, U = c["correct"], c["wrong"], c["unclear"]
+        print("verdicts", name, "n=%d C=%d W=%d U=%d" % (len(d), C, W, U), "count rule vs A_v3 %dC/%dW:" % (aC, aW),
+              "HOLDS" if C >= aC and W <= aW else "FAILS")
+    m = tsv("missing_ranked.tsv")
+    print("mesto s11 dropped", len(m), dict(Counter(r["kind"] for r in m)))
 print("RECOMPUTE_FAIL" if bad else "RECOMPUTE_OK")
