@@ -51,11 +51,27 @@ if a.inner:  # ---------------- inner PeTTaChainer child ----------------
     os.environ["PETTA_PATH"] = a.petta
     import petta
     from pettachainer.pettachainer import PeTTaChainer
-    h = PeTTaChainer(); spec = json.load(open(a.spec)); fails = 0
-    for s in RULES + spec["atoms"] + CANARY:
+    h = PeTTaChainer(); spec = json.load(open(a.spec)); fails = 0; pfails = 0
+    # master-adopt-v2: upstream PeTTaChainer master load order (sph 24e37182 templates/README.md).  Only when the
+    # spec says load_order == "master": declare every positive-only predicate (the KB-wide lower.predicates list
+    # and each text's class symbols) BEFORE any statement, then the seeded master rules, then the atoms.  On that
+    # engine a declaration after the statements about it changes nothing.  Without the key: the old path (arm A).
+    if spec.get("load_order") == "master_ops":   # master-adopt-v2: wmtm/master_loader.plan ops, in recipe order
+        from wmtm.master_loader import apply as _master_apply   # one loop, shared with the loader module
+        pfails, fails = _master_apply(h, list(spec.get("master_ops") or []))
+        pre = []
+    elif spec.get("load_order") == "master":
+        for name in list(spec.get("positive_only") or []):
+            try: h.set_positive_only_predicate(name)
+            except Exception: pfails += 1
+        pre = list(spec.get("master_rules") or [])
+    else:
+        pre = []
+    for s in RULES + pre + spec["atoms"] + CANARY:
         try: h.add_atom(s)
         except Exception: fails += 1
-    print("READY " + json.dumps({"add_fail": fails, "petta": petta.__file__}), flush=True)
+    print("READY " + json.dumps({"add_fail": fails, "pred_fail": pfails, "load_order": spec.get("load_order") or "legacy",
+                                 "petta": petta.__file__}), flush=True)
     for line in sys.stdin:
         g = line.strip()
         if not g: continue
@@ -144,6 +160,8 @@ if "raw_items" in spec:  # built here, off the cycle path
     os.replace(a.spec + ".tmp", a.spec)
 rec = {"mem_cap_mb": (MEM_CAP or 0) // (1 << 20), "prio": PRIO, "source": spec.get("source"), "cycle": spec.get("cycle"), "spec_ts": spec.get("ts"), "start_ts": t0, "k": spec.get("k"), "items": spec.get("items"),
        "atoms": len(spec["atoms"]), "goals_n": len(spec["goals"]), "timeout_s": a.timeout, "budget_s": a.budget, "steps": a.steps}
+if spec.get("master_meta") is not None:   # master-adopt-v2: what arm B loaded (decls/rules), so the record alone shows it
+    rec["master_meta"] = spec["master_meta"]
 w = Inner(); rec["warm_s"] = w.warm_s; rec.update(w.info); res = []
 if not w.ok:
     rec["status"] = "warm_fail"; w.kill()

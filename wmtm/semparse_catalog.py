@@ -31,6 +31,7 @@ ALLOWED_PINS = {
     PIN: "645bff3f5c3a0670d98a463d60d18e178d899c08c58f17ea4b3ff5a53b1d25b6",
     "1f1a7a6fc42ffb8911afb7d2e95259fdfe8a0aef": "e4c4a76c7666d70f6d019fd7fea9391d91b01528f8f89132ae05d842fdd8207e",   # previous default, rollback only
     "533c2274beac05439b08fa4dccd6b391fa38139e": "1585e873fc3151b887e5bdf412d7f2bd32dbd20447d8f6fc43503af246682b5c",   # Man Hin HEAD 2026-11-09, live-path replay v2 re-parse (opt-in via WMTM_SEMPARSE_HITL; default PIN unchanged)
+    "24e37182e64a20981d423ed1d851da6de5e3b3e8": "257425b2c1593569789317f0f007f57f21f856df868b382adc0880c1c3414809",   # Man Hin 2026-11-12 (sentence-by-sentence fix), master-adopt-v2 re-parse (opt-in via WMTM_SEMPARSE_HITL; default PIN unchanged)
 }
 LICENSE_SHA256 = "586023696f36ad863849d2b96648022c589acdd12b27c7b15e51356343077d4c"  # MIT, (c) 2026 leungmanhin
 
