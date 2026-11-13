@@ -59,7 +59,14 @@ def names_for(note_id, records):
     return out
 
 
-def plan(tdir, notes, kb_once=True, rules=True, catalog=None):
+def _note_label(stmt, suffix):
+    """Review 1 F3: the recipe's per-sentence labels (s1_x1_member, ...) repeat across notes, so a proof label
+    could not say which note it came from.  Give each statement label the note suffix (symbols already have it)."""
+    m = re.match(r"\(: (\S+) ", stmt)
+    return stmt if not m else "(: " + m.group(1) + suffix + stmt[m.end() - 1:]
+
+
+def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -84,6 +91,7 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None):
         recs = B.block_records(prior, catalog)
         allrec = [x for rec in recs for x in rec.get("records") or []]
         names = names_for(nid, allrec)
+        suffix = "__" + re.sub(r"[^A-Za-z0-9]", "_", nid)
         m = {"sentences": len(recs), "malformed": sum(r["status"] != "ok" for r in recs), "predicates": 0,
              "statements": 0, "definitions": 0, "definitions_shared": 0, "names": sum(not v.startswith("sk_") for v in names.values())}
         for rec in recs:
@@ -94,7 +102,7 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None):
             for n in low["predicates"]:                 # BEFORE this sentence's statements
                 m["predicates"] += pred(n)
             for s in low["statements"]:
-                m["statements"] += atom(s)
+                m["statements"] += atom(_note_label(s, suffix) if note_labels else s)
             for d in low["definitions"]:
                 if atom(d): m["definitions"] += 1
                 else: m["definitions_shared"] += 1

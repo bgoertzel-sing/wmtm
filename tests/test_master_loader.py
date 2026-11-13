@@ -52,3 +52,13 @@ def test_predicates_declared_before_load():
     assert "report__mod_progress" in pos
     use = next(i for i, (k, x) in enumerate(ops) if k == "atom" and "report__mod_progress" in x)
     assert pos["report__mod_progress"] < use
+
+
+def test_statement_labels_unique_across_notes():
+    ops, meta = _plan([("na", _note(("Lamine sold a quilt.", _sold("Lamine")))),
+                       ("nb", _note(("Yusra sold a quilt.", _sold("Yusra"))))], rules=False)
+    import re as _re
+    labs = [_re.match(r"\(: (\S+) ", x).group(1) for k, x in ops if k == "atom" and not x.startswith("(: kind__")
+            and not x.startswith("(: by_")]
+    assert len(labs) == len(set(labs))
+    assert any(l.endswith("__na") for l in labs) and any(l.endswith("__nb") for l in labs)
