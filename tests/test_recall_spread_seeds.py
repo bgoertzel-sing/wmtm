@@ -1,6 +1,8 @@
 """t-2026-11-11-wmtm-spread-seeds-probe: flag recall_spread_seeds, where recall's spreading activation starts.
 
-all   = every resident seeds layer 5 (direct links + spread); the default and the behaviour before the flag.
+all   = every resident seeds layer 5 (direct links + spread); the behaviour before the flag (the flag default until
+        t-2026-11-13-wmtm-spread-seed-default, which made turn + recall_spread_add_pct 10 the default; all stays
+        selectable, see tests/test_recall_spread_default.py).
 focus = the attention focus: the top 50% of residents by STI (design s9.2; s3.1 get_active_set "sorted by STI").
 turn  = this turn only: the clusters matching this turn's query by keyword, plus the request item.
 
@@ -64,19 +66,21 @@ def _ids(rb, st, mode, q="zephyr", **kw):
 
 # ------------------------------------------------------------------------------------------------------ config
 
-def test_spec_default_is_all():
-    assert rc.SPEC["recall_spread_seeds"][:3] == ("WMTM_RECALL_SPREAD_SEEDS", str, "all")
-    assert ctx.recall_spread_seeds({}) == "all"
-    assert ctx.recall_spread_seeds(rc.resolve(None, environ={})) == "all"
+def test_spec_default_is_turn():
+    # t-2026-11-13-wmtm-spread-seed-default: the default moved from all to turn (with recall_spread_add_pct 10)
+    assert rc.SPEC["recall_spread_seeds"][:3] == ("WMTM_RECALL_SPREAD_SEEDS", str, "turn")
+    assert ctx.recall_spread_seeds({}) == "turn"
+    assert ctx.recall_spread_seeds(rc.resolve(None, environ={})) == "turn"
 
 
 def test_flag_env_and_invalid():
     for v in ("all", "focus", "turn", " Focus ", "TURN"):
         assert ctx.recall_spread_seeds({"recall_spread_seeds": v}) == v.strip().lower()
-    assert ctx.recall_spread_seeds({"recall_spread_seeds": "junk"}) == "all"
-    assert ctx.recall_spread_seeds({"recall_spread_seeds": None}) == "all"
+    assert ctx.recall_spread_seeds({"recall_spread_seeds": "junk"}) == "turn"       # invalid = the default
+    assert ctx.recall_spread_seeds({"recall_spread_seeds": None}) == "turn"
     assert ctx.recall_spread_seeds(rc.resolve(None, environ={"WMTM_RECALL_SPREAD_SEEDS": "focus"})) == "focus"
-    assert ctx.recall_spread_seeds(rc.resolve(None, environ={"WMTM_RECALL_SPREAD_SEEDS": "x"})) == "all"
+    assert ctx.recall_spread_seeds(rc.resolve(None, environ={"WMTM_RECALL_SPREAD_SEEDS": "all"})) == "all"
+    assert ctx.recall_spread_seeds(rc.resolve(None, environ={"WMTM_RECALL_SPREAD_SEEDS": "x"})) == "turn"
 
 
 # --------------------------------------------------------------------------------------------- mode C: all
@@ -320,9 +324,11 @@ def _run_api(tmp_path, seed, flags, turns=10):
 
 
 @pytest.mark.parametrize("seed", range(6))
-def test_api_unset_flag_behaves_as_all(tmp_path, seed):
-    """Acceptance 1: no flag (nothing in the flags file, no env) admits and shows exactly what all does."""
-    assert _run_api(tmp_path / "unset", seed, {}) == _run_api(tmp_path / "all", seed, {"recall_spread_seeds": "all"})
+def test_api_unset_flag_behaves_as_turn_plus_10(tmp_path, seed):
+    """No flag (nothing in the flags file, no env) admits and shows exactly what turn + recall_spread_add_pct 10 does
+    (the default since t-2026-11-13-wmtm-spread-seed-default; before it, all)."""
+    assert _run_api(tmp_path / "unset", seed, {}) == \
+        _run_api(tmp_path / "p10", seed, {"recall_spread_seeds": "turn", "recall_spread_add_pct": 10})
 
 
 @pytest.mark.parametrize("seed", range(6))
@@ -351,10 +357,15 @@ def test_api_passes_mode_and_request_id(tmp_path, monkeypatch):
     rid = ctx.request_item_id("amber ember", m._flags())
     assert seen[-1]["request_id"] == rid and rid in m.orchestrator.store      # the id admit_request_item used
     seen.clear()
-    monkeypatch.delenv("WMTM_RECALL_SPREAD_SEEDS")
+    monkeypatch.setenv("WMTM_RECALL_SPREAD_SEEDS", "all")
     m.observe({"user": "cobalt"})
     m.context_for("cobalt")
-    assert seen and "spread_seeds" not in seen[-1] and "request_id" not in seen[-1]   # default: the old call
+    assert seen and "spread_seeds" not in seen[-1] and "request_id" not in seen[-1]   # all: the old call
+    seen.clear()
+    monkeypatch.delenv("WMTM_RECALL_SPREAD_SEEDS")
+    m.observe({"user": "garnet"})
+    m.context_for("garnet")
+    assert seen and seen[-1]["spread_seeds"] == "turn" and seen[-1]["add_pct"] == 10.0   # default: turn + 10
 
 
 def test_request_item_id_off_and_empty():

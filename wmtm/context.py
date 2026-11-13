@@ -732,13 +732,35 @@ SPREAD_SEED_MODES = ("all", "focus", "turn")
 def recall_spread_seeds(cfg):
     """recall_spread_seeds (t-2026-11-11-wmtm-spread-seeds-probe): where recall's spreading activation starts.
 
-    -> "all" (every resident; the default and the behaviour before the flag), "focus" (top 50% of residents by STI)
-    or "turn" (this turn's keyword-matched clusters + the request item).  Absent or invalid -> "all".  Never raises."""
+    -> "all" (every resident; the behaviour before the flag), "focus" (top 50% of residents by STI) or "turn" (this
+    turn's keyword-matched clusters + the request item; the SPEC default since t-2026-11-13-wmtm-spread-seed-default,
+    used with recall_spread_add_pct 10).  Absent or invalid -> the SPEC default.  Never raises."""
+    from .runtime_config import SPEC
+    default = SPEC["recall_spread_seeds"][2]
     try:
-        v = str(setting(cfg, "recall_spread_seeds")).strip().lower()
+        v = setting(cfg, "recall_spread_seeds")
+        v = default if v is None else str(v).strip().lower()
     except Exception:
-        return "all"
-    return v if v in SPREAD_SEED_MODES else "all"
+        return default
+    return v if v in SPREAD_SEED_MODES else default
+
+
+def recall_spread_pct(cfg, key):
+    """recall_spread_fallback_pct / recall_spread_add_pct (t-2026-11-13-wmtm-spread-seed-sweep): the percentage of
+    residents (top by STI) added to recall_spread_seeds=turn's seeds.  -> float in [0, 100]; absent, invalid (not a
+    number, None, NaN) -> the SPEC default (fallback 0, add 10 since t-2026-11-13-wmtm-spread-seed-default); <= 0 ->
+    0.0 (off); > 100 -> 100.0.  Never raises."""
+    from .runtime_config import SPEC
+    default = float(SPEC[key][2])
+    try:
+        v = float(setting(cfg, key))
+    except Exception:
+        v = default
+    if v != v:
+        v = default
+    if v <= 0:
+        return 0.0
+    return min(v, 100.0)
 
 
 def protect_settings(cfg):

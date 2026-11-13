@@ -1,0 +1,2 @@
+A vs probe A:   {"identical_modulo_writeback_ids": true, "writeback_note_ids": 5, "writeback_positive_scores": 0}
+E vs probe E:   {"identical_modulo_writeback_ids": true, "writeback_note_ids": 3, "writeback_positive_scores": 0}

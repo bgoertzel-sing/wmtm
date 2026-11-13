@@ -1,0 +1,862 @@
+{
+"A": {
+"turns": 40,
+"admitted": 32,
+"admitted_graph_only": 0,
+"admitted_keyword": 32,
+"admitted_useful": 18,
+"admitted_noise": 14,
+"max_new_recalled_in_one_turn": 4,
+"precision_admitted_on_topic": 0.5625,
+"precision_admitted_any_useful": 0.625,
+"precision_graph_only_admitted_on_topic": null,
+"shown_total": 261,
+"shown_useful": 50,
+"shown_noise": 211,
+"precision_shown_on_topic": 0.1916,
+"coverage_useful_shown_first_visit": {
+"shown": 17,
+"planted": 70,
+"hubs": 17,
+"linked": 0,
+"frac": 0.2429
+},
+"useful_admitted_during_topic_turns": 15,
+"coverage_by_topic_first_visit": {
+"0": [
+2,
+6
+],
+"1": [
+1,
+4
+],
+"2": [
+3,
+10
+],
+"4": [
+2,
+8
+],
+"5": [
+1,
+3
+],
+"6": [
+3,
+13
+],
+"7": [
+2,
+8
+],
+"8": [
+1,
+10
+],
+"9": [
+2,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+2,
+6
+],
+"2": [
+2,
+10
+],
+"4": [
+1,
+8
+],
+"6": [
+3,
+13
+],
+"8": [
+1,
+10
+]
+},
+"coverage_revisit_total": [
+9,
+47
+],
+"evicted": 0,
+"evicted_by_graph_only_admit": 0,
+"evicted_useful_any_topic": 0,
+"evicted_useful_hubs": 0,
+"max_store": 26,
+"first_turn_store_full": null,
+"cut_by_floor": 0,
+"cut_by_top_k": 0,
+"cut_by_top_k_on_topic_useful": 0,
+"cut_by_top_k_keyword": 0,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+15
+],
+"turns_top_k_full": 0,
+"sti_on_admit": {
+"graph_only": [
+null,
+null,
+null
+],
+"keyword": [
+6.5,
+183.8803,
+91.023
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+null
+],
+"violations": 0,
+"errors": 0
+},
+"E": {
+"turns": 40,
+"admitted": 119,
+"admitted_graph_only": 83,
+"admitted_keyword": 36,
+"admitted_useful": 62,
+"admitted_noise": 57,
+"max_new_recalled_in_one_turn": 10,
+"precision_admitted_on_topic": 0.521,
+"precision_admitted_any_useful": 0.5798,
+"precision_graph_only_admitted_on_topic": 0.4819,
+"shown_total": 323,
+"shown_useful": 73,
+"shown_noise": 250,
+"precision_shown_on_topic": 0.226,
+"coverage_useful_shown_first_visit": {
+"shown": 36,
+"planted": 70,
+"hubs": 17,
+"linked": 19,
+"frac": 0.5143
+},
+"useful_admitted_during_topic_turns": 48,
+"coverage_by_topic_first_visit": {
+"0": [
+5,
+6
+],
+"1": [
+3,
+4
+],
+"2": [
+6,
+10
+],
+"4": [
+4,
+8
+],
+"5": [
+2,
+3
+],
+"6": [
+5,
+13
+],
+"7": [
+6,
+8
+],
+"8": [
+1,
+10
+],
+"9": [
+4,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+5,
+6
+],
+"2": [
+4,
+10
+],
+"4": [
+2,
+8
+],
+"6": [
+3,
+13
+],
+"8": [
+0,
+10
+]
+},
+"coverage_revisit_total": [
+14,
+47
+],
+"evicted": 0,
+"evicted_by_graph_only_admit": 0,
+"evicted_useful_any_topic": 0,
+"evicted_useful_hubs": 0,
+"max_store": 51,
+"first_turn_store_full": null,
+"cut_by_floor": 127,
+"cut_by_top_k": 26,
+"cut_by_top_k_on_topic_useful": 9,
+"cut_by_top_k_keyword": 2,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+10
+],
+"turns_top_k_full": 6,
+"sti_on_admit": {
+"graph_only": [
+7.28,
+7.28,
+7.28
+],
+"keyword": [
+6.5,
+183.8803,
+92.87
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+0.728
+],
+"violations": 0,
+"errors": 0
+},
+"F50": {
+"turns": 40,
+"admitted": 248,
+"admitted_graph_only": 212,
+"admitted_keyword": 36,
+"admitted_useful": 75,
+"admitted_noise": 173,
+"max_new_recalled_in_one_turn": 10,
+"precision_admitted_on_topic": 0.3024,
+"precision_admitted_any_useful": 0.4677,
+"precision_graph_only_admitted_on_topic": 0.25,
+"shown_total": 214,
+"shown_useful": 63,
+"shown_noise": 151,
+"precision_shown_on_topic": 0.2944,
+"coverage_useful_shown_first_visit": {
+"shown": 40,
+"planted": 70,
+"hubs": 17,
+"linked": 23,
+"frac": 0.5714
+},
+"useful_admitted_during_topic_turns": 54,
+"coverage_by_topic_first_visit": {
+"0": [
+5,
+6
+],
+"1": [
+4,
+4
+],
+"2": [
+5,
+10
+],
+"4": [
+5,
+8
+],
+"5": [
+3,
+3
+],
+"6": [
+4,
+13
+],
+"7": [
+7,
+8
+],
+"8": [
+2,
+10
+],
+"9": [
+5,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+5,
+6
+],
+"2": [
+4,
+10
+],
+"4": [
+2,
+8
+],
+"6": [
+4,
+13
+],
+"8": [
+0,
+10
+]
+},
+"coverage_revisit_total": [
+15,
+47
+],
+"evicted": 57,
+"evicted_by_graph_only_admit": 52,
+"evicted_useful_any_topic": 27,
+"evicted_useful_hubs": 1,
+"max_store": 60,
+"first_turn_store_full": 20,
+"cut_by_floor": 288,
+"cut_by_top_k": 91,
+"cut_by_top_k_on_topic_useful": 15,
+"cut_by_top_k_keyword": 2,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+10
+],
+"turns_top_k_full": 16,
+"sti_on_admit": {
+"graph_only": [
+7.28,
+20.28,
+7.403
+],
+"keyword": [
+6.5,
+183.8803,
+92.358
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+2.028
+],
+"violations": 0,
+"errors": 0
+},
+"F25": {
+"turns": 40,
+"admitted": 177,
+"admitted_graph_only": 141,
+"admitted_keyword": 36,
+"admitted_useful": 76,
+"admitted_noise": 101,
+"max_new_recalled_in_one_turn": 10,
+"precision_admitted_on_topic": 0.4294,
+"precision_admitted_any_useful": 0.5367,
+"precision_graph_only_admitted_on_topic": 0.383,
+"shown_total": 186,
+"shown_useful": 74,
+"shown_noise": 112,
+"precision_shown_on_topic": 0.3978,
+"coverage_useful_shown_first_visit": {
+"shown": 42,
+"planted": 70,
+"hubs": 17,
+"linked": 25,
+"frac": 0.6
+},
+"useful_admitted_during_topic_turns": 55,
+"coverage_by_topic_first_visit": {
+"0": [
+5,
+6
+],
+"1": [
+3,
+4
+],
+"2": [
+5,
+10
+],
+"4": [
+5,
+8
+],
+"5": [
+3,
+3
+],
+"6": [
+5,
+13
+],
+"7": [
+7,
+8
+],
+"8": [
+2,
+10
+],
+"9": [
+7,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+4,
+6
+],
+"2": [
+4,
+10
+],
+"4": [
+2,
+8
+],
+"6": [
+7,
+13
+],
+"8": [
+0,
+10
+]
+},
+"coverage_revisit_total": [
+17,
+47
+],
+"evicted": 0,
+"evicted_by_graph_only_admit": 0,
+"evicted_useful_any_topic": 0,
+"evicted_useful_hubs": 0,
+"max_store": 51,
+"first_turn_store_full": null,
+"cut_by_floor": 305,
+"cut_by_top_k": 27,
+"cut_by_top_k_on_topic_useful": 10,
+"cut_by_top_k_keyword": 2,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+10
+],
+"turns_top_k_full": 7,
+"sti_on_admit": {
+"graph_only": [
+7.28,
+13.78,
+7.326
+],
+"keyword": [
+6.5,
+183.8803,
+92.358
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+1.378
+],
+"violations": 0,
+"errors": 0
+},
+"P10": {
+"turns": 40,
+"admitted": 141,
+"admitted_graph_only": 104,
+"admitted_keyword": 37,
+"admitted_useful": 69,
+"admitted_noise": 72,
+"max_new_recalled_in_one_turn": 10,
+"precision_admitted_on_topic": 0.4894,
+"precision_admitted_any_useful": 0.5674,
+"precision_graph_only_admitted_on_topic": 0.4423,
+"shown_total": 323,
+"shown_useful": 77,
+"shown_noise": 246,
+"precision_shown_on_topic": 0.2384,
+"coverage_useful_shown_first_visit": {
+"shown": 36,
+"planted": 70,
+"hubs": 17,
+"linked": 19,
+"frac": 0.5143
+},
+"useful_admitted_during_topic_turns": 50,
+"coverage_by_topic_first_visit": {
+"0": [
+5,
+6
+],
+"1": [
+3,
+4
+],
+"2": [
+6,
+10
+],
+"4": [
+4,
+8
+],
+"5": [
+2,
+3
+],
+"6": [
+5,
+13
+],
+"7": [
+6,
+8
+],
+"8": [
+1,
+10
+],
+"9": [
+4,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+5,
+6
+],
+"2": [
+4,
+10
+],
+"4": [
+2,
+8
+],
+"6": [
+8,
+13
+],
+"8": [
+0,
+10
+]
+},
+"coverage_revisit_total": [
+19,
+47
+],
+"evicted": 0,
+"evicted_by_graph_only_admit": 0,
+"evicted_useful_any_topic": 0,
+"evicted_useful_hubs": 0,
+"max_store": 53,
+"first_turn_store_full": null,
+"cut_by_floor": 561,
+"cut_by_top_k": 25,
+"cut_by_top_k_on_topic_useful": 10,
+"cut_by_top_k_keyword": 2,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+10
+],
+"turns_top_k_full": 6,
+"sti_on_admit": {
+"graph_only": [
+7.28,
+7.28,
+7.28
+],
+"keyword": [
+6.5,
+183.8803,
+92.483
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+0.728
+],
+"violations": 0,
+"errors": 0
+},
+"P25": {
+"turns": 40,
+"admitted": 205,
+"admitted_graph_only": 169,
+"admitted_keyword": 36,
+"admitted_useful": 73,
+"admitted_noise": 132,
+"max_new_recalled_in_one_turn": 10,
+"precision_admitted_on_topic": 0.3561,
+"precision_admitted_any_useful": 0.4927,
+"precision_graph_only_admitted_on_topic": 0.3018,
+"shown_total": 240,
+"shown_useful": 67,
+"shown_noise": 173,
+"precision_shown_on_topic": 0.2792,
+"coverage_useful_shown_first_visit": {
+"shown": 36,
+"planted": 70,
+"hubs": 17,
+"linked": 19,
+"frac": 0.5143
+},
+"useful_admitted_during_topic_turns": 53,
+"coverage_by_topic_first_visit": {
+"0": [
+5,
+6
+],
+"1": [
+3,
+4
+],
+"2": [
+5,
+10
+],
+"4": [
+4,
+8
+],
+"5": [
+3,
+3
+],
+"6": [
+4,
+13
+],
+"7": [
+7,
+8
+],
+"8": [
+1,
+10
+],
+"9": [
+4,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+5,
+6
+],
+"2": [
+3,
+10
+],
+"4": [
+1,
+8
+],
+"6": [
+6,
+13
+],
+"8": [
+0,
+10
+]
+},
+"coverage_revisit_total": [
+15,
+47
+],
+"evicted": 31,
+"evicted_by_graph_only_admit": 29,
+"evicted_useful_any_topic": 13,
+"evicted_useful_hubs": 2,
+"max_store": 60,
+"first_turn_store_full": 20,
+"cut_by_floor": 506,
+"cut_by_top_k": 37,
+"cut_by_top_k_on_topic_useful": 12,
+"cut_by_top_k_keyword": 2,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+10
+],
+"turns_top_k_full": 9,
+"sti_on_admit": {
+"graph_only": [
+7.28,
+20.28,
+7.395
+],
+"keyword": [
+6.5,
+183.8803,
+92.358
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+2.028
+],
+"violations": 0,
+"errors": 0
+},
+"D": {
+"turns": 40,
+"admitted": 141,
+"admitted_graph_only": 104,
+"admitted_keyword": 37,
+"admitted_useful": 69,
+"admitted_noise": 72,
+"max_new_recalled_in_one_turn": 10,
+"precision_admitted_on_topic": 0.4894,
+"precision_admitted_any_useful": 0.5674,
+"precision_graph_only_admitted_on_topic": 0.4423,
+"shown_total": 323,
+"shown_useful": 77,
+"shown_noise": 246,
+"precision_shown_on_topic": 0.2384,
+"coverage_useful_shown_first_visit": {
+"shown": 36,
+"planted": 70,
+"hubs": 17,
+"linked": 19,
+"frac": 0.5143
+},
+"useful_admitted_during_topic_turns": 50,
+"coverage_by_topic_first_visit": {
+"0": [
+5,
+6
+],
+"1": [
+3,
+4
+],
+"2": [
+6,
+10
+],
+"4": [
+4,
+8
+],
+"5": [
+2,
+3
+],
+"6": [
+5,
+13
+],
+"7": [
+6,
+8
+],
+"8": [
+1,
+10
+],
+"9": [
+4,
+8
+]
+},
+"coverage_revisit": {
+"0": [
+5,
+6
+],
+"2": [
+4,
+10
+],
+"4": [
+2,
+8
+],
+"6": [
+8,
+13
+],
+"8": [
+0,
+10
+]
+},
+"coverage_revisit_total": [
+19,
+47
+],
+"evicted": 0,
+"evicted_by_graph_only_admit": 0,
+"evicted_useful_any_topic": 0,
+"evicted_useful_hubs": 0,
+"max_store": 53,
+"first_turn_store_full": null,
+"cut_by_floor": 561,
+"cut_by_top_k": 25,
+"cut_by_top_k_on_topic_useful": 10,
+"cut_by_top_k_keyword": 2,
+"cut_by_top_k_keyword_on_topic_useful": 0,
+"top_k_values": [
+10
+],
+"turns_top_k_full": 6,
+"sti_on_admit": {
+"graph_only": [
+7.28,
+7.28,
+7.28
+],
+"keyword": [
+6.5,
+183.8803,
+92.483
+]
+},
+"min_keyword_score_vs_max_graph_only": [
+0.65,
+0.728
+],
+"violations": 0,
+"errors": 0
+}
+}
+{"E_evicted_kinds": {}, "E_graph_only_admit_composition": {"other_topic_useful": 6, "on_topic_useful": 40, "other_topic_noise": 5, "on_topic_noise": 32}, "E_floor_cut_kinds": {"linked-d2-U": 31, "linked-d2-N-offtopic": 12, "linked-d2-U-offtopic": 7, "linked-d2-N": 77}}
+{"disp_E": {"turns_lost_a_useful_A_showed": 8, "turn_kinds_lost": {"Q3": 4, "R3": 4}, "useful_lost": 9, "useful_lost_kinds": {"hub-U": 9}, "useful_gained": 32}}
+{"F50_evicted_kinds": {"linked-d1-U": 18, "distractor-N": 2, "linked-d2-N": 10, "linked-d1-N": 18, "linked-d2-U": 8, "hub-U": 1}, "F50_graph_only_admit_composition": {"other_topic_useful": 40, "on_topic_useful": 53, "other_topic_noise": 60, "on_topic_noise": 59}, "F50_floor_cut_kinds": {"linked-d2-U": 42, "linked-d2-N-offtopic": 88, "linked-d2-U-offtopic": 35, "linked-d2-N": 100, "linked-d1-N-offtopic": 9, "hub-U-offtopic": 6, "linked-d1-U-offtopic": 7, "hub-U": 1}}
+{"disp_F50": {"turns_lost_a_useful_A_showed": 11, "turn_kinds_lost": {"Q3": 7, "R3": 4}, "useful_lost": 18, "useful_lost_kinds": {"hub-U": 18}, "useful_gained": 31}}
+{"F25_evicted_kinds": {}, "F25_graph_only_admit_composition": {"other_topic_useful": 18, "on_topic_useful": 54, "other_topic_noise": 18, "on_topic_noise": 51}, "F25_floor_cut_kinds": {"linked-d2-U": 46, "linked-d2-N-offtopic": 94, "linked-d2-U-offtopic": 32, "linked-d2-N": 131, "linked-d1-N-offtopic": 2}}
+{"disp_F25": {"turns_lost_a_useful_A_showed": 9, "turn_kinds_lost": {"Q3": 5, "R3": 4}, "useful_lost": 15, "useful_lost_kinds": {"hub-U": 15}, "useful_gained": 39}}
+{"P10_evicted_kinds": {}, "P10_graph_only_admit_composition": {"other_topic_useful": 10, "on_topic_useful": 46, "other_topic_noise": 6, "on_topic_noise": 42}, "P10_floor_cut_kinds": {"linked-d2-U": 68, "linked-d2-N-offtopic": 233, "linked-d2-U-offtopic": 84, "linked-d2-N": 176}}
+{"disp_P10": {"turns_lost_a_useful_A_showed": 8, "turn_kinds_lost": {"Q3": 4, "R3": 4}, "useful_lost": 10, "useful_lost_kinds": {"hub-U": 10}, "useful_gained": 37}}
+{"P25_evicted_kinds": {"linked-d1-N": 8, "linked-d1-U": 8, "linked-d2-N": 8, "distractor-N": 2, "hub-U": 2, "linked-d2-U": 3}, "P25_graph_only_admit_composition": {"other_topic_useful": 27, "on_topic_useful": 51, "other_topic_noise": 37, "on_topic_noise": 54}, "P25_floor_cut_kinds": {"linked-d2-U": 59, "linked-d2-N-offtopic": 199, "linked-d2-U-offtopic": 84, "linked-d2-N": 161, "linked-d1-U-offtopic": 3}}
+{"disp_P25": {"turns_lost_a_useful_A_showed": 9, "turn_kinds_lost": {"Q3": 5, "R3": 4}, "useful_lost": 14, "useful_lost_kinds": {"hub-U": 14}, "useful_gained": 31}}
+{"D_evicted_kinds": {}, "D_graph_only_admit_composition": {"other_topic_useful": 10, "on_topic_useful": 46, "other_topic_noise": 6, "on_topic_noise": 42}, "D_floor_cut_kinds": {"linked-d2-U": 68, "linked-d2-N-offtopic": 233, "linked-d2-U-offtopic": 84, "linked-d2-N": 176}}
+{"disp_D": {"turns_lost_a_useful_A_showed": 8, "turn_kinds_lost": {"Q3": 4, "R3": 4}, "useful_lost": 10, "useful_lost_kinds": {"hub-U": 10}, "useful_gained": 37}}
+{"by_turn_kind": {"A": {"Q1": {"admitted": 21, "admitted_go": 0, "adm_useful": 13, "adm_noise": 8, "shown": 23, "shown_useful": 15, "shown_noise": 8, "turns": 10}, "Q2": {"admitted": 7, "admitted_go": 0, "adm_useful": 2, "adm_noise": 5, "shown": 30, "shown_useful": 10, "shown_noise": 20, "turns": 10}, "Q3/R3": {"admitted": 0, "admitted_go": 0, "adm_useful": 0, "adm_noise": 0, "shown": 198, "shown_useful": 18, "shown_noise": 180, "turns": 15}, "R2": {"admitted": 4, "admitted_go": 0, "adm_useful": 3, "adm_noise": 1, "shown": 10, "shown_useful": 7, "shown_noise": 3, "turns": 5}}, "E": {"Q1": {"admitted": 69, "admitted_go": 46, "adm_useful": 39, "adm_noise": 30, "shown": 44, "shown_useful": 27, "shown_noise": 17, "turns": 10}, "Q2": {"admitted": 26, "admitted_go": 20, "adm_useful": 9, "adm_noise": 17, "shown": 38, "shown_useful": 13, "shown_noise": 25, "turns": 10}, "Q3/R3": {"admitted": 0, "admitted_go": 0, "adm_useful": 0, "adm_noise": 0, "shown": 223, "shown_useful": 21, "shown_noise": 202, "turns": 15}, "R2": {"admitted": 24, "admitted_go": 17, "adm_useful": 14, "adm_noise": 10, "shown": 18, "shown_useful": 12, "shown_noise": 6, "turns": 5}}, "F50": {"Q1": {"admitted": 67, "admitted_go": 46, "adm_useful": 37, "adm_noise": 30, "shown": 44, "shown_useful": 27, "shown_noise": 17, "turns": 10}, "Q2": {"admitted": 36, "admitted_go": 30, "adm_useful": 9, "adm_noise": 27, "shown": 33, "shown_useful": 14, "shown_noise": 19, "turns": 10}, "Q3/R3": {"admitted": 119, "admitted_go": 119, "adm_useful": 10, "adm_noise": 109, "shown": 119, "shown_useful": 10, "shown_noise": 109, "turns": 15}, "R2": {"admitted": 26, "admitted_go": 17, "adm_useful": 19, "adm_noise": 7, "shown": 18, "shown_useful": 12, "shown_noise": 6, "turns": 5}}, "F25": {"Q1": {"admitted": 67, "admitted_go": 46, "adm_useful": 37, "adm_noise": 30, "shown": 44, "shown_useful": 27, "shown_noise": 17, "turns": 10}, "Q2": {"admitted": 29, "admitted_go": 23, "adm_useful": 8, "adm_noise": 21, "shown": 26, "shown_useful": 13, "shown_noise": 13, "turns": 10}, "Q3/R3": {"admitted": 55, "admitted_go": 55, "adm_useful": 14, "adm_noise": 41, "shown": 98, "shown_useful": 22, "shown_noise": 76, "turns": 15}, "R2": {"admitted": 26, "admitted_go": 17, "adm_useful": 17, "adm_noise": 9, "shown": 18, "shown_useful": 12, "shown_noise": 6, "turns": 5}}, "P10": {"Q1": {"admitted": 69, "admitted_go": 46, "adm_useful": 39, "adm_noise": 30, "shown": 44, "shown_useful": 27, "shown_noise": 17, "turns": 10}, "Q2": {"admitted": 40, "admitted_go": 34, "adm_useful": 11, "adm_noise": 29, "shown": 45, "shown_useful": 13, "shown_noise": 32, "turns": 10}, "Q3/R3": {"admitted": 6, "admitted_go": 6, "adm_useful": 5, "adm_noise": 1, "shown": 214, "shown_useful": 25, "shown_noise": 189, "turns": 15}, "R2": {"admitted": 26, "admitted_go": 18, "adm_useful": 14, "adm_noise": 12, "shown": 20, "shown_useful": 12, "shown_noise": 8, "turns": 5}}, "P25": {"Q1": {"admitted": 74, "admitted_go": 53, "adm_useful": 36, "adm_noise": 38, "shown": 46, "shown_useful": 26, "shown_noise": 20, "turns": 10}, "Q2": {"admitted": 43, "admitted_go": 37, "adm_useful": 12, "adm_noise": 31, "shown": 47, "shown_useful": 14, "shown_noise": 33, "turns": 10}, "Q3/R3": {"admitted": 48, "admitted_go": 48, "adm_useful": 8, "adm_noise": 40, "shown": 121, "shown_useful": 18, "shown_noise": 103, "turns": 15}, "R2": {"admitted": 40, "admitted_go": 31, "adm_useful": 17, "adm_noise": 23, "shown": 26, "shown_useful": 9, "shown_noise": 17, "turns": 5}}, "D": {"Q1": {"admitted": 69, "admitted_go": 46, "adm_useful": 39, "adm_noise": 30, "shown": 44, "shown_useful": 27, "shown_noise": 17, "turns": 10}, "Q2": {"admitted": 40, "admitted_go": 34, "adm_useful": 11, "adm_noise": 29, "shown": 45, "shown_useful": 13, "shown_noise": 32, "turns": 10}, "Q3/R3": {"admitted": 6, "admitted_go": 6, "adm_useful": 5, "adm_noise": 1, "shown": 214, "shown_useful": 25, "shown_noise": 189, "turns": 15}, "R2": {"admitted": 26, "admitted_go": 18, "adm_useful": 14, "adm_noise": 12, "shown": 20, "shown_useful": 12, "shown_noise": 8, "turns": 5}}}}

@@ -1,0 +1,206 @@
+{
+ "seed": 20261111,
+ "fixed_now": 1794350000.0,
+ "turns": [
+  {
+   "topic": 0,
+   "kind": "Q1",
+   "q": "status of bexdratar tarcro and what follows"
+  },
+  {
+   "topic": 0,
+   "kind": "Q2",
+   "q": "next update regarding nimdextov then"
+  },
+  {
+   "topic": 0,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 1,
+   "kind": "Q1",
+   "q": "status of dravelwen zojav and what follows"
+  },
+  {
+   "topic": 1,
+   "kind": "Q2",
+   "q": "next update regarding bexmungor then"
+  },
+  {
+   "topic": 1,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 2,
+   "kind": "Q1",
+   "q": "status of javwen moxquori and what follows"
+  },
+  {
+   "topic": 2,
+   "kind": "Q2",
+   "q": "next update regarding zimri then"
+  },
+  {
+   "topic": 2,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 3,
+   "kind": "Q1",
+   "q": "status of lorgorcro rifipvel and what follows"
+  },
+  {
+   "topic": 3,
+   "kind": "Q2",
+   "q": "next update regarding gultovshi then"
+  },
+  {
+   "topic": 3,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 4,
+   "kind": "Q1",
+   "q": "status of heshyarhesh zimyar and what follows"
+  },
+  {
+   "topic": 4,
+   "kind": "Q2",
+   "q": "next update regarding tartar then"
+  },
+  {
+   "topic": 4,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 5,
+   "kind": "Q1",
+   "q": "status of dratarjav dexgordex and what follows"
+  },
+  {
+   "topic": 5,
+   "kind": "Q2",
+   "q": "next update regarding yargul then"
+  },
+  {
+   "topic": 5,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 6,
+   "kind": "Q1",
+   "q": "status of fipzomun heshfenmun and what follows"
+  },
+  {
+   "topic": 6,
+   "kind": "Q2",
+   "q": "next update regarding bexka then"
+  },
+  {
+   "topic": 6,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 7,
+   "kind": "Q1",
+   "q": "status of javquo nimzim and what follows"
+  },
+  {
+   "topic": 7,
+   "kind": "Q2",
+   "q": "next update regarding fentovyar then"
+  },
+  {
+   "topic": 7,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 8,
+   "kind": "Q1",
+   "q": "status of dramox wenshika and what follows"
+  },
+  {
+   "topic": 8,
+   "kind": "Q2",
+   "q": "next update regarding drajavgul then"
+  },
+  {
+   "topic": 8,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 9,
+   "kind": "Q1",
+   "q": "status of tarcrotov pratar and what follows"
+  },
+  {
+   "topic": 9,
+   "kind": "Q2",
+   "q": "next update regarding bexkawen then"
+  },
+  {
+   "topic": 9,
+   "kind": "Q3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 0,
+   "kind": "R2",
+   "q": "next update regarding nimdextov then"
+  },
+  {
+   "topic": 0,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 2,
+   "kind": "R2",
+   "q": "next update regarding zimri then"
+  },
+  {
+   "topic": 2,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 4,
+   "kind": "R2",
+   "q": "next update regarding tartar then"
+  },
+  {
+   "topic": 4,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 6,
+   "kind": "R2",
+   "q": "next update regarding bexka then"
+  },
+  {
+   "topic": 6,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  },
+  {
+   "topic": 8,
+   "kind": "R2",
+   "q": "next update regarding drajavgul then"
+  },
+  {
+   "topic": 8,
+   "kind": "R3",
+   "q": "consequence then, what follows next"
+  }
+ ]
+}

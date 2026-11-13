@@ -1,0 +1,7 @@
+A: WMTM_RECALL_SPREAD_SEEDS=unset WMTM_RECALL_SPREAD_FALLBACK_PCT=unset WMTM_RECALL_SPREAD_ADD_PCT=unset code=/hive/protocosmo/workspace/projects/wmtm/repos/probe-A
+E: WMTM_RECALL_SPREAD_SEEDS=turn WMTM_RECALL_SPREAD_FALLBACK_PCT=0 WMTM_RECALL_SPREAD_ADD_PCT=0 code=/hive/protocosmo/workspace/projects/wmtm/repos/default
+F50: WMTM_RECALL_SPREAD_SEEDS=turn WMTM_RECALL_SPREAD_FALLBACK_PCT=50 WMTM_RECALL_SPREAD_ADD_PCT=0 code=/hive/protocosmo/workspace/projects/wmtm/repos/default
+F25: WMTM_RECALL_SPREAD_SEEDS=turn WMTM_RECALL_SPREAD_FALLBACK_PCT=25 WMTM_RECALL_SPREAD_ADD_PCT=0 code=/hive/protocosmo/workspace/projects/wmtm/repos/default
+P10: WMTM_RECALL_SPREAD_SEEDS=turn WMTM_RECALL_SPREAD_FALLBACK_PCT=0 WMTM_RECALL_SPREAD_ADD_PCT=10 code=/hive/protocosmo/workspace/projects/wmtm/repos/default
+P25: WMTM_RECALL_SPREAD_SEEDS=turn WMTM_RECALL_SPREAD_FALLBACK_PCT=0 WMTM_RECALL_SPREAD_ADD_PCT=25 code=/hive/protocosmo/workspace/projects/wmtm/repos/default
+D: WMTM_RECALL_SPREAD_SEEDS=unset WMTM_RECALL_SPREAD_FALLBACK_PCT=unset WMTM_RECALL_SPREAD_ADD_PCT=unset code=/hive/protocosmo/workspace/projects/wmtm/repos/default

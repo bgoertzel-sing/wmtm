@@ -1,0 +1,25 @@
+## check_rerun.py (probe/sweep copy)
+s20261111 A vs sweep A: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 5, "writeback_positive_scores": 0}
+s20261111 E vs sweep E: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 3, "writeback_positive_scores": 0}
+s20261111 F50 vs sweep F50: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 0, "writeback_positive_scores": 0}
+s20261111 F25 vs sweep F25: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 0, "writeback_positive_scores": 0}
+s20261111 P10 vs sweep P10: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 3, "writeback_positive_scores": 0}
+s20261111 P25 vs sweep P25: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 0, "writeback_positive_scores": 0}
+s20261111 D (new default) vs sweep P10: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 3, "writeback_positive_scores": 0}
+s20261111 D vs this run's P10: {"identical_modulo_writeback_ids": true, "writeback_note_ids": 3, "writeback_positive_scores": 0}
+s20261113 D (new default) vs this run's P10: {"identical_modulo_writeback_ids": false, "writeback_note_ids": 1, "writeback_positive_scores": 0}
+negative control: s20261113 D vs s20261113 E: {"identical_modulo_writeback_ids": false, "writeback_note_ids": 2, "writeback_positive_scores": 0}
+
+## check_rerun_wb.py (also normalises the same-second -n suffix)
+s20261111 A vs sweep A: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261111 E vs sweep E: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261111 F50 vs sweep F50: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261111 F25 vs sweep F25: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261111 P10 vs sweep P10: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261111 P25 vs sweep P25: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261111 D vs sweep P10: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+s20261113 D vs s20261113 P10: {"identical_modulo_writeback_ids": true, "writeback_positive_scores_both": 0}
+negative control: s20261113 D vs s20261113 E: {"identical_modulo_writeback_ids": false, "writeback_positive_scores_both": 0}
+negative control: s20261113 D vs s20261113 F50: {"identical_modulo_writeback_ids": false, "writeback_positive_scores_both": 0}
+negative control: s20261113 D vs s20261113 F25: {"identical_modulo_writeback_ids": false, "writeback_positive_scores_both": 0}
+negative control: s20261113 D vs s20261113 P25: {"identical_modulo_writeback_ids": false, "writeback_positive_scores_both": 0}

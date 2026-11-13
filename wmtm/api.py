@@ -263,10 +263,17 @@ class WMTM:
                 budget = _ctx.recall_budget(pcfg)
                 slots = orch.recall_slots(budget)
                 top_k = _ctx.RECALL_TOP_K_UNBUDGETED if slots is None else slots
-                # recall_spread_seeds (default all = every resident seeds the spread, as before the flag)
+                # recall_spread_seeds (default turn + recall_spread_add_pct 10 since t-2026-11-13-wmtm-spread-seed-default:
+                # this turn's matches + the top 10% most active residents seed the spread; all = every resident, as
+                # before the flag)
                 seeds = _ctx.recall_spread_seeds(pcfg)
                 skw = {} if seeds == "all" else {"spread_seeds": seeds,
                                                  "request_id": _ctx.request_item_id(user_msg, pcfg)}
+                if seeds == "turn":     # t-2026-11-13-wmtm-spread-seed-sweep: top x% residents, fallback / every turn
+                    for k, f in (("fallback_pct", "recall_spread_fallback_pct"), ("add_pct", "recall_spread_add_pct")):
+                        v = _ctx.recall_spread_pct(pcfg, f)
+                        if v > 0:
+                            skw[k] = v
                 candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg), **skw) if top_k > 0 else []
                 admitted_snippets = []
                 for c in candidates:

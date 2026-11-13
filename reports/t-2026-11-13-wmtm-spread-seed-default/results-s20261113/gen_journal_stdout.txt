@@ -1,0 +1,1 @@
+{"seed": 20261113, "clusters": 362, "turns": 40, "by_role": {"background/dNone/noise": 200, "distractor/d0/noise": 11, "hub/d0/useful": 17, "linked/d1/noise": 41, "linked/d1/useful": 33, "linked/d2/noise": 38, "linked/d2/useful": 22}, "journal_sha256": "0fb3fdedd06a1273c111012ccdf06bfe504c995436d07ac63c2f035c07bcfa7c"}
