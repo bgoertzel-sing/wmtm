@@ -1,4 +1,4 @@
-# t-2026-11-12-wmtm-parser-master-adopt-v2 (revision 3, review 2 fixes)
+# t-2026-11-12-wmtm-parser-master-adopt-v2 (revision 4, review 3 fixes)
 
 Supersedes: t-2026-11-12-wmtm-parser-master-adopt
 
@@ -7,10 +7,21 @@ The task was to adopt the Man Hin parser master recipe (sph 24e37182) in the WMT
 
 Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= correct(A) and wrong(B) <= wrong(A), A = live F3 v3 at 2C/2W) FAILS for both arms as a whole, because B has 4 wrong goals. It HOLDS for the 23 goals that are not restatements (22C/1W). 82 of the 105 goals are restatements (77 symmetry, 5 coref links) that the shipped trivial filter does not catch, and 3 of the 4 wrong goals are among them. Once labels are unique per note, no goal joins two notes (W1 = 0). Mesto §11: 10 earlier conclusions are dropped, and 4 of those are real losses of correct conclusions. Against the old loader (M17 r1/r2/r3, now fully judged: 8C/1W, 10C/1W, 7C/1W) the count rule also FAILS for B as a whole (4W > 1W) and HOLDS for the non-restatement goals (22C/1W). The per-note label suffix makes a fact that two notes share verbatim count as separate evidence (41 extra copies in s2); no proof in the main arm cites one of them. Open decisions for a human: (1) whether to extend the trivial filter to the symmetry and coref-link restatements, after which the count rule would be re-run; (2) whether to seed the parser's per-sentence adjective implications as goal sources (the sensitivity arm), which recovers 8 of the 12 old-loader goals but also brings back the 2 goals F3 v3 judged wrong (see Disagreement).
 
+## Review 3 findings, row by row
+| finding | fix | where |
+|---|---|---|
+| 1 SHA256SUMS not committed, not readable | SHA256SUMS regenerated (154 files), read granted to hive-reviewer (ACL r--, mask r--; every file in the folder now carries the hive-reviewer entry), and the same file committed as reports/.../SHA256SUMS. recompute.py checks that the committed copy equals the evidence copy | SHA256SUMS (repo and EV); recompute.py "committed SHA256SUMS equals" line |
+| 2 stale recompute copy in EV | EV tools/recompute.py replaced by the committed rev4 script (identical bytes; hash in SHA256SUMS) | EV tools/recompute.py |
+| 3 off-by-one (6 vs 5 M17 hand verdicts) | corrected to 5 (verdicts_m17_extra.tsv has 5 rows; recompute.py prints the count). Per-run counts unchanged | Review 2 table row 1; Count rule section |
+| 4 missing list narrower than Do item 5 | stated as a limit: the list covers only the 10 conclusions earlier runs derived that B dropped (7 notes or entities), not a reader-expectation pass over all 20 notes. Certainty is now an explicit column | Mesto section; Limits |
+| 5 loader not wired into the live shadow | unchanged, stated in Limits; acceptance noted as explicit | Limits |
+| 6 restatement split uneven | alternative split computed: counting all six coref role rules (bearer, agent, patient, theme, member, possession) as coref-link restatements leaves 5 non-restatement goals, 5C/0W. That HOLDS vs A_v3 (2C/2W) and FAILS vs each M17 run (fewer correct). So the 22C/1W HOLDS line depends on the split; the headline (FAILS as a whole) does not | recompute.py "alt non-restatement" lines; Count rule section |
+| 7 review 2 finding 6 truncated | still open; neither worker nor reviewer has its text | Open |
+
 ## Review 2 findings, row by row
 | finding | fix | where |
 |---|---|---|
-| 1 count rule against the old loader (M17) not delivered | the 6 M17 goals with no earlier verdict are now hand-judged (all correct). M17 r1/r2/r3 = 8C/1W (9), 10C/1W (11), 7C/1W (8). Count rule: full_s2 all FAILS against each run (C holds, 4W > 1W); full_s2 non-restatement 22C/1W HOLDS against each run; sens_s2 all FAILS against each run | armB/verdicts/verdicts_m17_extra.tsv; recompute.py "M17" lines |
+| 1 count rule against the old loader (M17) not delivered | the 5 M17 goals with no earlier verdict are now hand-judged (all correct). M17 r1/r2/r3 = 8C/1W (9), 10C/1W (11), 7C/1W (8). Count rule: full_s2 all FAILS against each run (C holds, 4W > 1W); full_s2 non-restatement 22C/1W HOLDS against each run; sens_s2 all FAILS against each run | armB/verdicts/verdicts_m17_extra.tsv; recompute.py "M17" lines |
 | 2 line-up of A and B note/goal sets not stated | A_v3's 4 goals come from 3 notes (185959Z x2, 190214Z, 104T181709Z). B's goals and proofs touch 15 notes in both arms (same 15 for goals and for proofs; the review's 13 counted proofs that cite a note directly). All 3 A_v3 notes are among B's 15. Per A_v3 goal: 2 DROP (1 wrong, 1 correct: the parse shape changed), 1 ASSERTED as a parsed fact, so never a derived goal (was wrong in A, not counted for or against B), 1 ASSERTED under a new entity name for the same referent (correct content kept, not as a derivation). This corrects the rev2 Mesto reasons for rows 4 and 9 | armB/verdicts/lineup_A_v3_vs_B.tsv |
 | 3 suite run skipped the engine | rerun with WMTM_PC_PETTA / WMTM_PC_VENDOR / WMTM_PC_SHADOW_SPH_TEMPLATES set: 1378 passed, 28 skipped, 5 xfailed, exit 0 (total 1411). All 28 remaining skips depend on the environment: WMTM_TEST_GC2_PYTHON (4), WMTM_SEMPARSE_HITL checkout (20), WMTM_REPLAY_DATA (3), PETTA_PARSER/SWIPL for the codec (1). No engine test is skipped; the two new master_loader engine tests ran and passed | suite/suite_rev3_rs.txt (pytest -rs) |
 | 4 label suffix changes evidence counting | stated as a consequence. In s2, 29 atom shapes occur under more than one note label: 70 labels, 41 extra copies (s1r had 30 extra). The spec gains 11 atom ops from s1r to s2 (1410 to 1421; 514 preds unchanged), which is the 1924 to 1935 rise. 0 of the 105 full_s2 proofs cite a duplicated label; 20 goals name a duplicated entity and are proved through coref atoms. A fix (one shared label per identical shape, or merge on load) is not made here: it changes what counts as evidence and needs a decision | armB/verdicts/suffix_dupes.tsv; Limits |
@@ -41,7 +52,8 @@ Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= c
 - bd03425 README flags rows (R1)
 - 53e5d9b per-note label suffix + test (R3)
 - bbb27b1 report revision 2, recompute.py extended (verdict counts, count rule, Mesto drop list)
-- this commit: report revision 3 (review 2), recompute.py checks M17 count rule, line-up and suffix duplicates
+- 575cb7e report revision 3 (review 2), recompute.py checks M17 count rule, line-up and suffix duplicates
+- this commit: report revision 4 (review 3): SHA256SUMS committed, 5 M17 verdicts, alternative restatement split, missing-list scope
 
 ## Pins (armB/pins.txt)
 PeTTa 3681b9baa28d (clean); PeTTaChainer b6aacc686675 (only untracked examples/indprobe/); sph 24e37182e64a; seeded_rules.pettachainer-master.metta sha256 9c58f2e01f8db9a67553e3b5985de107d1bd5941b2ecb65337d45b4d0c2b0454 (280 rules, 165 KB predicates, 16 shared defs, 1935 ops); rules.yaml sha256 e2c37881...0dcb; prompt sha256 257425b2...4809; worker config armB/worker_config_B.json sha256 8ff675eb...0f76.
@@ -85,33 +97,38 @@ Of the 77 symmetry goals, 29 are KB-only ScaleOpposite symmetries (so_sym on sha
 | full_s2, non-restatement 22/1/0 | HOLDS | HOLDS | HOLDS |
 | sens_s2, all 110/4/5 | FAILS | FAILS | FAILS |
 
-Old loader M17 goals are judged with the F3 v3 B_v3 verdicts plus 6 new hand verdicts (verdicts_m17_extra.tsv); revision 2 left these unjudged.
+Old loader M17 goals are judged with the F3 v3 B_v3 verdicts plus 5 new hand verdicts (verdicts_m17_extra.tsv); revision 2 left these unjudged.
+
+Restatement split sensitivity (review 3 finding 6): score.py counts only same_coref and coref_bearer as coref links. If all six coref role rules count as restatements, non-restatement is 5C/0W: HOLDS vs A_v3, FAILS vs M17 r1/r2/r3. The 22C/1W line rests on the narrower split.
 
 W1 (cross-note wrong conclusion): 0 in both arms. No proof uses premises from two notes.
 
 Disagreement: F3 v3 judged the 2 "effective" goals (notes 185132Z and 185959Z; b116, b119 here) WRONG, under W1 through a shared nwdef symbol. Here they come from a same-sentence adjective implication with no cross-note join, and I judged them correct. If the F3 v3 verdict is kept, sens_s2 becomes 108C/6W/5U and still FAILS.
 
 ## Mesto §11: conclusions dropped by B (sens_s2), ranked (armB/verdicts/missing_ranked.tsv)
-| rank | note | prior | kind | reason (shape) |
-|---|---|---|---|---|
-| 1 | 185132Z | B_v3 C, M17 x3 | lost correct | sentence worded differently; no adjective implication emitted |
-| 2 | 185959Z | B_v3 C | lost correct | no adjective implication emitted for this class |
-| 3 | live entity | A_v3 C | lost correct | parse gives Member witnesses, no flat Inheritance |
-| 4 | live entity | A_v3 C | lost correct | no link from the live entry entity to the class |
-| 5 | 153222Z | B_v3 C | variant | skolem number only; same referent kept as another skolem |
-| 6 | 122745Z | M17 r2 only | weak prior | no adjective implication in s02/s03 parse |
-| 7 | 104T051320Z | M17 r2 only | weak prior | no adjective implication in s02 parse |
-| 8 | 190214Z | M17 r1 only | variant | spelling variant of a kept class |
-| 9 | live entity | A_v3 W | dropped wrong | live-loader entity not in the sentence parse |
-| 10 | live entity | A_v3 W | dropped wrong | live nwdef entity not in the sentence parse |
+| rank | note | prior | kind | certainty | reason (shape) |
+|---|---|---|---|---|---|
+| 1 | 185132Z | B_v3 C, M17 x3 | lost correct | firm | sentence worded differently; no adjective implication emitted |
+| 2 | 185959Z | B_v3 C | lost correct | firm | no adjective implication emitted for this class |
+| 3 | live entity | A_v3 C | lost correct | firm | parse gives Member witnesses, no flat Inheritance |
+| 4 | live entity | A_v3 C | lost correct | firm | no link from the live entry entity to the class |
+| 5 | 153222Z | B_v3 C | variant | uncertain (variant) | skolem number only; same referent kept as another skolem |
+| 6 | 122745Z | M17 r2 only | weak prior | uncertain (weak prior) | no adjective implication in s02/s03 parse |
+| 7 | 104T051320Z | M17 r2 only | weak prior | uncertain (weak prior) | no adjective implication in s02 parse |
+| 8 | 190214Z | M17 r1 only | variant | uncertain (variant) | spelling variant of a kept class |
+| 9 | live entity | A_v3 W | dropped wrong | firm | live-loader entity not in the sentence parse |
+| 10 | live entity | A_v3 W | dropped wrong | firm | live nwdef entity not in the sentence parse |
 
 full_s2 keeps 0 of the 20 earlier conclusions; sens_s2 keeps 10.
+
+Scope: this list is the conclusions earlier runs derived that B dropped (10 rows, 7 notes or entities). It is not a reader-expectation pass over all 20 notes (order Do item 5); that pass was not done.
 
 ## Limits
 - The loader is wired only into the worker spec path (pc_shadow worker, load_order=master_ops). wmtm/pc_shadow.build_snapshot (the live shadow) does not use master_loader. Adoption would need that wiring as a separate change.
 - Per-note label suffix: a statement two notes share verbatim is loaded once per note, so the engine counts it as separate evidence (41 extra copies in s2). No main-arm proof relies on one.
 - The shipped trivial filter (pc_admit.trivial_reason) catches 0 of the 82 restatements.
 - Verdicts are by one judge (me) against the source sentence; wording is in EV only.
+- Missing-conclusions list is limited to earlier-run conclusions, not a per-note reader-expectation pass (review 3 finding 4).
 - goalchainer is off in this offline A/B, so criterion items about goal escalations were not exercised.
 
 ## Open

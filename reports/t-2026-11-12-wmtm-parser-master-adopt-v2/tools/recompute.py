@@ -89,4 +89,21 @@ if os.path.isdir(VD) and os.path.exists(os.path.join(VD, "verdicts_m17_extra.tsv
     L = [l for l in open(os.path.join(VD, "suffix_dupes.tsv")).read().splitlines()[1:] if l.strip() and not l.startswith("#")]
     n = [int(l.split("\t")[0]) for l in L]
     print("suffix dupes: shapes", len(n), "labels", sum(n), "extra copies", sum(n) - len(n))
+# review 3: alternative restatement split (all coref role rules counted as coref-link restatements)
+if os.path.isdir(VD) and os.path.exists(os.path.join(VD, "verdicts23.tsv")):
+    ROLE = {"coref_bearer", "coref_agent", "coref_patient", "coref_theme", "coref_member", "coref_possession"}
+    sc = json.load(open(os.path.join(EV, "armB/full_s2/score.json")))
+    alt = Counter(v[r["goal_id"]] for r in sc["rows"] if r["restatement"] is None and r["rule"] not in ROLE)
+    print("alt non-restatement (all coref roles = restatement) n=%d C=%d W=%d" % (sum(alt.values()), alt["correct"], alt["wrong"]),
+          "vs A_v3:", "HOLDS" if alt["correct"] >= aC and alt["wrong"] <= aW else "FAILS")
+    for r, gs in sorted(runs.items()):
+        c = Counter(mv.get(g, "unjudged") for g in gs)
+        print("  alt vs", r, "HOLDS" if alt["correct"] >= c["correct"] and alt["wrong"] <= c["wrong"] else "FAILS")
+    print("M17 extra hand verdicts", len(tsv("verdicts_m17_extra.tsv")))
+# review 3: committed sums must equal the evidence folder sums
+cs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "SHA256SUMS")
+if os.path.exists(cs) and os.path.exists(sums):
+    same = open(cs, "rb").read() == open(sums, "rb").read()
+    print("committed SHA256SUMS equals evidence SHA256SUMS:", same)
+    if not same: bad += 1
 print("RECOMPUTE_FAIL" if bad else "RECOMPUTE_OK")
