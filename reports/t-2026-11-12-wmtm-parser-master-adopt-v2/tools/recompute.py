@@ -61,4 +61,32 @@ if os.path.isdir(VD) and os.path.exists(os.path.join(VD, "verdicts_restate.tsv")
               "HOLDS" if C >= aC and W <= aW else "FAILS")
     m = tsv("missing_ranked.tsv")
     print("mesto s11 dropped", len(m), dict(Counter(r["kind"] for r in m)))
+
+# review 2: count rule vs old loader M17 (B_v3 + extra verdicts), A_v3/B line-up, suffix duplicates
+if os.path.isdir(VD) and os.path.exists(os.path.join(VD, "verdicts_m17_extra.tsv")):
+    import re
+    norm = lambda g: g.replace("__i_ep_note_", "__ep_note_").strip()
+    mv = {norm(r["goal"]): r["verdict"].lower() for r in J["B_v3"]["rows"]}
+    mv.update({norm(r["goal"]): r["verdict"].lower() for r in tsv("verdicts_m17_extra.tsv")})
+    runs = {}
+    for l in open(os.path.join(EV, "baselines/old_loader/old_loader_goals.txt")):
+        p = l.split(None, 2)
+        if len(p) == 3: runs.setdefault(p[0], []).append(norm(p[2]))
+    bsets = (("full_s2 all", Counter(v.values())), ("full_s2 non-restatement", Counter(nt.values())), ("sens_s2 all", Counter(vs.values())))
+    for r, gs in sorted(runs.items()):
+        c = Counter(mv.get(g, "unjudged") for g in gs)
+        if c["unjudged"]: print("M17 UNJUDGED", r, c["unjudged"]); bad += 1
+        print("M17", r, "n=%d C=%d W=%d" % (len(gs), c["correct"], c["wrong"]))
+        for name, b in bsets:
+            print("  count rule", name, "vs", r, "HOLDS" if b["correct"] >= c["correct"] and b["wrong"] <= c["wrong"] else "FAILS")
+    lu = tsv("lineup_A_v3_vs_B.tsv")
+    print("lineup A_v3 goals", len(lu), dict(Counter(r["status_in_B"].split(" (")[0] for r in lu)))
+    for run in ("full_s2", "sens_s2"):
+        q = json.loads(open(os.path.join(EV, "armB/%s/shadow.jsonl" % run)).readline())["queries"]
+        notes = set()
+        for x in q: notes |= set(re.findall(r"2026\d{4}T\d{6}Z", (x.get("proof") or "") + x["goal"]))
+        print("lineup B", run, "notes touched by goals/proofs", len(notes))
+    L = [l for l in open(os.path.join(VD, "suffix_dupes.tsv")).read().splitlines()[1:] if l.strip() and not l.startswith("#")]
+    n = [int(l.split("\t")[0]) for l in L]
+    print("suffix dupes: shapes", len(n), "labels", sum(n), "extra copies", sum(n) - len(n))
 print("RECOMPUTE_FAIL" if bad else "RECOMPUTE_OK")

@@ -1,11 +1,21 @@
-# t-2026-11-12-wmtm-parser-master-adopt-v2 (revision 2, review 1 fixes)
+# t-2026-11-12-wmtm-parser-master-adopt-v2 (revision 3, review 2 fixes)
 
 Supersedes: t-2026-11-12-wmtm-parser-master-adopt
 
 ## Summary
 The task was to adopt the Man Hin parser master recipe (sph 24e37182) in the WMTM shadow loader, re-parse the 20 f3-ab notes sentence by sentence, and compare the result with the old loader (M17 r1-r3) and with live F3 v3, using the pre-registered f3-ab criterion. The loader works: arm B proves all its goals (105/105, and 119/119 in the sensitivity run), the canary passes and the negative control does not fire. Every goal now has a hand verdict. Main arm: 97 correct, 4 wrong, 4 unclear. Sensitivity arm (which also builds goals from the parser's per-sentence adjective rules): 110 correct, 4 wrong, 5 unclear.
 
-Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= correct(A) and wrong(B) <= wrong(A), A = live F3 v3 at 2C/2W) FAILS for both arms as a whole, because B has 4 wrong goals. It HOLDS for the 23 goals that are not restatements (22C/1W). 82 of the 105 goals are restatements (77 symmetry, 5 coref links) that the shipped trivial filter does not catch, and 3 of the 4 wrong goals are among them. Once labels are unique per note, no goal joins two notes (W1 = 0). Mesto §11: 10 earlier conclusions are dropped, and 4 of those are real losses of correct conclusions. Open decisions for a human: (1) whether to extend the trivial filter to the symmetry and coref-link restatements, after which the count rule would be re-run; (2) whether to seed the parser's per-sentence adjective implications as goal sources (the sensitivity arm), which recovers 8 of the 12 old-loader goals but also brings back the 2 goals F3 v3 judged wrong (see Disagreement).
+Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= correct(A) and wrong(B) <= wrong(A), A = live F3 v3 at 2C/2W) FAILS for both arms as a whole, because B has 4 wrong goals. It HOLDS for the 23 goals that are not restatements (22C/1W). 82 of the 105 goals are restatements (77 symmetry, 5 coref links) that the shipped trivial filter does not catch, and 3 of the 4 wrong goals are among them. Once labels are unique per note, no goal joins two notes (W1 = 0). Mesto §11: 10 earlier conclusions are dropped, and 4 of those are real losses of correct conclusions. Against the old loader (M17 r1/r2/r3, now fully judged: 8C/1W, 10C/1W, 7C/1W) the count rule also FAILS for B as a whole (4W > 1W) and HOLDS for the non-restatement goals (22C/1W). The per-note label suffix makes a fact that two notes share verbatim count as separate evidence (41 extra copies in s2); no proof in the main arm cites one of them. Open decisions for a human: (1) whether to extend the trivial filter to the symmetry and coref-link restatements, after which the count rule would be re-run; (2) whether to seed the parser's per-sentence adjective implications as goal sources (the sensitivity arm), which recovers 8 of the 12 old-loader goals but also brings back the 2 goals F3 v3 judged wrong (see Disagreement).
+
+## Review 2 findings, row by row
+| finding | fix | where |
+|---|---|---|
+| 1 count rule against the old loader (M17) not delivered | the 6 M17 goals with no earlier verdict are now hand-judged (all correct). M17 r1/r2/r3 = 8C/1W (9), 10C/1W (11), 7C/1W (8). Count rule: full_s2 all FAILS against each run (C holds, 4W > 1W); full_s2 non-restatement 22C/1W HOLDS against each run; sens_s2 all FAILS against each run | armB/verdicts/verdicts_m17_extra.tsv; recompute.py "M17" lines |
+| 2 line-up of A and B note/goal sets not stated | A_v3's 4 goals come from 3 notes (185959Z x2, 190214Z, 104T181709Z). B's goals and proofs touch 15 notes in both arms (same 15 for goals and for proofs; the review's 13 counted proofs that cite a note directly). All 3 A_v3 notes are among B's 15. Per A_v3 goal: 2 DROP (1 wrong, 1 correct: the parse shape changed), 1 ASSERTED as a parsed fact, so never a derived goal (was wrong in A, not counted for or against B), 1 ASSERTED under a new entity name for the same referent (correct content kept, not as a derivation). This corrects the rev2 Mesto reasons for rows 4 and 9 | armB/verdicts/lineup_A_v3_vs_B.tsv |
+| 3 suite run skipped the engine | rerun with WMTM_PC_PETTA / WMTM_PC_VENDOR / WMTM_PC_SHADOW_SPH_TEMPLATES set: 1378 passed, 28 skipped, 5 xfailed, exit 0 (total 1411). All 28 remaining skips depend on the environment: WMTM_TEST_GC2_PYTHON (4), WMTM_SEMPARSE_HITL checkout (20), WMTM_REPLAY_DATA (3), PETTA_PARSER/SWIPL for the codec (1). No engine test is skipped; the two new master_loader engine tests ran and passed | suite/suite_rev3_rs.txt (pytest -rs) |
+| 4 label suffix changes evidence counting | stated as a consequence. In s2, 29 atom shapes occur under more than one note label: 70 labels, 41 extra copies (s1r had 30 extra). The spec gains 11 atom ops from s1r to s2 (1410 to 1421; 514 preds unchanged), which is the 1924 to 1935 rise. 0 of the 105 full_s2 proofs cite a duplicated label; 20 goals name a duplicated entity and are proved through coref atoms. A fix (one shared label per identical shape, or merge on load) is not made here: it changes what counts as evidence and needs a decision | armB/verdicts/suffix_dupes.tsv; Limits |
+| 5 loader not wired into the live shadow | unchanged and stated: order item 2 is only partly met; wiring build_snapshot is a separate change | Limits |
+| 6 (text cut off after "He" in both copies received) | pending: the full text of finding 6 did not reach me; it will be addressed when it does | Open |
 
 ## Review 1 findings, row by row
 | finding | fix | where |
@@ -30,7 +40,8 @@ Recommendation: do not adopt yet. The pre-registered count rule (correct(B) >= c
 - 1092085 report revision 1
 - bd03425 README flags rows (R1)
 - 53e5d9b per-note label suffix + test (R3)
-- this commit: report revision 2, recompute.py extended (verdict counts, count rule, Mesto drop list)
+- bbb27b1 report revision 2, recompute.py extended (verdict counts, count rule, Mesto drop list)
+- this commit: report revision 3 (review 2), recompute.py checks M17 count rule, line-up and suffix duplicates
 
 ## Pins (armB/pins.txt)
 PeTTa 3681b9baa28d (clean); PeTTaChainer b6aacc686675 (only untracked examples/indprobe/); sph 24e37182e64a; seeded_rules.pettachainer-master.metta sha256 9c58f2e01f8db9a67553e3b5985de107d1bd5941b2ecb65337d45b4d0c2b0454 (280 rules, 165 KB predicates, 16 shared defs, 1935 ops); rules.yaml sha256 e2c37881...0dcb; prompt sha256 257425b2...4809; worker config armB/worker_config_B.json sha256 8ff675eb...0f76.
@@ -68,7 +79,13 @@ Of the 77 symmetry goals, 29 are KB-only ScaleOpposite symmetries (so_sym on sha
 | full_s2, non-restatement | 22/1/0 | HOLDS |
 | sens_s2, all | 110/4/5 | FAILS (4W > 2W) |
 
-Old loader M17 r1/r2/r3 (9/11/8 goals, judged with the F3 v3 B_v3 verdicts): 5C/1W/3 not judged, 6C/1W/4 not judged, 5C/1W/2 not judged. The not-judged rows have no earlier verdict, so B cannot be scored against M17 under the count rule. M17 is used for the Mesto drop list only.
+| B set | vs M17 r1 8C/1W | vs M17 r2 10C/1W | vs M17 r3 7C/1W |
+|---|---|---|---|
+| full_s2, all 97/4/4 | FAILS | FAILS | FAILS |
+| full_s2, non-restatement 22/1/0 | HOLDS | HOLDS | HOLDS |
+| sens_s2, all 110/4/5 | FAILS | FAILS | FAILS |
+
+Old loader M17 goals are judged with the F3 v3 B_v3 verdicts plus 6 new hand verdicts (verdicts_m17_extra.tsv); revision 2 left these unjudged.
 
 W1 (cross-note wrong conclusion): 0 in both arms. No proof uses premises from two notes.
 
@@ -92,10 +109,12 @@ full_s2 keeps 0 of the 20 earlier conclusions; sens_s2 keeps 10.
 
 ## Limits
 - The loader is wired only into the worker spec path (pc_shadow worker, load_order=master_ops). wmtm/pc_shadow.build_snapshot (the live shadow) does not use master_loader. Adoption would need that wiring as a separate change.
+- Per-note label suffix: a statement two notes share verbatim is loaded once per note, so the engine counts it as separate evidence (41 extra copies in s2). No main-arm proof relies on one.
 - The shipped trivial filter (pc_admit.trivial_reason) catches 0 of the 82 restatements.
 - Verdicts are by one judge (me) against the source sentence; wording is in EV only.
 - goalchainer is off in this offline A/B, so criterion items about goal escalations were not exercised.
 
 ## Open
-- Decisions (1) and (2) from the Summary.
+- Decisions (1) and (2) from the Summary, and whether duplicate shared statements should be merged (review 2 finding 4).
+- Review 2 finding 6: text cut off, pending.
 - Cleanup after review (/tmp/mav2, worktree back to main), only when a human OKs it.
