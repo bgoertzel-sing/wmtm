@@ -1,0 +1,221 @@
+{
+ "arms": {
+  "full_s2": {
+   "C": 22,
+   "U": 0,
+   "W": 1,
+   "admitted": 23,
+   "admitted_by_head": {
+    "Agent": 3,
+    "Because": 1,
+    "Member": 7,
+    "PartOf": 2,
+    "Patient": 5,
+    "Possession": 3,
+    "Theme": 2
+   },
+   "admitted_unclear_ids": [],
+   "admitted_wrong_ids": [
+    "b68"
+   ],
+   "dropped": {
+    "asserted": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 0,
+    "per_fact_cap": 0,
+    "trivial": 82
+   },
+   "dropped_old_code": {
+    "asserted": 0,
+    "bad": 98,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 7,
+    "per_fact_cap": 0
+   },
+   "dropped_render_only": {
+    "asserted": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 23,
+    "per_fact_cap": 0,
+    "trivial": 82
+   },
+   "goal_shapes": {
+    "(Agent SK SK)": 3,
+    "(Bearer SK SK)": 2,
+    "(Because SK SK)": 1,
+    "(Coref S S)": 1,
+    "(Coref S SK)": 10,
+    "(Coref SK S)": 1,
+    "(Coref SK SK)": 39,
+    "(Member S S)": 4,
+    "(Member SK S)": 3,
+    "(PartOf SK S)": 1,
+    "(PartOf SK SK)": 1,
+    "(Patient SK S)": 2,
+    "(Patient SK SK)": 3,
+    "(Possession S SK)": 1,
+    "(Possession SK S)": 1,
+    "(Possession SK SK)": 1,
+    "(ScaleOpposite S S)": 29,
+    "(Theme SK SK)": 2
+   },
+   "no_source_by_head": {
+    "ScaleOpposite": 29
+   },
+   "refused_CWU": {
+    "correct": 75,
+    "unclear": 4,
+    "wrong": 3
+   },
+   "refused_by_reason": {
+    "coref_restatement": 5,
+    "symmetry_restatement": 77
+   },
+   "results": 105,
+   "unjudged": 0,
+   "unrenderable_by_head": {},
+   "vs_A_v3": "HOLDS",
+   "vs_M17_as_judged": {
+    "M17_r1_True": "HOLDS",
+    "M17_r2_True": "HOLDS",
+    "M17_r3_True": "HOLDS"
+   }
+  },
+  "sens_s2": {
+   "C": 35,
+   "U": 1,
+   "W": 1,
+   "admitted": 37,
+   "admitted_by_head": {
+    "Agent": 3,
+    "Because": 1,
+    "Member": 21,
+    "PartOf": 2,
+    "Patient": 5,
+    "Possession": 3,
+    "Theme": 2
+   },
+   "admitted_unclear_ids": [
+    "b114"
+   ],
+   "admitted_wrong_ids": [
+    "b68"
+   ],
+   "dropped": {
+    "asserted": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 0,
+    "per_fact_cap": 0,
+    "trivial": 82
+   },
+   "dropped_old_code": {
+    "asserted": 0,
+    "bad": 98,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 21,
+    "per_fact_cap": 0
+   },
+   "dropped_render_only": {
+    "asserted": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 37,
+    "per_fact_cap": 0,
+    "trivial": 82
+   },
+   "goal_shapes": {
+    "(Agent SK SK)": 3,
+    "(Bearer SK SK)": 2,
+    "(Because SK SK)": 1,
+    "(Coref S S)": 1,
+    "(Coref S SK)": 10,
+    "(Coref SK S)": 1,
+    "(Coref SK SK)": 39,
+    "(Member S S)": 5,
+    "(Member SK S)": 16,
+    "(PartOf SK S)": 1,
+    "(PartOf SK SK)": 1,
+    "(Patient SK S)": 2,
+    "(Patient SK SK)": 3,
+    "(Possession S SK)": 1,
+    "(Possession SK S)": 1,
+    "(Possession SK SK)": 1,
+    "(ScaleOpposite S S)": 29,
+    "(Theme SK SK)": 2
+   },
+   "no_source_by_head": {
+    "ScaleOpposite": 29
+   },
+   "refused_CWU": {
+    "correct": 75,
+    "unclear": 4,
+    "wrong": 3
+   },
+   "refused_by_reason": {
+    "coref_restatement": 5,
+    "symmetry_restatement": 77
+   },
+   "results": 119,
+   "unjudged": 0,
+   "unrenderable_by_head": {},
+   "vs_A_v3": "HOLDS",
+   "vs_M17_as_judged": {
+    "M17_r1_True": "HOLDS",
+    "M17_r2_True": "HOLDS",
+    "M17_r3_True": "HOLDS"
+   }
+  }
+ },
+ "canary": {
+  "admitted": 1,
+  "dropped": {
+   "asserted": 0,
+   "bad": 0,
+   "known": 0,
+   "negative": 0,
+   "no_live_source": 0,
+   "per_fact_cap": 0,
+   "trivial": 1
+  },
+  "ok": true,
+  "refused": 1
+ },
+ "inputs": {
+  "A_v3": "2C/2W",
+  "filter_on_default": true,
+  "notes": 20
+ },
+ "m17_as_judged": {
+  "M17_r1_True": {
+   "C": 8,
+   "U": 0,
+   "W": 1,
+   "unjudged": 0
+  },
+  "M17_r2_True": {
+   "C": 10,
+   "U": 0,
+   "W": 1,
+   "unjudged": 0
+  },
+  "M17_r3_True": {
+   "C": 7,
+   "U": 0,
+   "W": 1,
+   "unjudged": 0
+  }
+ },
+ "tmp": {
+  "mode": "0o700",
+  "removed": true
+ }
+}
