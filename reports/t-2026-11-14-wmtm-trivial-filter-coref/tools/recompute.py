@@ -4,7 +4,7 @@ Usage (repo root of the branch): python3 reports/t-2026-11-14-wmtm-trivial-filte
 1. checks EV/SHA256SUMS;  2. re-runs the filter (wmtm.pc_admit from this repo) over EV/inputs and checks the result
 equals the stored tables (EV/tables/goals_*.tsv, counts.json);  3. recounts the report tables from goals_*.tsv and
 the stored M17 counts and prints them.  Ends RECOMPUTE_OK or RECOMPUTE_FAIL."""
-import sys, os, json, hashlib, csv
+import sys, os, json, hashlib, csv, stat
 from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import rescore
@@ -15,6 +15,9 @@ for line in open(os.path.join(EV, "SHA256SUMS")):
         print("SHA MISMATCH", f); bad += 1
 print("sha256sums checked:", sum(1 for _ in open(os.path.join(EV, "SHA256SUMS"))), "files, mismatches", bad)
 out, rows = rescore.compute(EV)
+td = rescore.tmpdir(); tmode = stat.S_IMODE(os.stat(td).st_mode)
+print("private temp dir mode %o" % tmode, "(admit.json copies for load_candidates)"); bad += tmode != 0o700
+td = rescore.cleanup(); print("private temp dir removed:", not os.path.exists(td)); bad += os.path.exists(td)
 stored = json.load(open(os.path.join(EV, "tables", "counts.json")))
 same = json.loads(json.dumps(out, sort_keys=True)) == stored
 print("re-run filter equals stored counts.json:", same); bad += not same

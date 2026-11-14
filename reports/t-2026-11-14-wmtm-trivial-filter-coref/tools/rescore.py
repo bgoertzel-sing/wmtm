@@ -7,7 +7,7 @@ split (b) wide (also all six coref role rules), hand verdict, note count; then p
 rule against A_v3 (live F3 v3) and M17 r1/r2/r3, Mesto s11 (earlier conclusions kept/dropped) and W1.
 No parse calls; the filter is wmtm.pc_admit.trivial_reason from the repo this file sits in.
 Usage: python3 reports/<task>/tools/rescore.py EV   -> writes EV/tables/*.tsv, EV/tables/counts.json (ids/counts only)."""
-import sys, os, json, re, csv, time
+import sys, os, json, re, csv, time, tempfile, shutil, atexit
 from collections import Counter
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 sys.path.insert(0, REPO)
@@ -28,13 +28,31 @@ def lc(arm, adm, mutate):
     """Real admission path (pc_admit.load_candidates, filter flag at its default = on) over this arm's admit.json."""
     if mutate:   # canary: renderable synthetic goal + live source, proof and rules unchanged, so every result reaches the filter
         adm = dict(adm, results=[dict(r, goal="(Member sk_canary c%d)" % i, sources=["n1"]) for i, r in enumerate(adm["results"])])
-    sd = os.path.join("/tmp/tfc_lc", arm + ("_canary" if mutate else "_raw")); os.makedirs(sd, exist_ok=True)
+    sd = os.path.join(tmpdir(), arm + ("_canary" if mutate else "_raw")); os.makedirs(sd, mode=0o700, exist_ok=True)
     json.dump(adm, open(os.path.join(sd, P.ADMIT_FILE), "w"))
     _, info = P.load_candidates({"shadow_dir": sd, "reasoner_max_admit": 1000, "gate_max_per_fact": 0}, None,
                                 now=float(adm.get("spec_ts") or adm["ts"]) + 1,
                                 live_ids=["n1"] + sorted({x for r in adm["results"] for x in r.get("sources") or []}))
     return {"dropped": info.get("dropped"), "trivial_refused_n": info.get("trivial_refused_n"),
             "refused_by_reason": dict(sorted(Counter(e["reason"] for e in info.get("trivial_refused") or []).items()))}
+
+
+_TMP = []   # the one private temp dir of this process (tempfile.mkdtemp: mode 700), removed at exit
+
+
+def tmpdir():
+    """Private temp dir for the admit.json copies lc() writes (note-derived): mode 700, removed at exit."""
+    if not _TMP:
+        d = tempfile.mkdtemp(prefix="tfc_lc_"); _TMP.append(d); atexit.register(cleanup)
+    return _TMP[0]
+
+
+def cleanup():
+    """Remove the private temp dir now (also runs at exit); returns its path, or None if none was made."""
+    if not _TMP:
+        return None
+    d = _TMP.pop(); shutil.rmtree(d, ignore_errors=True)
+    return d
 
 
 def tsv(p):
