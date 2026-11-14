@@ -455,6 +455,30 @@ def _weights(v):
         return GOAL_WEIGHTS
 
 
+def _master_load(cfg, atoms):
+    """master-adopt-v2: spec keys for the upstream master load order (sph templates/README.md), or {} on the legacy
+    path.  positive_only = tmpl.lower.predicates("pettachainer-master") plus the class symbols the atoms use
+    (the second argument of each flat Member); master_rules = the seeded master rules, comment and blank lines out."""
+    if str(cfg.get("shadow_load_order") or "legacy").strip().lower() != "master":
+        return {}
+    tdir = os.path.expanduser(cfg.get("shadow_sph_templates") or "")
+    if not tdir or not os.path.isdir(tdir):
+        raise RuntimeError("shadow_load_order=master needs shadow_sph_templates (got %r)" % tdir)
+    import sys as _sys
+    if tdir not in _sys.path:
+        _sys.path.insert(0, tdir)
+    from tmpl import lower as _lower
+    preds = list(_lower.predicates(_lower.MASTER))
+    classes = set()
+    for a in atoms:
+        for m in re.finditer(r"\(Member\s+[^\s()]+\s+([^\s()]+)\)", a):
+            classes.add(m.group(1))
+    with open(os.path.join(tdir, "generated", "seeded_rules.pettachainer-master.metta"), encoding="utf-8") as fh:
+        rules = [ln.strip() for ln in fh if ln.strip() and not ln.lstrip().startswith(";")]
+    return {"load_order": "master", "positive_only": sorted(set(preds) | classes), "master_rules": rules,
+            "master_meta": {"kb_predicates": len(preds), "class_symbols": len(classes), "rules": len(rules)}}
+
+
 def build_snapshot(store, cycle=0, k=None, cfg=None):
     """-> dict spec.  Per item: cached semparse atoms (Track H) only.  Track K: no regex fallback - an item that has
     not been parsed yet contributes no facts this cycle (counted in unparsed_items)."""
@@ -552,7 +576,8 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
                      "hops": {str(h): sum(1 for _, m in ranked if m["hops"] == h) for h in (1, 2, 3)}}
     else:
         goals = build_goals(rel, max_goals, skolem_goals); rank_info = None
-    return {"cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
+    load_extra = _master_load(cfg, metta)
+    return {**load_extra, "cycle": cycle, "ts": time.time(), "k": k, "items": len(items), "atoms": metta, "goals": goals,
             "semparse_items": n_sp, "unparsed_items": n_unparsed, "facts": len(facts), "rules": n_rules,
             "skolem_goals": skolem_goals, "goal_meta": goal_meta, "goal_rank": rank_info,
             "atom_src": src, "fact_src": fsrc, "label_fact": lf, "derived_src": dsrc, "derived_items": n_derived,
