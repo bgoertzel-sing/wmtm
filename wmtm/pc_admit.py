@@ -42,9 +42,23 @@ def is_derivation(proof) -> bool:
     return bool(_ASSERTED_TOKENS.sub("", term))
 _PARSER_RULE = re.compile(r"\(by i_\w+?__\w*implication\w*\b")   # P4 rev5: direct step through a parser Implication rule (<note>__<id>) is a derivation too
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
-_GOAL = re.compile(r"^\((Inheritance|Member|Implies|Similarity|Evaluation) (\S+) (\S+)\)$")
 _TEXT = {"Inheritance": "{} is a {}", "Member": "{} is a {}", "Implies": "{} implies {}",
          "Similarity": "{} is similar to {}", "Evaluation": "{} has {}"}   # same rendering as the removed pln_bridge (Track L)
+# t-2026-11-14-wmtm-render-master-goals: the master parser's binary heads (sph templates generated/atom-types.metta,
+# argument order as typed there; wording from rules.yaml "meaning").  Flat symbol arguments only, like the shapes above.
+_MASTER_TEXT = {"Coref": "{} refers to the same thing as {}",        # (-> Instance Instance)
+                "ScaleOpposite": "{} is the opposite of {}",          # (-> Class Class)
+                "Agent": "the agent of {} is {}",                     # (-> Event Entity)
+                "Patient": "the patient of {} is {}",
+                "Theme": "the theme of {} is {}",
+                "Bearer": "the bearer of {} is {}",
+                "Recipient": "the recipient of {} is {}",
+                "Experiencer": "the experiencer of {} is {}",
+                "Possession": "{} belongs to {}",                     # (-> Entity Entity): (Possession thing owner)
+                "PartOf": "{} is part of {}",                         # (-> Instance Instance)
+                "Because": "{} happens because of {}"}                # (-> Event Event|Instance)
+_TEXT.update(_MASTER_TEXT)
+_GOAL = re.compile(r"^\((%s) ([^\s()]+) ([^\s()]+)\)$" % "|".join(_TEXT))
 
 
 def mode(cfg=None, default="pettachainer") -> str:
@@ -80,11 +94,23 @@ def admissible(q) -> bool:
                 and isinstance(tv, list) and len(tv) == 2 and q.get("proof"))
 
 
+def proof_labels(proof, known=None):
+    """Fact labels a proof term cites, in order, once each: legacy sp<n>/wm<n> labels plus any token that is a key of
+    known (the spec's atom_src / label_fact).  t-2026-11-14-wmtm-render-master-goals: the master loader's statement
+    labels (s<n>_<id>__<note>) are not sp/wm labels, so they are found through the spec map, never by pattern."""
+    known = known or {}
+    out = []
+    for t in re.findall(r"[^\s()]+", str(proof or "")):
+        if (t in known or _LABEL.fullmatch(t)) and t not in out:
+            out.append(t)
+    return out
+
+
 def sources_for(goal, proof, spec):
     """Supporting WMTM item ids: from the fact labels in the proof term, else items whose facts touch the goal."""
     src = spec.get("atom_src") or {}
     ids = []
-    for lab in _LABEL.findall(proof or ""):
+    for lab in proof_labels(proof, src):
         iid = src.get(lab)
         if iid and iid not in ids:
             ids.append(iid)
@@ -107,9 +133,22 @@ def sources_for(goal, proof, spec):
 def proof_facts(goal, proof, spec):
     """Facts a proof rests on: its fact labels, else (fold proofs) the goal's chain facts."""
     lf = spec.get("label_fact") or {}
-    out = sorted({lf.get(x, x) for x in _LABEL.findall(proof or "")})
+    out = sorted({lf.get(x, x) for x in proof_labels(proof, lf)})
     if not out and "implication-instance-fold" in (proof or ""):
         out = sorted(((spec.get("goal_meta") or {}).get(goal) or {}).get("chain") or [])
+    return out
+
+
+def _with_master_maps(spec):
+    """t-2026-11-14-wmtm-render-master-goals: a master_ops spec (wmtm/master_loader.plan) carries its label -> note
+    and label -> fact maps in master_meta (atom_src / label_fact); lift them to the top-level keys the legacy path
+    uses, so sources_for / proof_facts read both paths the same way.  Top-level keys, if present, win."""
+    mm = (spec or {}).get("master_meta") or {}
+    if (spec or {}).get("load_order") != "master_ops" or not (mm.get("atom_src") or mm.get("label_fact")):
+        return spec
+    out = dict(spec)
+    out["atom_src"] = dict(mm.get("atom_src") or {}, **(spec.get("atom_src") or {}))
+    out["label_fact"] = dict(mm.get("label_fact") or {}, **(spec.get("label_fact") or {}))
     return out
 
 
@@ -119,6 +158,7 @@ def write_admit_file(out_dir, rec, spec, now=None):
     can, neg = rec.get("canary") or {}, rec.get("neg") or {}
     canary_ok = bool(can.get("ok") and not neg.get("ok") and not neg.get("timeout"))
     results = []
+    spec = _with_master_maps(spec)
     if rec.get("status") == "ok" and canary_ok:
         for q in rec.get("queries", []):
             if admissible(q):
