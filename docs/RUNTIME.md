@@ -353,4 +353,9 @@ passes through PeTTaChainer.
   `goalchainer/requests_index.json` / `notes_index.json` (rc2): reply and journal closure digests (mode 600, no text);
   `goalchainer/asked.jsonl` (rc3): suggestion lines actually shown on user turns (empty/absent with `goal_prompt` off).
 - `semparse_cache/parse_log.jsonl`: one line per parse attempt (status, secs, tokens); `worker_runs.jsonl`: one
-  line per worker run (status, load canary, model, counts); `rejects.jsonl`: rejected atoms with reasons.
+  line per worker run (status, load canary, model, counts); `rejects.jsonl`: rejected atoms with reasons;
+  `launch_decisions.jsonl` (next to `worker_runs.jsonl`, in the active cache dir): one line per launch decision of
+  the feed hook (`ts`, `decision` = launched | busy | budget_zero | nothing_pending | error, `pending`,
+  `budget_left`, `role`, `pid` or the exception type only; rotated to `.1` above 256 KiB). `tools/feed_watch.py` is
+  the standalone read-only stall check that reads the queue and the share ledger directly (exit 0 OK, 1 ALERT,
+  3 cannot judge).

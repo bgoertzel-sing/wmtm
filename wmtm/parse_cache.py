@@ -17,7 +17,10 @@ Guarantees
   * items longer than parse_max_chars (default 1500) are skipped, not truncated;
   * tokens and time are logged per parse (parse_log.jsonl); logs are size-capped (rotated to .1);
   * everything lives in the runtime dir (default <state_dir>/_wmtm_shadow/, i.e. inside the bot's memory dir);
-  * maybe_feed never raises and never waits; one worker at a time (pidfile guard).
+  * maybe_feed never raises and never waits; one worker at a time (pidfile guard);
+  * every launch decision leaves one line in launch_decisions.jsonl next to worker_runs.jsonl (launched | busy |
+    budget_zero | nothing_pending | error with the exception type only; size-capped), so a feed that stopped
+    can be told from an idle one (L-03; tools/feed_watch.py reads the queue and the share ledger directly).
 """
 from __future__ import annotations
 import contextlib, fcntl, json, os, time
@@ -354,19 +357,76 @@ def gateway_llm_usage(timeout=300.0, env_file=None, hitl=None, workdir=None, bud
         return call
 
 
+# ---------------------------------------------------------------- launch decision record (L-03)
+LAUNCH_LOG = "launch_decisions.jsonl"   # next to worker_runs.jsonl: one line per launch decision
+LAUNCH_LOG_MAX_BYTES = 256 * 1024       # rotated to .1 above this (so at most ~2x on disk, ~2000 lines each)
+LAUNCH_DECISIONS = ("launched", "busy", "budget_zero", "nothing_pending", "error")
+
+
+def record_launch(d, decision, pending=None, budget_left=None, role=None, pid=None, error=None, now=None):
+    """Append one launch-decision line to <d>/launch_decisions.jsonl.  Fields: ts, decision, pending, budget_left,
+    role, and pid (launched) or error = the exception TYPE only (never a message, never note content).
+    Best effort: never raises, never creates the cache dir (a missing dir means nothing to record against)."""
+    try:
+        if not d or not os.path.isdir(d):
+            return False
+        rec = {"ts": time.time() if now is None else now, "decision": decision,
+               "pending": pending if isinstance(pending, int) and not isinstance(pending, bool) else None,
+               "budget_left": budget_left if isinstance(budget_left, int) and not isinstance(budget_left, bool) else None,
+               "role": str(role) if role else None}
+        if pid is not None:
+            rec["pid"] = pid
+        if error is not None:
+            rec["error"] = str(error)[:80]
+        rc.append_jsonl(os.path.join(d, LAUNCH_LOG), rec, LAUNCH_LOG_MAX_BYTES)
+        return True
+    except Exception:                       # noqa: BLE001  (the record must never change what the hook does)
+        return False
+
+
+def _role_of(cfg, cache=None):
+    try:
+        c = cfg if isinstance(cfg, dict) else getattr(cache, "cfg", None)
+        return str((c or {}).get("parse_role") or "task").strip().lower()
+    except Exception:                       # noqa: BLE001
+        return None
+
+
 # ---------------------------------------------------------------- cycle hook
 def launch_worker(cache: ParseCache, cfg=None, module=None, extra=(), pending=None):
     """Start the detached niced parse worker if there is work and budget.  Never waits.  -> pid or None.
-    pending: queue length already known from enqueue() (saves re-reading the cache)."""
-    if rc.busy(cache.pidfile, WORKER_MAX_AGE) or cache.budget() <= 0:
+    pending: queue length already known from enqueue() (saves re-reading the cache).
+    Every decision (launched | busy | budget_zero | nothing_pending) appends one line to launch_decisions.jsonl;
+    the checks run in the same order and with the same results as before (busy is checked before the budget is
+    read, so a busy line has budget_left null).  An exception propagates as before (feed_rows records it)."""
+    role = _role_of(cfg, cache)
+    if rc.busy(cache.pidfile, WORKER_MAX_AGE):
+        record_launch(cache.d, "busy", pending, None, role)
         return None
-    if (cache.pending() if pending is None else pending) == 0:
+    left = cache.budget()
+    if left <= 0:
+        record_launch(cache.d, "budget_zero", pending, left, role)
+        return None
+    n = cache.pending() if pending is None else pending
+    if n == 0:
+        record_launch(cache.d, "nothing_pending", n, left, role)
         return None
     cfg = dict(cfg or rc.resolve()); cfg["semparse_dir"] = cache.d
     cpath = os.path.join(cache.d, "worker_config.json")
     rc.write_json_atomic(cpath, cfg)
-    return rc.spawn_worker(cfg, module or WORKER_MODULE, ["--dir", cache.d, "--config", cpath] + list(extra),
-                           cache.pidfile)
+    pid = rc.spawn_worker(cfg, module or WORKER_MODULE, ["--dir", cache.d, "--config", cpath] + list(extra),
+                          cache.pidfile)
+    record_launch(cache.d, "launched", n, left, role, pid=pid)
+    return pid
+
+
+def _record_swallowed(e, cfg, cache):
+    """feed_rows / maybe_feed swallow every error; leave an error line (exception type only) instead of nothing."""
+    try:
+        d = getattr(cache, "d", None) or (cfg.get("semparse_dir") if isinstance(cfg, dict) else None)
+        record_launch(d, "error", role=_role_of(cfg, cache), error=type(e).__name__)
+    except Exception:                       # noqa: BLE001
+        pass
 
 
 def top_k_rows(store, k):
@@ -420,7 +480,8 @@ def feed_rows(rows, cfg=None, state_dir=None, cache=None, skip_unchanged=False):
         else:
             st = cache.enqueue(rows)
         return launch_worker(cache, cfg, pending=st.get("pending"))
-    except Exception:
+    except Exception as e:
+        _record_swallowed(e, cfg, cache)
         return None
 
 
@@ -431,7 +492,8 @@ def maybe_feed(store, cycle=0, state_dir=None, cache=None, cfg=None):
         if not cfg["semparse_feed"]:
             return None
         return feed_rows(top_k_rows(store, cfg["shadow_k"]), cfg, cache=cache)
-    except Exception:
+    except Exception as e:                  # feed_rows never raises: this is resolve() or top_k_rows failing
+        _record_swallowed(e, cfg, cache)
         return None
 
 
