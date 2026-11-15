@@ -57,13 +57,8 @@ if a.inner:  # ---------------- inner PeTTaChainer child ----------------
     # and each text's class symbols) BEFORE any statement, then the seeded master rules, then the atoms.  On that
     # engine a declaration after the statements about it changes nothing.  Without the key: the old path (arm A).
     if spec.get("load_order") == "master_ops":   # master-adopt-v2: wmtm/master_loader.plan ops, in recipe order
-        for kind, x in list(spec.get("master_ops") or []):
-            try:
-                if kind == "pred": h.set_positive_only_predicate(x)
-                else: h.add_atom(x)
-            except Exception:
-                if kind == "pred": pfails += 1
-                else: fails += 1
+        from wmtm import master_loader as _ML   # t-2026-11-15-wmtm-master-shadow-wiring: one apply path
+        pfails, fails = _ML.apply(h, [tuple(o) for o in (spec.get("master_ops") or [])])
         pre = []
     elif spec.get("load_order") == "master":
         for name in list(spec.get("positive_only") or []):
