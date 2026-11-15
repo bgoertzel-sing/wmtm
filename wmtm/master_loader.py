@@ -165,3 +165,129 @@ def apply(h, ops):
             if kind == "pred": pf += 1
             else: af += 1
     return pf, af
+
+
+def _node(s):
+    from .semparse_adapter import split_toplevel
+    try:
+        r = list(split_toplevel(s))
+    except Exception:
+        return None
+    return r[0][1] if r and not r[0][2] else None
+
+
+def _unify(p, f, env):
+    if isinstance(p, str) and p.startswith("$"):
+        if p in env:
+            return env if env[p] == f else None
+        e = dict(env); e[p] = f
+        return e
+    if isinstance(p, list):
+        if not isinstance(f, list) or len(p) != len(f):
+            return None
+        for x, y in zip(p, f):
+            env = _unify(x, y, env)
+            if env is None:
+                return None
+        return env
+    return env if p == f else None
+
+
+def _subst(t, env):
+    if isinstance(t, list):
+        return [_subst(x, env) for x in t]
+    return env.get(t, t) if isinstance(t, str) else t
+
+
+def _ground(t):
+    if isinstance(t, list):
+        return all(_ground(x) for x in t)
+    return not (isinstance(t, str) and t.startswith("$"))
+
+
+def rule_goals(ops, rule_atoms, max_envs=200):
+    """t-2026-11-15-wmtm-master-shadow-wiring: the goal builder of the master-adopt-v2 mkspec.py, moved here.
+    Goals = ground conclusions of the seeded master rules whose premises match loaded statements (forward
+    instantiation, one step), deduped, minus conclusions already stated.  -> ({goal: rule id}, {rule id: count})."""
+    from .semparse_adapter import to_str
+    rule_set = set(rule_atoms)
+    rules, facts = {}, []
+    for k, a in ops:
+        if k != "atom":
+            continue
+        n = _node(a)
+        if not (isinstance(n, list) and len(n) == 4):
+            continue
+        if a in rule_set and isinstance(n[2], list) and n[2][0] in ("Implication", "BiImplication"):
+            rules[n[1]] = n[2]
+        elif isinstance(n[2], list):
+            facts.append(n[2])
+    by_head = {}
+    for f in facts:
+        by_head.setdefault(f[0] if f and isinstance(f[0], str) else None, []).append(f)
+
+    def matches(prem, env):
+        ps = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
+        envs = [env]
+        for p in ps:
+            nxt = []
+            for e in envs:
+                for f in by_head.get(p[0] if isinstance(p, list) else None, []):
+                    r = _unify(p, f, e)
+                    if r is not None:
+                        nxt.append(r)
+            envs = nxt[:max_envs]
+        return envs
+
+    stated = {to_str(f) for f in facts}
+    goals, per_rule = {}, {}
+    for rid, r in rules.items():
+        pairs = [(r[1], r[2])] + ([(r[2], r[1])] if r[0] == "BiImplication" else [])
+        for prem, concl in pairs:
+            for e in matches(prem, {}):
+                c = _subst(concl, e)
+                if not _ground(c):
+                    continue
+                g = to_str(c)
+                if g in stated or g in goals:
+                    continue
+                goals[g] = rid
+                per_rule[rid] = per_rule.get(rid, 0) + 1
+    return goals, per_rule
+
+
+def notes_from_parsed(tdir, parsed_path, note_ids):
+    """-> ([(note_id, prior)], {"complete": n, "incomplete": [note ids], "absent": [note ids]}) from a cached
+    sentence-mode parsed.jsonl (rows carry id/dataset/doc/sent next to the reply).  Reads the cache only: no parse
+    calls.  A note is planned only when every sentence has a good reply made under the right context (blocks.walk)."""
+    import json as _json
+    L, B, CAT = _tmpl(tdir)
+    want = list(dict.fromkeys(note_ids))
+    rows, seen = [], set()
+    if parsed_path and os.path.exists(parsed_path):
+        with open(parsed_path, encoding="utf-8") as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                r = _json.loads(line)
+                if r.get("id") in seen:
+                    continue
+                seen.add(r["id"])
+                rows.append({k: v for k, v in r.items() if k != "reply"})
+    rep = B.read_replies(parsed_path) if parsed_path else {}
+    blocks = {}
+    for b in B.blocks_of(rows):
+        blocks.setdefault(b[0].get("doc") or b[0]["id"], b)
+    notes, info = [], {"complete": 0, "incomplete": [], "absent": []}
+    wset = set(want)
+    info["absent"] = [nid for nid in want if nid not in blocks]
+    # cache (block) order, not store order: the load order must not depend on how the store lists its items
+    for nid, b in blocks.items():
+        if nid not in wset:
+            continue
+        prior, nxt = B.walk(b, rep)
+        if nxt is None:
+            notes.append((nid, prior)); info["complete"] += 1
+        else:
+            info["incomplete"].append(nid)
+    return notes, info

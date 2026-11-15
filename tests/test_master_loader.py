@@ -62,3 +62,28 @@ def test_statement_labels_unique_across_notes():
             and not x.startswith("(: by_")]
     assert len(labs) == len(set(labs))
     assert any(l.endswith("__na") for l in labs) and any(l.endswith("__nb") for l in labs)
+
+
+# t-2026-11-15-wmtm-master-shadow-wiring: goal builder + cached-parse note reader (synthetic only)
+
+def test_rule_goals_forward_one_step():
+    rule = "(: r1 (Implication (Member $x quilt) (Member $x textile)) (STV 1.0 0.9))"
+    ops = [("pred", "Member"), ("atom", rule),
+           ("atom", "(: s1 (Member q1 quilt) (STV 1.0 0.9))"),
+           ("atom", "(: s2 (Member q2 quilt) (STV 1.0 0.9))"),
+           ("atom", "(: s3 (Member q2 textile) (STV 1.0 0.9))")]
+    goals, per = ML.rule_goals(ops, [rule])
+    assert goals == {"(Member q1 textile)": "r1"}          # q2 already stated -> not a goal
+    assert per == {"r1": 1}
+
+
+def test_rule_goals_ignores_unseeded_implications():
+    rule = "(: r1 (Implication (Member $x quilt) (Member $x textile)) (STV 1.0 0.9))"
+    ops = [("atom", rule), ("atom", "(: s1 (Member q1 quilt) (STV 1.0 0.9))")]
+    goals, _ = ML.rule_goals(ops, [])
+    assert goals == {}
+
+
+def test_notes_from_parsed_missing_cache_reports_absent(tmp_path):
+    notes, info = ML.notes_from_parsed(T, str(tmp_path / "none.jsonl"), ["na", "nb"])
+    assert notes == [] and info["complete"] == 0 and info["absent"] == ["na", "nb"]

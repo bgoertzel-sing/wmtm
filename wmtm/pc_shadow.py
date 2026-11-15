@@ -479,6 +479,30 @@ def _master_load(cfg, atoms):
             "master_meta": {"kb_predicates": len(preds), "class_symbols": len(classes), "rules": len(rules)}}
 
 
+def _master_ops_snapshot(cfg, items, cycle, k):
+    """t-2026-11-15-wmtm-master-shadow-wiring: shadow_load_order=master_ops.  The spec the master-adopt-v2 arm B used,
+    built here instead of by hand: cached sentence parses (shadow_master_parsed) -> tmpl.blocks.walk per note ->
+    master_loader.plan (recipe load order) -> goals from the seeded master rules (master_loader.rule_goals).
+    Reads the cache only; a note without a complete cached parse contributes nothing (counted)."""
+    from . import master_loader as ML
+    tdir = os.path.expanduser(cfg.get("shadow_sph_templates") or "")
+    if not tdir or not os.path.isdir(tdir):
+        raise RuntimeError("shadow_load_order=master_ops needs shadow_sph_templates (got %r)" % tdir)
+    parsed = os.path.expanduser(cfg.get("shadow_master_parsed") or "")
+    ids = [it.id for it in items if getattr(it, "source_type", "") != "derived"]
+    notes, info = ML.notes_from_parsed(tdir, parsed, ids)
+    ops, meta = ML.plan(tdir, notes)
+    goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir))
+    gl = list(goals)[:int(cfg["shadow_max_goals"])] if int(cfg.get("shadow_max_goals") or 0) > 0 else list(goals)
+    return {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": gl,
+            "goal_rule": {g: goals[g] for g in gl}, "rule_candidates": per_rule,
+            "master_meta": {kk: v for kk, v in meta.items() if kk not in ("notes", "atom_src", "label_fact")},
+            "master_notes": info, "cycle": cycle, "ts": time.time(), "k": k, "items": len(items),
+            "semparse_items": info["complete"], "unparsed_items": len(ids) - info["complete"],
+            "atom_src": meta["atom_src"], "label_fact": meta["label_fact"], "fact_src": [], "derived_src": {},
+            "derived_items": len(items) - len(ids), "goal_total": len(goals), "source": "master_ops"}
+
+
 def build_snapshot(store, cycle=0, k=None, cfg=None):
     """-> dict spec.  Per item: cached semparse atoms (Track H) only.  Track K: no regex fallback - an item that has
     not been parsed yet contributes no facts this cycle (counted in unparsed_items)."""
@@ -492,6 +516,8 @@ def build_snapshot(store, cycle=0, k=None, cfg=None):
     # F12 decision 2: a conclusion's sources are looked up in the whole memory store, not the top-k snapshot
     store_ids = getattr(store, "live_ids", None)
     store_ids = set(store_ids) if store_ids is not None else {it.id for it in all_items}
+    if str(cfg.get("shadow_load_order") or "").strip().lower() == "master_ops":
+        return _master_ops_snapshot(cfg, items, cycle, k)
     if cfg.get("speaker_link"):
         cached = _cache_lookup(items, cfg["semparse_dir"], context=bool(cfg.get("semparse_context")), speaker=True)
     elif cfg.get("semparse_context"):
