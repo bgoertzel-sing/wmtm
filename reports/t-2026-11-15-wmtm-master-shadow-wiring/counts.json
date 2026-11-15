@@ -1,0 +1,20 @@
+{
+ "run": "run_apply",
+ "spec_master_ops": 1935,
+ "spec_goals": 105,
+ "status": "ok",
+ "load_order": "master_ops",
+ "goals_n": 105,
+ "pc_proved": 105,
+ "ok_queries": 105,
+ "add_fail": 0,
+ "pred_fail": 0,
+ "timeouts": 0,
+ "skipped_budget": 0,
+ "unparsed_items": 0,
+ "ref_pc_proved": 105,
+ "ref_goals_n": 105,
+ "queries_equal_excl_timing": true,
+ "canary_equal_excl_timing": true,
+ "neg_equal_excl_timing": true
+}
