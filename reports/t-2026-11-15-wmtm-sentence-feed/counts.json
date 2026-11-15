@@ -1,0 +1,336 @@
+{
+ "cached_good_rows": 124,
+ "cached_rows": 129,
+ "feed_order": {
+  "admit": {
+   "C": 22,
+   "U": 0,
+   "W": 1,
+   "admitted": 23,
+   "admitted_wrong_ids": [
+    "b68"
+   ],
+   "dropped": {
+    "asserted": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 0,
+    "per_fact_cap": 0,
+    "trivial": 82
+   },
+   "refused_by_reason": {
+    "coref_restatement": 5,
+    "symmetry_restatement": 77
+   },
+   "results": 105,
+   "unjudged": 0,
+   "unmapped_goal": 0,
+   "vs_A_v3": "HOLDS"
+  },
+  "enqueue": {
+   "cached": 0,
+   "pending": 20,
+   "queue_len": 20,
+   "queued_known": 0,
+   "queued_new": 20,
+   "skipped_long": 0
+  },
+  "replay": {
+   "calls": 124,
+   "ledger_roles": [
+    "live"
+   ],
+   "ledger_rows": 124,
+   "log_call_ids_joined": true,
+   "log_rows": 124,
+   "master_path_never_saw_a_partial_note": true,
+   "notes_ok": 20,
+   "provider": {
+    "requests": 124,
+    "served": 124
+   },
+   "runs": [
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 4,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 1,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 5,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 4,
+     "empty": 0,
+     "failed": 0,
+     "ok": 1,
+     "partial": 0,
+     "stop": null
+    }
+   ],
+   "share_used": 124
+  },
+  "rows": {
+   "byte_identical_to_cached_good_row": 124,
+   "cached_error_rows_not_replayed": 5,
+   "rebuilt": 124,
+   "reply_fields_differing": {},
+   "reply_keys_equal_to_cached_good": true,
+   "row_keys": [
+    [
+     "id",
+     "dataset",
+     "doc",
+     "sent",
+     "text",
+     "reply"
+    ]
+   ],
+   "same_row_order_as_cached_good_rows": false
+  },
+  "shadow": {
+   "add_fail": 0,
+   "canary_equal_ref_excl_timing": true,
+   "goals_n": 105,
+   "load_order": "master_ops",
+   "neg_equal_ref_excl_timing": true,
+   "pc_proved": 105,
+   "pred_fail": 0,
+   "queries_equal_ref_excl_timing": false,
+   "queries_same_set_as_ref_excl_timing": true,
+   "rc": 0,
+   "skipped_budget": 0,
+   "status": "ok",
+   "timeouts": 0
+  },
+  "spec": {
+   "goals": 105,
+   "goals_equal_ref": false,
+   "goals_same_set_as_ref": true,
+   "master_ops": 1935,
+   "master_ops_equal_ref": false,
+   "master_ops_same_multiset_as_ref": true,
+   "semparse_items": 20,
+   "unparsed_items": 0
+  }
+ },
+ "fetch": {
+  "rc": 0,
+  "version_commit": "commit=24e37182e64a20981d423ed1d851da6de5e3b3e8"
+ },
+ "notes": 20,
+ "offline_order": {
+  "admit": {
+   "C": 22,
+   "U": 0,
+   "W": 1,
+   "admitted": 23,
+   "admitted_wrong_ids": [
+    "b68"
+   ],
+   "dropped": {
+    "asserted": 0,
+    "bad": 0,
+    "known": 0,
+    "negative": 0,
+    "no_live_source": 0,
+    "per_fact_cap": 0,
+    "trivial": 82
+   },
+   "refused_by_reason": {
+    "coref_restatement": 5,
+    "symmetry_restatement": 77
+   },
+   "results": 105,
+   "unjudged": 0,
+   "unmapped_goal": 0,
+   "vs_A_v3": "HOLDS"
+  },
+  "enqueue": {
+   "cached": 0,
+   "queued_new": 20,
+   "skipped_long": 0
+  },
+  "replay": {
+   "calls": 124,
+   "ledger_roles": [
+    "live"
+   ],
+   "ledger_rows": 124,
+   "log_call_ids_joined": true,
+   "log_rows": 124,
+   "master_path_never_saw_a_partial_note": true,
+   "notes_ok": 20,
+   "provider": {
+    "requests": 124,
+    "served": 124
+   },
+   "runs": [
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 4,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 0,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 3,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 20,
+     "empty": 0,
+     "failed": 0,
+     "ok": 2,
+     "partial": 1,
+     "stop": null
+    },
+    {
+     "calls": 4,
+     "empty": 0,
+     "failed": 0,
+     "ok": 2,
+     "partial": 0,
+     "stop": null
+    }
+   ],
+   "share_used": 124
+  },
+  "rows": {
+   "byte_identical_to_cached_good_row": 124,
+   "cached_error_rows_not_replayed": 5,
+   "rebuilt": 124,
+   "reply_fields_differing": {},
+   "reply_keys_equal_to_cached_good": true,
+   "row_keys": [
+    [
+     "id",
+     "dataset",
+     "doc",
+     "sent",
+     "text",
+     "reply"
+    ]
+   ],
+   "same_row_order_as_cached_good_rows": false
+  },
+  "shadow": {
+   "add_fail": 0,
+   "canary_equal_ref_excl_timing": true,
+   "goals_n": 105,
+   "load_order": "master_ops",
+   "neg_equal_ref_excl_timing": true,
+   "pc_proved": 105,
+   "pred_fail": 0,
+   "queries_equal_ref_excl_timing": true,
+   "queries_same_set_as_ref_excl_timing": true,
+   "rc": 0,
+   "skipped_budget": 0,
+   "status": "ok",
+   "timeouts": 0
+  },
+  "spec": {
+   "goals": 105,
+   "goals_equal_ref": true,
+   "goals_same_set_as_ref": true,
+   "master_ops": 1935,
+   "master_ops_equal_ref": true,
+   "master_ops_same_multiset_as_ref": true,
+   "semparse_items": 20,
+   "unparsed_items": 0
+  }
+ },
+ "speaker_link_live_map": {
+  "notes_speaker_resolved": 0,
+  "notes_text_changed": 3
+ },
+ "split": {
+  "equal_to_cached_rows": true,
+  "equal_to_sel_jsonl": true,
+  "per_note_max": 13,
+  "sel_sha256": "b76cd0d405f6a9a17860ceb73f486f72b6590c7107255426e3cfa503eb9e5345",
+  "sentences": 124
+ },
+ "untouched": {
+  "after": {
+   "live_flags": "e6496a474b5a613ecf0068c8fafe279827627134afef1be35bfcca8c6dfa305a",
+   "live_ledger": "f8203df44c4d25e34b9b3fb23f01c63f4ba508ee366238d107b6b3bc3fa9cbbb",
+   "task_ledger": "29e750fc4bdf145210a8b352a27fafc935f9e65cdd4c96e0a6bec229ba3a76ca"
+  },
+  "before": {
+   "live_flags": "e6496a474b5a613ecf0068c8fafe279827627134afef1be35bfcca8c6dfa305a",
+   "live_ledger": "f8203df44c4d25e34b9b3fb23f01c63f4ba508ee366238d107b6b3bc3fa9cbbb",
+   "task_ledger": "29e750fc4bdf145210a8b352a27fafc935f9e65cdd4c96e0a6bec229ba3a76ca"
+  },
+  "equal": true
+ }
+}

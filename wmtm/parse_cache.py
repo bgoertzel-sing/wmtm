@@ -454,7 +454,13 @@ def feed_rows(rows, cfg=None, state_dir=None, cache=None, skip_unchanged=False):
         if not cfg["semparse_feed"]:
             return None
         cache = cache or ParseCache(cfg=cfg)
-        if cfg.get("speaker_link") and os.path.basename(os.path.normpath(cache.d)) != SPK_VERSION:
+        if str(cfg.get("semparse_mode") or "").strip().lower() == "sentence":
+            # t-2026-11-15-wmtm-sentence-feed: queue, budget and worker live in <semparse_dir>/sent1; speaker linking
+            # (speaker_link) is applied per note inside the sentence worker, so spk1 is not used in this mode
+            from .semparse_sentence import SENT_VERSION, sentence_cache
+            if os.path.basename(os.path.normpath(cache.d)) != SENT_VERSION:
+                cache = sentence_cache(cfg, cache)
+        elif cfg.get("speaker_link") and os.path.basename(os.path.normpath(cache.d)) != SPK_VERSION:
             base_c = cache
             cache = speaker_cache(cfg, cache)   # Track Q (opt-in): new parses live in <semparse_dir>/spk1
             rows = _spk_rows_worth_parsing(rows, cfg, base_c)

@@ -53,6 +53,7 @@ ERROR_STREAK = 3                # trailing error decisions (in the window) that 
 EXIT = {"OK": 0, "ALERT": 1, "ERROR": 3}
 # runtime_config SPEC defaults for the keys read here (wmtm ddd2096)
 DEFAULTS = {"semparse_feed": False, "speaker_link": False, "semparse_context": False, "parse_role": "task",
+            "semparse_mode": "catalog",
             "parse_live_dir": "", "parse_share_live_per_hour": 10, "parse_cap_per_hour": 20,
             "runtime_dir": "", "semparse_dir": ""}
 
@@ -106,9 +107,10 @@ def resolve(state_dir, raw):
     for k in ("parse_share_live_per_hour", "parse_cap_per_hour"):
         if k in raw:
             cfg[k] = _int(k, raw[k])
-    for k in ("parse_role", "parse_live_dir", "runtime_dir", "semparse_dir"):
+    for k in ("parse_role", "parse_live_dir", "runtime_dir", "semparse_dir", "semparse_mode"):
         if k in raw and raw[k] is not None:
             cfg[k] = str(raw[k])
+    cfg["semparse_mode"] = (cfg["semparse_mode"] or "catalog").strip().lower()
     cfg["parse_role"] = (cfg["parse_role"] or "task").strip().lower()
     sd = os.path.abspath(state_dir)
 
@@ -129,6 +131,8 @@ def active_dir(cfg):
     """The cache feed_rows feeds: spk1 with speaker_link, else ctx1 with semparse_context, else the base dir."""
     base = cfg["semparse_dir"]
     b = os.path.basename(os.path.normpath(base))
+    if cfg.get("semparse_mode") == "sentence":      # t-2026-11-15-wmtm-sentence-feed: the sentence feed's cache
+        return base if b == "sent1" else os.path.join(base, "sent1")
     if cfg["speaker_link"] and b != "spk1":
         return os.path.join(base, "spk1")
     if cfg["semparse_context"] and b != "ctx1":
@@ -138,7 +142,7 @@ def active_dir(cfg):
 
 def live_root(d):
     d = os.path.normpath(d)
-    return os.path.dirname(d) if os.path.basename(d) in ("ctx1", "spk1") else d
+    return os.path.dirname(d) if os.path.basename(d) in ("ctx1", "spk1", "sent1") else d
 
 
 def _rows(path, max_bytes=None):

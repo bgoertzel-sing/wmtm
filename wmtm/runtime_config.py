@@ -142,6 +142,7 @@ SPEC = {
     "semparse_preamble":   ("WMTM_SEMPARSE_PREAMBLE", bool, True, None),          # Track M: prepend semparse_preamble.PREAMBLE to the (pinned, unedited) prompt
     "parse_max_chars":     ("WMTM_SEMPARSE_MAX_CHARS", int, 1500, None),
     "parse_max_attempts":  ("WMTM_SEMPARSE_MAX_ATTEMPTS", int, 2, None),
+    "semparse_sentence_cap": ("WMTM_SEMPARSE_SENTENCE_CAP", int, 0, None),   # t-2026-11-15-wmtm-sentence-feed: semparse_mode sentence parses at most this many sentences per note (the first ones); 0 = no cap
     "shadow_k":            ("WMTM_PC_SHADOW_K", int, 200, None),
     "shadow_max_goals":    ("WMTM_PC_SHADOW_MAX_GOALS", int, 60, None),
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),

@@ -60,10 +60,13 @@ def finish(code):
 
 try:
     status["mode"] = MODE
-    if MODE == "catalog":
+    if MODE in ("catalog", "sentence"):
         from wmtm import semparse_catalog as _sc
         try:
             HITL = _sc.hitl_root(HITL)       # wrong pin / missing or altered LICENSE -> refuse before any spend
+            if MODE == "sentence":           # t-2026-11-15-wmtm-sentence-feed: only the parser with the sentence mode
+                from wmtm import semparse_sentence as _ss
+                HITL = _ss.require_pin(HITL)
         except (_sc.HitlPinError, FileNotFoundError) as e:
             status.update(status="hitl_pin", error=str(e)[:200]); finish(5)
         a.prompt = a.prompt or _sc.prompt_path(HITL)
@@ -93,6 +96,33 @@ try:
     if cache.budget() <= 0:      # own cap or share full: stop with a clear status before building anything
         status.update(status="share_full" if cache.share.remaining() <= 0 else "cap_full",
                       share=cache.share.status()); finish(0)
+    if MODE == "sentence":
+        # t-2026-11-15-wmtm-sentence-feed: one call per sentence (upstream parse_sentence with the block context),
+        # every call reserved in this cache's share first; finished notes only go to sent1/parsed.jsonl
+        from wmtm import semparse_sentence as _ss
+        if os.path.basename(os.path.normpath(a.dir)) != _ss.SENT_VERSION:
+            status.update(status="sentence_dir", error="sentence mode runs only on <semparse_dir>/%s" % _ss.SENT_VERSION)
+            finish(5)
+        B, S, MF = _ss.upstream(HITL)
+        stale = S.stale_prompt(a.prompt)
+        if stale:
+            status.update(status="prompt_stale", error=str(stale)[:200]); finish(5)
+        with open(a.prompt, encoding="utf-8") as fh:
+            body_sha = S.prompt_body_sha(fh.read())
+        parse_fn = _ss.gateway_parse_fn(HITL, a.prompt, cache.share, env_file=CFG.get("llm_env_file") or None,
+                                        workdir=os.path.join(a.dir, "provider"),
+                                        meta={"tool": "semparse_feed", "mode": _ss.MODE})
+        status.update(model=parse_fn.model, prompt_sha256=got, prompt_body_sha256=body_sha,
+                      sentence_cap=int(CFG.get("semparse_sentence_cap") or 0), speaker_link=bool(CFG.get("speaker_link")))
+        res = _ss.process_queue_sentence(cache, parse_fn, cfg=CFG, n=a.n, B=B, prompt_body_sha=body_sha,
+                                         manifest_id=MF.current_id())
+        recs = res["calls"]
+        status["share"] = cache.share.status()
+        if cache.last_stop:
+            status["share_stop"] = cache.last_stop
+        status.update(status=res["stop"] or "ok", parsed=len(recs), notes=res["notes"],
+                      by_status={s: sum(r["status"] == s for r in recs) for s in {r["status"] for r in recs}})
+        finish(0)
     llm = gateway_llm_usage(env_file=CFG.get("llm_env_file") or None, hitl=HITL,   # upstream provider (review-7)
                             workdir=os.path.join(a.dir, "provider"), budget=cache.share)   # every call counted
     status["model"] = getattr(llm, "model", None)
