@@ -42,9 +42,23 @@ def is_derivation(proof) -> bool:
     return bool(_ASSERTED_TOKENS.sub("", term))
 _PARSER_RULE = re.compile(r"\(by i_\w+?__\w*implication\w*\b")   # P4 rev5: direct step through a parser Implication rule (<note>__<id>) is a derivation too
 _LABEL = re.compile(r"\b(?:sp|wm)\d+\b")
-_GOAL = re.compile(r"^\((Inheritance|Member|Implies|Similarity|Evaluation) (\S+) (\S+)\)$")
 _TEXT = {"Inheritance": "{} is a {}", "Member": "{} is a {}", "Implies": "{} implies {}",
          "Similarity": "{} is similar to {}", "Evaluation": "{} has {}"}   # same rendering as the removed pln_bridge (Track L)
+# t-2026-11-14-wmtm-render-master-goals: the master parser's binary heads (sph templates generated/atom-types.metta,
+# argument order as typed there; wording from rules.yaml "meaning").  Flat symbol arguments only, like the shapes above.
+_MASTER_TEXT = {"Coref": "{} refers to the same thing as {}",        # (-> Instance Instance)
+                "ScaleOpposite": "{} is the opposite of {}",          # (-> Class Class)
+                "Agent": "the agent of {} is {}",                     # (-> Event Entity)
+                "Patient": "the patient of {} is {}",
+                "Theme": "the theme of {} is {}",
+                "Bearer": "the bearer of {} is {}",
+                "Recipient": "the recipient of {} is {}",
+                "Experiencer": "the experiencer of {} is {}",
+                "Possession": "{} belongs to {}",                     # (-> Entity Entity): (Possession thing owner)
+                "PartOf": "{} is part of {}",                         # (-> Instance Instance)
+                "Because": "{} happens because of {}"}                # (-> Event Event|Instance)
+_TEXT.update(_MASTER_TEXT)
+_GOAL = re.compile(r"^\((%s) ([^\s()]+) ([^\s()]+)\)$" % "|".join(_TEXT))
 
 
 def mode(cfg=None, default="pettachainer") -> str:
@@ -80,11 +94,23 @@ def admissible(q) -> bool:
                 and isinstance(tv, list) and len(tv) == 2 and q.get("proof"))
 
 
+def proof_labels(proof, known=None):
+    """Fact labels a proof term cites, in order, once each: legacy sp<n>/wm<n> labels plus any token that is a key of
+    known (the spec's atom_src / label_fact).  t-2026-11-14-wmtm-render-master-goals: the master loader's statement
+    labels (s<n>_<id>__<note>) are not sp/wm labels, so they are found through the spec map, never by pattern."""
+    known = known or {}
+    out = []
+    for t in re.findall(r"[^\s()]+", str(proof or "")):
+        if (t in known or _LABEL.fullmatch(t)) and t not in out:
+            out.append(t)
+    return out
+
+
 def sources_for(goal, proof, spec):
     """Supporting WMTM item ids: from the fact labels in the proof term, else items whose facts touch the goal."""
     src = spec.get("atom_src") or {}
     ids = []
-    for lab in _LABEL.findall(proof or ""):
+    for lab in proof_labels(proof, src):
         iid = src.get(lab)
         if iid and iid not in ids:
             ids.append(iid)
@@ -107,9 +133,22 @@ def sources_for(goal, proof, spec):
 def proof_facts(goal, proof, spec):
     """Facts a proof rests on: its fact labels, else (fold proofs) the goal's chain facts."""
     lf = spec.get("label_fact") or {}
-    out = sorted({lf.get(x, x) for x in _LABEL.findall(proof or "")})
+    out = sorted({lf.get(x, x) for x in proof_labels(proof, lf)})
     if not out and "implication-instance-fold" in (proof or ""):
         out = sorted(((spec.get("goal_meta") or {}).get(goal) or {}).get("chain") or [])
+    return out
+
+
+def _with_master_maps(spec):
+    """t-2026-11-14-wmtm-render-master-goals: a master_ops spec (wmtm/master_loader.plan) carries its label -> note
+    and label -> fact maps in master_meta (atom_src / label_fact); lift them to the top-level keys the legacy path
+    uses, so sources_for / proof_facts read both paths the same way.  Top-level keys, if present, win."""
+    mm = (spec or {}).get("master_meta") or {}
+    if (spec or {}).get("load_order") != "master_ops" or not (mm.get("atom_src") or mm.get("label_fact")):
+        return spec
+    out = dict(spec)
+    out["atom_src"] = dict(mm.get("atom_src") or {}, **(spec.get("atom_src") or {}))
+    out["label_fact"] = dict(mm.get("label_fact") or {}, **(spec.get("label_fact") or {}))
     return out
 
 
@@ -119,6 +158,7 @@ def write_admit_file(out_dir, rec, spec, now=None):
     can, neg = rec.get("canary") or {}, rec.get("neg") or {}
     canary_ok = bool(can.get("ok") and not neg.get("ok") and not neg.get("timeout"))
     results = []
+    spec = _with_master_maps(spec)
     if rec.get("status") == "ok" and canary_ok:
         for q in rec.get("queries", []):
             if admissible(q):
@@ -211,7 +251,7 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
             if why:
                 n_triv += 1; drop["trivial"] = n_triv
                 triv_log.append({"rule": TRIVIAL_RULE, "reason": why, "goal": g,
-                                 "steps": sorted(set(re.findall(r"\(by\s+(\S+)", str(r.get("proof")))))})
+                                 "steps": sorted(set(re.findall(r"\(by\s+(?:\(bi-forward\s+)?([^\s()]+)", str(r.get("proof")))))})
                 continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))
         # Track O: strength is a probability.  s < reasoner_min_strength means "probably not", never a weak yes.
@@ -334,7 +374,24 @@ def log_admission(cfg, path, info, timing=None, now=None):
 # weighted branch of any other head such as "reported", an unknown head, missing rule atoms) means NOT trivial: the
 # filter fails open and admits.  "Defining rule" means the EXACT narrow_defining_rules shape (_is_nwdef_shape), not
 # any CTV Member implication: a parser class rule such as (pilot -> person) is never treated as nwdef.
+#
+# t-2026-11-14-wmtm-trivial-filter-coref (andy, line fixed before re-scoring): the master rules file (sph 24e37182,
+# seeded_rules.pettachainer-master.metta) has restatement rules that the shapes above do not see.  These are matched
+# BY RULE ID (the label in the proof step), the one place this filter reads a name, because the line was drawn on
+# rule ids:
+#   symmetry_restatement : coref_sym, so_sym              ("A is B" -> "B is A"; ScaleOpposite pole symmetry)
+#   coref_restatement    : same_coref, coref_bearer       (plain coreference links)
+# NOT trivial (who-did-what role rules): coref_agent, coref_patient, coref_theme, coref_member, coref_possession.
+# A proof is a restatement when EVERY inference step is one of these rules (a chain of them counts too, e.g. a
+# symmetry over a coref link) and every leaf is an asserted atom label (any plain symbol: the master loader's
+# note-suffixed labels are not sp<n>/wm<n>).  The engine's "(by (bi-forward R) ..)" step form and "(conjunction ..)"
+# premises are read for these rules only.  Any other step in the proof (a role rule, nwdef, a parser rule, an unknown
+# head) means NOT a restatement; proofs without a listed rule are classified exactly as before.
 TRIVIAL_RULE = "trivial_restatement"
+RESTATEMENT_RULES = {"coref_sym": "symmetry_restatement", "so_sym": "symmetry_restatement",
+                     "same_coref": "coref_restatement", "coref_bearer": "coref_restatement"}
+COREF_ROLE_RULES = ("coref_agent", "coref_patient", "coref_theme", "coref_member", "coref_possession")
+_SYMBOL = re.compile(r"[A-Za-z_][A-Za-z0-9_\-]*")
 _STEP_HEADS = ("by",)
 
 
@@ -452,24 +509,38 @@ def _zero_weight(head):
     return False
 
 
-def trivial_reason(proof, rules):
-    """-> 'nwdef_head_noun' | 'narrow_echo' if the proof is trivial (see TRIVIAL_RULE above), else None."""
+def trivial_reason(proof, rules, restatement_rules=None):
+    """-> 'nwdef_head_noun' | 'narrow_echo' | 'symmetry_restatement' | 'coref_restatement' if the proof is trivial
+    (see TRIVIAL_RULE above), else None.  restatement_rules (rule id -> reason) defaults to RESTATEMENT_RULES; it is
+    an evaluation hook for scoring a different line (no runtime flag reads it)."""
+    R = RESTATEMENT_RULES if restatement_rules is None else dict(restatement_rules)
     n = _sx(proof)
     if not (isinstance(n, list) and len(n) == 4 and n[0] == ":"):
         return None
-    steps, bad = [], []
+    steps, bad, ext = [], [], []      # ext: forms accepted only when every step is a restatement rule
 
     def walk(t):          # -> True if t's weighted support is asserted fact labels only
         if isinstance(t, str):
             if _LABEL.fullmatch(t):
                 return True
+            if _SYMBOL.fullmatch(t) and t not in R:
+                ext.append(t); return True
             bad.append(t); return False
         if not isinstance(t, list) or not t:
             bad.append(t); return False
         h = t[0]
+        if h == "by" and len(t) == 3 and isinstance(t[1], list) and len(t[1]) == 2 and t[1][0] == "bi-forward" \
+                and isinstance(t[1][1], str) and t[1][1] in R:
+            ext.append("bi-forward")
+            steps.append((t[1][1], walk(t[2])))
+            return False
         if h == "by" and len(t) == 3 and isinstance(t[1], str):
             steps.append((t[1], walk(t[2])))
             return False
+        if h == "conjunction" and len(t) >= 2:
+            ext.append("conjunction")
+            parts = [walk(x) for x in t[1:]]
+            return all(parts)
         if h == "merge/revision" and len(t) == 3:
             a, b = walk(t[1]), walk(t[2])
             return a and b
@@ -491,7 +562,12 @@ def trivial_reason(proof, rules):
         bad.append(h); return False
 
     walk(n[1])
-    if bad or not steps or not all(on_fact for _l, on_fact in steps):
+    if bad or not steps:
+        return None
+    rk = [R.get(l) for l, _f in steps]
+    if all(rk):           # restatement rules only, over asserted labels (directly or through other restatements)
+        return "coref_restatement" if "coref_restatement" in rk else rk[0]
+    if ext or not all(on_fact for _l, on_fact in steps):
         return None
     kinds = [_step_kind(l, rules) for l, _f in steps]
     if any(k is None for k in kinds):

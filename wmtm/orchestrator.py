@@ -261,7 +261,8 @@ class WMTMOrchestrator:
 
     def _is_trivial(self, cand) -> bool:
         """GAP-5 TRIVIAL_RULE (pc_admit.trivial_reason): refuse a PeTTaChainer conclusion whose proof is only an nwdef
-        head-noun step or a Narrow-restriction echo applied to asserted facts.  Logged and counted."""
+        head-noun step or a Narrow-restriction echo applied to asserted facts, or only master-rule symmetry/coreference
+        restatements (pc_admit.RESTATEMENT_RULES, by rule id).  Logged and counted."""
         prov = getattr(cand, "provenance", None) or {}
         if not self.trivial_filter or cand.inference_type != "pc_deduction" or not prov.get("proof"):
             return False

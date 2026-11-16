@@ -91,7 +91,11 @@ def _ts(r):
 
 def live_root(cache_dir):
     d = os.path.normpath(str(cache_dir))
-    return os.path.dirname(d) if os.path.basename(d) in ("ctx1", "spk1") else d
+    # sent1 (t-2026-11-15-wmtm-sentence-feed): the sentence feed's cache is a live sub-cache too, so without
+    # parse_live_dir its share is the live root's, never a share of its own.  Its calls are counted through the
+    # share ledger (every sentence call reserves a ledger row first; its parse_log rows carry the call_ids), so it
+    # is not added to SUBCACHES (which would change the logs count in legacy status lines).
+    return os.path.dirname(d) if os.path.basename(d) in ("ctx1", "spk1", "sent1") else d
 
 
 class ParseBudget:

@@ -142,9 +142,13 @@ SPEC = {
     "semparse_preamble":   ("WMTM_SEMPARSE_PREAMBLE", bool, True, None),          # Track M: prepend semparse_preamble.PREAMBLE to the (pinned, unedited) prompt
     "parse_max_chars":     ("WMTM_SEMPARSE_MAX_CHARS", int, 1500, None),
     "parse_max_attempts":  ("WMTM_SEMPARSE_MAX_ATTEMPTS", int, 2, None),
+    "semparse_sentence_cap": ("WMTM_SEMPARSE_SENTENCE_CAP", int, 0, None),   # t-2026-11-15-wmtm-sentence-feed: semparse_mode sentence parses at most this many sentences per note (the first ones); 0 = no cap
     "shadow_k":            ("WMTM_PC_SHADOW_K", int, 200, None),
     "shadow_max_goals":    ("WMTM_PC_SHADOW_MAX_GOALS", int, 60, None),
     "shadow_full_kb":      ("WMTM_PC_SHADOW_FULL_KB", bool, False, None),
+    "shadow_load_order":   ("WMTM_PC_SHADOW_LOAD_ORDER", str, "legacy", None),   # master-adopt-v2: "master" = declare positive-only predicates, then seeded master rules, then atoms (arm B); "legacy" = old path (arm A)
+    "shadow_sph_templates": ("WMTM_PC_SHADOW_SPH_TEMPLATES", str, "", None),     # master-adopt-v2: semantic-parsing-hitl templates dir (tmpl/lower.py + generated/seeded_rules.pettachainer-master.metta)
+    "shadow_master_parsed": ("WMTM_PC_SHADOW_MASTER_PARSED", str, "", None),     # t-2026-11-15-wmtm-master-shadow-wiring: cached sentence-mode parsed.jsonl read when shadow_load_order=master_ops (no parse calls)
     "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
     "shadow_nwdef":        ("WMTM_PC_SHADOW_NWDEF", bool, True, None),           # P4 rev5: add nwdef_* defining rules for narrowed classes (False: leave out, upstream R2 lowers c)
     "shadow_normalise":    ("WMTM_PC_SHADOW_NORMALISE", bool, True, None),       # t-2026-11-10: parse_normalise layer before the KB build (Narrow anywhere, Premises/Conclusions, unrecognised shapes counted)

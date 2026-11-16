@@ -1,0 +1,12 @@
+parse-feed-watch OK 2026-11-15T18:12:45Z [recent_run]
+  1 queued, budget free (15 left), last run 17 min ago
+  +0h exit=0
+parse-feed-watch OK 2026-11-15T19:12:45Z [recent_run]
+  1 queued, budget free (20 left), last run 1.3 h ago
+  +1h exit=0
+parse-feed-watch ALERT 2026-11-15T21:12:45Z [stalled]
+  1 queued (oldest waiting 3.0 h), budget free (20 left: share 0/20 used, own cap 0/20), no worker run for 3.3 h (last 2026-11-15T17:55:00Z)
+  +3h exit=1
+parse-feed-watch OK 2026-11-15T21:12:45Z [idle]
+  idle: nothing queued (last run 3.3 h ago)
+  +3h queue drained exit=0
