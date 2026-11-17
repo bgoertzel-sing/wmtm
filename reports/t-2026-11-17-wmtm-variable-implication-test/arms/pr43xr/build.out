@@ -1,0 +1,1 @@
+{"goals": 42, "rule_goals": 34, "nimpl": 1, "probes": 8, "master_notes": {"complete": 6, "incomplete": [], "absent": []}, "nimpl_stats": {"note_impl": 6, "ground": 0, "with_vars": 6, "bi": 0, "and_premise": 6, "premise_in_kb": 1, "premise_missing": 5, "concl_not_ground": 0, "cross_note": 0, "concl_stated": 0, "dup_goal": 0, "goals": 1, "impl_with_goal": 1}}

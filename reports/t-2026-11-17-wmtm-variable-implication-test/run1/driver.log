@@ -1,0 +1,17 @@
+2026-11-17T09:51:22-0700 START hitl=24e37182e64a prompt=257425b2c1593569 sel=dd3f518f7831 blocks=8 sentences=16 manifest=31571b39fd6b share={'role': 'task', 'share_per_hour': 10, 'used_last_hour': 10, 'remaining': 0, 'logs': 6}
+2026-11-17T09:53:00-0700 START hitl=24e37182e64a prompt=257425b2c1593569 sel=dd3f518f7831 blocks=8 sentences=16 manifest=31571b39fd6b share={'role': 'task', 'share_per_hour': 10, 'used_last_hour': 10, 'remaining': 0, 'logs': 6}
+2026-11-17T10:41:21-0700 ep-note-20991117T000001Z.s01 k=1 ok=True 16s cached=172332 err=None
+2026-11-17T10:41:53-0700 ep-note-20991117T000001Z.s02 k=2 ok=True 5s cached=172332 err=None
+2026-11-17T10:42:05-0700 ep-note-20991117T000002Z.s01 k=1 ok=True 10s cached=172332 err=None
+2026-11-17T10:42:21-0700 ep-note-20991117T000002Z.s02 k=2 ok=True 12s cached=172332 err=None
+2026-11-17T10:42:41-0700 ep-note-20991117T000003Z.s01 k=1 ok=True 21s cached=172332 err=None
+2026-11-17T10:42:54-0700 ep-note-20991117T000003Z.s02 k=2 ok=True 9s cached=172332 err=None
+2026-11-17T10:43:18-0700 ep-note-20991117T000004Z.s01 k=1 ok=True 18s cached=172332 err=None
+2026-11-17T11:41:27-0700 ep-note-20991117T000004Z.s02 k=2 ok=True 8s cached=172332 err=None
+2026-11-17T11:41:43-0700 ep-note-20991117T000004Z.s03 k=3 ok=True 6s cached=172332 err=None
+2026-11-17T11:42:07-0700 ep-note-20991117T000005Z.s01 k=1 ok=True 18s cached=172332 err=None
+2026-11-17T11:42:54-0700 ep-note-20991117T000005Z.s02 k=2 ok=True 8s cached=172332 err=None
+2026-11-17T11:42:54-0700 ep-note-20991117T000006Z.s01 k=1 reused identical reply of ep-note-20991117T000001Z.s01 (no call)
+2026-11-17T11:43:09-0700 ep-note-20991117T000006Z.s02 k=2 ok=True 9s cached=172332 err=None
+2026-11-17T11:43:09-0700 ep-note-20991117T000007Z.s01 k=1 reused identical reply of ep-note-20991117T000001Z.s01 (no call)
+2026-11-17T11:50:37-0700 STOPPED (killed) at 11:50: C7 s2 and C8 s1 left unparsed, task share full until about 12:41; 12 calls made, 2 identical replies reused

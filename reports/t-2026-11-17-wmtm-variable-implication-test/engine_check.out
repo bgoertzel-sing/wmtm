@@ -1,0 +1,2 @@
+(STV 1.0 0.9) -> ['(: (by imp f1) (Member lute quiet) (STV 1.0 0.8709625388003415))']
+(CTV (STV 1.0 0.9) (STV 0.0 0.001)) -> ['(: (by imp f1) (Member lute quiet) (STV 1.0 0.818161113347313))']

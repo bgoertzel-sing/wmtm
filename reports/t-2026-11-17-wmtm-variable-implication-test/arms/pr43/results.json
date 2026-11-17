@@ -1,0 +1,348 @@
+{
+ "status": "ok",
+ "canary_ok": true,
+ "neg_proved": false,
+ "goals_n": 42,
+ "proved": 36,
+ "timeouts": 0,
+ "add_fail": 0,
+ "pred_fail": 0,
+ "steps": 30,
+ "cases": [
+  {
+   "case": "C1_anything_X_is_Y",
+   "implications": [],
+   "asked": [
+    {
+     "goal": "(Member sk_lute_1__ep_note_20991117T000001Z quiet)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": false,
+     "stv": null,
+     "timeout": false,
+     "prior": null,
+     "proof": null
+    },
+    {
+     "goal": "(Member sk_lute_1__ep_note_20991117T000001Z thing__member_acoustic)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": false,
+     "stv": null,
+     "timeout": false,
+     "prior": null,
+     "proof": null
+    }
+   ]
+  },
+  {
+   "case": "C2_every_A_that_B_is_C",
+   "implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000002Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000002Z (Implication (And (Member $x bird) (Member $e sing) (Agent $e $x)) (Member $x happy)) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$e",
+      "$x"
+     ],
+     "skolem_symbols_inside": [],
+     "premise_head": "And",
+     "goals": {
+      "(Member tweety happy)": "nimpl:s1_r1_implication__ep_note_20991117T000002Z"
+     },
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 1,
+      "premise_missing": 0,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 1,
+      "impl_with_goal": 1
+     }
+    }
+   ],
+   "asked": [
+    {
+     "goal": "(Member tweety happy)",
+     "note_impl_goal": true,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": true,
+     "stv": [
+      1.0,
+      0.8919
+     ],
+     "timeout": false,
+     "prior": null,
+     "proof": "(: (by s1_r1_implication__ep_note_20991117T000002Z (conjunction s2_c1_member__ep_note_20991117T000002Z s2_v1_member__ep_note_20991117T000002Z s2_v1_agent__ep_note_20991117T000002Z)) (Member tweety happy) (STV 1.0 0.891889659763245))"
+    }
+   ]
+  },
+  {
+   "case": "C3_if_someone_V_they_are_W",
+   "implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000003Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000003Z (Implication (And (Member $e play) (Agent $e $x) (Patient $e sk_drum_1__ep_note_20991117T000003Z)) (Member sk_they_1__ep_note_20991117T000003Z loud)) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$e",
+      "$x"
+     ],
+     "skolem_symbols_inside": [
+      "sk_drum_1__ep_note_20991117T000003Z",
+      "sk_they_1__ep_note_20991117T000003Z"
+     ],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    }
+   ],
+   "asked": [
+    {
+     "goal": "(Member marta loud)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": false,
+     "stv": null,
+     "timeout": false,
+     "prior": null,
+     "proof": null
+    },
+    {
+     "goal": "(Member sk_they_1__ep_note_20991117T000003Z loud)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": true,
+     "stv": [
+      0.9,
+      0.0314
+     ],
+     "timeout": false,
+     "prior": null,
+     "proof": "(: (by s1_r1_implication__ep_note_20991117T000003Z (conjunction s2_v1_member__ep_note_20991117T000003Z s2_v1_agent__ep_note_20991117T000003Z (by coref_patient (conjunction s2_c1_coref__ep_note_20991117T000003Z s2_v1_patient__ep_note_20991117T000003Z)))) (Member sk_they_1__ep_note_20991117T000003Z loud) (STV 0.9 0.03140673444967913))"
+    }
+   ]
+  },
+  {
+   "case": "C4_two_premise_conjunction",
+   "implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000004Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000004Z (Implication (And (Member $x thing) (Member $x red) (Member $x round)) (Member $x ball)) (STV 0.9 0.7))",
+     "kind": "Implication",
+     "variables": [
+      "$x"
+     ],
+     "skolem_symbols_inside": [],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    },
+    {
+     "label": "s1_r1_implication_2__ep_note_20991117T000004Z",
+     "atom": "(: s1_r1_implication_2__ep_note_20991117T000004Z (Implication (And (Member $x thing) (Holds $s (Member $x red)) (Holds $s2 (Member $x round))) (And (Holds (sk_ball__ep_note_20991117T000004Z $x $s $s2) (Member $x ball)) (During (sk_ball__ep_note_20991117T000004Z $x $s $s2) $s) (During (sk_ball__ep_note_20991117T000004Z $x $s $s2) $s2))) (STV 0.9 0.7))",
+     "kind": "Implication",
+     "variables": [
+      "$s",
+      "$s2",
+      "$x"
+     ],
+     "skolem_symbols_inside": [
+      "sk_ball__ep_note_20991117T000004Z"
+     ],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    }
+   ],
+   "asked": [
+    {
+     "goal": "(Member sk_toy_1__ep_note_20991117T000004Z ball)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": false,
+     "stv": null,
+     "timeout": false,
+     "prior": null,
+     "proof": null
+    }
+   ]
+  },
+  {
+   "case": "C5_negated_conclusion",
+   "implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000005Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000005Z (Implication (And (Member $x thing) (Member $x frozen)) (Not (Member $x liquid))) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$x"
+     ],
+     "skolem_symbols_inside": [],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    },
+    {
+     "label": "s1_r1_implication_2__ep_note_20991117T000005Z",
+     "atom": "(: s1_r1_implication_2__ep_note_20991117T000005Z (Implication (And (Member $x thing) (Holds $s (Member $x frozen))) (Not (And (Holds (sk_liquid__ep_note_20991117T000005Z $x $s) (Member $x liquid)) (During (sk_liquid__ep_note_20991117T000005Z $x $s) $s)))) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$s",
+      "$x"
+     ],
+     "skolem_symbols_inside": [
+      "sk_liquid__ep_note_20991117T000005Z"
+     ],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    }
+   ],
+   "asked": [
+    {
+     "goal": "(Member sk_pond_1__ep_note_20991117T000005Z liquid)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": false,
+     "stv": null,
+     "timeout": false,
+     "prior": null,
+     "proof": null
+    }
+   ]
+  },
+  {
+   "case": "C6_near_miss_other_class",
+   "implications": [],
+   "asked": [
+    {
+     "goal": "(Member sk_trumpet_1__ep_note_20991117T000006Z quiet)",
+     "note_impl_goal": false,
+     "rule_goal": false,
+     "stated": false,
+     "asked": true,
+     "proved": false,
+     "stv": null,
+     "timeout": false,
+     "prior": null,
+     "proof": null
+    }
+   ]
+  }
+ ],
+ "note_impl_stats": {
+  "note_impl": 6,
+  "ground": 0,
+  "with_vars": 6,
+  "bi": 0,
+  "and_premise": 6,
+  "premise_in_kb": 1,
+  "premise_missing": 5,
+  "concl_not_ground": 0,
+  "cross_note": 0,
+  "concl_stated": 0,
+  "dup_goal": 0,
+  "goals": 1,
+  "impl_with_goal": 1,
+  "premise_shape": {
+   "And": 6
+  },
+  "concl_shape": {
+   "Member": 3,
+   "And": 1,
+   "Not": 2
+  }
+ }
+}
