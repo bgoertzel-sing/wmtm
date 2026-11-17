@@ -94,7 +94,7 @@ def _label_fact(stmt):
     return m.group(1), to_str(n[2])
 
 
-def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False):
+def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False, label_replace=False):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -109,6 +109,9 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
         if a not in seen_atom:
             seen_atom.add(a); ops.append(("atom", a)); return True
         return False
+    lab_at = {}   # t-2026-11-17-wmtm-steps-3-5 step 4: statement label -> index in ops (label_replace only)
+    if label_replace:
+        meta["label_replaced"] = 0
     if kb_once:
         for n in L.predicates(L.MASTER):
             meta["kb_predicates"] += pred(n)
@@ -120,6 +123,7 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
         for r in extra_rules():
             meta["extra_rules"] += atom(r)
     for nid, prior in notes:
+        lab_at.clear()   # step 4: a label repeats only within one note's sentence records; never replace across notes
         recs = B.block_records(prior, catalog)
         allrec = [x for rec in recs for x in rec.get("records") or []]
         names = names_for(nid, allrec)
@@ -135,8 +139,18 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
                 m["predicates"] += pred(n)
             for s in low["statements"]:
                 st = _note_label(s, suffix) if note_labels else s
-                m["statements"] += atom(st)
                 lab, fact = _label_fact(st)
+                if label_replace and lab and lab in lab_at and ops[lab_at[lab]] != ("atom", st):
+                    # sph Man Hin 2026-11-17 (3): a re-issued statement under a repeated label (revision-needed)
+                    # replaces the earlier one: drop the earlier op, load the later at this point (after its predicates)
+                    old = ops[lab_at[lab]][1]
+                    ops[lab_at[lab]] = None; seen_atom.discard(old)
+                    meta["atom_src"].pop(lab, None); meta["label_fact"].pop(lab, None)
+                    meta["label_replaced"] += 1
+                added = atom(st)
+                m["statements"] += added
+                if label_replace and lab and added:
+                    lab_at[lab] = len(ops) - 1
                 if lab and note_labels:   # render-master-goals: label -> source note, like the legacy atom_src
                     meta["atom_src"].setdefault(lab, nid); meta["label_fact"].setdefault(lab, fact)
             for d in low["definitions"]:
@@ -144,6 +158,8 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
                 else: m["definitions_shared"] += 1
         meta["shared_definitions"] += m["definitions_shared"]
         meta["notes"][nid] = m
+    if label_replace:
+        ops[:] = [o for o in ops if o is not None]
     meta["ops"] = len(ops)
     return ops, meta
 

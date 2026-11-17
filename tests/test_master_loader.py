@@ -227,3 +227,59 @@ def test_build_snapshot_extra_rules_flag_off_byte_identical(tmp_path):
     n = off["master_meta"]["kb_predicates"] + off["master_meta"]["rules"]
     assert on["master_ops"][:n] == off["master_ops"][:n] and on["master_ops"][n + 4:] == off["master_ops"][n:]
     assert {g: r for g, r in on["goal_rule"].items() if not r.startswith("xr_")} == off["goal_rule"]
+
+
+def test_coref_mention_same_symbol_as_theme_argument():
+    """t-2026-11-17-wmtm-steps-3-5 step 3: the Coref atom's mention symbol is the same symbol as the Theme argument of
+    the later event, and its antecedent is the earlier sentence's symbol, so coref_theme can fire."""
+    s1 = [{"t": "named-entity", "id": "n1", "name": "Mira"}, {"t": "witness", "id": "x1", "class": "guitar", "mods": ["old"]},
+          {"t": "activity", "id": "e1", "verb": "tune", "actor": "@n1", "patient": "@x1", "tense": "past"}]
+    s2 = [{"t": "mention", "id": "m1", "word": "she"}, {"t": "mention", "id": "m2", "word": "it"},
+          {"t": "transfer", "id": "e1", "verb": "sell", "giver": "@m1", "object": "@m2", "tense": "past"},
+          {"t": "coref", "id": "c1", "mention": "@m1", "antecedent": "@s1.n1", "certainty": "certain"},
+          {"t": "coref", "id": "c2", "mention": "@m2", "antecedent": "@s1.x1", "certainty": "certain"}]
+    ops, _ = _plan([("nm", _note(("Mira tuned the old guitar.", s1), ("She then sold it.", s2)))], rules=False)
+    atoms = [a for k, a in ops if k == "atom"]
+    import re
+    coref = [a for a in atoms if "(Coref sk_it_" in a]
+    assert len(coref) == 1
+    mention, ante = re.search(r"\(Coref (\S+) (\S+)\)", coref[0]).groups()
+    assert ante.startswith("sk_guitar_") and ante.endswith("__nm")
+    assert any(f"(Theme " in a and f" {mention})" in a for a in atoms)          # sell's Theme argument is the mention
+    assert any(f" {ante})" in a and "tune" in a or f"(Patient " in a and f" {ante})" in a for a in atoms)
+
+
+def _ladder_note():
+    s1 = [{"t": "witness", "id": "x1", "class": "ladder"},
+          {"t": "motion", "id": "m1", "verb": "bring", "moved": "@x1", "tense": "present"},
+          {"t": "imperative", "id": "s1", "over": ["@m1"]}]
+    s2 = [{"t": "mention", "id": "m1", "word": "it"},
+          {"t": "copular", "id": "c1", "subject": "@m1", "predicate": "tall", "form": "adjective", "tense": "present"},
+          {"t": "coref", "id": "c2", "mention": "@m1", "antecedent": "@s1.x1", "certainty": "certain"}]
+    return _note(("Bring a ladder.", s1), ("It is tall.", s2))
+
+
+def test_label_replace_later_statement_wins_flag_off_by_default():
+    """t-2026-11-17-wmtm-steps-3-5 step 4 (Man Hin 2026-11-17): a statement re-issued under a repeated label
+    (blocks revision-needed) replaces the earlier one when label_replace is on; off, plan() is unchanged."""
+    off, moff = _plan([("nl", _ladder_note())], rules=False)
+    on, mon = _plan([("nl", _ladder_note())], rules=False, label_replace=True)
+    lab = lambda ops: [a.split()[1] for k, a in ops if k == "atom" and a.startswith("(: ")]
+    assert "label_replaced" not in moff
+    assert lab(off).count("s1_s1_directive__nl") == 2
+    assert mon["label_replaced"] == 1 and lab(on).count("s1_s1_directive__nl") == 1
+    d = [a for k, a in on if k == "atom" and a.startswith("(: s1_s1_directive__nl")][0]
+    assert "(Member sk_ladder_1__nl ladder)" not in d                     # the later (re-issued) form is the one kept
+    assert [o for o in off if o not in on] == [("atom", [a for k, a in off if k == "atom" and a.startswith("(: s1_s1_directive__nl")][0])]
+    two, _ = _plan([("na", _ladder_note()), ("nb", _ladder_note())], rules=False, label_replace=True)
+    assert lab(two).count("s1_s1_directive__na") == 1 and lab(two).count("s1_s1_directive__nb") == 1
+
+
+def test_label_replace_flag_threads_through_snapshot(tmp_path):
+    rows = _rows_two_notes()
+    import json
+    def dump(sp):
+        sp = dict(sp); sp.pop("ts", None); return json.dumps(sp, sort_keys=True).encode()
+    assert dump(_snap(tmp_path, ["na", "nb"], rows)) == dump(_snap(tmp_path, ["na", "nb"], rows, shadow_label_replace=False))
+    on = _snap(tmp_path, ["na", "nb"], rows, shadow_label_replace=True)
+    assert on["master_meta"]["label_replaced"] == 0

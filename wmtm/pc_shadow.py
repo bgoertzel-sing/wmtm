@@ -492,7 +492,8 @@ def _master_ops_snapshot(cfg, items, cycle, k):
     ids = [it.id for it in items if getattr(it, "source_type", "") != "derived"]
     notes, info = ML.notes_from_parsed(tdir, parsed, ids)
     extra = bool(cfg.get("shadow_extra_rules"))      # t-2026-11-17-wmtm-extra-rules-v2 (default off)
-    ops, meta = ML.plan(tdir, notes, extra=extra)
+    ops, meta = ML.plan(tdir, notes, extra=extra,
+                        label_replace=bool(cfg.get("shadow_label_replace")))   # t-2026-11-17-wmtm-steps-3-5 step 4 (default off)
     xr = ML.extra_rules() if extra else []
     goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir) + xr, scoped={ML._node(r)[1] for r in xr})
     nimpl_st = None
