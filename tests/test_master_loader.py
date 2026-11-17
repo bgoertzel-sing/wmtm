@@ -283,3 +283,22 @@ def test_label_replace_flag_threads_through_snapshot(tmp_path):
     assert dump(_snap(tmp_path, ["na", "nb"], rows)) == dump(_snap(tmp_path, ["na", "nb"], rows, shadow_label_replace=False))
     on = _snap(tmp_path, ["na", "nb"], rows, shadow_label_replace=True)
     assert on["master_meta"]["label_replaced"] == 0
+
+
+def test_reference_time_anchors_now_calendar_fields():
+    """t-2026-11-17-wmtm-steps-3-5 step 5: a note's reference time reaches block_records, so the @now anchor of a
+    deictic gets calendar fields; without one, plan() output is unchanged."""
+    from tmpl import blocks as B
+    s1 = [{"t": "named-entity", "id": "n1", "name": "Marisol"},
+          {"t": "activity", "id": "v1", "verb": "laugh", "actor": "@n1", "tense": "past"},
+          {"t": "time", "id": "t1", "event": "@v1", "deictic": "yesterday", "anchor": "@now", "span": "yesterday"}]
+    note = [{"k": 1, "text": "Marisol laughed yesterday.", "instances": B.qualify(s1, 1)}]
+    off, _ = _plan([("nd", note)], rules=False)
+    none, _ = _plan([("nd", note)], rules=False, reference_times={"other": "2026-11-16T09:30"})
+    on, _ = _plan([("nd", note)], rules=False, reference_times={"nd": "2026-11-16T09:30"})
+    assert off == none
+    atoms = [a for k, a in on if k == "atom"]
+    assert any("(BeforeBy sk_time_1__nd sk_now_1__nd 1 day)" in a for a in atoms)
+    for f in ("(Year sk_now_1__nd 2026)", "(Month sk_now_1__nd november)", "(Day sk_now_1__nd 16)"):
+        assert any(f in a for a in atoms), f
+    assert not any("(Year sk_now_1__nd" in a for k, a in off if k == "atom")

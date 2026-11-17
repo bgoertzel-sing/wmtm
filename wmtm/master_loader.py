@@ -94,7 +94,8 @@ def _label_fact(stmt):
     return m.group(1), to_str(n[2])
 
 
-def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False, label_replace=False):
+def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False, label_replace=False,
+         reference_times=None):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -124,7 +125,8 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
             meta["extra_rules"] += atom(r)
     for nid, prior in notes:
         lab_at.clear()   # step 4: a label repeats only within one note's sentence records; never replace across notes
-        recs = B.block_records(prior, catalog)
+        rt = (reference_times or {}).get(nid)   # t-2026-11-17-wmtm-steps-3-5 step 5: the note's date anchors @now
+        recs = B.block_records(prior, catalog, rt) if rt else B.block_records(prior, catalog)
         allrec = [x for rec in recs for x in rec.get("records") or []]
         names = names_for(nid, allrec)
         suffix = "__" + re.sub(r"[^A-Za-z0-9]", "_", nid)

@@ -492,8 +492,19 @@ def _master_ops_snapshot(cfg, items, cycle, k):
     ids = [it.id for it in items if getattr(it, "source_type", "") != "derived"]
     notes, info = ML.notes_from_parsed(tdir, parsed, ids)
     extra = bool(cfg.get("shadow_extra_rules"))      # t-2026-11-17-wmtm-extra-rules-v2 (default off)
+    rts = None
+    if cfg.get("shadow_reference_time"):   # t-2026-11-17-wmtm-steps-3-5 step 5 (default off): note date -> reference_time
+        import datetime as _dt
+        rts = {}
+        for it in items:
+            ts = float(getattr(it, "origin_timestamp", 0.0) or 0.0) or float(getattr(it, "created_at", 0.0) or 0.0)
+            if ts > 0:
+                rts[it.id] = _dt.datetime.fromtimestamp(ts, _dt.timezone.utc).strftime("%Y-%m-%dT%H:%M")
     ops, meta = ML.plan(tdir, notes, extra=extra,
-                        label_replace=bool(cfg.get("shadow_label_replace")))   # t-2026-11-17-wmtm-steps-3-5 step 4 (default off)
+                        label_replace=bool(cfg.get("shadow_label_replace")),   # t-2026-11-17-wmtm-steps-3-5 step 4 (default off)
+                        reference_times=rts)
+    if rts is not None:
+        meta["reference_times"] = sum(1 for nid, _ in notes if nid in rts)
     xr = ML.extra_rules() if extra else []
     goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir) + xr, scoped={ML._node(r)[1] for r in xr})
     nimpl_st = None

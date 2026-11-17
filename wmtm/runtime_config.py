@@ -152,6 +152,7 @@ SPEC = {
     "shadow_extra_rules":  ("WMTM_PC_SHADOW_EXTRA_RULES", bool, False, None),    # t-2026-11-17-wmtm-extra-rules-v2: master_ops also loads wmtm/rules/extra_rules.pettachainer-master.metta after the seeded rules
     "shadow_note_impl_goals": ("WMTM_PC_SHADOW_NOTE_IMPL_GOALS", bool, False, None),  # t-2026-11-17-wmtm-steps-3-5 (carried over from t-2026-11-17-wmtm-note-implication-goals-v2): master_ops also asks the conclusions of note-stated Implication atoms, premises matched within the same note
     "shadow_label_replace": ("WMTM_PC_SHADOW_LABEL_REPLACE", bool, False, None),  # t-2026-11-17-wmtm-steps-3-5 step 4: master_ops plan() lets a later re-issued statement under a repeated label (blocks revision-needed) replace the earlier one; default off
+    "shadow_reference_time": ("WMTM_PC_SHADOW_REFERENCE_TIME", bool, False, None),  # t-2026-11-17-wmtm-steps-3-5 step 5: master_ops passes each note's date (origin_timestamp, else created_at; UTC ISO) to block_records as reference_time; default off
     "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
     "shadow_nwdef":        ("WMTM_PC_SHADOW_NWDEF", bool, True, None),           # P4 rev5: add nwdef_* defining rules for narrowed classes (False: leave out, upstream R2 lowers c)
     "shadow_normalise":    ("WMTM_PC_SHADOW_NORMALISE", bool, True, None),       # t-2026-11-10: parse_normalise layer before the KB build (Narrow anywhere, Premises/Conclusions, unrecognised shapes counted)
