@@ -179,3 +179,15 @@ def test_build_snapshot_flag_off_has_no_master_ops(tmp_path, monkeypatch):
         if lo is not None: cfg["shadow_load_order"] = lo
         sp = PS.build_snapshot(st, k=1, cfg=cfg)
         assert "master_ops" not in sp and sp.get("load_order") != "master_ops"
+
+
+def test_extra_rules_after_seeded_rules_flag_off_by_default():
+    """t-2026-11-17-wmtm-extra-rules: plan(extra=True) loads the extra rules right after the seeded rules."""
+    off, moff = _plan([])
+    on, mon = _plan([], extra=True)
+    xr = ML.extra_rules()
+    assert moff["extra_rules"] == 0 and not any(a in xr for k, a in off if k == "atom")
+    assert mon["extra_rules"] == len(xr)
+    assert on[:len(off)] == off and [a for k, a in on[len(off):]] == xr
+    from wmtm import runtime_config as rc
+    assert rc.resolve()["shadow_extra_rules"] is False

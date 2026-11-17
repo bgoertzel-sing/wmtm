@@ -29,6 +29,16 @@ def seeded_rules(tdir):
         return [ln.strip() for ln in fh if ln.strip().startswith("(:")]
 
 
+EXTRA_RULES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules", "extra_rules.pettachainer-master.metta")
+
+
+def extra_rules(path=None):
+    """t-2026-11-17-wmtm-extra-rules: the "(: ..." lines of wmtm/rules/extra_rules.pettachainer-master.metta,
+    loaded after the seeded master rules when shadow_extra_rules is on (default off)."""
+    with open(path or EXTRA_RULES, encoding="utf-8") as fh:
+        return [ln.strip() for ln in fh if ln.strip().startswith("(:")]
+
+
 def _syms(term):
     if isinstance(term, list):
         for x in term:
@@ -84,7 +94,7 @@ def _label_fact(stmt):
     return m.group(1), to_str(n[2])
 
 
-def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True):
+def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -105,6 +115,10 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True):
     if rules:
         for r in seeded_rules(tdir):
             meta["rules"] += atom(r)
+    meta["extra_rules"] = 0
+    if extra:                                     # t-2026-11-17-wmtm-extra-rules: after the seeded rules, before notes
+        for r in extra_rules():
+            meta["extra_rules"] += atom(r)
     for nid, prior in notes:
         recs = B.block_records(prior, catalog)
         allrec = [x for rec in recs for x in rec.get("records") or []]
@@ -205,7 +219,26 @@ def _ground(t):
     return not (isinstance(t, str) and t.startswith("$"))
 
 
-def rule_goals(ops, rule_atoms, max_envs=200):
+_CMP = {"<": lambda a, b: a < b, ">": lambda a, b: a > b, "<=": lambda a, b: a <= b, ">=": lambda a, b: a >= b,
+        "==": lambda a, b: a == b, "!=": lambda a, b: a != b}
+
+
+def _num(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
+def _compute_ok(p, env):
+    """(Compute OP (A B) -> true) with A, B bound to numbers -> bool; anything else -> False."""
+    if len(p) != 5 or p[3] != "->" or p[4] != "true" or p[1] not in _CMP or not (isinstance(p[2], list) and len(p[2]) == 2):
+        return False
+    a, b = (_num(_subst(x, env)) for x in p[2])
+    return a is not None and b is not None and _CMP[p[1]](a, b)
+
+
+def rule_goals(ops, rule_atoms, max_envs=200, compute=False):
     """t-2026-11-15-wmtm-master-shadow-wiring: the goal builder of the master-adopt-v2 mkspec.py, moved here.
     Goals = ground conclusions of the seeded master rules whose premises match loaded statements (forward
     instantiation, one step), deduped, minus conclusions already stated.  -> ({goal: rule id}, {rule id: count})."""
@@ -231,6 +264,11 @@ def rule_goals(ops, rule_atoms, max_envs=200):
         envs = [env]
         for p in ps:
             nxt = []
+            if compute and isinstance(p, list) and p and p[0] == "Compute":
+                # t-2026-11-17-wmtm-extra-rules: evaluate (Compute OP ($a $b) -> true) on bound numbers;
+                # only when compute=True (shadow_extra_rules on), so the flag-off goal set is unchanged
+                envs = [e for e in envs if _compute_ok(p, e)][:max_envs]
+                continue
             for e in envs:
                 for f in by_head.get(p[0] if isinstance(p, list) else None, []):
                     r = _unify(p, f, e)

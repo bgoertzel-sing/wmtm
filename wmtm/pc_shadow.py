@@ -491,8 +491,9 @@ def _master_ops_snapshot(cfg, items, cycle, k):
     parsed = os.path.expanduser(cfg.get("shadow_master_parsed") or "")
     ids = [it.id for it in items if getattr(it, "source_type", "") != "derived"]
     notes, info = ML.notes_from_parsed(tdir, parsed, ids)
-    ops, meta = ML.plan(tdir, notes)
-    goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir))
+    extra = bool(cfg.get("shadow_extra_rules"))      # t-2026-11-17-wmtm-extra-rules (default off)
+    ops, meta = ML.plan(tdir, notes, extra=extra)
+    goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir) + (ML.extra_rules() if extra else []), compute=extra)
     gl = list(goals)[:int(cfg["shadow_max_goals"])] if int(cfg.get("shadow_max_goals") or 0) > 0 else list(goals)
     return {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": gl,
             "goal_rule": {g: goals[g] for g in gl}, "rule_candidates": per_rule,
