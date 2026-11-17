@@ -150,6 +150,8 @@ SPEC = {
     "shadow_sph_templates": ("WMTM_PC_SHADOW_SPH_TEMPLATES", str, "", None),     # master-adopt-v2: semantic-parsing-hitl templates dir (tmpl/lower.py + generated/seeded_rules.pettachainer-master.metta)
     "shadow_master_parsed": ("WMTM_PC_SHADOW_MASTER_PARSED", str, "", None),     # t-2026-11-15-wmtm-master-shadow-wiring: cached sentence-mode parsed.jsonl read when shadow_load_order=master_ops (no parse calls)
     "shadow_extra_rules":  ("WMTM_PC_SHADOW_EXTRA_RULES", bool, False, None),    # t-2026-11-17-wmtm-extra-rules: master_ops also loads wmtm/rules/extra_rules.pettachainer-master.metta after the seeded rules
+    "shadow_extra_rules_drop": ("WMTM_PC_SHADOW_EXTRA_RULES_DROP", str, "", None),  # t-2026-11-17-wmtm-note-implication-goals-v2: comma list of extra rule ids left out (andy msg 682)
+    "shadow_note_impl_goals": ("WMTM_PC_SHADOW_NOTE_IMPL_GOALS", bool, False, None),  # t-2026-11-17-wmtm-note-implication-goals: master_ops also asks the conclusions of note-stated Implication atoms whose premise is in the KB
     "shadow_rules":        ("WMTM_PC_SHADOW_RULES", bool, True, None),           # P4: add parser Implication rules (flat Member classes) to the shadow KB
     "shadow_nwdef":        ("WMTM_PC_SHADOW_NWDEF", bool, True, None),           # P4 rev5: add nwdef_* defining rules for narrowed classes (False: leave out, upstream R2 lowers c)
     "shadow_normalise":    ("WMTM_PC_SHADOW_NORMALISE", bool, True, None),       # t-2026-11-10: parse_normalise layer before the KB build (Narrow anywhere, Premises/Conclusions, unrecognised shapes counted)
