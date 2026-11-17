@@ -238,10 +238,24 @@ def _compute_ok(p, env):
     return a is not None and b is not None and _CMP[p[1]](a, b)
 
 
-def rule_goals(ops, rule_atoms, max_envs=200, compute=False):
+_NOTE_SFX = re.compile(r"__ep_note_\d{8}T\d{6}Z")
+
+
+def _one_note(env):
+    """True when the bound symbols carry at most one distinct note suffix (named individuals carry none)."""
+    seen = set()
+    for v in env.values():
+        for t in _syms(v):
+            seen.update(_NOTE_SFX.findall(t))
+    return len(seen) <= 1
+
+
+def rule_goals(ops, rule_atoms, max_envs=200, compute=False, scoped=()):
     """t-2026-11-15-wmtm-master-shadow-wiring: the goal builder of the master-adopt-v2 mkspec.py, moved here.
     Goals = ground conclusions of the seeded master rules whose premises match loaded statements (forward
-    instantiation, one step), deduped, minus conclusions already stated.  -> ({goal: rule id}, {rule id: count})."""
+    instantiation, one step), deduped, minus conclusions already stated.  -> ({goal: rule id}, {rule id: count}).
+    t-2026-11-17-wmtm-extra-rules: scoped = rule ids (the extra rules) that are evaluated with Compute premises
+    (when compute=True) and kept only when their bindings come from one note; seeded rules are never affected."""
     from .semparse_adapter import to_str
     rule_set = set(rule_atoms)
     rules, facts = {}, []
@@ -259,14 +273,15 @@ def rule_goals(ops, rule_atoms, max_envs=200, compute=False):
     for f in facts:
         by_head.setdefault(f[0] if f and isinstance(f[0], str) else None, []).append(f)
 
-    def matches(prem, env):
+    def matches(prem, env, rid=None):
+        do_compute = compute and rid in scoped
         ps = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
         envs = [env]
         for p in ps:
             nxt = []
-            if compute and isinstance(p, list) and p and p[0] == "Compute":
+            if do_compute and isinstance(p, list) and p and p[0] == "Compute":
                 # t-2026-11-17-wmtm-extra-rules: evaluate (Compute OP ($a $b) -> true) on bound numbers;
-                # only when compute=True (shadow_extra_rules on), so the flag-off goal set is unchanged
+                # only for scoped (extra) rules with compute=True, so seeded goals never change with the flag
                 envs = [e for e in envs if _compute_ok(p, e)][:max_envs]
                 continue
             for e in envs:
@@ -282,7 +297,9 @@ def rule_goals(ops, rule_atoms, max_envs=200, compute=False):
     for rid, r in rules.items():
         pairs = [(r[1], r[2])] + ([(r[2], r[1])] if r[0] == "BiImplication" else [])
         for prem, concl in pairs:
-            for e in matches(prem, {}):
+            for e in matches(prem, {}, rid):
+                if rid in scoped and not _one_note(e):
+                    continue
                 c = _subst(concl, e)
                 if not _ground(c):
                     continue

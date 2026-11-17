@@ -12,7 +12,7 @@ def _ops(facts):
 def _goals(facts, extra=True):
     rules = ML.extra_rules() if extra else []
     ops = [("atom", r) for r in rules] + _ops(facts)
-    return ML.rule_goals(ops, rules, compute=extra)
+    return ML.rule_goals(ops, rules, compute=extra, scoped={ML._node(r)[1] for r in rules})
 
 
 def test_file_parses_and_ids_unique():
@@ -76,3 +76,22 @@ def test_compute_only_numbers():
     assert not ML._compute_ok(p, {"$a": "11", "$b": "5"})
     assert not ML._compute_ok(p, {"$a": "october", "$b": "5"})
     assert not ML._compute_ok(p, {"$a": "5"})
+
+
+def test_scoped_one_note_only():
+    a, b = "__ep_note_20261101T000000Z", "__ep_note_20261102T000000Z"
+    g, _ = _goals(["(Directive d1%s)" % a, "(Member t1%s task)" % b])          # cross-note: refused
+    assert g == {}
+    g2, _ = _goals(["(Directive d1%s)" % a, "(Member t1%s task)" % a])         # same note: kept
+    assert g2.get("(Applies d1%s t1%s)" % (a, a)) == "xr_directive_inherit"
+    g3, _ = _goals(["(Directive d1%s)" % a, "(Member named_task task)"])       # named individual: no suffix
+    assert "(Applies d1%s named_task)" % a in g3
+
+
+def test_compute_not_applied_to_unscoped_rules():
+    seeded = "(: s_year (Implication (And (Year $a $y1) (Year $b $y2) (Compute < ($y1 $y2) -> true)) (Before $a $b)) (CTV (STV 1.0 0.9) (STV 0.0 0.001)))"
+    ops = [("atom", seeded)] + _ops(["(Year a 2020)", "(Year b 2021)"])
+    g, _ = ML.rule_goals(ops, [seeded], compute=True, scoped={"xr_hour_order"})
+    # Compute premise of a seeded rule is never evaluated: no head match for Compute -> no goals, same as flag off
+    g0, _ = ML.rule_goals(ops, [seeded], compute=False)
+    assert g == g0
