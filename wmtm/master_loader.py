@@ -387,6 +387,137 @@ def note_impl_goals(ops, rule_atoms, note_labels, max_envs=200):
     return goals, st
 
 
+_ENTITY_ROLES = ("Member", "Agent", "Patient", "Theme", "Bearer", "Name")
+
+
+def note_impl_premise_goals(ops, rule_atoms, note_labels, max_cands=8):
+    """t-2026-11-17-wmtm-impl-premise-proving step 1 (flag shadow_note_impl_premise, default off).  For a note-stated
+    Implication/BiImplication whose premise does NOT match loaded statements literally, still ask the conclusion,
+    instantiated for candidate entities of the SAME note, and leave the premise to PeTTaChainer.
+    Candidates: entity arguments (first arg of Member/Name, second of Agent/Patient/Theme/Bearer) of statements whose
+    label carries the implication's own note suffix (never another note's; named individuals only when stated in this
+    note).  Cap: per implication at most max_cands candidates, ranked by how many of the premise's constant symbols
+    (classes, predicates) the entity's own-note statements mention, ties by first appearance; entities with score 0
+    are not candidates.  Only conclusions whose unbound variables are exactly one ($x-like) are built; more counted.
+    -> ({goal: "nimplp:" + label}, stats) (no atom text)."""
+    from .semparse_adapter import to_str
+    rule_set, labels = set(rule_atoms), set(note_labels)
+    nimpl, facts, own_facts = {}, [], {}
+    for k, a in ops:
+        if k != "atom" or a in rule_set:
+            continue
+        n = _node(a)
+        if not (isinstance(n, list) and len(n) == 4 and isinstance(n[2], list)):
+            continue
+        if n[2][0] in ("Implication", "BiImplication") and n[1] in labels:
+            nimpl[n[1]] = n[2]
+            continue
+        facts.append(n[2])
+        for sfx in set(_NOTE_SFX.findall(n[1])):
+            own_facts.setdefault(sfx, []).append(n[2])
+    by_head = {}
+    for f in facts:
+        by_head.setdefault(f[0] if f and isinstance(f[0], str) else None, []).append(f)
+    stated = {to_str(f) for f in facts}
+    st = {"note_impl": len(nimpl), "premise_literal": 0, "premise_not_literal": 0, "no_note": 0, "multi_var_concl": 0,
+          "no_var_concl": 0, "candidates": 0, "capped": 0, "concl_stated": 0, "goals": 0, "impl_with_goal": 0}
+
+    def literal(prem):
+        ps = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
+        envs = [{}]
+        for p in ps:
+            envs = [r for e in envs for f in by_head.get(p[0] if isinstance(p, list) and p else None, [])
+                    for r in [_unify(p, f, e)] if r is not None][:200]
+            if not envs:
+                return False
+        return True
+
+    def ents(fs):
+        out = []
+        for f in fs:
+            if not (isinstance(f, list) and len(f) >= 3 and f[0] in _ENTITY_ROLES):
+                continue
+            x = f[1] if f[0] in ("Member", "Name") else f[2]
+            if isinstance(x, str) and not x.startswith("$") and x not in out:
+                out.append(x)
+        return out
+
+    goals = {}
+    for lab, r in nimpl.items():
+        sfx = set(_NOTE_SFX.findall(lab))
+        if len(sfx) != 1:
+            st["no_note"] += 1
+            continue
+        fs = own_facts.get(next(iter(sfx)), [])
+        pairs = [(r[1], r[2])] + ([(r[2], r[1])] if r[0] == "BiImplication" else [])
+        got = 0
+        for prem, concl in pairs:
+            if literal(prem):
+                st["premise_literal"] += 1     # the one-step builder (note_impl_goals) covers it
+                continue
+            st["premise_not_literal"] += 1
+            cv = sorted({t for t in _syms(concl) if t.startswith("$")})
+            if not cv:
+                st["no_var_concl"] += 1
+                continue
+            if len(cv) > 1:
+                st["multi_var_concl"] += 1
+                continue
+            consts = {t for t in _syms(prem) if not t.startswith("$")} - {"And", "Member", "Agent", "Patient",
+                                                                            "Theme", "Bearer", "Inheritance", "thing"}
+            scored = []
+            for i, e in enumerate(ents(fs)):
+                mine = [f for f in fs if e in _syms(f)]
+                sc = len(consts & {t for f in mine for t in _syms(f)})
+                if sc:
+                    scored.append((-sc, i, e))
+            scored.sort()
+            st["capped"] += max(0, len(scored) - max_cands)
+            for _, _, e in scored[:max_cands]:
+                st["candidates"] += 1
+                g = to_str(_subst(concl, {cv[0]: e}))
+                if g in stated:
+                    st["concl_stated"] += 1
+                    continue
+                if g not in goals:
+                    goals[g] = "nimplp:" + lab
+                    got += 1
+        st["goals"] += got
+        st["impl_with_goal"] += got > 0
+    return goals, st
+
+
+def lowering_stopgaps(ops, which=("thing", "narrow")):
+    """t-2026-11-17-wmtm-impl-premise-proving step 3 (flag shadow_lowering_stopgaps, default empty = off), until the
+    lowering fix: (a) "thing": (Inheritance C thing) for every class C a note states a ground Member of, so
+    "anything ..." premises (Member $x thing) hold; (b) "narrow": for a narrowed class K (kind__ Inheritance K noun,
+    by_ NarrowBy K (Is a)), (Implication (And (Member $x noun) (Member $x a)..) (Member $x K)).
+    -> (atoms to append, {"thing": n, "narrow": n})."""
+    cls, kinds, isby = set(), {}, {}
+    for k, a in ops:
+        n = _node(a) if k == "atom" else None
+        if not (isinstance(n, list) and len(n) == 4 and isinstance(n[2], list)):
+            continue
+        f = n[2]
+        if _NOTE_SFX.search(n[1]) and f[0] == "Member" and len(f) == 3 and isinstance(f[2], str) and _ground(f):
+            cls.add(f[2])
+        if n[1].startswith("kind__") and f[0] == "Inheritance" and len(f) == 3:
+            kinds[f[1]] = f[2]
+        if n[1].startswith("by_") and f[0] == "NarrowBy" and len(f) == 3 and isinstance(f[2], list) and f[2][0] == "Is":
+            isby.setdefault(f[1], []).append(f[2][1])
+    out, cnt = [], {"thing": 0, "narrow": 0}
+    if "thing" in which:
+        for c in sorted(cls - {"thing"}):
+            out.append("(: stopgap_thing__%s (Inheritance %s thing) (STV 1.0 0.99))" % (c, c)); cnt["thing"] += 1
+    if "narrow" in which:
+        for sym, noun in sorted(kinds.items()):
+            if sym in isby and all(isinstance(x, str) for x in isby[sym]) and isinstance(noun, str):
+                prem = " ".join(["(Member $x %s)" % noun] + ["(Member $x %s)" % x for x in isby[sym]])
+                out.append("(: stopgap_narrow__%s (Implication (And %s) (Member $x %s)) (STV 1.0 0.99))"
+                           % (sym, prem, sym)); cnt["narrow"] += 1
+    return out, cnt
+
+
 def notes_from_parsed(tdir, parsed_path, note_ids):
     """-> ([(note_id, prior)], {"complete": n, "incomplete": [note ids], "absent": [note ids]}) from a cached
     sentence-mode parsed.jsonl (rows carry id/dataset/doc/sent next to the reply).  Reads the cache only: no parse
