@@ -495,14 +495,26 @@ def _master_ops_snapshot(cfg, items, cycle, k):
     ops, meta = ML.plan(tdir, notes, extra=extra)
     xr = ML.extra_rules() if extra else []
     goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir) + xr, scoped={ML._node(r)[1] for r in xr})
+    nimpl_st = None
+    if cfg.get("shadow_note_impl_goals"):   # t-2026-11-17-wmtm-steps-3-5 carry-over of note-implication-goals-v2 (default off)
+        ng, nimpl_st = ML.note_impl_goals(ops, ML.seeded_rules(tdir) + xr, meta["atom_src"])
+        for g, rid in ng.items():
+            if g not in goals:
+                goals[g] = rid
+                per_rule[rid] = per_rule.get(rid, 0) + 1
+            else:
+                nimpl_st["dup_goal"] += 1
     gl = list(goals)[:int(cfg["shadow_max_goals"])] if int(cfg.get("shadow_max_goals") or 0) > 0 else list(goals)
-    return {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": gl,
+    out = {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": gl,
             "goal_rule": {g: goals[g] for g in gl}, "rule_candidates": per_rule,
             "master_meta": {kk: v for kk, v in meta.items() if kk not in ("notes", "atom_src", "label_fact")},
             "master_notes": info, "cycle": cycle, "ts": time.time(), "k": k, "items": len(items),
             "semparse_items": info["complete"], "unparsed_items": len(ids) - info["complete"],
             "atom_src": meta["atom_src"], "label_fact": meta["label_fact"], "fact_src": [], "derived_src": {},
             "derived_items": len(items) - len(ids), "goal_total": len(goals), "source": "master_ops"}
+    if nimpl_st is not None:
+        out["note_impl"] = nimpl_st
+    return out
 
 
 def build_snapshot(store, cycle=0, k=None, cfg=None):
