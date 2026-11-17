@@ -1,0 +1,492 @@
+{
+ "cases": [
+  {
+   "case": "C1_anything_X_is_Y",
+   "asked": [
+    {
+     "subject": "member:lute",
+     "class": "quiet",
+     "goal": "(Member sk_lute_1__ep_note_20991117T000001Z quiet)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    },
+    {
+     "subject": "member:lute",
+     "class": "thing__member_acoustic",
+     "why": "diagnostic: the lowered narrowed class the Inheritance starts from",
+     "goal": "(Member sk_lute_1__ep_note_20991117T000001Z thing__member_acoustic)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    }
+   ],
+   "doc": "ep-note-20991117T000001Z",
+   "text": "Anything acoustic is quiet. The lute is acoustic.",
+   "expect": "fires",
+   "atoms": [
+    "(: s1_k1_inheritance__ep_note_20991117T000001Z (Inheritance thing__member_acoustic quiet) (STV 0.9 0.7))",
+    "(: s2_x1_member__ep_note_20991117T000001Z (Member sk_lute_1__ep_note_20991117T000001Z lute) (STV 1.0 0.99))",
+    "(: s2_c1_member__ep_note_20991117T000001Z (Member sk_lute_1__ep_note_20991117T000001Z acoustic) (STV 1.0 0.99))"
+   ],
+   "note_implications": [],
+   "meta": {
+    "complete": 6,
+    "incomplete": [],
+    "absent": []
+   },
+   "plan_note": null
+  },
+  {
+   "case": "C2_every_A_that_B_is_C",
+   "asked": [
+    {
+     "subject": "name:tweety",
+     "class": "happy",
+     "goal": "(Member tweety happy)",
+     "stated": false,
+     "note_impl_goal": true,
+     "rule_goal": false
+    }
+   ],
+   "doc": "ep-note-20991117T000002Z",
+   "text": "Every bird that sings is happy. Tweety is a bird that sings.",
+   "expect": "fires",
+   "atoms": [
+    "(: s1_r1_implication__ep_note_20991117T000002Z (Implication (And (Member $x bird) (Member $e sing) (Agent $e $x)) (Member $x happy)) (STV 1.0 0.9))",
+    "(: s2_n1_name__ep_note_20991117T000002Z (Name tweety \"Tweety\") (STV 1.0 0.99))",
+    "(: s2_c1_member__ep_note_20991117T000002Z (Member tweety bird) (STV 1.0 0.99))",
+    "(: s2_v1_member__ep_note_20991117T000002Z (Member sk_sing_2__ep_note_20991117T000002Z sing) (STV 1.0 0.99))",
+    "(: s2_v1_agent__ep_note_20991117T000002Z (Agent sk_sing_2__ep_note_20991117T000002Z tweety) (STV 1.0 0.99))",
+    "(: s2_h1_habitual__ep_note_20991117T000002Z (Habitual sk_sing_2__ep_note_20991117T000002Z) (STV 1.0 0.99))"
+   ],
+   "note_implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000002Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000002Z (Implication (And (Member $x bird) (Member $e sing) (Agent $e $x)) (Member $x happy)) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$e",
+      "$x"
+     ],
+     "skolem_symbols_inside": [],
+     "premise_head": "And",
+     "goals": {
+      "(Member tweety happy)": "nimpl:s1_r1_implication__ep_note_20991117T000002Z"
+     },
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 1,
+      "premise_missing": 0,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 1,
+      "impl_with_goal": 1
+     }
+    }
+   ],
+   "meta": {
+    "complete": 6,
+    "incomplete": [],
+    "absent": []
+   },
+   "plan_note": null
+  },
+  {
+   "case": "C3_if_someone_V_they_are_W",
+   "asked": [
+    {
+     "subject": "name:marta",
+     "class": "loud",
+     "goal": "(Member marta loud)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    },
+    {
+     "subject": "prefix:sk_they_1",
+     "class": "loud",
+     "goal": "(Member sk_they_1__ep_note_20991117T000003Z loud)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    }
+   ],
+   "doc": "ep-note-20991117T000003Z",
+   "text": "If someone plays the drum, they are loud. Marta plays the drum.",
+   "expect": "fires",
+   "atoms": [
+    "(: s1_x1_member__ep_note_20991117T000003Z (Member sk_person_1__ep_note_20991117T000003Z person) (STV 1.0 0.99))",
+    "(: s1_x2_member__ep_note_20991117T000003Z (Member sk_drum_1__ep_note_20991117T000003Z drum) (STV 1.0 0.99))",
+    "(: s1_r1_implication__ep_note_20991117T000003Z (Implication (And (Member $e play) (Agent $e $x) (Patient $e sk_drum_1__ep_note_20991117T000003Z)) (Member sk_they_1__ep_note_20991117T000003Z loud)) (STV 1.0 0.9))",
+    "(: s1_k1_coref__ep_note_20991117T000003Z (Coref sk_they_1__ep_note_20991117T000003Z sk_person_1__ep_note_20991117T000003Z) (STV 0.99 0.9))",
+    "(: s2_n1_name__ep_note_20991117T000003Z (Name marta \"Marta\") (STV 1.0 0.99))",
+    "(: s2_x1_member__ep_note_20991117T000003Z (Member sk_drum_2__ep_note_20991117T000003Z drum) (STV 1.0 0.99))",
+    "(: s2_v1_member__ep_note_20991117T000003Z (Member sk_play_2__ep_note_20991117T000003Z play) (STV 1.0 0.99))",
+    "(: s2_v1_agent__ep_note_20991117T000003Z (Agent sk_play_2__ep_note_20991117T000003Z marta) (STV 1.0 0.99))",
+    "(: s2_v1_patient__ep_note_20991117T000003Z (Patient sk_play_2__ep_note_20991117T000003Z sk_drum_2__ep_note_20991117T000003Z) (STV 1.0 0.99))",
+    "(: s2_h1_habitual__ep_note_20991117T000003Z (Habitual sk_play_2__ep_note_20991117T000003Z) (STV 1.0 0.99))",
+    "(: s2_c1_coref__ep_note_20991117T000003Z (Coref sk_drum_2__ep_note_20991117T000003Z sk_drum_1__ep_note_20991117T000003Z) (STV 0.8 0.9))"
+   ],
+   "note_implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000003Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000003Z (Implication (And (Member $e play) (Agent $e $x) (Patient $e sk_drum_1__ep_note_20991117T000003Z)) (Member sk_they_1__ep_note_20991117T000003Z loud)) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$e",
+      "$x"
+     ],
+     "skolem_symbols_inside": [
+      "sk_drum_1__ep_note_20991117T000003Z",
+      "sk_they_1__ep_note_20991117T000003Z"
+     ],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    }
+   ],
+   "meta": {
+    "complete": 6,
+    "incomplete": [],
+    "absent": []
+   },
+   "plan_note": null
+  },
+  {
+   "case": "C4_two_premise_conjunction",
+   "asked": [
+    {
+     "subject": "member:toy",
+     "class": "ball",
+     "goal": "(Member sk_toy_1__ep_note_20991117T000004Z ball)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    }
+   ],
+   "doc": "ep-note-20991117T000004Z",
+   "text": "Anything that is red and round is a ball. The toy is red. The toy is round.",
+   "expect": "fires",
+   "atoms": [
+    "(: s1_r1_implication__ep_note_20991117T000004Z (Implication (And (Member $x thing) (Member $x red) (Member $x round)) (Member $x ball)) (STV 0.9 0.7))",
+    "(: s1_r1_implication_2__ep_note_20991117T000004Z (Implication (And (Member $x thing) (Holds $s (Member $x red)) (Holds $s2 (Member $x round))) (And (Holds (sk_ball__ep_note_20991117T000004Z $x $s $s2) (Member $x ball)) (During (sk_ball__ep_note_20991117T000004Z $x $s $s2) $s) (During (sk_ball__ep_note_20991117T000004Z $x $s $s2) $s2))) (STV 0.9 0.7))",
+    "(: s2_x1_member__ep_note_20991117T000004Z (Member sk_toy_1__ep_note_20991117T000004Z toy) (STV 1.0 0.99))",
+    "(: s2_c1_member__ep_note_20991117T000004Z (Member sk_toy_1__ep_note_20991117T000004Z red) (STV 1.0 0.99))",
+    "(: s3_x1_member__ep_note_20991117T000004Z (Member sk_toy_2__ep_note_20991117T000004Z toy) (STV 1.0 0.99))",
+    "(: s3_c1_coref__ep_note_20991117T000004Z (Coref sk_toy_2__ep_note_20991117T000004Z sk_toy_1__ep_note_20991117T000004Z) (STV 0.99 0.9))",
+    "(: s3_c2_member__ep_note_20991117T000004Z (Member sk_toy_2__ep_note_20991117T000004Z round) (STV 1.0 0.99))"
+   ],
+   "note_implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000004Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000004Z (Implication (And (Member $x thing) (Member $x red) (Member $x round)) (Member $x ball)) (STV 0.9 0.7))",
+     "kind": "Implication",
+     "variables": [
+      "$x"
+     ],
+     "skolem_symbols_inside": [],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    },
+    {
+     "label": "s1_r1_implication_2__ep_note_20991117T000004Z",
+     "atom": "(: s1_r1_implication_2__ep_note_20991117T000004Z (Implication (And (Member $x thing) (Holds $s (Member $x red)) (Holds $s2 (Member $x round))) (And (Holds (sk_ball__ep_note_20991117T000004Z $x $s $s2) (Member $x ball)) (During (sk_ball__ep_note_20991117T000004Z $x $s $s2) $s) (During (sk_ball__ep_note_20991117T000004Z $x $s $s2) $s2))) (STV 0.9 0.7))",
+     "kind": "Implication",
+     "variables": [
+      "$s",
+      "$s2",
+      "$x"
+     ],
+     "skolem_symbols_inside": [
+      "sk_ball__ep_note_20991117T000004Z"
+     ],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    }
+   ],
+   "meta": {
+    "complete": 6,
+    "incomplete": [],
+    "absent": []
+   },
+   "plan_note": null
+  },
+  {
+   "case": "C5_negated_conclusion",
+   "asked": [
+    {
+     "subject": "member:pond",
+     "class": "liquid",
+     "expect": "strength near 0 (negated)",
+     "goal": "(Member sk_pond_1__ep_note_20991117T000005Z liquid)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    }
+   ],
+   "doc": "ep-note-20991117T000005Z",
+   "text": "Anything frozen is not liquid. The pond is frozen.",
+   "expect": "fires (negated)",
+   "atoms": [
+    "(: s1_r1_implication__ep_note_20991117T000005Z (Implication (And (Member $x thing) (Member $x frozen)) (Not (Member $x liquid))) (STV 1.0 0.9))",
+    "(: s1_r1_implication_2__ep_note_20991117T000005Z (Implication (And (Member $x thing) (Holds $s (Member $x frozen))) (Not (And (Holds (sk_liquid__ep_note_20991117T000005Z $x $s) (Member $x liquid)) (During (sk_liquid__ep_note_20991117T000005Z $x $s) $s)))) (STV 1.0 0.9))",
+    "(: s2_x1_member__ep_note_20991117T000005Z (Member sk_pond_1__ep_note_20991117T000005Z pond) (STV 1.0 0.99))",
+    "(: s2_c1_member__ep_note_20991117T000005Z (Member sk_pond_1__ep_note_20991117T000005Z frozen) (STV 1.0 0.99))"
+   ],
+   "note_implications": [
+    {
+     "label": "s1_r1_implication__ep_note_20991117T000005Z",
+     "atom": "(: s1_r1_implication__ep_note_20991117T000005Z (Implication (And (Member $x thing) (Member $x frozen)) (Not (Member $x liquid))) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$x"
+     ],
+     "skolem_symbols_inside": [],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    },
+    {
+     "label": "s1_r1_implication_2__ep_note_20991117T000005Z",
+     "atom": "(: s1_r1_implication_2__ep_note_20991117T000005Z (Implication (And (Member $x thing) (Holds $s (Member $x frozen))) (Not (And (Holds (sk_liquid__ep_note_20991117T000005Z $x $s) (Member $x liquid)) (During (sk_liquid__ep_note_20991117T000005Z $x $s) $s)))) (STV 1.0 0.9))",
+     "kind": "Implication",
+     "variables": [
+      "$s",
+      "$x"
+     ],
+     "skolem_symbols_inside": [
+      "sk_liquid__ep_note_20991117T000005Z"
+     ],
+     "premise_head": "And",
+     "goals": {},
+     "stats": {
+      "note_impl": 1,
+      "ground": 0,
+      "with_vars": 1,
+      "bi": 0,
+      "and_premise": 1,
+      "premise_in_kb": 0,
+      "premise_missing": 1,
+      "concl_not_ground": 0,
+      "cross_note": 0,
+      "concl_stated": 0,
+      "dup_goal": 0,
+      "goals": 0,
+      "impl_with_goal": 0
+     }
+    }
+   ],
+   "meta": {
+    "complete": 6,
+    "incomplete": [],
+    "absent": []
+   },
+   "plan_note": null
+  },
+  {
+   "case": "C6_near_miss_other_class",
+   "asked": [
+    {
+     "subject": "member:trumpet",
+     "class": "quiet",
+     "expect": "not proved",
+     "goal": "(Member sk_trumpet_1__ep_note_20991117T000006Z quiet)",
+     "stated": false,
+     "note_impl_goal": false,
+     "rule_goal": false
+    }
+   ],
+   "doc": "ep-note-20991117T000006Z",
+   "text": "Anything acoustic is quiet. The trumpet is metallic.",
+   "expect": "must NOT fire",
+   "atoms": [
+    "(: s1_k1_inheritance__ep_note_20991117T000006Z (Inheritance thing__member_acoustic quiet) (STV 0.9 0.7))",
+    "(: s2_x1_member__ep_note_20991117T000006Z (Member sk_trumpet_1__ep_note_20991117T000006Z trumpet) (STV 1.0 0.99))",
+    "(: s2_c1_member__ep_note_20991117T000006Z (Member sk_trumpet_1__ep_note_20991117T000006Z metallic) (STV 1.0 0.99))"
+   ],
+   "note_implications": [],
+   "meta": {
+    "complete": 6,
+    "incomplete": [],
+    "absent": []
+   },
+   "plan_note": null
+  }
+ ],
+ "rule_goals": {
+  "(Coref sk_person_1__ep_note_20991117T000003Z sk_they_1__ep_note_20991117T000003Z)": "coref_sym",
+  "(Coref sk_drum_1__ep_note_20991117T000003Z sk_drum_2__ep_note_20991117T000003Z)": "coref_sym",
+  "(Coref sk_toy_1__ep_note_20991117T000004Z sk_toy_2__ep_note_20991117T000004Z)": "coref_sym",
+  "(Patient sk_play_2__ep_note_20991117T000003Z sk_drum_1__ep_note_20991117T000003Z)": "coref_patient",
+  "(Member sk_toy_1__ep_note_20991117T000004Z round)": "coref_member",
+  "(ScaleOpposite tall short)": "so_sym",
+  "(ScaleOpposite strong weak)": "so_sym",
+  "(ScaleOpposite fast slow)": "so_sym",
+  "(ScaleOpposite expensive cheap)": "so_sym",
+  "(ScaleOpposite heavy light)": "so_sym",
+  "(ScaleOpposite wide narrow)": "so_sym",
+  "(ScaleOpposite deep shallow)": "so_sym",
+  "(ScaleOpposite high low)": "so_sym",
+  "(ScaleOpposite old young)": "so_sym",
+  "(ScaleOpposite hot cold)": "so_sym",
+  "(ScaleOpposite warm cool)": "so_sym",
+  "(ScaleOpposite bright dim)": "so_sym",
+  "(ScaleOpposite loud quiet)": "so_sym",
+  "(ScaleOpposite large small)": "so_sym",
+  "(ScaleOpposite big small)": "so_sym",
+  "(ScaleOpposite thick thin)": "so_sym",
+  "(ScaleOpposite many few)": "so_sym",
+  "(ScaleOpposite much little)": "so_sym",
+  "(ScaleOpposite rich poor)": "so_sym",
+  "(ScaleOpposite full empty)": "so_sym",
+  "(ScaleOpposite late early)": "so_sym",
+  "(ScaleOpposite hard soft)": "so_sym",
+  "(ScaleOpposite good bad)": "so_sym",
+  "(ScaleOpposite far near)": "so_sym",
+  "(ScaleOpposite complex simple)": "so_sym",
+  "(ScaleOpposite difficult easy)": "so_sym",
+  "(ScaleOpposite common rare)": "so_sym",
+  "(ScaleOpposite happy sad)": "so_sym",
+  "(ScaleOpposite beautiful ugly)": "so_sym"
+ },
+ "note_impl_goals": {
+  "(Member tweety happy)": "nimpl:s1_r1_implication__ep_note_20991117T000002Z"
+ },
+ "note_impl_stats": {
+  "note_impl": 6,
+  "ground": 0,
+  "with_vars": 6,
+  "bi": 0,
+  "and_premise": 6,
+  "premise_in_kb": 1,
+  "premise_missing": 5,
+  "concl_not_ground": 0,
+  "cross_note": 0,
+  "concl_stated": 0,
+  "dup_goal": 0,
+  "goals": 1,
+  "impl_with_goal": 1,
+  "premise_shape": {
+   "And": 6
+  },
+  "concl_shape": {
+   "Member": 3,
+   "And": 1,
+   "Not": 2
+  }
+ },
+ "probes": {
+  "(Member sk_lute_1__ep_note_20991117T000001Z quiet)": "ask:C1_anything_X_is_Y",
+  "(Member sk_lute_1__ep_note_20991117T000001Z thing__member_acoustic)": "ask:C1_anything_X_is_Y",
+  "(Member tweety happy)": "ask:C2_every_A_that_B_is_C",
+  "(Member marta loud)": "ask:C3_if_someone_V_they_are_W",
+  "(Member sk_they_1__ep_note_20991117T000003Z loud)": "ask:C3_if_someone_V_they_are_W",
+  "(Member sk_toy_1__ep_note_20991117T000004Z ball)": "ask:C4_two_premise_conjunction",
+  "(Member sk_pond_1__ep_note_20991117T000005Z liquid)": "ask:C5_negated_conclusion",
+  "(Member sk_trumpet_1__ep_note_20991117T000006Z quiet)": "ask:C6_near_miss_other_class"
+ },
+ "subjects": [
+  "sk_drum_1__ep_note_20991117T000003Z",
+  "sk_drum_2__ep_note_20991117T000003Z",
+  "sk_lute_1__ep_note_20991117T000001Z",
+  "sk_person_1__ep_note_20991117T000003Z",
+  "sk_play_2__ep_note_20991117T000003Z",
+  "sk_pond_1__ep_note_20991117T000005Z",
+  "sk_sing_2__ep_note_20991117T000002Z",
+  "sk_toy_1__ep_note_20991117T000004Z",
+  "sk_toy_2__ep_note_20991117T000004Z",
+  "sk_trumpet_1__ep_note_20991117T000006Z",
+  "tweety"
+ ],
+ "diag_atoms": [
+  "(: diag_thing__acoustic (Inheritance acoustic thing) (STV 1.0 0.99))",
+  "(: diag_thing__bird (Inheritance bird thing) (STV 1.0 0.99))",
+  "(: diag_thing__drum (Inheritance drum thing) (STV 1.0 0.99))",
+  "(: diag_thing__frozen (Inheritance frozen thing) (STV 1.0 0.99))",
+  "(: diag_thing__lute (Inheritance lute thing) (STV 1.0 0.99))",
+  "(: diag_thing__metallic (Inheritance metallic thing) (STV 1.0 0.99))",
+  "(: diag_thing__person (Inheritance person thing) (STV 1.0 0.99))",
+  "(: diag_thing__play (Inheritance play thing) (STV 1.0 0.99))",
+  "(: diag_thing__pond (Inheritance pond thing) (STV 1.0 0.99))",
+  "(: diag_thing__red (Inheritance red thing) (STV 1.0 0.99))",
+  "(: diag_thing__round (Inheritance round thing) (STV 1.0 0.99))",
+  "(: diag_thing__sing (Inheritance sing thing) (STV 1.0 0.99))",
+  "(: diag_thing__toy (Inheritance toy thing) (STV 1.0 0.99))",
+  "(: diag_thing__trumpet (Inheritance trumpet thing) (STV 1.0 0.99))",
+  "(: diag_narrow__thing__member_acoustic (Implication (And (Member $x thing) (Member $x acoustic)) (Member $x thing__member_acoustic)) (STV 1.0 0.99))"
+ ],
+ "master_notes": {
+  "complete": 6,
+  "incomplete": [],
+  "absent": []
+ },
+ "extra": 0,
+ "drop": [],
+ "n_ops": 517,
+ "n_goals": 42
+}

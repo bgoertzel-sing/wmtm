@@ -1,0 +1,126 @@
+{
+ "_comment": "t-2026-11-17-wmtm-variable-implication-test: invented notes only (no real notes). Note ids use the ep-note shape with year 2099 so master_loader's one-note scoping (_NOTE_SFX) applies.",
+ "cases": [
+  {
+   "case": "C1_anything_X_is_Y",
+   "doc": "ep-note-20991117T000001Z",
+   "text": "Anything acoustic is quiet. The lute is acoustic.",
+   "expect": "fires",
+   "goal_words": "lute quiet",
+   "asks": [
+    {
+     "subject": "member:lute",
+     "class": "quiet"
+    },
+    {
+     "subject": "member:lute",
+     "class": "thing__member_acoustic",
+     "why": "diagnostic: the lowered narrowed class the Inheritance starts from"
+    }
+   ]
+  },
+  {
+   "case": "C2_every_A_that_B_is_C",
+   "doc": "ep-note-20991117T000002Z",
+   "text": "Every bird that sings is happy. Tweety is a bird that sings.",
+   "expect": "fires",
+   "goal_words": "Tweety happy",
+   "asks": [
+    {
+     "subject": "name:tweety",
+     "class": "happy"
+    }
+   ]
+  },
+  {
+   "case": "C3_if_someone_V_they_are_W",
+   "doc": "ep-note-20991117T000003Z",
+   "text": "If someone plays the drum, they are loud. Marta plays the drum.",
+   "expect": "fires",
+   "goal_words": "Marta loud",
+   "asks": [
+    {
+     "subject": "name:marta",
+     "class": "loud"
+    },
+    {
+     "subject": "prefix:sk_they_1",
+     "class": "loud"
+    }
+   ]
+  },
+  {
+   "case": "C4_two_premise_conjunction",
+   "doc": "ep-note-20991117T000004Z",
+   "text": "Anything that is red and round is a ball. The toy is red. The toy is round.",
+   "expect": "fires",
+   "goal_words": "toy ball",
+   "asks": [
+    {
+     "subject": "member:toy",
+     "class": "ball"
+    }
+   ]
+  },
+  {
+   "case": "C5_negated_conclusion",
+   "doc": "ep-note-20991117T000005Z",
+   "text": "Anything frozen is not liquid. The pond is frozen.",
+   "expect": "fires (negated)",
+   "goal_words": "pond not liquid",
+   "asks": [
+    {
+     "subject": "member:pond",
+     "class": "liquid",
+     "expect": "strength near 0 (negated)"
+    }
+   ]
+  },
+  {
+   "case": "C6_near_miss_other_class",
+   "doc": "ep-note-20991117T000006Z",
+   "text": "Anything acoustic is quiet. The trumpet is metallic.",
+   "expect": "must NOT fire",
+   "goal_words": "trumpet quiet",
+   "asks": [
+    {
+     "subject": "member:trumpet",
+     "class": "quiet",
+     "expect": "not proved"
+    }
+   ]
+  }
+ ],
+ "_comment_asks": "asks: the conclusion each case is about, asked of PeTTaChainer whether or not a goal was built. subject selects a symbol the PARSER produced in that note (member:C = the E of a (Member E C) fact; name:N = the name symbol N; prefix:P = the note's symbol starting with P); class is the parser's class symbol. Goal = (Member <subject> <class>). Nothing else is hand-written.",
+ "not_parsed": [
+  {
+   "case": "C7_near_miss_converse",
+   "doc": "ep-note-20991117T000007Z",
+   "text": "Anything acoustic is quiet. The banjo is quiet.",
+   "expect": "must NOT fire (banjo acoustic)",
+   "goal_words": "banjo acoustic",
+   "asks": [
+    {
+     "subject": "member:banjo",
+     "class": "acoustic",
+     "expect": "not proved"
+    }
+   ]
+  },
+  {
+   "case": "C8_instance_in_other_note",
+   "doc": "ep-note-20991117T000008Z",
+   "text": "The viol is acoustic.",
+   "expect": "note-impl goal dropped by one-note scope; asked by hand against C1's implication",
+   "goal_words": "viol quiet",
+   "asks": [
+    {
+     "subject": "member:viol",
+     "class": "quiet",
+     "expect": "cross-note: no note-impl goal; asked anyway"
+    }
+   ]
+  }
+ ],
+ "_comment_not_parsed": "C7 and C8 were planned but not parsed: the task parse share (10/h, shared with t-2026-11-17-wmtm-manhin-parser-analysis) was full until about 12:41 and the driver was stopped at 11:50 after 12 calls. C7 s1 has a reused reply (identical to C1 s1); C7 s2 and C8 s1 have none. They are not part of the result."
+}
