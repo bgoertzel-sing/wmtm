@@ -29,6 +29,16 @@ def seeded_rules(tdir):
         return [ln.strip() for ln in fh if ln.strip().startswith("(:")]
 
 
+EXTRA_RULES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules", "extra_rules.pettachainer-master.metta")
+
+
+def extra_rules(path=None):
+    """t-2026-11-17-wmtm-extra-rules-v2: the "(: ..." lines of wmtm/rules/extra_rules.pettachainer-master.metta,
+    loaded after the seeded master rules when shadow_extra_rules is on (default off)."""
+    with open(path or EXTRA_RULES, encoding="utf-8") as fh:
+        return [ln.strip() for ln in fh if ln.strip().startswith("(:")]
+
+
 def _syms(term):
     if isinstance(term, list):
         for x in term:
@@ -84,7 +94,7 @@ def _label_fact(stmt):
     return m.group(1), to_str(n[2])
 
 
-def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True):
+def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -105,6 +115,10 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True):
     if rules:
         for r in seeded_rules(tdir):
             meta["rules"] += atom(r)
+    if extra:   # t-2026-11-17-wmtm-extra-rules-v2: after the seeded rules, before notes; meta key only when on
+        meta["extra_rules"] = 0
+        for r in extra_rules():
+            meta["extra_rules"] += atom(r)
     for nid, prior in notes:
         recs = B.block_records(prior, catalog)
         allrec = [x for rec in recs for x in rec.get("records") or []]
@@ -205,10 +219,24 @@ def _ground(t):
     return not (isinstance(t, str) and t.startswith("$"))
 
 
-def rule_goals(ops, rule_atoms, max_envs=200):
+_NOTE_SFX = re.compile(r"__ep_note_\d{8}T\d{6}Z")
+
+
+def _one_note(env):
+    """True when the bound symbols carry at most one distinct note suffix (named individuals carry none)."""
+    seen = set()
+    for v in env.values():
+        for t in _syms(v):
+            seen.update(_NOTE_SFX.findall(t))
+    return len(seen) <= 1
+
+
+def rule_goals(ops, rule_atoms, max_envs=200, scoped=()):
     """t-2026-11-15-wmtm-master-shadow-wiring: the goal builder of the master-adopt-v2 mkspec.py, moved here.
     Goals = ground conclusions of the seeded master rules whose premises match loaded statements (forward
-    instantiation, one step), deduped, minus conclusions already stated.  -> ({goal: rule id}, {rule id: count})."""
+    instantiation, one step), deduped, minus conclusions already stated.  -> ({goal: rule id}, {rule id: count}).
+    t-2026-11-17-wmtm-extra-rules-v2: scoped = rule ids (the extra rules) whose goals are kept only when their
+    bindings come from one note; seeded rules are never affected."""
     from .semparse_adapter import to_str
     rule_set = set(rule_atoms)
     rules, facts = {}, []
@@ -245,6 +273,8 @@ def rule_goals(ops, rule_atoms, max_envs=200):
         pairs = [(r[1], r[2])] + ([(r[2], r[1])] if r[0] == "BiImplication" else [])
         for prem, concl in pairs:
             for e in matches(prem, {}):
+                if rid in scoped and not _one_note(e):
+                    continue
                 c = _subst(concl, e)
                 if not _ground(c):
                     continue

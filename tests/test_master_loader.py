@@ -179,3 +179,51 @@ def test_build_snapshot_flag_off_has_no_master_ops(tmp_path, monkeypatch):
         if lo is not None: cfg["shadow_load_order"] = lo
         sp = PS.build_snapshot(st, k=1, cfg=cfg)
         assert "master_ops" not in sp and sp.get("load_order") != "master_ops"
+
+
+
+# Keys of master_meta written by the base (wmtm 24b0442) master_ops build; flag off must write exactly these.
+BASE_META_KEYS = {"kb_predicates", "rules", "shared_definitions", "ops"}
+
+
+def test_extra_rules_after_seeded_rules_flag_off_by_default():
+    """t-2026-11-17-wmtm-extra-rules-v2: plan(extra=True) loads the extra rules right after the seeded rules;
+    plan() without the flag writes no extra_rules key in meta."""
+    off, moff = _plan([])
+    base, mbase = _plan([], extra=False)
+    on, mon = _plan([], extra=True)
+    xr = ML.extra_rules()
+    assert "extra_rules" not in moff and off == base and moff == mbase
+    assert not any(a in xr for k, a in off if k == "atom")
+    assert mon["extra_rules"] == len(xr) == 4
+    assert on[:len(off)] == off and [a for k, a in on[len(off):]] == xr
+    from wmtm import runtime_config as rc
+    assert rc.resolve()["shadow_extra_rules"] is False
+
+
+def test_build_snapshot_extra_rules_flag_off_byte_identical(tmp_path):
+    """t-2026-11-17-wmtm-extra-rules-v2: with shadow_extra_rules off (False, or the key absent as at 24b0442),
+    the master_ops spec is byte-identical, master_meta included, and master_meta has only the base keys.
+    Flag on: the extra rules are appended after the seeded rules and master_meta gains extra_rules; nothing else
+    in the recipe moves."""
+    import json
+    rows = _rows_two_notes()
+    def dump(sp):
+        sp = dict(sp); sp.pop("ts", None)
+        return json.dumps(sp, sort_keys=True).encode()
+    off = _snap(tmp_path, ["na", "nb"], rows, shadow_extra_rules=False)
+    from wmtm import runtime_config as rc
+    cfg_absent = {k: v for k, v in rc.resolve().items() if k != "shadow_extra_rules"}
+    from wmtm import pc_shadow as PS
+    p = tmp_path / "parsed.jsonl"
+    cfg_absent.update(shadow_load_order="master_ops", shadow_sph_templates=T, shadow_master_parsed=str(p), shadow_max_goals=0)
+    absent = PS.build_snapshot(_St(["na", "nb"]), k=2, cfg=cfg_absent)
+    assert dump(off) == dump(absent)
+    assert set(off["master_meta"]) == BASE_META_KEYS
+    assert not any(x in ML.extra_rules() for _, x in off["master_ops"])
+    assert not any(str(g).startswith("xr_") for g in off["rule_candidates"])
+    on = _snap(tmp_path, ["na", "nb"], rows, shadow_extra_rules=True)
+    assert set(on["master_meta"]) == BASE_META_KEYS | {"extra_rules"} and on["master_meta"]["extra_rules"] == 4
+    n = off["master_meta"]["kb_predicates"] + off["master_meta"]["rules"]
+    assert on["master_ops"][:n] == off["master_ops"][:n] and on["master_ops"][n + 4:] == off["master_ops"][n:]
+    assert {g: r for g, r in on["goal_rule"].items() if not r.startswith("xr_")} == off["goal_rule"]
