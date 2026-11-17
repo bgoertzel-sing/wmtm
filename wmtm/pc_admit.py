@@ -59,6 +59,12 @@ _MASTER_TEXT = {"Coref": "{} refers to the same thing as {}",        # (-> Insta
                 "Because": "{} happens because of {}"}                # (-> Event Event|Instance)
 _TEXT.update(_MASTER_TEXT)
 _GOAL = re.compile(r"^\((%s) ([^\s()]+) ([^\s()]+)\)$" % "|".join(_TEXT))
+# t-2026-11-17-wmtm-render-not-current: the negated 1-ary conclusions of the extra rules (shadow_extra_rules,
+# rules/extra_rules.pettachainer-master.metta).  Only (Not (Current x)) and (Not (Valid x)) with a flat symbol x,
+# rendered as is like the shapes above; the negation is kept in the wording.  Every other Not shape stays None.
+# Separate from _GOAL, so sources_for's goal fallback is unchanged.
+_NOT_TEXT = {"Current": "{} is no longer current", "Valid": "{} no longer holds"}
+_NOT_GOAL = re.compile(r"^\(Not \((%s) ([^\s()]+)\)\)$" % "|".join(_NOT_TEXT))
 
 
 def mode(cfg=None, default="pettachainer") -> str:
@@ -84,7 +90,10 @@ def negation_mode(cfg) -> str:
 
 def render(goal):
     m = _GOAL.match(goal or "")
-    return _TEXT[m.group(1)].format(m.group(2), m.group(3)) if m else None
+    if m:
+        return _TEXT[m.group(1)].format(m.group(2), m.group(3))
+    m = _NOT_GOAL.match(goal or "")
+    return _NOT_TEXT[m.group(1)].format(m.group(2)) if m else None
 
 
 def admissible(q) -> bool:
