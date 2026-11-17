@@ -38,7 +38,7 @@ Arms: base = no note-impl flags. off = shadow_note_impl_goals on (the one-step b
 The ip, sg and ipsg lines equal the off line exactly. Neither new flag changes any count.
 
 ## Step 3: stopgaps on the 20 real notes, alone (sg) and with step 1 (ipsg)
-187 thing atoms and 34 narrow implications are added. 0 proofs use a stopgap atom in either arm, at 30 or at 300 steps, and no goal is added or changed (tables above). On real notes only 1 note-stated Inheritance has a narrowed class nearby, and 18 Member facts are already stated directly as narrowed classes, so the "anything ..." shape the stopgaps target is nearly absent. **Verdict: they don't help on real notes.**
+187 thing atoms and 34 narrow implications are added. 0 proofs use a stopgap atom in either arm, at 30 or at 300 steps, and no goal is added or changed (tables above). On real notes no note-stated Inheritance has a narrowed class as its subject (there is 1 note-stated Inheritance in all, about an ordinary class), and 18 Member facts already state a narrowed class directly, so the "anything ..." shape the stopgaps target is nearly absent. **Verdict: they don't help on real notes.**
 
 ## Invented cases (variable-test notes; arms as above, steps 30 unless stated)
 | case | goal built by premise flag | off | ip | sg | ipsg |
