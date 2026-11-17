@@ -1,4 +1,4 @@
-"""t-2026-11-17-wmtm-impl-premise-proving: note_impl_premise_goals and lowering_stopgaps on synthetic atoms only."""
+"""t-2026-11-17-wmtm-impl-premise-proving: note_impl_premise_goals on synthetic atoms only (v2: stopgaps removed, literal() same-note)."""
 from wmtm import master_loader as ML
 
 A = "__ep_note_20990101T000000Z"
@@ -59,21 +59,31 @@ def test_seeded_rules_ignored():
     assert goals == {} and st["note_impl"] == 0
 
 
-def test_stopgap_thing_and_narrow():
-    ops = [_a("s2_m" + A, f"(Member sk_lute_1{A} acoustic)"),
-           _a("kind__thing__member_acoustic", "(Inheritance thing__member_acoustic thing)"),
-           _a("by_1__thing__member_acoustic", "(NarrowBy thing__member_acoustic (Is acoustic))")]
-    out, cnt = ML.lowering_stopgaps(ops)
-    assert cnt == {"thing": 1, "narrow": 1}
-    assert "(: stopgap_thing__acoustic (Inheritance acoustic thing) (STV 1.0 0.99))" in out
-    assert ("(: stopgap_narrow__thing__member_acoustic (Implication (And (Member $x thing) (Member $x acoustic)) "
-            "(Member $x thing__member_acoustic)) (STV 1.0 0.99))") in out
-    out, cnt = ML.lowering_stopgaps(ops, which=("thing",))
-    assert cnt == {"thing": 1, "narrow": 0} and len(out) == 1
-    assert ML.lowering_stopgaps([], which=())[0] == []
+def test_literal_premise_in_other_note_does_not_block():
+    """v2: literal() reads only the implication's own note; a premise stated literally only in note B does not
+    block note A's goal, and B's entity is never a candidate."""
+    lab = "s1_r1_implication" + A
+    ops = [_a(lab, IMPL), _a("s2_m" + A, f"(Member sk_lute_1{A} acoustic)"),
+           _a("s3_t" + B, f"(Member sk_harp_1{B} thing)"), _a("s4_m" + B, f"(Member sk_harp_1{B} acoustic)")]
+    goals, st = ML.note_impl_premise_goals(ops, [], [lab])
+    assert goals == {f"(Member sk_lute_1{A} quiet)": "nimplp:" + lab}
+    assert st["premise_literal"] == 0 and st["premise_not_literal"] == 1 and st["candidates"] == 1
+
+
+def test_literal_premise_in_own_note_still_left_to_one_step_builder():
+    lab = "s1_r1_implication" + A
+    ops = [_a(lab, IMPL), _a("s2_t" + A, f"(Member sk_lute_1{A} thing)"), _a("s3_m" + A, f"(Member sk_lute_1{A} acoustic)"),
+           _a("s4_m" + B, f"(Member sk_harp_1{B} acoustic)")]
+    goals, st = ML.note_impl_premise_goals(ops, [], [lab])
+    assert goals == {} and st["premise_literal"] == 1
+
+
+def test_no_stopgap_code():
+    import wmtm.runtime_config as rc
+    assert not hasattr(ML, "lowering_stopgaps") and "shadow_lowering_stopgaps" not in rc.SPEC
 
 
 def test_flags_off_by_default():
     from wmtm import runtime_config as rc
     r = rc.resolve()
-    assert r["shadow_note_impl_premise"] is False and r["shadow_lowering_stopgaps"] == ""
+    assert r["shadow_note_impl_premise"] is False

@@ -1,5 +1,7 @@
 # t-2026-11-17-wmtm-impl-premise-proving: note-implication premise goals, lowering stopgaps, C4, C7/C8
 
+> **Superseded by t-2026-11-17-wmtm-impl-premise-proving-v2:** the two lowering stopgaps (`shadow_lowering_stopgaps`) described below were removed (code, tests, docs and tools); `shadow_note_impl_premise` is kept, off by default, and its literal() check now reads only the implication's own note. This report is kept as history.
+
 ## Summary
 andy asked for three things. The first was a flag that asks a note implication's conclusion for entities from the same note even when the premise is not stated literally, leaving PeTTaChainer to prove the premise. The second was two lowering stopgaps behind a separate flag: "everything is a thing", and narrowed-class membership. The third was a C4 rerun with a larger budget and finishing C7/C8. Both flags are built, off by default, and tested. With them off, the 20-note spec is byte-identical to 9a8f693. **On the 20 real notes neither flag adds a single proof.** The premise flag builds 36 same-note goals and 0 are proved, even at 10x the step budget. The stopgaps add 221 atoms and change nothing. The count rule holds in every arm (non-restatement and admitted 36/1/0 C/W/U, as with flags off). The reader pass stays at 8 of 75.
 

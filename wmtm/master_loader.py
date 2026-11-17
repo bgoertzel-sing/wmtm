@@ -392,7 +392,8 @@ _ENTITY_ROLES = ("Member", "Agent", "Patient", "Theme", "Bearer", "Name")
 
 def note_impl_premise_goals(ops, rule_atoms, note_labels, max_cands=8):
     """t-2026-11-17-wmtm-impl-premise-proving step 1 (flag shadow_note_impl_premise, default off).  For a note-stated
-    Implication/BiImplication whose premise does NOT match loaded statements literally, still ask the conclusion,
+    Implication/BiImplication whose premise does NOT match its OWN note's statements literally (v2: facts
+    from other notes never count, so a premise stated only in another note does not block the goal), still ask the conclusion,
     instantiated for candidate entities of the SAME note, and leave the premise to PeTTaChainer.
     Candidates: entity arguments (first arg of Member/Name, second of Agent/Patient/Theme/Bearer) of statements whose
     label carries the implication's own note suffix (never another note's; named individuals only when stated in this
@@ -415,18 +416,16 @@ def note_impl_premise_goals(ops, rule_atoms, note_labels, max_cands=8):
         facts.append(n[2])
         for sfx in set(_NOTE_SFX.findall(n[1])):
             own_facts.setdefault(sfx, []).append(n[2])
-    by_head = {}
-    for f in facts:
-        by_head.setdefault(f[0] if f and isinstance(f[0], str) else None, []).append(f)
     stated = {to_str(f) for f in facts}
     st = {"note_impl": len(nimpl), "premise_literal": 0, "premise_not_literal": 0, "no_note": 0, "multi_var_concl": 0,
           "no_var_concl": 0, "candidates": 0, "capped": 0, "concl_stated": 0, "goals": 0, "impl_with_goal": 0}
 
-    def literal(prem):
+    def literal(prem, own_by_head):
+        """True when the premise matches facts of the implication's OWN note literally (v2: never another note's)."""
         ps = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
         envs = [{}]
         for p in ps:
-            envs = [r for e in envs for f in by_head.get(p[0] if isinstance(p, list) and p else None, [])
+            envs = [r for e in envs for f in own_by_head.get(p[0] if isinstance(p, list) and p else None, [])
                     for r in [_unify(p, f, e)] if r is not None][:200]
             if not envs:
                 return False
@@ -449,10 +448,13 @@ def note_impl_premise_goals(ops, rule_atoms, note_labels, max_cands=8):
             st["no_note"] += 1
             continue
         fs = own_facts.get(next(iter(sfx)), [])
+        own_by_head = {}
+        for f in fs:
+            own_by_head.setdefault(f[0] if f and isinstance(f[0], str) else None, []).append(f)
         pairs = [(r[1], r[2])] + ([(r[2], r[1])] if r[0] == "BiImplication" else [])
         got = 0
         for prem, concl in pairs:
-            if literal(prem):
+            if literal(prem, own_by_head):
                 st["premise_literal"] += 1     # the one-step builder (note_impl_goals) covers it
                 continue
             st["premise_not_literal"] += 1
@@ -485,37 +487,6 @@ def note_impl_premise_goals(ops, rule_atoms, note_labels, max_cands=8):
         st["goals"] += got
         st["impl_with_goal"] += got > 0
     return goals, st
-
-
-def lowering_stopgaps(ops, which=("thing", "narrow")):
-    """t-2026-11-17-wmtm-impl-premise-proving step 3 (flag shadow_lowering_stopgaps, default empty = off), until the
-    lowering fix: (a) "thing": (Inheritance C thing) for every class C a note states a ground Member of, so
-    "anything ..." premises (Member $x thing) hold; (b) "narrow": for a narrowed class K (kind__ Inheritance K noun,
-    by_ NarrowBy K (Is a)), (Implication (And (Member $x noun) (Member $x a)..) (Member $x K)).
-    -> (atoms to append, {"thing": n, "narrow": n})."""
-    cls, kinds, isby = set(), {}, {}
-    for k, a in ops:
-        n = _node(a) if k == "atom" else None
-        if not (isinstance(n, list) and len(n) == 4 and isinstance(n[2], list)):
-            continue
-        f = n[2]
-        if _NOTE_SFX.search(n[1]) and f[0] == "Member" and len(f) == 3 and isinstance(f[2], str) and _ground(f):
-            cls.add(f[2])
-        if n[1].startswith("kind__") and f[0] == "Inheritance" and len(f) == 3:
-            kinds[f[1]] = f[2]
-        if n[1].startswith("by_") and f[0] == "NarrowBy" and len(f) == 3 and isinstance(f[2], list) and f[2][0] == "Is":
-            isby.setdefault(f[1], []).append(f[2][1])
-    out, cnt = [], {"thing": 0, "narrow": 0}
-    if "thing" in which:
-        for c in sorted(cls - {"thing"}):
-            out.append("(: stopgap_thing__%s (Inheritance %s thing) (STV 1.0 0.99))" % (c, c)); cnt["thing"] += 1
-    if "narrow" in which:
-        for sym, noun in sorted(kinds.items()):
-            if sym in isby and all(isinstance(x, str) for x in isby[sym]) and isinstance(noun, str):
-                prem = " ".join(["(Member $x %s)" % noun] + ["(Member $x %s)" % x for x in isby[sym]])
-                out.append("(: stopgap_narrow__%s (Implication (And %s) (Member $x %s)) (STV 1.0 0.99))"
-                           % (sym, prem, sym)); cnt["narrow"] += 1
-    return out, cnt
 
 
 def notes_from_parsed(tdir, parsed_path, note_ids):

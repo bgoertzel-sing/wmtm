@@ -506,12 +506,6 @@ def _master_ops_snapshot(cfg, items, cycle, k):
     if rts is not None:
         meta["reference_times"] = sum(1 for nid, _ in notes if nid in rts)
     xr = ML.extra_rules() if extra else []
-    sg = [w.strip() for w in str(cfg.get("shadow_lowering_stopgaps") or "").split(",") if w.strip()]
-    if sg:   # t-2026-11-17-wmtm-impl-premise-proving step 3 (default off): lowering stopgaps appended after the notes
-        sga, sgc = ML.lowering_stopgaps(ops, which=tuple(sg))
-        ops = list(ops) + [("atom", x) for x in sga]
-        meta["stopgaps"] = sgc
-        meta["ops"] = len(ops)
     goals, per_rule = ML.rule_goals(ops, ML.seeded_rules(tdir) + xr, scoped={ML._node(r)[1] for r in xr})
     nimpl_st = None
     if cfg.get("shadow_note_impl_goals"):   # t-2026-11-17-wmtm-steps-3-5 carry-over of note-implication-goals-v2 (default off)
