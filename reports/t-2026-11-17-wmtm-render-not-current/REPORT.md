@@ -3,7 +3,7 @@
 Base: hive/t-2026-11-17-wmtm-extra-rules-v2 at a70dc86 (passed, not merged; parent main 24b0442).
 
 ## Summary
-andy asked for wordings for Not (Current x) and Not (Valid x), so that the extra rules' conclusions can be admitted, and for a shadow check of the admitted C/W/U and the count rule, with no live change. `pc_admit.render` now gives "x is no longer current" for (Not (Current x)) and "x no longer holds" for (Not (Valid x)). The negation is kept in the wording, x is rendered as is (like the existing shapes), and every other Not shape still renders as nothing. Both shapes have tests, and the full suite passes.
+andy asked for wordings for Not (Current x) and Not (Valid x), so that the extra rules' conclusions can be admitted, and for a shadow check of the admitted C/W/U and the count rule, with no live change. `pc_admit.render` now gives "x is no longer current" for (Not (Current x)) and "x no longer holds" for (Not (Valid x)). The negation is kept in the wording, x is rendered as is (like the existing shapes), and every other Not shape still renders as nothing. Both shapes are covered by new tests; the full suite passes.
 
 Through the real admission path (`load_candidates`, trivial filter on, caps lifted as in the v2 report), the flag-on run now admits all 11 extra-rule conclusions: **10 correct, 0 wrong, 1 unclear (x10)**. Drops for `bad` fall from 11 to 0. Admitted with the flag on: **32C/1W/1U**, against 22C/1W/0U with the flag off. The count rule **holds** against live A (2C/2W) and against the flag-off run. With the flag off, nothing changes: the spec is byte-identical to 24b0442 and admission is identical to v2. One point for the operator: with the shipped caps (reasoner_max_admit 5), one run admits 5 conclusions (5C/0W), and these are seeded ones whether the flag is on or off. So under the live cap the extra conclusions would enter only over later runs, once the higher-ranked ones are known. Nothing live has changed, there were 0 parse calls, and nothing has been pushed.
 
@@ -57,11 +57,14 @@ All 11 are admitted with positive polarity (strength 1.0 is at least reasoner_mi
 ## Suite
 Without the templates env: 1594 passed, 60 skipped, 5 xfailed. With WMTM_PC_SHADOW_SPH_TEMPLATES (sph 24e37182): 1609 passed, 45 skipped, 5 xfailed. Against v2 (1570 / 1585 passed), that is +24 each, the new tests. Targeted (render_not_current, render_master_goals, extra_rules, master_loader): 54 passed, 13 skipped in 0.22s (suite_noenv.log, suite_env.log, targeted.log).
 
+## How REPORT.md was checked
+tools/text_check_rnc.py (private temp dir) compares REPORT.md and the added diff lines against the 20 notes' cached sentence texts. It finds 0 shared 3-word sequences, leaving out the ones with numbers or task-id or path tokens, and 0 sk_ symbols that occur in the parses (the tests' sk_ symbols are invented). The double-quoted spans are only the two wordings and their invented examples. See text_check.json.
+
 ## Evidence
 /srv/hive-evidence/t-2026-11-17-wmtm-render-not-current/ holds base.txt, head.txt, note_ids.txt, parsed.md5_before/after, off/, absent/ and on/ (spec.json, build.json, shadow.jsonl, admit.json, run.log; absent/ has no worker run), recompute_rnc.json, the suite logs, text_check.json, tools/ (run_rnc.sh, build_spec_v2.py, recompute_rnc.py, text_check_rnc.py) and SHA256SUMS. To recompute: `python3 tools/recompute_rnc.py <evidence dir> <repo at this commit>`. It prints ids and counts only and runs load_candidates in a private mode-700 temp dir. It reads the v2, PR 42, master-shadow-wiring and render-master-goals evidence for the base spec, the verdicts and live A.
 
 ## Limits
 - The verdicts are reused from PR 42 and were not re-judged. The goals and proofs are byte-identical to v2's (checked above).
 - "No longer" reads slightly more than a bare "not": it says the thing once was current or held. That matches what the two extra rules derive (from supersede and contradict). If Current or Valid ever came from another source, a plain "is not current" might be the better wording.
-- Under the shipped per-run cap of 5, the 11 rank below the seeded conclusions. The default-caps line above is a single run; it does not simulate several cycles with `known` dedup.
+- Under the shipped per-run cap of 5, the 11 rank below the seeded conclusions. The default-caps line above covers one run only; it does not simulate several cycles with `known` dedup.
 - x06 and x09 are admitted at confidence 0.0021, because there is no confidence cutoff (F1 item 3).
