@@ -131,6 +131,8 @@ def _term(x, env, d, rule):
         return [V.ONE_ARG[0] if ind else V.ONE_ARG[1], s, sym(h)]
     if len(a) == 0:
         raise Unmapped('zero-arg')
+    if h in _ROLES and len(a) == 2:   # only with roles= (exploratory post-hoc map); frozen default is empty
+        return [_ROLES[h], _arg(a[0], env, d, rule), _arg(a[1], env, d, rule)]
     return [V.DEFAULT, sym(h), ['List'] + [_arg(y, env, d, rule) for y in a]]
 
 
@@ -155,7 +157,12 @@ def _units(x):
     return [x]
 
 
-def translate(landings, doc):
+_ROLES = {}
+
+
+def translate(landings, doc, roles=None):
+    global _ROLES
+    _ROLES = dict(roles or {})
     d = _Doc(doc); atoms = []; unmapped = []; k = 0
     for li, s in enumerate(landings):
         try:

@@ -41,3 +41,10 @@ def test_unmapped_logged_not_loaded():
 def test_called_equal():
     at, _ = A.translate(['(called task-1 "T")', "(equal a-1 b-1)"], "t")
     assert heads(at) == ["Name", "Similarity"]
+
+
+def test_posthoc_roles_only_when_asked():
+    from wmtm.clerk.vocab_map_posthoc import ROLES
+    L = ["(exists ($1) (and (run $1) (agent $1 bob-2)))"]
+    assert "(Evaluation agent" in A.translate(L, "t")[0][1]
+    assert "(Agent sk_run_1 bob_2)" in A.translate(L, "t", roles=ROLES)[0][1]
