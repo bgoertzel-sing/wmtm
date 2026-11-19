@@ -17,10 +17,10 @@ COPULA = {
     "isa":       ("Member", "Inheritance"),   # derived.py ISA S64; linkform (isa fido dog)
     "is-a":      ("Member", "Inheritance"),   # linkform (is-a robert astronaut)
     "is":        ("Member", "Inheritance"),   # linkform (is robert astronaut)
-    "instance-of": ("Member", "Member"),      # order: instance-of -> Member (0 hits in Clerk e2e6aba)
+    "instance-of": ("Member", "Member"),      # order: instance-of -> Member (Clerk e2e6aba: linkform.py COPULA_HEADS; 2 hits in .py/.md)
     "member-of": ("Member", "Member"),        # linkform (member-of robert crew) -> Member
     "kind-of":   ("Inheritance", "Inheritance"),  # linkform (kind-of coffee-drinker caffeinated)
-    "subset-of": ("Inheritance", "Inheritance"),  # order (0 hits in Clerk e2e6aba)
+    "subset-of": ("Inheritance", "Inheritance"),  # order (Clerk e2e6aba: linkform.py COPULA/SUBCLASS_HEADS, tallies.py; 5 hits in .py/.md)
 }
 ONE_ARG = ("Member", "Inheritance")            # (K x): linkform (astronaut robert) -> x in class K
 IDENTITY = {"equal": "Similarity", "same-as": "Similarity", "identity": "Similarity"}  # linkform
