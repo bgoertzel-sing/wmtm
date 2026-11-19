@@ -1,15 +1,16 @@
-"""Fixed vocabulary map: Clerk (parser-clerk e2e6aba, manual v11.5 + tests/projection/test_linkform.py)
+"""Fixed vocabulary map: Clerk (parser-clerk e2e6aba, manual v10.3 + tests/projection/test_linkform.py)
 heads -> wmtm predicate names (t-2026-11-18-wmtm-clerk-ab, committed BEFORE any arm-B parse).
 
 Order rules (answer-2): instance-of -> Member; class-to-class kind-of/subset-of -> Inheritance;
-Implication keeps $x.  Individual vs class follows manual v11.5 s.3: "a symbol made of a name or a
+Implication keeps $x.  Individual vs class follows manual v10.3 s.3: "a symbol made of a name or a
 kind's word and a number is an individual's id (idris-1); any other symbol is a kind".
 Source rows (Clerk linkform typing table) noted per entry; where Clerk says Inheritance for an
 individual (isa fido dog), the order's instance-of -> Member rule wins.
 """
 import re
 
-INDIVIDUAL_ID = re.compile(r"^[a-z][a-z0-9-]*-[0-9]+$")   # manual v11.5 s.3 (idris-1, petra-2)
+SKOLEM_ID = re.compile(r"^sk-[A-Za-z0-9_-]*[0-9]$")   # Clerk skolems: sk-2, sk-e_2, sk-testonly-7
+INDIVIDUAL_ID = re.compile(r"^[a-z][a-z0-9-]*-[0-9]+$")   # manual v10.3 s.3 (idris-1, petra-2)
 
 # Clerk head -> (wmtm head when subject is an individual, wmtm head when subject is a class)
 COPULA = {
@@ -38,6 +39,10 @@ def is_individual(sym) -> bool:
     return isinstance(sym, str) and bool(INDIVIDUAL_ID.match(sym))
 
 
+def is_skolem(sym) -> bool:
+    return isinstance(sym, str) and bool(SKOLEM_ID.match(sym))
+
+
 def copula_head(head: str, subject) -> str:
     ind, cls = COPULA[head]
-    return ind if (is_individual(subject) or str(subject).startswith("sk")) else cls
+    return ind if (is_individual(subject) or is_skolem(subject)) else cls
