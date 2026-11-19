@@ -1,0 +1,844 @@
+{
+ "examples": [
+  {
+   "doc": "g01_month_class",
+   "rule": "month_class",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "Month top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "Month top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "Month top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g02_rank_orders",
+   "rule": "rank_orders",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 3
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 2
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 3
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g03_becauseof_cause",
+   "rule": "becauseof_cause",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "BecauseOf top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "BecauseOf top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "BecauseOf top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g04_measure_same",
+   "rule": "measure_same",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "Measure top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "Measure top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "Measure top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g05_measure_moreby",
+   "rule": "measure_moreby",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 2
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 2
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 2
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g06_unit_measure",
+   "rule": "unit_measure",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "Measure top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "Measure top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "Measure top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g07_unit_atmost",
+   "rule": "unit_atmost",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g08_subset_is_part",
+   "rule": "subset_is_part",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "none",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g09_located_trans",
+   "rule": "located_trans",
+   "sentences": 2,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "LocatedIn top x2",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 1
+     }
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "LocatedIn top x2",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 1
+     }
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "LocatedIn top x2",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 1
+     }
+    }
+   ]
+  },
+  {
+   "doc": "g10_located_in_part",
+   "rule": "located_in_part",
+   "sentences": 1,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "LocatedIn top x1, PartOf top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "LocatedIn in Implication x1, LocatedIn top x1, PartOf in Implication x1, PartOf top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "LocatedIn top x1, PartOf top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok"
+     ],
+     "block": [
+      "ok"
+     ],
+     "findings": {}
+    }
+   ]
+  },
+  {
+   "doc": "g11_days_before_day",
+   "rule": "days_before_day",
+   "sentences": 2,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "BeforeBy top x1",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok",
+      "ok"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "BeforeBy top x1",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok",
+      "ok"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {}
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "BeforeBy top x1, Day top x1",
+     "rule_matches": 0,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 1
+     }
+    }
+   ]
+  },
+  {
+   "doc": "g12_coref_theme",
+   "rule": "coref_theme",
+   "sentences": 2,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "Coref top x2, Theme top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 3
+     }
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "Coref top x2, Theme top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 3
+     }
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "Coref top x2, Theme top x1",
+     "rule_matches": 1,
+     "dup_labels": 0,
+     "unmapped": {},
+     "issues": {},
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 3
+     }
+    }
+   ]
+  },
+  {
+   "doc": "bug_label_repeat",
+   "rule": null,
+   "sentences": 2,
+   "runs": [
+    {
+     "run": "r1",
+     "complete": true,
+     "premise": "Directive top x2",
+     "rule_matches": null,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {},
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 3
+     }
+    },
+    {
+     "run": "r2",
+     "complete": true,
+     "premise": "Directive top x2",
+     "rule_matches": null,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {
+      "P00": 1
+     },
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 3
+     }
+    },
+    {
+     "run": "r3",
+     "complete": true,
+     "premise": "Directive top x2",
+     "rule_matches": null,
+     "dup_labels": 0,
+     "unmapped": {
+      "G00": 1
+     },
+     "issues": {
+      "P00": 2
+     },
+     "inspect": [
+      "ok",
+      "malformed"
+     ],
+     "block": [
+      "ok",
+      "ok"
+     ],
+     "findings": {
+      "inspect:instance": 3
+     }
+    }
+   ]
+  }
+ ],
+ "calls": 51,
+ "calls_ok": 51,
+ "calls_by_run": {
+  "r1": 17,
+  "r2": 17,
+  "r3": 17
+ }
+}
