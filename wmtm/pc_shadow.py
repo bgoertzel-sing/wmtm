@@ -516,6 +516,17 @@ def _master_ops_snapshot(cfg, items, cycle, k):
                 per_rule[rid] = per_rule.get(rid, 0) + 1
             else:
                 nimpl_st["dup_goal"] += 1
+    nimplp_st = None
+    if cfg.get("shadow_note_impl_premise"):   # t-2026-11-17-wmtm-impl-premise-proving step 1 (default off)
+        pg, nimplp_st = ML.note_impl_premise_goals(ops, ML.seeded_rules(tdir) + xr, meta["atom_src"],
+                                                   max_cands=int(cfg.get("shadow_note_impl_cands") or 8))
+        nimplp_st["dup_goal"] = 0
+        for g, rid in pg.items():
+            if g not in goals:
+                goals[g] = rid
+                per_rule[rid] = per_rule.get(rid, 0) + 1
+            else:
+                nimplp_st["dup_goal"] += 1
     gl = list(goals)[:int(cfg["shadow_max_goals"])] if int(cfg.get("shadow_max_goals") or 0) > 0 else list(goals)
     out = {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": gl,
             "goal_rule": {g: goals[g] for g in gl}, "rule_candidates": per_rule,
@@ -526,6 +537,8 @@ def _master_ops_snapshot(cfg, items, cycle, k):
             "derived_items": len(items) - len(ids), "goal_total": len(goals), "source": "master_ops"}
     if nimpl_st is not None:
         out["note_impl"] = nimpl_st
+    if nimplp_st is not None:
+        out["note_impl_premise"] = nimplp_st
     return out
 
 
