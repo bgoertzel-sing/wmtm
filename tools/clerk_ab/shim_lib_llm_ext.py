@@ -84,7 +84,23 @@ def _chat(client, model, content, system=None, max_tokens=4096, max_retries=1, r
     if not isinstance(cost, (int, float)):
         cost = (getattr(u, 'prompt_tokens', 0) or 0) * _PRICE_IN + (getattr(u, 'completion_tokens', 0) or 0) * _PRICE_OUT
     _meter_add(float(cost))
+    _tokens_add(u, float(cost), model)
     return (r.choices[0].message.content or '') if r.choices else ''
+
+
+def _tokens_add(u, cost, model):
+    """Per-call token row (review 2 finding 6): ARTIFACTS/tokens.jsonl, counts only, no prompt/reply text."""
+    try:
+        det = getattr(u, 'prompt_tokens_details', None)
+        cached = getattr(det, 'cached_tokens', None) if det is not None else None
+        row = {'t': time.time(), 'model': model, 'prompt': getattr(u, 'prompt_tokens', None),
+               'completion': getattr(u, 'completion_tokens', None), 'cached': cached, 'cost': cost,
+               'note': os.environ.get('CLERK_AB_NOTE_ID')}
+        ARTIFACTS.mkdir(parents=True, exist_ok=True)
+        with open(ARTIFACTS / 'tokens.jsonl', 'a') as f:
+            f.write(json.dumps(row) + '\n')
+    except Exception as e:
+        print('token write failed', type(e).__name__)
 
 
 def _client(name='openrouter'):
