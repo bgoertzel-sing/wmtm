@@ -29,7 +29,10 @@ def _provider_parts(content):
 
 
 def _primary_call_limits():
-    return int(os.environ.get('HYPERNOIA_MAX_TOKENS', '4096')), float(os.environ.get('HYPERNOIA_TIMEOUT', '120'))
+    # review-1 answer-5 fix: read the Clerk's env names (HYPERNOIA_MAX_OUTPUT_TOKENS, pinned 16000;
+    # HYPERNOIA_PRIMARY_TIMEOUT_S, Clerk default provider timeout 240 s). Old names kept as fallback.
+    return (int(os.environ.get('HYPERNOIA_MAX_OUTPUT_TOKENS') or os.environ.get('HYPERNOIA_MAX_TOKENS') or '16000'),
+            float(os.environ.get('HYPERNOIA_PRIMARY_TIMEOUT_S') or os.environ.get('HYPERNOIA_TIMEOUT') or '240'))
 
 
 class _Deadline(Exception):
