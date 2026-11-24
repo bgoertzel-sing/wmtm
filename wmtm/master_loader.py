@@ -304,6 +304,164 @@ def rule_goals(ops, rule_atoms, max_envs=200, scoped=()):
     return goals, per_rule
 
 
+CHAIN_INH_MEMBER = "chain_inh_member"     # (Member x A) + (Inheritance A B) -> (Member x B)
+CHAIN_INH_TRANS = "chain_inh_trans"       # (Inheritance A B) + (Inheritance B C) -> (Inheritance A C)
+
+
+_NOTE_TS = re.compile(r"\d{8}T\d{6}Z")
+
+
+def _notes_of(t):
+    return frozenset(_NOTE_TS.search(n).group(0) for s_ in _syms(t) for n in _NOTE_SFX.findall(s_))
+
+
+def _meet(h, th):
+    """Note scope of a combination: None = free (shared premise); else the notes every premise so far belongs to."""
+    if h is None:
+        return th
+    if th is None:
+        return h
+    return h & th
+
+
+def chain_goals(ops, rule_atoms, k=2, scoped=(), max_per_note=30, budget_s=10.0, max_envs=200, note_src=None, trace=None, no_coref=False):
+    """t-2026-11-24-wmtm-r02-chaining (flag shadow_chain_k, default 0 = off): multi-step forward goal generation.
+    Step 1 is rule_goals (unchanged).  Steps 2..k treat every ground conclusion of the step before as a usable
+    premise and apply the same rules again, plus two class-link rules: (Member x A),(Inheritance A B) -> (Member x B)
+    and (Inheritance A B),(Inheritance B C) -> (Inheritance A C).  A new goal must use at least one conclusion of the
+    step just before (semi-naive), so a cycle stops once nothing new appears.
+    Note scope ("home" of a fact): the note suffix in its symbols if any; else the notes that state it (note_src =
+    plan()'s label -> note id, so a fact without a suffix but stated in one note still belongs to that note); a fact
+    stated in no note and carrying no suffix (definitions, kind__ class links, rules' background facts) is free.  A fact
+    stated in several notes may join any of them (that is the shared premise).  A combination's home is the
+    intersection over all premises used; empty = refused and counted (cross_note_refused).  A derived fact keeps that
+    home.  So a chain never links two notes unless a premise is shared.
+    Caps: at most max_per_note new chained goals per note (free goals count under note ""), wall budget_s for
+    steps 2..k together; whatever hits a cap is counted, never silently dropped.
+    -> ({goal: "chain<d>:" + rule id}, stats) (no atom text)."""
+    import time as _t
+    from .semparse_adapter import to_str
+    t0 = _t.monotonic()
+    rule_set = set(rule_atoms)
+    src = {}
+    for lab, nid in (note_src or {}).items():
+        m = _NOTE_TS.search(str(nid))
+        if m:
+            src[lab] = m.group(0)
+    rules, facts = {}, []
+    for kk, a in ops:
+        if kk != "atom":
+            continue
+        n = _node(a)
+        if not (isinstance(n, list) and len(n) == 4):
+            continue
+        if a in rule_set and isinstance(n[2], list) and n[2][0] in ("Implication", "BiImplication"):
+            rules[n[1]] = n[2]
+        elif isinstance(n[2], list):
+            facts.append((n[2], n[1]))
+    rules[CHAIN_INH_MEMBER] = ["Implication", ["And", ["Member", "$cx", "$cA"], ["Inheritance", "$cA", "$cB"]],
+                               ["Member", "$cx", "$cB"]]
+    rules[CHAIN_INH_TRANS] = ["Implication", ["And", ["Inheritance", "$cA", "$cB"], ["Inheritance", "$cB", "$cC"]],
+                              ["Inheritance", "$cA", "$cC"]]
+    pairs = []
+    for rid, r in rules.items():
+        pairs.append((rid, r[1], r[2]))
+        if r[0] == "BiImplication":
+            pairs.append((rid, r[2], r[1]))
+    known = {}                  # str -> (term, home or None, depth)
+    for f, lab in facts:
+        sf = _notes_of(f)
+        h = sf if sf else (frozenset([src[lab]]) if lab in src else None)
+        g = to_str(f)
+        if g in known:
+            oh = known[g][1]
+            h = None if (oh is None or h is None) else (oh | h)   # stated in several notes: shared by them
+        known[g] = (f, h, 0)
+    st = {"k": k, "max_per_note": max_per_note, "budget_s": budget_s, "rules": len(rules), "steps": 0,
+          "per_step": {}, "cross_note_refused": 0, "capped": 0, "budget_hit": False, "envs_cut": 0,
+          "inh_member": 0, "inh_trans": 0, "goals": 0, "per_note_max": 0, "no_coref": bool(no_coref), "coref_gated": 0,
+          "facts_free": sum(1 for v in known.values() if v[1] is None),
+          "facts_src_only": sum(1 for f, lab in facts if not _notes_of(f) and lab in src)}
+    FREE = object()
+
+    def step(depth):
+        by_head = {}
+        for g, (t, h, d) in known.items():
+            by_head.setdefault(t[0] if t and isinstance(t[0], str) else None, []).append((t, h, d))
+        out = {}
+        for rid, prem, concl in pairs:
+            ps = prem[1:] if isinstance(prem, list) and prem and prem[0] == "And" else [prem]
+            if no_coref and depth >= 2 and any(isinstance(p, list) and p and p[0] == "Coref" for p in ps):
+                st["coref_gated"] += 1     # gate: a chained step never reads a coreference link
+                continue
+            envs = [({}, FREE, -1, ())]      # env, home so far (FREE = no scoped premise yet), max depth used, premises
+            for p in ps:
+                nxt = []
+                for e, h, md, pr in envs:
+                    for t, th, d in by_head.get(p[0] if isinstance(p, list) else None, []):
+                        r = _unify(p, t, e)
+                        if r is not None:
+                            nxt.append((r, _meet(None if h is FREE else h, th) if not (h is FREE and th is None) else FREE,
+                                        max(md, d), pr + (t,) if trace is not None else pr))
+                if len(nxt) > max_envs:
+                    st["envs_cut"] += len(nxt) - max_envs
+                envs = nxt[:max_envs]
+            for e, h, md, pr in envs:
+                if md != depth - 1:                  # semi-naive: must use a conclusion of the step before
+                    continue
+                h = None if h is FREE else h
+                if h is not None and not h:
+                    st["cross_note_refused"] += 1
+                    continue
+                if rid in scoped and not _one_note(e):
+                    continue
+                c = _subst(concl, e)
+                if not _ground(c):
+                    continue
+                g = to_str(c)
+                if g in known or g in out:
+                    continue
+                out[g] = (c, h, depth, rid)
+                if trace is not None:
+                    trace[g] = (rid, [to_str(x) for x in pr])
+        return out
+
+    def keep(g, h, d, rid, goals, per_note):
+        note = min(h) if h else ""
+        if per_note.get(note, 0) >= max_per_note:
+            st["capped"] += 1
+            return
+        per_note[note] = per_note.get(note, 0) + 1
+        goals[g] = "chain%d:%s" % (d, rid)
+        st["inh_member"] += rid == CHAIN_INH_MEMBER
+        st["inh_trans"] += rid == CHAIN_INH_TRANS
+
+    first = step(1)
+    for g, (c, h, d, rid) in first.items():
+        known[g] = (c, h, 1)
+    goals, per_note = {}, {}
+    for depth in range(2, int(k) + 1):
+        if _t.monotonic() - t0 > budget_s:
+            st["budget_hit"] = True
+            break
+        new = step(depth)
+        st["steps"] = depth
+        st["per_step"][str(depth)] = len(new)
+        if not new:
+            break
+        for g, (c, h, d, rid) in new.items():
+            known[g] = (c, h, d)
+            keep(g, h, d, rid, goals, per_note)
+    # class-link conclusions of step 1 are new to the one-step builder too: keep them (depth 1)
+    for g, (c, h, d, rid) in first.items():
+        if rid in (CHAIN_INH_MEMBER, CHAIN_INH_TRANS) and g not in goals:
+            keep(g, h, 1, rid, goals, per_note)
+    st["goals"] = len(goals)
+    st["per_note_max"] = max(per_note.values()) if per_note else 0
+    st["elapsed_s"] = round(_t.monotonic() - t0, 3)
+    return goals, st
+
+
 def note_impl_goals(ops, rule_atoms, note_labels, max_envs=200):
     """t-2026-11-17-wmtm-steps-3-5, carried over from t-2026-11-17-wmtm-note-implication-goals-v2 (flag shadow_note_impl_goals, default off): goals from Implication
     atoms a note states (label in note_labels, i.e. atom_src; never a seeded/extra rule).  For each such atom, the

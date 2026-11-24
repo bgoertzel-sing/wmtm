@@ -1,0 +1,31 @@
+build A0 s1 rc=0
+build A0 s1cl rc=0
+build A1 s1 rc=0
+build A1 s1cl rc=0
+build r1 s1 rc=0
+build r1 s1cl rc=0
+build r2 s1 rc=0
+build r2 s1cl rc=0
+build r3 s1 rc=0
+build r3 s1cl rc=0
+build A0 s1cl rc=0
+build A1 s1cl rc=0
+build r1 s1cl rc=0
+build r2 s1cl rc=0
+build r3 s1cl rc=0
+A0 s1 == S1-worktree s1
+A0 s1cl == S1-worktree s1cl
+A0 s1cl == archived S1 all
+A1 s1 == S1-worktree s1
+A1 s1cl == S1-worktree s1cl
+A1 s1cl == archived S1 all
+r1 s1 == S1-worktree s1
+r1 s1cl == S1-worktree s1cl
+r1 s1cl == archived S1 all
+r2 s1 == S1-worktree s1
+r2 s1cl == S1-worktree s1cl
+r2 s1cl == archived S1 all
+r3 s1 == S1-worktree s1
+r3 s1cl == S1-worktree s1cl
+r3 s1cl == archived S1 all
+BASECHECK_DONE

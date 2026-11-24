@@ -168,6 +168,10 @@ SPEC = {
     "shadow_min_hops":     ("WMTM_PC_SHADOW_MIN_HOPS", int, 1, None),            # Track N: only ask goals needing >= N steps
     "shadow_goal_weights": ("WMTM_PC_SHADOW_GOAL_WEIGHTS", str, "2,1,1,0.5", None),  # Track N: w_req,w_depth,w_info,w_sti
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),
+    "shadow_chain_k":      ("WMTM_PC_SHADOW_CHAIN_K", int, 0, None),             # t-2026-11-24-wmtm-r02-chaining: master_ops goal generation chains up to k steps (rule conclusions as premises, Member/Inheritance class links); 0/1 = off
+    "shadow_chain_max_per_note": ("WMTM_PC_SHADOW_CHAIN_MAX_PER_NOTE", int, 30, None),  # t-2026-11-24-wmtm-r02-chaining: cap on new chained goals per note
+    "shadow_chain_no_coref": ("WMTM_PC_SHADOW_CHAIN_NO_COREF", bool, False, None),  # t-2026-11-24-wmtm-r02-chaining: chained steps (>=2) never apply rules that read Coref
+    "shadow_chain_budget_s": ("WMTM_PC_SHADOW_CHAIN_BUDGET", float, 10.0, None),  # t-2026-11-24-wmtm-r02-chaining: wall budget for chaining steps 2..k
     "shadow_budget_s":     ("WMTM_PC_SHADOW_BUDGET", float, 20.0, None),
     "shadow_steps":        ("WMTM_PC_SHADOW_STEPS", int, 30, None),
     # F1 §11: warm-up limit of the inner PeTTaChainer child.  Measured on pop-os (8 cores) at worker priority
