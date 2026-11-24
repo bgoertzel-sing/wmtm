@@ -1,0 +1,44 @@
+{
+ "d1": {
+  "docs": 20,
+  "narrow": {
+   "n": 22,
+   "correct": 21,
+   "wrong": 1,
+   "uncertain": 0,
+   "UNJUDGED": 0
+  },
+  "wide_strict": {
+   "correct": 4,
+   "wrong": 0,
+   "uncertain": 0,
+   "UNJUDGED": 0
+  },
+  "reader": 7,
+  "reader_of": 41,
+  "inheritance": 110,
+  "instance": 28,
+  "class_class": 82
+ },
+ "d2": {
+  "docs": 20,
+  "narrow": {
+   "n": 20,
+   "correct": 19,
+   "wrong": 1,
+   "uncertain": 0,
+   "UNJUDGED": 0
+  },
+  "wide_strict": {
+   "correct": 4,
+   "wrong": 0,
+   "uncertain": 0,
+   "UNJUDGED": 0
+  },
+  "reader": 7,
+  "reader_of": 41,
+  "inheritance": 107,
+  "instance": 25,
+  "class_class": 82
+ }
+}

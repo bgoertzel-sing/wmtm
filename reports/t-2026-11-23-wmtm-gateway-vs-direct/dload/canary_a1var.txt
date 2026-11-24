@@ -1,0 +1,4 @@
+r1 docs 20 narrow {'correct': 24, 'wrong': 1, 'uncertain': 0, 'UNJUDGED': 0} wide {'correct': 5, 'wrong': 0, 'uncertain': 0, 'UNJUDGED': 0} reader 8 / 41 inh 110 inst 33 cc 77
+r2 docs 20 narrow {'correct': 25, 'wrong': 6, 'uncertain': 1, 'UNJUDGED': 0} wide {'correct': 7, 'wrong': 0, 'uncertain': 0, 'UNJUDGED': 0} reader 8 / 41 inh 121 inst 44 cc 77
+r3 docs 20 narrow {'correct': 25, 'wrong': 2, 'uncertain': 0, 'UNJUDGED': 0} wide {'correct': 5, 'wrong': 0, 'uncertain': 0, 'UNJUDGED': 0} reader 7 / 41 inh 114 inst 33 cc 81
+unjudged distinct 0
