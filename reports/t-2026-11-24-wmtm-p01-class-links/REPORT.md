@@ -43,6 +43,9 @@ The narrow, wide and reader figures are the archived Clerk A/B scores (FINDING2,
 3. Per-run table with ranges is above. Count rule holds (no new W). The gain (0) does not exceed the run-to-run range.
 4. tests/test_class_links.py: 12 tests, covering each rule firing and must-not-fire cases (most/few/no, ground, different variable, event consequent, conditioned antecedent, across bases, equal or disjoint restrictions, untraceable, already stated, downward). Also the README flag-table sync. 35 passed together with test_parse_normalise.
 
+- PeTTaChainer bdae8d7 accepts every derived atom (`add_atom`): A0 18/18, A1 16/16, r1 16/16, r2 10/10, r3 16/16, 0 refused (pcaccept.py / pcaccept.out). The links are well-formed for the chainer. They just add no conclusion under the pinned score path.
+- A0's narrow 22/1/0 is the pinned re-score (review4). FINDING2's 22/2/0 used the 660127d9 goal file.
+
 ## Details
 - Base: wmtm 9a8f693 (hive base). wmtm main head at start was fd48815. Branch hive/t-2026-11-24-wmtm-p01-class-links in worktree projects/omegaclaw/p01/wmtm-wt. Not pushed.
 - Pins: PINS.md from the Clerk A/B, which gives PeTTaChainer bdae8d7, PeTTa 3681b9b, templates sph-24e37182, rules 9c58f2e0, and goals_arm b868a3db.
