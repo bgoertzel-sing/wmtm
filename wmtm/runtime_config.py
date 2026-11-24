@@ -162,6 +162,7 @@ SPEC = {
     "shadow_max_hops":     ("WMTM_PC_SHADOW_MAX_HOPS", int, 3, None),            # Track N: longest chain in the pool (derivation steps)
     "shadow_induction":    ("WMTM_PC_SHADOW_INDUCTION", bool, False, None),      # t-2026-11-11: propose (Inheritance A B) goals from shared Member instances
     "shadow_induction_min": ("WMTM_PC_SHADOW_INDUCTION_MIN", int, 3, None),      # t-2026-11-11: min shared instances for an induction goal
+    "class_links":         ("WMTM_CLASS_LINKS", bool, False, None),               # t-2026-11-24-wmtm-p01-class-links: shadow pass wmtm/class_links.py adds parse-supported Inheritance + Member links (off = untouched)
     "shadow_min_hops":     ("WMTM_PC_SHADOW_MIN_HOPS", int, 1, None),            # Track N: only ask goals needing >= N steps
     "shadow_goal_weights": ("WMTM_PC_SHADOW_GOAL_WEIGHTS", str, "2,1,1,0.5", None),  # Track N: w_req,w_depth,w_info,w_sti
     "shadow_timeout_s":    ("WMTM_PC_SHADOW_TIMEOUT", float, 2.0, None),

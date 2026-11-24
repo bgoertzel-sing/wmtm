@@ -1,0 +1,7 @@
+{"cc_off": 79, "cc_on": 97, "derived_by_rule": {"narrow_subset": 18}, "derived_without_units": 0, "goals_off": 652, "goals_on": 652, "new_goals_on": 0, "off_atoms_byte_identical": true, "off_goals_eq_archived": true, "on_goals_eq_off": true, "run": "A0"}
+{"cc_off": 84, "cc_on": 100, "derived_by_rule": {"narrow_subset": 16}, "derived_without_units": 0, "goals_off": 657, "goals_on": 657, "new_goals_on": 0, "off_atoms_byte_identical": true, "off_goals_eq_archived": true, "on_goals_eq_off": true, "run": "A1"}
+{"cc_off": 77, "cc_on": 93, "derived_by_rule": {"narrow_subset": 16}, "derived_without_units": 0, "goals_off": 657, "goals_on": 657, "new_goals_on": 0, "off_atoms_byte_identical": true, "off_goals_eq_archived": true, "on_goals_eq_off": true, "run": "r1"}
+{"cc_off": 77, "cc_on": 87, "derived_by_rule": {"narrow_subset": 10}, "derived_without_units": 0, "goals_off": 666, "goals_on": 666, "new_goals_on": 0, "off_atoms_byte_identical": true, "off_goals_eq_archived": true, "on_goals_eq_off": true, "run": "r2"}
+{"cc_off": 81, "cc_on": 97, "derived_by_rule": {"narrow_subset": 16}, "derived_without_units": 0, "goals_off": 662, "goals_on": 662, "new_goals_on": 0, "off_atoms_byte_identical": true, "off_goals_eq_archived": true, "on_goals_eq_off": true, "run": "r3"}
+diag.json md5 recomputed: 4eef5142
+diag.json md5 archived:   4eef5142
