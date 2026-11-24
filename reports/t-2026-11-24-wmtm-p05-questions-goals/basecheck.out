@@ -1,0 +1,11 @@
+A0 s1 == 7fa69af s1
+A0 s1 == r02 s1
+A1 s1 == 7fa69af s1
+A1 s1 == r02 s1
+r1 s1 == 7fa69af s1
+r1 s1 == r02 s1
+r2 s1 == 7fa69af s1
+r2 s1 == r02 s1
+r3 s1 == 7fa69af s1
+r3 s1 == r02 s1
+BASECHECK_DONE

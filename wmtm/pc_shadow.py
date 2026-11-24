@@ -503,7 +503,8 @@ def _master_ops_snapshot(cfg, items, cycle, k):
     ops, meta = ML.plan(tdir, notes, extra=extra,
                         label_replace=bool(cfg.get("shadow_label_replace")),   # t-2026-11-17-wmtm-steps-3-5 step 4 (default off)
                         reference_times=rts,
-                        class_links=bool(cfg.get("class_links")))   # t-2026-11-24-wmtm-s1-shadow-bundle: P-01 pass (default off)
+                        class_links=bool(cfg.get("class_links")),   # t-2026-11-24-wmtm-s1-shadow-bundle: P-01 pass (default off)
+                        questions=bool(cfg.get("shadow_question_goals")))   # t-2026-11-24-wmtm-p05-questions-goals: P-05 (default off)
     if rts is not None:
         meta["reference_times"] = sum(1 for nid, _ in notes if nid in rts)
     xr = ML.extra_rules() if extra else []
@@ -528,16 +529,28 @@ def _master_ops_snapshot(cfg, items, cycle, k):
                 per_rule[rid] = per_rule.get(rid, 0) + 1
             else:
                 nimplp_st["dup_goal"] += 1
+    q_st = None
+    if cfg.get("shadow_question_goals"):   # t-2026-11-24-wmtm-p05-questions-goals: each parsed question's query becomes a goal
+        qm = meta.get("questions") or {}
+        q_st = {k: qm.get(k, 0) for k in ("found", "malformed", "unmapped_g00")}
+        q_st.update(queries=len(qm.get("queries") or []), goals=0, dup_goal=0)
+        for qg in qm.get("queries") or []:
+            if qg in goals:
+                q_st["dup_goal"] += 1; continue
+            goals[qg] = "question"; per_rule["question"] = per_rule.get("question", 0) + 1; q_st["goals"] += 1
+        q_st["query_note"] = {g: list(v) for g, v in (qm.get("query_note") or {}).items()}
     gl = list(goals)[:int(cfg["shadow_max_goals"])] if int(cfg.get("shadow_max_goals") or 0) > 0 else list(goals)
     out = {"load_order": "master_ops", "master_ops": ops, "atoms": [], "goals": gl,
             "goal_rule": {g: goals[g] for g in gl}, "rule_candidates": per_rule,
-            "master_meta": {kk: v for kk, v in meta.items() if kk not in ("notes", "atom_src", "label_fact")},
+            "master_meta": {kk: v for kk, v in meta.items() if kk not in ("notes", "atom_src", "label_fact", "questions")},
             "master_notes": info, "cycle": cycle, "ts": time.time(), "k": k, "items": len(items),
             "semparse_items": info["complete"], "unparsed_items": len(ids) - info["complete"],
             "atom_src": meta["atom_src"], "label_fact": meta["label_fact"], "fact_src": [], "derived_src": {},
             "derived_items": len(items) - len(ids), "goal_total": len(goals), "source": "master_ops"}
     if nimpl_st is not None:
         out["note_impl"] = nimpl_st
+    if q_st is not None:
+        out["questions"] = q_st
     if nimplp_st is not None:
         out["note_impl_premise"] = nimplp_st
     return out

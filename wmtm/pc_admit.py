@@ -245,6 +245,12 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
     n_triv = 0      # GAP-5: dropped["trivial"] appears only when > 0, so existing dropped records keep their shape
     triv_on, triv_log = trivial_filter_on(cfg), []
     min_s, neg_mode = min_strength(cfg), negation_mode(cfg)
+    try:   # R-10 (t-2026-11-24-wmtm-p05-questions-goals): confidence floor, default 0 = off; drop key only when on
+        floor = float((cfg or {}).get("reasoner_conf_floor") or 0.0)
+    except (TypeError, ValueError):
+        floor = 0.0
+    if floor > 0:
+        drop["below_floor"] = 0
     for r in doc["results"]:
         try:
             g = r["goal"]; s, c = float(r["stv"][0]), float(r["stv"][1]); text = render(g)
@@ -263,6 +269,8 @@ def load_candidates(cfg, store, now=None, consumed=None, live_ids=None, known=No
                                  "steps": sorted(set(re.findall(r"\(by\s+(?:\(bi-forward\s+)?([^\s()]+)", str(r.get("proof")))))})
                 continue
         s, c = min(1.0, max(0.0, s)), min(0.99, max(0.0, c))
+        if floor > 0 and c < floor:
+            drop["below_floor"] += 1; continue
         # Track O: strength is a probability.  s < reasoner_min_strength means "probably not", never a weak yes.
         neg = s < min_s
         if neg:
