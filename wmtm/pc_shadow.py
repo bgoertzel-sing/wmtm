@@ -517,6 +517,21 @@ def _master_ops_snapshot(cfg, items, cycle, k):
                 per_rule[rid] = per_rule.get(rid, 0) + 1
             else:
                 nimpl_st["dup_goal"] += 1
+    chain_st = None
+    if int(cfg.get("shadow_chain_k") or 0) >= 2:   # t-2026-11-24-wmtm-r02-chaining: k-step chaining + class links (default 0 = off)
+        cg, chain_st = ML.chain_goals(ops, ML.seeded_rules(tdir) + xr, k=int(cfg["shadow_chain_k"]),
+                                      scoped={ML._node(r)[1] for r in xr},
+                                      max_per_note=int(cfg.get("shadow_chain_max_per_note") or 30),
+                                      budget_s=float(cfg.get("shadow_chain_budget_s") or 10.0),
+                                      note_src=meta["atom_src"],
+                                      no_coref=bool(cfg.get("shadow_chain_no_coref")))
+        chain_st["dup_goal"] = 0
+        for g, rid in cg.items():
+            if g not in goals:
+                goals[g] = rid
+                per_rule[rid] = per_rule.get(rid, 0) + 1
+            else:
+                chain_st["dup_goal"] += 1
     nimplp_st = None
     if cfg.get("shadow_note_impl_premise"):   # t-2026-11-17-wmtm-impl-premise-proving step 1 (default off)
         pg, nimplp_st = ML.note_impl_premise_goals(ops, ML.seeded_rules(tdir) + xr, meta["atom_src"],
@@ -540,6 +555,8 @@ def _master_ops_snapshot(cfg, items, cycle, k):
         out["note_impl"] = nimpl_st
     if nimplp_st is not None:
         out["note_impl_premise"] = nimplp_st
+    if chain_st is not None:
+        out["chain"] = chain_st
     return out
 
 
