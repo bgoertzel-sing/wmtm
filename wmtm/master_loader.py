@@ -95,7 +95,7 @@ def _label_fact(stmt):
 
 
 def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False, label_replace=False,
-         reference_times=None):
+         reference_times=None, class_links=False):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -124,6 +124,7 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
         for r in extra_rules():
             meta["extra_rules"] += atom(r)
     for nid, prior in notes:
+        cl_mine = []   # class_links input: every lowered statement/definition of this note, dedup-blind (as load_arm sees a note)
         lab_at.clear()   # step 4: a label repeats only within one note's sentence records; never replace across notes
         rt = (reference_times or {}).get(nid)   # t-2026-11-17-wmtm-steps-3-5 step 5: the note's date anchors @now
         recs = B.block_records(prior, catalog, rt) if rt else B.block_records(prior, catalog)
@@ -149,6 +150,8 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
                     ops[lab_at[lab]] = None; seen_atom.discard(old)
                     meta["atom_src"].pop(lab, None); meta["label_fact"].pop(lab, None)
                     meta["label_replaced"] += 1
+                if class_links:
+                    cl_mine.append(st)
                 added = atom(st)
                 m["statements"] += added
                 if label_replace and lab and added:
@@ -156,8 +159,21 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
                 if lab and note_labels:   # render-master-goals: label -> source note, like the legacy atom_src
                     meta["atom_src"].setdefault(lab, nid); meta["label_fact"].setdefault(lab, fact)
             for d in low["definitions"]:
+                if class_links:
+                    cl_mine.append(d)
                 if atom(d): m["definitions"] += 1
                 else: m["definitions_shared"] += 1
+        if class_links:   # t-2026-11-24-wmtm-s1-shadow-bundle: P-01 class_links pass per note (default off; meta key only when on)
+            from .class_links import derive as _cl_derive
+            meta.setdefault("class_links", {})
+            mine = [a for a in cl_mine if a in seen_atom]   # this note's full lowered set (shared definitions included), minus label-replaced statements
+            for r in _cl_derive(mine):
+                st = _note_label(r["atom"], suffix) if note_labels else r["atom"]
+                if atom(st):
+                    meta["class_links"][r["rule"]] = meta["class_links"].get(r["rule"], 0) + 1
+                    lab, fact = _label_fact(st)
+                    if lab and note_labels:
+                        meta["atom_src"].setdefault(lab, nid); meta["label_fact"].setdefault(lab, fact)
         meta["shared_definitions"] += m["definitions_shared"]
         meta["notes"][nid] = m
     if label_replace:

@@ -502,7 +502,8 @@ def _master_ops_snapshot(cfg, items, cycle, k):
                 rts[it.id] = _dt.datetime.fromtimestamp(ts, _dt.timezone.utc).strftime("%Y-%m-%dT%H:%M")
     ops, meta = ML.plan(tdir, notes, extra=extra,
                         label_replace=bool(cfg.get("shadow_label_replace")),   # t-2026-11-17-wmtm-steps-3-5 step 4 (default off)
-                        reference_times=rts)
+                        reference_times=rts,
+                        class_links=bool(cfg.get("class_links")))   # t-2026-11-24-wmtm-s1-shadow-bundle: P-01 pass (default off)
     if rts is not None:
         meta["reference_times"] = sum(1 for nid, _ in notes if nid in rts)
     xr = ML.extra_rules() if extra else []
