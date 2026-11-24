@@ -13,7 +13,8 @@ PROMPT = TPL + "/generated/PROMPT_CATALOG.txt"; PSHA = "2826a9c35b29942f0f0d9932
 KEYF = os.path.expanduser("~/.config/wmtm/anthropic.env")
 MODEL = os.environ.get("D_MODEL", "claude-opus-5-5"); EFFORT = os.environ.get("D_EFFORT", "medium")
 CAP_USD = float(os.environ.get("D_CAP_USD", "30")); SPENT0 = float(os.environ.get("D_SPENT_BEFORE", "0"))
-PRICE = {"in": float(os.environ.get("D_P_IN", "5")), "out": float(os.environ.get("D_P_OUT", "25"))}  # USD per Mtok; read 0.1x, 5m write 1.25x
+# v2 (review 1, finding 3): Anthropic published Opus 5.5 rates per Mtok: input 4, output 20, cache read 0.20, 5-min cache write 5 (openclaw docs/providers/anthropic.md). v1 used Opus 5 rates 5/25 (read 0.1x, write 1.25x).
+PRICE = {"in": float(os.environ.get("D_P_IN", "4")), "out": float(os.environ.get("D_P_OUT", "20")), "read": float(os.environ.get("D_P_READ", "0.20")), "write": float(os.environ.get("D_P_WRITE", "5"))}
 WT = os.environ.get("CLERK_AB_WT", os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 CAP = 20; MAX_ATT = 2; MAX_CALLS = int(os.environ.get("A1_MAX_CALLS", "260"))
 LIMIT = re.compile(r"429|rate.?limit|usage.?limit|quota|too many requests|insufficient|credit", re.I)
@@ -34,9 +35,12 @@ for line in open(KEYF, encoding="utf-8"):
         os.environ["ANTHROPIC_API_KEY"] = line.rstrip("\n").split("=", 1)[1].strip().strip('"').strip("'")
 if not os.environ.get("ANTHROPIC_API_KEY"): print("no key line"); sys.exit(3)
 def cost(ru):
-    ru = ru or {}; pi, po = PRICE["in"], PRICE["out"]
-    return ((ru.get("input_tokens") or 0) * pi + (ru.get("cache_read_input_tokens") or 0) * pi * 0.1
-            + (ru.get("cache_creation_input_tokens") or 0) * pi * 1.25 + (ru.get("output_tokens") or 0) * po) / 1e6
+    ru = ru or {}
+    return ((ru.get("input_tokens") or 0) * PRICE["in"] + (ru.get("cache_read_input_tokens") or 0) * PRICE["read"]
+            + (ru.get("cache_creation_input_tokens") or 0) * PRICE["write"] + (ru.get("output_tokens") or 0) * PRICE["out"]) / 1e6
+def cu(c):   # v2: price a logged call from its usage at PRICE (so v1-priced usd fields are not summed)
+    u = c.get("usage") or {}
+    return cost({"input_tokens": u.get("input"), "cache_read_input_tokens": u.get("cache_read"), "cache_creation_input_tokens": u.get("cache_write"), "output_tokens": u.get("output")})
 sp = S.load_parse_script(S.PARSE_SCRIPT)
 class HardLimit(Exception):   # not an OSError/HTTPError: _post_json does not catch it, so no retry or long wait
     pass
@@ -82,7 +86,7 @@ for block in blocks:
                 rec["reused_from"] = same[0]["id"]; rec["block"] = {"doc": row.get("doc"), "k": k, "available_from": k}
                 with open(out, "a", encoding="utf-8") as fh: fh.write(json.dumps({**row, "reply": rec}, ensure_ascii=False) + "\n")
                 log("%s k=%d reused identical reply of %s (no call)" % (row["id"], k, same[0]["id"])); continue
-        spent = SPENT0 + sum(c.get("usd") or 0 for c in jl(CALLS)); oks = [c["usd"] for c in jl(CALLS) if c.get("usd")]
+        spent = SPENT0 + sum(cu(c) for c in jl(CALLS)); oks = [cu(c) for c in jl(CALLS) if c.get("ok")]
         nxt = max(oks[-5:]) if oks else 1.5
         if spent + nxt > CAP_USD: stop("spend cap: spent %.4f + next-call est %.4f > %.2f" % (spent, nxt, CAP_USD))
         cid = None
@@ -102,7 +106,7 @@ for block in blocks:
                        "cache_write": ru.get("cache_creation_input_tokens"), "output": ru.get("output_tokens"), "cached": u.get("cached")},
              "usd": round(cost(ru), 6), "error": (rec.get("error") or "")[:160] if not ok else None}
         with open(CALLS, "a") as fh: fh.write(json.dumps(c) + "\n")
-        log("%s k=%d ok=%s %.0fs read=%s write=%s out=%s usd=%.4f cum=%.4f err=%s" % (row["id"], k, ok, c["secs"], c["usage"]["cache_read"], c["usage"]["cache_write"], c["usage"]["output"], c["usd"], SPENT0 + sum(x.get("usd") or 0 for x in jl(CALLS)), c["error"]))
+        log("%s k=%d ok=%s %.0fs read=%s write=%s out=%s usd=%.4f cum=%.4f err=%s" % (row["id"], k, ok, c["secs"], c["usage"]["cache_read"], c["usage"]["cache_write"], c["usage"]["output"], c["usd"], SPENT0 + sum(cu(x) for x in jl(CALLS)), c["error"]))
         if (err and LIMIT.search(err)) or LIMIT.search(str(rec.get("error") or "")): stop("limit error: " + (err or rec.get("error"))[:160])
         if len(jl(CALLS)) == 1 and not (ok and (rec.get("response") or {}).get("instances") is not None):
             stop("canary: first call not a valid catalog reply (%s)" % c["error"])
