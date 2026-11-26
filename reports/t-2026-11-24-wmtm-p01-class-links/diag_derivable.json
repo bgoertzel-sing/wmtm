@@ -1,0 +1,43 @@
+{
+ "A0": {
+  "a_links": 24,
+  "a_links_already_stated": 0,
+  "a_member_B_already": 14,
+  "c_generic_ante_classes": 17,
+  "c_reached_stated": 1,
+  "narrowed_classes": 107,
+  "narrowed_with_member": 67
+ },
+ "A1": {
+  "a_links": 27,
+  "a_links_already_stated": 0,
+  "a_member_B_already": 19,
+  "c_generic_ante_classes": 10,
+  "narrowed_classes": 116,
+  "narrowed_with_member": 79
+ },
+ "r1": {
+  "a_links": 23,
+  "a_links_already_stated": 0,
+  "a_member_B_already": 15,
+  "c_generic_ante_classes": 9,
+  "narrowed_classes": 107,
+  "narrowed_with_member": 74
+ },
+ "r2": {
+  "a_links": 24,
+  "a_links_already_stated": 0,
+  "a_member_B_already": 17,
+  "c_generic_ante_classes": 12,
+  "narrowed_classes": 118,
+  "narrowed_with_member": 78
+ },
+ "r3": {
+  "a_links": 23,
+  "a_links_already_stated": 0,
+  "a_member_B_already": 15,
+  "c_generic_ante_classes": 13,
+  "narrowed_classes": 112,
+  "narrowed_with_member": 71
+ }
+}
