@@ -177,6 +177,11 @@ SPEC = {
     "shadow_min_interval_s": ("WMTM_PC_SHADOW_MIN_INTERVAL", float, 300.0, None),
     # Track P: recall/context plumbing (wmtm/context.py).  Each switch off = the rc2 behaviour.
     "forget_one_rule":     ("WMTM_FORGET_ONE_RULE", bool, True, None),   # F1 §9: every path records evictions in the forgetting log
+    # M-05 (S2 design part a; design s7.1c/s7.1b/s10/s12.1): composite capacity eviction (wmtm/eviction.py), off by default
+    "composite_eviction":  ("WMTM_COMPOSITE_EVICTION", bool, False, None),
+    "eviction_weights":    ("WMTM_EVICTION_WEIGHTS", str, "0.4,0.4,0.2", None),     # w_sti, w_util, w_lti (s7.1c)
+    "derived_eviction_penalty": ("WMTM_DERIVED_EVICTION_PENALTY", float, 1.5, None),  # s10: derived composite / this
+    "eviction_min_utility": ("WMTM_EVICTION_MIN_UTILITY", float, 2.0, None),      # s10/s7.1b: keep + reset age above this
     "recall_relevance_floor": ("WMTM_RECALL_RELEVANCE_FLOOR", float, 0.1, None),  # design s8.2: recall drops score <= floor
     "recall_budget":       ("WMTM_RECALL_BUDGET", int, 10, None),         # design s8.3/s10: max new recalled items per cycle; <= 0 = no budget
     # t-2026-11-11-wmtm-spread-seeds-probe: where recall's spreading activation starts (design s3.3 / s8.1b).

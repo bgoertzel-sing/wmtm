@@ -332,6 +332,7 @@ def admit_on_snapshot(snapshot, cfg, now=None):
     from .store import WMTMStore
     orch = WMTMOrchestrator(WMTMStore(), use_goalchainer=False)
     orch.restore_state(snapshot)
+    orch._sync_eviction_cfg(cfg or {})             # M-05: admissions here may overflow capacity (flag off -> None)
     orch.trivial_filter = trivial_filter_on(cfg)   # GAP-5: same flag as load_candidates (flag off = guard off too)
     admitted, info = orch.admit_pc_candidates(cands, info)
     new = orch.snapshot_state()

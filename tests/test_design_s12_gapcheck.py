@@ -174,11 +174,12 @@ def test_s8_1_spreading_activation_follows_evidence_for_with_decay():
 
 # ----------------------------------------------------------------------------------------- s7.1 eviction rules
 
-@pytest.mark.xfail(strict=True, reason="GAP-3 forgetting: capacity eviction (store._evict_lowest_sti) uses STI only; the "
-                   "design's composite STI*0.4+utility*0.4+LTI*0.2 with the 1.5x derived penalty is not implemented")
 def test_s7_1c_capacity_eviction_prefers_derived_via_composite_penalty():
-    """s7.1c: recalled STI 1.0 (composite 0.40) vs derived STI 1.2 (0.48/1.5 = 0.32): the derived item goes first."""
+    """s7.1c: recalled STI 1.0 (composite 0.40) vs derived STI 1.2 (0.48/1.5 = 0.32): the derived item goes first.
+    GAP-3 closed by M-05: run with the composite_eviction flag on (default off; flag-off path is pre-M-05)."""
+    from wmtm.eviction import eviction_cfg
     st = WMTMStore(capacity=2)
+    st.eviction_cfg = eviction_cfg({"composite_eviction": True})
     st.admit("rec", "recalled fact", source_type="recalled", initial_sti=1.0)
     st.admit("der", "derived fact", source_type="derived", derived_from=["rec"], initial_sti=1.2)
     st.admit("new", "new recalled fact", source_type="recalled", initial_sti=3.0)

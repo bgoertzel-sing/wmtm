@@ -51,9 +51,17 @@ class ForgettingPolicy:
     def _evict_aged_low_utility(self, store: WMTMStore) -> list:
         """Evict items exceeding their max age with utility below minimum."""
         evicted = []
+        ecfg = getattr(store, "eviction_cfg", None)
         for item in list(store._items.values()):
             age_limit = self._max_age_for(item)
-            if item.age >= age_limit and item.utility < self.min_utility:
+            if ecfg is not None:
+                # M-05 (flag on), design s7.1b: at max_age keep and reset age if utility > min_utility, else evict
+                if item.age >= age_limit:
+                    if item.utility > ecfg["min_utility"]:
+                        item.age = 0
+                    else:
+                        evicted.append(store.evict(item.id))
+            elif item.age >= age_limit and item.utility < self.min_utility:
                 evicted.append(store.evict(item.id))
         return evicted
 
@@ -62,7 +70,10 @@ class ForgettingPolicy:
         """Evict lowest-utility items until store is at or below capacity."""
         evicted = []
         while len(store) > store.capacity:
-            lowest = min(store._items.values(), key=lambda it: it.utility)
+            if getattr(store, "eviction_cfg", None) is not None:
+                lowest = store.composite_victim()                  # M-05: same ranking as store.admit (flag on)
+            else:
+                lowest = min(store._items.values(), key=lambda it: it.utility)
             evicted.append(store.evict(lowest.id))
         return evicted
 
