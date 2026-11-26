@@ -146,7 +146,7 @@ class WMTMOrchestrator:
             self.utility = UtilityTracker.from_dict(snapshot["utility"])
         if "forgetting_log" in snapshot:
             from .forgetting_log import ForgettingLog
-            self.forget_log = ForgettingLog.from_dict(snapshot["forgetting_log"])
+            self.forget_log = ForgettingLog.from_dict(snapshot["forgetting_log"], max_records=self._forget_log_cap())
         if isinstance(snapshot.get("pc_admit"), dict):
             self.pc_admit_state = dict(snapshot["pc_admit"])
         if isinstance(snapshot.get("context_rel"), dict):
@@ -181,6 +181,15 @@ class WMTMOrchestrator:
             self._recall_used = [self._cycle, 0]
         self._recall_used[1] += 1
         return True
+
+    def _forget_log_cap(self):
+        """M-07: runtime_config forgetting_log_max (default 500); None = keep the saved cap (resolve failed)."""
+        try:
+            from . import runtime_config as _rc
+            v = int(_rc.resolve(self.runtime_state_dir).get("forgetting_log_max") or 0)
+            return v if v > 0 else None
+        except Exception:
+            return None
 
     def _recall_budget(self):
         try:
@@ -293,9 +302,11 @@ class WMTMOrchestrator:
 
     def _is_skipworthy(self, cand) -> bool:
         """Check if a candidate should be skipped (forgotten or duplicate)."""
-        if self.forget_log.is_forgotten(cand.content, list(cand.derived_from or [])):   # F1 §4: derivation key
-            if cand.initial_sti < self.forget_log_override_threshold:
-                return True
+        # F1 §4: derivation key.  M-07: the one re-admission test (should_re_admit), also for keys pruned from the
+        # forgetting-log window; threshold = forget_log_override_threshold, as before.
+        if not self.forget_log.should_re_admit(cand.content, self.forget_log_override_threshold, cand.initial_sti,
+                                               derived_from=list(cand.derived_from or [])):
+            return True
         return not self._is_novel(cand)
 
     def _is_novel(self, cand) -> bool:
