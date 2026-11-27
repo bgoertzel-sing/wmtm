@@ -1,0 +1,1 @@
+baseline d506783 24h (excl fd48815 window 17:11:53-17:20:33Z): rows 15, add_fail>0 rows 3 (17:05Z=1,17:10Z=1,17:24:47Z=2), add_fail_max 2; NOTE 17:24:47Z row add_fail=2 on d506783 after rollback -> T3 'row add_fail>=2' also fires on old package
