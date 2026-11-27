@@ -73,3 +73,29 @@ def test_empty_and_deterministic():
     st = [f"(: s1_x1_member (Member sk_b_1 badger) {D})",
           "(: s2_g1_i (Implication (Member $x badger) (Member $x mustelid)) (STV 1.0 0.9))"]
     assert derive(st) == derive(list(st))
+
+
+# --- t-2026-11-26-wmtm-p01a: R4 identity_member (opt-in) ---
+_R4 = ["(: s1_c1_copular (Member sk_bob_1 doctor) (STV 1.0 0.9))",
+       "(: s1_i1_identity (Same sk_robert_1 sk_bob_1) (STV 1.0 0.9))"]
+
+def test_r4_identity_carries_stated_class():
+    r = rules(derive(_R4, identity=True), "identity_member")
+    assert [x["atom"].split(" (STV")[0].split(" ", 2)[2] for x in r] == ["(Member sk_robert_1 doctor)"]
+    assert derive(_R4) == derive(_R4, identity=False)
+    assert not rules(derive(_R4), "identity_member")
+
+def test_r4_not_from_variables_or_already_stated_or_self():
+    assert not rules(derive(["(: s1_c1_c (Member $x doctor) (STV 1.0 0.9))",
+                             "(: s1_i1_i (Same sk_a_1 $x) (STV 1.0 0.9))"], identity=True), "identity_member")
+    assert not rules(derive(_R4 + ["(: s1_c2_c (Member sk_robert_1 doctor) (STV 1.0 0.9))"], identity=True), "identity_member")
+    assert not rules(derive(["(: s1_c1_c (Member sk_a_1 doctor) (STV 1.0 0.9))",
+                             "(: s1_i1_i (Same sk_a_1 sk_a_1) (STV 1.0 0.9))"], identity=True), "identity_member")
+
+def test_r4_no_chaining_and_deterministic():
+    st = ["(: s1_c1_c (Member sk_c_1 doctor) (STV 1.0 0.9))",
+          "(: s1_i1_i (Same sk_a_1 sk_b_1) (STV 1.0 0.9))",
+          "(: s1_i2_i (Same sk_b_1 sk_c_1) (STV 1.0 0.9))"]
+    got = {x["atom"].split(" (STV")[0].split(" ", 2)[2] for x in rules(derive(st, identity=True), "identity_member")}
+    assert got == {"(Member sk_b_1 doctor)"}
+    assert derive(st, identity=True) == derive(list(st), identity=True)

@@ -16,6 +16,9 @@ Rules (each fires only on what the parse states; no world knowledge, no guessed 
                    narrower -> less-narrow step.  Never fires across bases or for equal restriction sets.
   R3 member_link   (Member x A) stated, (Inheritance A B) stated or from R1/R2, (Member x B) not stated:
                    (Member x B).  x must be an individual (no variables).
+  R4 identity_member (p01a, only with identity=True / WMTM_CLASS_LINKS_IDENTITY) (Same x y) stated between two
+                   individuals and (Member y C) stated, (Member x C) not stated: (Member x C); both directions.
+                   Never from variables, never chained, no coreference beyond the parse's own Same atoms.
 """
 from __future__ import annotations
 import hashlib, re
@@ -59,10 +62,11 @@ def _stmt(rule, term, truth):
     return f"cl_{rule}__{h}", f"(: cl_{rule}__{h} {body} (STV {_num(truth[0])} {_num(truth[1])}))"
 
 
-def derive(statements):
+def derive(statements, identity=False):
     """statements: iterable of lowered statement strings of ONE note.  -> list of dicts
-    {"rule", "atom", "sources": [statement names], "units": [parse unit ids]} in a stable order."""
-    mem, inh, nb, gen, mentions = {}, {}, {}, [], {}
+    {"rule", "atom", "sources": [statement names], "units": [parse unit ids]} in a stable order.
+    identity=True (t-2026-11-26-wmtm-p01a, flag WMTM_CLASS_LINKS_IDENTITY, default off) enables R4."""
+    mem, inh, nb, gen, mentions, same = {}, {}, {}, [], {}, {}
     for s in statements:
         n = _parse(s)
         if isinstance(n, list) and len(n) == 4 and isinstance(n[1], str):
@@ -77,6 +81,8 @@ def derive(statements):
             inh.setdefault((term[1], term[2]), name)
         elif h == "NarrowBy" and len(term) == 3 and isinstance(term[1], str):
             nb.setdefault(term[1], {})[_show(term[2])] = name
+        elif h == "Same" and len(term) == 3 and all(isinstance(x, str) and not x.startswith("$") for x in term[1:]) and term[1] != term[2]:
+            same.setdefault((term[1], term[2]), name)
         elif h == "Implication" and len(term) == 3:
             gen.append((name, term, tv))
     out, seen = [], set()
@@ -125,6 +131,14 @@ def derive(statements):
                 continue                      # untraceable to a parse unit: never emitted
             emit("narrow_subset", ["Inheritance", A, B], TRUTH_DEF, src)
             new_links[(A, B)] = src
+    # R4 (p01a, opt-in): a stated identity between two individuals carries each one's stated classes to the other.
+    # Only stated (Same x y) atoms from the parse; no coreference guessing, no chaining through several Same atoms.
+    if identity:
+        for (x, y), snm in sorted(same.items()):
+            for a, b in ((x, y), (y, x)):
+                for (z, C), mnm in sorted(mem.items()):
+                    if z == b and (a, C) not in mem:
+                        emit("identity_member", ["Member", a, C], TRUTH_DEF, [snm, mnm])
     # R3
     links = {k: [v] for k, v in inh.items() if not k[0].startswith("sk_")}
     links.update(new_links)

@@ -196,6 +196,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `shadow_induction` | `WMTM_PC_SHADOW_INDUCTION` | bool | `False` | t-2026-11-11: propose (Inheritance A B) goals from shared Member instances | `wmtm/pc_shadow.py:540` |
 | `shadow_induction_min` | `WMTM_PC_SHADOW_INDUCTION_MIN` | int | `3` | t-2026-11-11: min shared instances for an induction goal | `wmtm/pc_shadow.py:541` |
 | `class_links` | `WMTM_CLASS_LINKS` | bool | `False` | t-2026-11-24-wmtm-p01-class-links: shadow pass adding parse-supported class links (generic is-a, narrowed subset, member link), each traced to parse unit ids | `wmtm/class_links.py` |
+| `class_links_identity` | `WMTM_CLASS_LINKS_IDENTITY` | bool | `False` | t-2026-11-26-wmtm-p01a: R4 identity_member in the class_links pass: a stated (Same x y) carries the stated classes of one individual to the other (no coreference guessing, no chaining); needs `class_links` on | `wmtm/class_links.py` |
 | `shadow_min_hops` | `WMTM_PC_SHADOW_MIN_HOPS` | int | `1` | Track N: only ask goals needing &gt;= N steps | `wmtm/pc_shadow.py:292` |
 | `shadow_goal_weights` | `WMTM_PC_SHADOW_GOAL_WEIGHTS` | str | `'2,1,1,0.5'` | Track N: w_req,w_depth,w_info,w_sti | `wmtm/pc_shadow.py:293` |
 | `shadow_timeout_s` | `WMTM_PC_SHADOW_TIMEOUT` | float | `2.0` | Shadow worker: timeout in seconds for each PeTTa query, including the canary and negative-control queries. The worker's `--timeout` option overrides it. | `wmtm/workers/pc_shadow.py:34` |

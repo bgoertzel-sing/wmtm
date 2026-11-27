@@ -9,7 +9,7 @@ from wmtm import runtime_config as rc
 from wmtm.class_links import derive
 
 src, dst = sys.argv[1], sys.argv[2]; prov = sys.argv[3] if len(sys.argv) > 3 else None
-on = bool(rc.resolve().get("class_links"))
+_cfg = rc.resolve(); on = bool(_cfg.get("class_links")); ident = bool(_cfg.get("class_links_identity"))
 if not on:
     shutil.copyfile(src, dst); print(json.dumps({"class_links": False})); sys.exit(0)
 lines = open(src).read().splitlines(keepends=True)
@@ -20,7 +20,7 @@ c = collections.Counter(); P = open(prov, "w") if prov else None
 with open(dst, "w") as o:
     for d, ls in bydoc.items():
         for l in ls: o.write(l)
-        for r in derive([json.loads(l)["atom"] for l in ls]):
+        for r in derive([json.loads(l)["atom"] for l in ls], identity=ident):
             o.write(json.dumps({"doc": d, "atom": r["atom"]}) + "\n"); c[r["rule"]] += 1
             if P: P.write(json.dumps({"doc": d, "rule": r["rule"], "name": r["name"], "sources": r["sources"], "units": r["units"]}) + "\n")
-print(json.dumps({"class_links": True, **dict(c)}))
+print(json.dumps({"class_links": True, "identity": ident, **dict(c)}))
