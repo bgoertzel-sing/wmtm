@@ -1,0 +1,19 @@
+{
+ "ts": "2026-11-24T16:31:42Z",
+ "status": "PASS",
+ "fails": [],
+ "info": [
+  "dist/system-prompt-params-QzMF23Cp.mjs OK",
+  "node_modules/@openclaw/ai/dist/simple-options-BkDPMuxw.mjs OK",
+  "node_modules/@openclaw/ai/dist/anthropic-stream-reducer-DrsBCsFY.mjs OK",
+  "dist/builtin-openclaw-DEib7rq9.mjs OK",
+  "openclaw version 2026.9.8 (patch built for 2026.9.8)",
+  "login-shell openclaw -> /home/openclaw/.npm-global/lib/node_modules/openclaw/openclaw.mjs",
+  "agents.entries.protocosmo2.params.cacheRetention = 'long'",
+  "parse calls 11-22 16:31Z..11-24 16:31Z: 295 catalog-sized, 263 warm, 5 warm misses (old pattern), 5 logs"
+ ],
+ "sums": "/home/openclaw/backups/gateway-cache-patch-durable/patch/SHA256SUMS.expected-patched",
+ "config": "/home/openclaw/.openclaw/openclaw.json",
+ "test_label": "",
+ "alert": null
+}

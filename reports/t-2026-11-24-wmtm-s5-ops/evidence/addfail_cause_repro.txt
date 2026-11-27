@@ -1,0 +1,12 @@
+# ids, counts and error kinds only; full error text (with atom content) stays on pop-os: /srv/hive-evidence/t-2026-11-24-wmtm-s5-ops/addfail_cause_repro.full.txt
+notes 655
+ops 24526
+# op_index op_kind exception domain_error_kind note_id alone_result
+6046 atom PrologError fact_without_free_variables ep-note-20261117T163655Z alone_fail
+6062 atom PrologError fact_without_free_variables ep-note-20261117T163655Z alone_fail
+10676 atom PrologError fact_without_free_variables ep-note-20261108T233704Z alone_fail
+10685 atom PrologError fact_without_free_variables ep-note-20261108T233704Z alone_fail
+13093 atom PrologError inheritance_class ep-note-20261119T211438Z alone_fail
+15193 atom PrologError predicate_arity ep-note-20261120T113506Z alone_ok
+15488 atom PrologError fact_without_free_variables ep-note-20261120T141412Z alone_fail
+fails 7 DONE
