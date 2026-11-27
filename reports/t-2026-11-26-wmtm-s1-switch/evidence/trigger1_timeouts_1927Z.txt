@@ -1,0 +1,5 @@
+Watcher trigger 2026-11-26T19:27:30Z: TRIGGERS ['timeouts'] (first trigger since switch to fd48815 at 17:36:25Z).
+Row cycle 20473 start_ts 1795721028 (~19:23:48Z): items 56 goals_n 180 warm_s 59.2 prequery_s 82.956 timeouts 1 skipped_budget 50 pred_fail 0 add_fail 0 build_error null canary ok status ok.
+Neighbours: c20453 warm 8.0 pq 13.6 to0; c20464 warm 7.6 pq 12.2 to0; c20483 (19:29Z) items 60 goals 180 warm 14.4 pq 21.5 to0 skipped 0.
+Reading: warm_s (load before any query) was 59 s vs 7-14 s normal, so the whole process was slowed before querying started. The next row has the same goal count (180) and more items and ran clean. Host load avg 1/5/15 = 5.98/7.30/6.26 at 19:31Z; Clerk pytest + my find/grep scans ran in that window. Most likely host-load stall, not an fd48815 regression. Not proven.
+Action: no rollback yet; blocked for decision on the S1 task. Watcher keeps running.

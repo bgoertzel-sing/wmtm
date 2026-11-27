@@ -1,0 +1,106 @@
+2026-11-26T17:42:28Z rows 1 add_fail>0 1 max 2 pq_median 15.65 pq_max 15.653 ge12 1 TRIGGERS none
+2026-11-26T17:47:28Z rows 2 add_fail>0 2 max 2 pq_median 14.78 pq_max 15.653 ge12 2 TRIGGERS none
+2026-11-26T17:52:28Z rows 3 add_fail>0 3 max 2 pq_median 15.65 pq_max 17.477 ge12 3 TRIGGERS none
+2026-11-26T17:57:28Z rows 4 add_fail>0 3 max 2 pq_median 16.57 pq_max 19.237 ge12 4 TRIGGERS none
+2026-11-26T18:02:29Z rows 5 add_fail>0 3 max 2 pq_median 17.48 pq_max 22.089 ge12 5 TRIGGERS none
+2026-11-26T18:07:29Z rows 6 add_fail>0 3 max 2 pq_median 18.36 pq_max 22.089 ge12 6 TRIGGERS none
+2026-11-26T18:12:29Z rows 7 add_fail>0 3 max 2 pq_median 17.48 pq_max 22.089 ge12 7 TRIGGERS none
+2026-11-26T18:17:29Z rows 8 add_fail>0 3 max 2 pq_median 16.57 pq_max 22.089 ge12 8 TRIGGERS none
+2026-11-26T18:22:29Z rows 9 add_fail>0 3 max 2 pq_median 15.65 pq_max 22.089 ge12 9 TRIGGERS none
+2026-11-26T18:27:29Z rows 9 add_fail>0 3 max 2 pq_median 15.65 pq_max 22.089 ge12 9 TRIGGERS none
+2026-11-26T18:32:29Z rows 10 add_fail>0 3 max 2 pq_median 15.03 pq_max 22.089 ge12 9 TRIGGERS none
+2026-11-26T18:37:29Z rows 11 add_fail>0 3 max 2 pq_median 14.42 pq_max 22.089 ge12 10 TRIGGERS none
+2026-11-26T18:42:29Z rows 12 add_fail>0 3 max 2 pq_median 15.03 pq_max 22.089 ge12 11 TRIGGERS none
+2026-11-26T18:47:29Z rows 13 add_fail>0 3 max 2 pq_median 15.65 pq_max 22.089 ge12 12 TRIGGERS none
+2026-11-26T18:52:29Z rows 14 add_fail>0 3 max 2 pq_median 16.24 pq_max 22.089 ge12 13 TRIGGERS none
+2026-11-26T18:57:29Z rows 15 add_fail>0 3 max 2 pq_median 16.83 pq_max 22.089 ge12 14 TRIGGERS none
+2026-11-26T19:02:29Z rows 16 add_fail>0 3 max 2 pq_median 16.24 pq_max 22.089 ge12 15 TRIGGERS none
+2026-11-26T19:07:29Z rows 16 add_fail>0 3 max 2 pq_median 16.24 pq_max 22.089 ge12 15 TRIGGERS none
+2026-11-26T19:12:29Z rows 16 add_fail>0 3 max 2 pq_median 16.24 pq_max 22.089 ge12 15 TRIGGERS none
+2026-11-26T19:17:30Z rows 16 add_fail>0 3 max 2 pq_median 16.24 pq_max 22.089 ge12 15 TRIGGERS none
+2026-11-26T19:22:30Z rows 17 add_fail>0 3 max 2 pq_median 15.65 pq_max 22.089 ge12 16 TRIGGERS none
+2026-11-26T19:27:30Z rows 18 add_fail>0 3 max 2 pq_median 16.24 pq_max 82.956 ge12 17 TRIGGERS ['timeouts']
+2026-11-26T19:32:30Z rows 19 add_fail>0 3 max 2 pq_median 16.83 pq_max 82.956 ge12 18 TRIGGERS ['timeouts']
+2026-11-26T19:37:30Z rows 20 add_fail>0 3 max 2 pq_median 17.15 pq_max 82.956 ge12 19 TRIGGERS ['timeouts']
+2026-11-26T19:42:30Z rows 20 add_fail>0 3 max 2 pq_median 17.15 pq_max 82.956 ge12 19 TRIGGERS none load1 6.16 last_cycle 20491 last_warm_s 14.831 last_to 0 exc [20473]
+2026-11-26T19:47:30Z rows 21 add_fail>0 3 max 2 pq_median 17.48 pq_max 82.956 ge12 20 TRIGGERS none load1 5.35 last_cycle 20495 last_warm_s 12.967 last_to 0 exc [20473]
+2026-11-26T19:52:30Z rows 22 add_fail>0 3 max 2 pq_median 17.76 pq_max 82.956 ge12 21 TRIGGERS none load1 4.99 last_cycle 20496 last_warm_s 13.91 last_to 0 exc [20473]
+2026-11-26T19:57:30Z rows 22 add_fail>0 3 max 2 pq_median 17.76 pq_max 82.956 ge12 21 TRIGGERS none load1 5.76 last_cycle 20496 last_warm_s 13.91 last_to 0 exc [20473]
+2026-11-26T20:02:30Z rows 22 add_fail>0 3 max 2 pq_median 17.76 pq_max 82.956 ge12 21 TRIGGERS none load1 5.41 last_cycle 20496 last_warm_s 13.91 last_to 0 exc [20473]
+2026-11-26T20:07:30Z rows 23 add_fail>0 3 max 2 pq_median 18.04 pq_max 82.956 ge12 22 TRIGGERS none load1 6.58 last_cycle 20497 last_warm_s 13.986 last_to 0 exc [20473]
+2026-11-26T20:12:31Z rows 24 add_fail>0 3 max 2 pq_median 18.64 pq_max 82.956 ge12 23 TRIGGERS none load1 5.08 last_cycle 20499 last_warm_s 13.824 last_to 0 exc [20473]
+2026-11-26T20:17:31Z rows 24 add_fail>0 3 max 2 pq_median 18.64 pq_max 82.956 ge12 23 TRIGGERS none load1 3.83 last_cycle 20499 last_warm_s 13.824 last_to 0 exc [20473]
+2026-11-26T20:22:31Z rows 25 add_fail>0 3 max 2 pq_median 18.04 pq_max 82.956 ge12 24 TRIGGERS none load1 2.95 last_cycle 20501 last_warm_s 10.11 last_to 0 exc [20473]
+2026-11-26T20:27:31Z rows 26 add_fail>0 3 max 2 pq_median 17.85 pq_max 82.956 ge12 25 TRIGGERS none load1 2.94 last_cycle 20504 last_warm_s 11.632 last_to 0 exc [20473]
+2026-11-26T20:32:31Z rows 26 add_fail>0 3 max 2 pq_median 17.85 pq_max 82.956 ge12 25 TRIGGERS none load1 2.91 last_cycle 20504 last_warm_s 11.632 last_to 0 exc [20473]
+2026-11-26T20:37:31Z rows 26 add_fail>0 3 max 2 pq_median 17.85 pq_max 82.956 ge12 25 TRIGGERS none load1 3.14 last_cycle 20504 last_warm_s 11.632 last_to 0 exc [20473]
+2026-11-26T20:42:31Z rows 27 add_fail>0 3 max 2 pq_median 17.65 pq_max 82.956 ge12 26 TRIGGERS none load1 4.04 last_cycle 20510 last_warm_s 10.814 last_to 0 exc [20473]
+2026-11-26T20:47:31Z rows 28 add_fail>0 3 max 2 pq_median 17.58 pq_max 82.956 ge12 26 TRIGGERS none load1 2.91 last_cycle 20514 last_warm_s 7.324 last_to 0 exc [20473]
+2026-11-26T20:52:31Z rows 29 add_fail>0 3 max 2 pq_median 17.52 pq_max 82.956 ge12 26 TRIGGERS none load1 2.04 last_cycle 20526 last_warm_s 6.139 last_to 0 exc [20473]
+2026-11-26T20:57:31Z rows 30 add_fail>0 3 max 2 pq_median 17.5 pq_max 82.956 ge12 26 TRIGGERS none load1 2.15 last_cycle 20539 last_warm_s 5.831 last_to 0 exc [20473]
+2026-11-26T21:02:31Z rows 31 add_fail>0 3 max 2 pq_median 17.48 pq_max 82.956 ge12 26 TRIGGERS none load1 2.04 last_cycle 20551 last_warm_s 5.335 last_to 0 exc [20473]
+2026-11-26T21:07:31Z rows 32 add_fail>0 3 max 2 pq_median 17.23 pq_max 82.956 ge12 27 TRIGGERS none load1 4.90 last_cycle 20558 last_warm_s 10.751 last_to 0 exc [20473]
+2026-11-26T21:12:31Z rows 32 add_fail>0 3 max 2 pq_median 17.23 pq_max 82.956 ge12 27 TRIGGERS none load1 3.36 last_cycle 20558 last_warm_s 10.751 last_to 0 exc [20473]
+2026-11-26T21:17:31Z rows 32 add_fail>0 3 max 2 pq_median 17.23 pq_max 82.956 ge12 27 TRIGGERS none load1 4.49 last_cycle 20558 last_warm_s 10.751 last_to 0 exc [20473]
+2026-11-26T21:22:31Z rows 32 add_fail>0 3 max 2 pq_median 17.23 pq_max 82.956 ge12 27 TRIGGERS none load1 3.99 last_cycle 20558 last_warm_s 10.751 last_to 0 exc [20473]
+2026-11-26T21:27:31Z rows 33 add_fail>0 3 max 2 pq_median 16.99 pq_max 82.956 ge12 28 TRIGGERS none load1 4.13 last_cycle 20563 last_warm_s 9.789 last_to 0 exc [20473]
+2026-11-26T21:32:31Z rows 34 add_fail>0 3 max 2 pq_median 16.91 pq_max 82.956 ge12 29 TRIGGERS none load1 3.43 last_cycle 20570 last_warm_s 9.78 last_to 0 exc [20473]
+2026-11-26T21:37:32Z rows 34 add_fail>0 3 max 2 pq_median 16.91 pq_max 82.956 ge12 29 TRIGGERS none load1 2.99 last_cycle 20570 last_warm_s 9.78 last_to 0 exc [20473]
+2026-11-26T21:42:32Z rows 34 add_fail>0 3 max 2 pq_median 16.91 pq_max 82.956 ge12 29 TRIGGERS none load1 3.24 last_cycle 20570 last_warm_s 9.78 last_to 0 exc [20473]
+2026-11-26T21:47:32Z rows 35 add_fail>0 3 max 2 pq_median 16.83 pq_max 82.956 ge12 30 TRIGGERS none load1 3.51 last_cycle 20573 last_warm_s 10.277 last_to 0 exc [20473]
+2026-11-26T21:52:32Z rows 36 add_fail>0 3 max 2 pq_median 16.59 pq_max 82.956 ge12 31 TRIGGERS none load1 3.99 last_cycle 20581 last_warm_s 8.211 last_to 0 exc [20473]
+2026-11-26T21:57:32Z rows 36 add_fail>0 3 max 2 pq_median 16.59 pq_max 82.956 ge12 31 TRIGGERS none load1 3.88 last_cycle 20581 last_warm_s 8.211 last_to 0 exc [20473]
+2026-11-26T22:02:32Z rows 36 add_fail>0 3 max 2 pq_median 16.59 pq_max 82.956 ge12 31 TRIGGERS none load1 4.39 last_cycle 20581 last_warm_s 8.211 last_to 0 exc [20473]
+2026-11-26T22:07:32Z rows 37 add_fail>0 3 max 2 pq_median 16.35 pq_max 82.956 ge12 32 TRIGGERS none load1 3.87 last_cycle 20584 last_warm_s 9.773 last_to 0 exc [20473]
+2026-11-26T22:12:32Z rows 38 add_fail>0 3 max 2 pq_median 16.01 pq_max 82.956 ge12 33 TRIGGERS none load1 2.60 last_cycle 20593 last_warm_s 8.223 last_to 0 exc [20473]
+2026-11-26T22:17:32Z rows 38 add_fail>0 3 max 2 pq_median 16.01 pq_max 82.956 ge12 33 TRIGGERS none load1 2.28 last_cycle 20593 last_warm_s 8.223 last_to 0 exc [20473]
+2026-11-26T22:22:32Z rows 39 add_fail>0 3 max 2 pq_median 15.67 pq_max 82.956 ge12 33 TRIGGERS none load1 2.26 last_cycle 20602 last_warm_s 6.923 last_to 0 exc [20473]
+2026-11-26T22:27:32Z rows 39 add_fail>0 3 max 2 pq_median 15.67 pq_max 82.956 ge12 33 TRIGGERS none load1 1.96 last_cycle 20602 last_warm_s 6.923 last_to 0 exc [20473]
+2026-11-26T22:32:32Z rows 40 add_fail>0 3 max 2 pq_median 15.66 pq_max 82.956 ge12 34 TRIGGERS none load1 2.33 last_cycle 20604 last_warm_s 8.277 last_to 0 exc [20473]
+2026-11-26T22:37:32Z rows 40 add_fail>0 3 max 2 pq_median 15.66 pq_max 82.956 ge12 34 TRIGGERS none load1 2.06 last_cycle 20604 last_warm_s 8.277 last_to 0 exc [20473]
+2026-11-26T22:42:32Z rows 40 add_fail>0 3 max 2 pq_median 15.66 pq_max 82.956 ge12 34 TRIGGERS none load1 1.90 last_cycle 20604 last_warm_s 8.277 last_to 0 exc [20473]
+2026-11-26T22:47:32Z rows 40 add_fail>0 3 max 2 pq_median 15.66 pq_max 82.956 ge12 34 TRIGGERS none load1 1.95 last_cycle 20604 last_warm_s 8.277 last_to 0 exc [20473]
+2026-11-26T22:52:32Z rows 41 add_fail>0 3 max 2 pq_median 15.65 pq_max 82.956 ge12 34 TRIGGERS none load1 2.11 last_cycle 20609 last_warm_s 7.19 last_to 0 exc [20473]
+2026-11-26T22:57:32Z rows 42 add_fail>0 3 max 2 pq_median 15.53 pq_max 82.956 ge12 35 TRIGGERS none load1 2.90 last_cycle 20610 last_warm_s 9.411 last_to 0 exc [20473]
+2026-11-26T23:02:33Z rows 42 add_fail>0 3 max 2 pq_median 15.53 pq_max 82.956 ge12 35 TRIGGERS none load1 2.04 last_cycle 20610 last_warm_s 9.411 last_to 0 exc [20473]
+2026-11-26T23:07:33Z rows 42 add_fail>0 3 max 2 pq_median 15.53 pq_max 82.956 ge12 35 TRIGGERS none load1 2.00 last_cycle 20610 last_warm_s 9.411 last_to 0 exc [20473]
+2026-11-26T23:12:33Z rows 43 add_fail>0 3 max 2 pq_median 15.41 pq_max 82.956 ge12 35 TRIGGERS none load1 2.22 last_cycle 20614 last_warm_s 7.024 last_to 0 exc [20473]
+2026-11-26T23:17:33Z rows 43 add_fail>0 3 max 2 pq_median 15.41 pq_max 82.956 ge12 35 TRIGGERS none load1 1.82 last_cycle 20614 last_warm_s 7.024 last_to 0 exc [20473]
+2026-11-26T23:22:33Z rows 43 add_fail>0 3 max 2 pq_median 15.41 pq_max 82.956 ge12 35 TRIGGERS none load1 1.97 last_cycle 20614 last_warm_s 7.024 last_to 0 exc [20473]
+2026-11-26T23:27:33Z rows 43 add_fail>0 3 max 2 pq_median 15.41 pq_max 82.956 ge12 35 TRIGGERS none load1 2.11 last_cycle 20614 last_warm_s 7.024 last_to 0 exc [20473]
+2026-11-26T23:32:33Z rows 44 add_fail>0 3 max 2 pq_median 15.36 pq_max 82.956 ge12 35 TRIGGERS none load1 1.79 last_cycle 20621 last_warm_s 7.186 last_to 0 exc [20473]
+2026-11-26T23:37:33Z rows 45 add_fail>0 3 max 2 pq_median 15.31 pq_max 82.956 ge12 36 TRIGGERS none load1 2.94 last_cycle 20622 last_warm_s 8.076 last_to 0 exc [20473]
+2026-11-26T23:42:33Z rows 46 add_fail>0 3 max 2 pq_median 14.86 pq_max 82.956 ge12 36 TRIGGERS none load1 2.37 last_cycle 20633 last_warm_s 6.383 last_to 0 exc [20473]
+2026-11-26T23:47:33Z rows 46 add_fail>0 3 max 2 pq_median 14.86 pq_max 82.956 ge12 36 TRIGGERS none load1 1.91 last_cycle 20633 last_warm_s 6.383 last_to 0 exc [20473]
+2026-11-26T23:52:33Z rows 46 add_fail>0 3 max 2 pq_median 14.86 pq_max 82.956 ge12 36 TRIGGERS none load1 1.88 last_cycle 20633 last_warm_s 6.383 last_to 0 exc [20473]
+2026-11-26T23:57:33Z rows 47 add_fail>0 3 max 2 pq_median 14.42 pq_max 82.956 ge12 36 TRIGGERS none load1 2.16 last_cycle 20634 last_warm_s 7.084 last_to 0 exc [20473]
+2026-11-27T00:02:33Z rows 47 add_fail>0 3 max 2 pq_median 14.42 pq_max 82.956 ge12 36 TRIGGERS none load1 2.42 last_cycle 20634 last_warm_s 7.084 last_to 0 exc [20473]
+2026-11-27T00:07:33Z rows 47 add_fail>0 3 max 2 pq_median 14.42 pq_max 82.956 ge12 36 TRIGGERS none load1 1.88 last_cycle 20634 last_warm_s 7.084 last_to 0 exc [20473]
+2026-11-27T00:12:33Z rows 48 add_fail>0 3 max 2 pq_median 14.32 pq_max 82.956 ge12 36 TRIGGERS none load1 1.85 last_cycle 20635 last_warm_s 6.67 last_to 0 exc [20473]
+2026-11-27T00:17:33Z rows 48 add_fail>0 3 max 2 pq_median 14.32 pq_max 82.956 ge12 36 TRIGGERS none load1 1.97 last_cycle 20635 last_warm_s 6.67 last_to 0 exc [20473]
+2026-11-27T00:22:33Z rows 49 add_fail>0 3 max 2 pq_median 14.22 pq_max 82.956 ge12 37 TRIGGERS none load1 1.84 last_cycle 20636 last_warm_s 8.293 last_to 0 exc [20473]
+2026-11-27T00:27:33Z rows 49 add_fail>0 3 max 2 pq_median 14.22 pq_max 82.956 ge12 37 TRIGGERS none load1 2.19 last_cycle 20636 last_warm_s 8.293 last_to 0 exc [20473]
+2026-11-27T00:32:33Z rows 49 add_fail>0 3 max 2 pq_median 14.22 pq_max 82.956 ge12 37 TRIGGERS none load1 2.20 last_cycle 20636 last_warm_s 8.293 last_to 0 exc [20473]
+2026-11-27T00:37:34Z rows 49 add_fail>0 3 max 2 pq_median 14.22 pq_max 82.956 ge12 37 TRIGGERS none load1 2.22 last_cycle 20636 last_warm_s 8.293 last_to 0 exc [20473]
+2026-11-27T00:42:34Z rows 50 add_fail>0 3 max 2 pq_median 14.07 pq_max 82.956 ge12 38 TRIGGERS none load1 2.02 last_cycle 20647 last_warm_s 8.666 last_to 0 exc [20473]
+2026-11-27T00:47:34Z rows 50 add_fail>0 3 max 2 pq_median 14.07 pq_max 82.956 ge12 38 TRIGGERS none load1 1.90 last_cycle 20647 last_warm_s 8.666 last_to 0 exc [20473]
+2026-11-27T00:52:34Z rows 50 add_fail>0 3 max 2 pq_median 14.07 pq_max 82.956 ge12 38 TRIGGERS none load1 2.29 last_cycle 20647 last_warm_s 8.666 last_to 0 exc [20473]
+2026-11-27T00:57:34Z rows 51 add_fail>0 3 max 2 pq_median 13.91 pq_max 82.956 ge12 39 TRIGGERS none load1 1.73 last_cycle 20648 last_warm_s 8.927 last_to 0 exc [20473]
+2026-11-27T01:02:34Z rows 52 add_fail>0 3 max 2 pq_median 13.81 pq_max 82.956 ge12 40 TRIGGERS none load1 2.54 last_cycle 20649 last_warm_s 9.269 last_to 0 exc [20473]
+2026-11-27T01:07:34Z rows 52 add_fail>0 3 max 2 pq_median 13.81 pq_max 82.956 ge12 40 TRIGGERS none load1 1.95 last_cycle 20649 last_warm_s 9.269 last_to 0 exc [20473]
+2026-11-27T01:12:34Z rows 52 add_fail>0 3 max 2 pq_median 13.81 pq_max 82.956 ge12 40 TRIGGERS none load1 1.78 last_cycle 20649 last_warm_s 9.269 last_to 0 exc [20473]
+2026-11-27T01:17:34Z rows 53 add_fail>0 3 max 2 pq_median 13.91 pq_max 82.956 ge12 41 TRIGGERS none load1 2.38 last_cycle 20658 last_warm_s 9.353 last_to 0 exc [20473]
+2026-11-27T01:22:34Z rows 54 add_fail>0 3 max 2 pq_median 13.81 pq_max 82.956 ge12 41 TRIGGERS none load1 2.90 last_cycle 20672 last_warm_s 7.7 last_to 0 exc [20473]
+2026-11-27T01:27:34Z rows 55 add_fail>0 3 max 2 pq_median 13.71 pq_max 82.956 ge12 42 TRIGGERS none load1 1.98 last_cycle 20686 last_warm_s 7.881 last_to 0 exc [20473]
+2026-11-27T01:32:34Z rows 56 add_fail>0 3 max 2 pq_median 13.71 pq_max 82.956 ge12 43 TRIGGERS none load1 2.18 last_cycle 20699 last_warm_s 7.699 last_to 0 exc [20473]
+2026-11-27T01:37:34Z rows 57 add_fail>0 3 max 2 pq_median 13.71 pq_max 82.956 ge12 43 TRIGGERS none load1 2.36 last_cycle 20711 last_warm_s 7.412 last_to 0 exc [20473]
+2026-11-27T01:42:34Z rows 58 add_fail>0 3 max 2 pq_median 13.64 pq_max 82.956 ge12 43 TRIGGERS none load1 2.31 last_cycle 20724 last_warm_s 7.492 last_to 0 exc [20473]
+2026-11-27T01:47:34Z rows 59 add_fail>0 3 max 2 pq_median 13.58 pq_max 82.956 ge12 43 TRIGGERS none load1 2.31 last_cycle 20736 last_warm_s 6.844 last_to 0 exc [20473]
+2026-11-27T01:52:34Z rows 60 add_fail>0 3 max 2 pq_median 13.39 pq_max 82.956 ge12 43 TRIGGERS none load1 2.09 last_cycle 20751 last_warm_s 5.535 last_to 0 exc [20473]
+2026-11-27T01:57:34Z rows 61 add_fail>0 3 max 2 pq_median 13.2 pq_max 82.956 ge12 43 TRIGGERS none load1 2.16 last_cycle 20765 last_warm_s 7.07 last_to 0 exc [20473]
+2026-11-27T02:02:34Z rows 62 add_fail>0 4 max 2 pq_median 13.18 pq_max 82.956 ge12 43 TRIGGERS ['T3 count>3'] load1 2.51 last_cycle 20779 last_warm_s 7.472 last_to 0 exc [20473]
+2026-11-27T02:07:35Z rows 63 add_fail>0 5 max 2 pq_median 13.15 pq_max 82.956 ge12 44 TRIGGERS ['T3 count>3'] load1 3.01 last_cycle 20792 last_warm_s 8.358 last_to 0 exc [20473]
+2026-11-27T02:12:35Z rows 63 add_fail>0 5 max 2 pq_median 13.15 pq_max 82.956 ge12 44 TRIGGERS ['T3 count>3'] load1 2.26 last_cycle 20792 last_warm_s 8.358 last_to 0 exc [20473]
+2026-11-27T02:17:35Z rows 64 add_fail>0 6 max 2 pq_median 13.09 pq_max 82.956 ge12 44 TRIGGERS ['T3 count>3'] load1 2.56 last_cycle 20802 last_warm_s 8.018 last_to 0 exc [20473]
+2026-11-27T02:22:35Z rows 65 add_fail>0 7 max 2 pq_median 13.04 pq_max 82.956 ge12 45 TRIGGERS ['T3 count>3'] load1 3.18 last_cycle 20813 last_warm_s 8.594 last_to 0 exc [20473]
+2026-11-27T02:25:24Z watcher stopped by protocosmo2: s1 result posted (rolled back 02:11:48Z, bot on d506783), live watch ended per cos ANSWER-4

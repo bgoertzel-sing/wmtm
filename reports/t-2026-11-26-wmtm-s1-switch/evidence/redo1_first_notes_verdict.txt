@@ -1,0 +1,1 @@
+first-notes verdict 17:42:28: row1 add_fail=2 (<3, no per-row T3), add_fail>0 rows so far 1 (<=3), pred_fail 0, timeouts 0, build_error null, canary ok -> NO TRIGGER, stay on fd48815
