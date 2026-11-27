@@ -1,0 +1,17 @@
+notes 655
+ops 24526
+FAIL 6046 atom PrologError "compileadd/2: Domain error: `fact_without_free_variables' expected, found `['Directive',['And',[check,sk_check_1__ep_note_20261117T163655Z],['Patient',sk_check_1__ep_note_20261117T163655Z,sk_group_1__ep_note_20261117T163655Z],['Before',sk_check_1__ep_note_20261117T163655Z,sk_result_1__ep_note_202611"
+ALONE fail PrologError
+FAIL 6062 atom PrologError "compileadd/2: Domain error: `fact_without_free_variables' expected, found `['Directive',['And',[check,sk_check_1__ep_note_20261117T163655Z],['Patient',sk_check_1__ep_note_20261117T163655Z,sk_group_1__ep_note_20261117T163655Z],['Before',sk_check_1__ep_note_20261117T163655Z,sk_result_1__ep_note_202611"
+ALONE fail PrologError
+FAIL 10676 atom PrologError "compileadd/2: Domain error: `fact_without_free_variables' expected, found `['Stimulus',sk_find_1__ep_note_20261108T233704Z,_10450972]' (fact contains free variables)"
+ALONE fail PrologError
+FAIL 10685 atom PrologError "compileadd/2: Domain error: `fact_without_free_variables' expected, found `['Stimulus',sk_find_1__ep_note_20261108T233704Z,_10486810]' (fact contains free variables)"
+ALONE fail PrologError
+FAIL 13093 atom PrologError "compileadd/2: Domain error: `inheritance_class' expected, found `['Inheritance',429,stop]' (Inheritance links two classes, each a symbol naming no connective, computation or internal head, or a variable)"
+ALONE fail PrologError
+FAIL 15193 atom PrologError "compileadd/2: Domain error: `predicate_arity' expected, found `['Between',2,3]' (a predicate head takes one arity)"
+ALONE ok
+FAIL 15488 atom PrologError "compileadd/2: Domain error: `fact_without_free_variables' expected, found `['Theme',sk_copy_1__ep_note_20261120T141412Z,_12918516]' (fact contains free variables)"
+ALONE fail PrologError
+fails 7 DONE

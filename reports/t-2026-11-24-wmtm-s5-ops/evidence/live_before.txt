@@ -1,0 +1,7 @@
+2026-11-24T19:51:23Z
+f9e59f7428f059f0565794ee1fb256d576d0a1e0c9bceac4f2f8f5f012216785  /home/openclaw/research-agent/projects/omegaclaw/protocosmo2/iter-port/repos/memory/_wmtm_flags.json
+7acf09f1a2c648059f21a70c8a3ae6056572186da67d19cbb3e87aff5b50fbee  /home/openclaw/research-agent/projects/omegaclaw/protocosmo2/iter-port/repos/_wmtm_pin.py
+WMTM_VENDOR = "wmtm-d506783"
+EXPECTED_VERSION = "0.7.0rc2"
+EXPECTED_COMMIT = "d5067832a3627c42d26fd936d968e47d036785ba"
+2026-11-16 16:15:38.391269200 -0700 1735
