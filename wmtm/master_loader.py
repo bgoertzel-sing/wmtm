@@ -95,7 +95,7 @@ def _label_fact(stmt):
 
 
 def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, extra=False, label_replace=False,
-         reference_times=None):
+         reference_times=None, questions=False):
     """notes: [(note_id, prior)] with prior = tmpl.blocks.walk(...)[0] for that note.
     -> (ops, meta).  meta: counts and, per note, sentences ok/malformed, predicates, statements, definitions."""
     L, B, CAT = _tmpl(tdir)
@@ -132,7 +132,28 @@ def plan(tdir, notes, kb_once=True, rules=True, catalog=None, note_labels=True, 
         suffix = "__" + re.sub(r"[^A-Za-z0-9]", "_", nid)
         m = {"sentences": len(recs), "malformed": sum(r["status"] != "ok" for r in recs), "predicates": 0,
              "statements": 0, "definitions": 0, "definitions_shared": 0, "names": sum(not v.startswith("sk_") for v in names.values())}
+        if questions:   # t-2026-11-24-wmtm-p05-questions-goals: P-05 (default off; meta key only when on)
+            qm = meta.setdefault("questions", {"found": 0, "malformed": 0, "unmapped_g00": 0, "queries": [], "query_note": {}})
+            # G00 is the parser's general "no template" code; only an unmapped span ending in "?" is a question
+            qm["unmapped_g00"] += sum(1 for sx in prior for u in (sx.get("unmapped") or [])
+                                      if isinstance(u, dict) and u.get("code") == "G00"
+                                      and str(u.get("span") or "").rstrip().endswith("?"))
         for rec in recs:
+            if questions and rec.get("kind") == "question":
+                if rec["status"] != "ok":
+                    qm["malformed"] += 1
+                    continue
+                qm["found"] += 1
+                try:
+                    low_q = L.question(rec["question"], L.MASTER, symbols=names)
+                except Exception:
+                    qm["malformed"] += 1
+                    continue
+                for q in low_q.get("queries") or []:
+                    mq = re.match(r"^\(: \$prf (.*) \$tv\)$", q)
+                    if mq and mq.group(1) not in qm["query_note"]:
+                        qm["queries"].append(mq.group(1)); qm["query_note"][mq.group(1)] = (nid, rec.get("k"))
+                continue
             if rec["status"] != "ok" or rec.get("kind") == "question":
                 continue
             low = L.lower({"records": rec["records"], "types": rec["types"], "functions": rec["functions"]},
