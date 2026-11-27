@@ -8,9 +8,12 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass, field
+import logging
 from typing import Optional
 
 from .store import WMTMStore
+
+logger = logging.getLogger(__name__)
 
 # F27: Function words carry no topical signal. Without this filter, query words
 # like "how"/"is"/"the" matched long consolidation notes with high IDF (rare in
@@ -178,9 +181,15 @@ class RecallCandidate:
 class RecallBridge:
     """Bridges LTM archive -> WMTM via keyword match + spreading activation."""
 
-    def __init__(self, ltm_clusters: list[LTMCluster]) -> None:
-        """Initialize the recall bridge with store, forgetting policy, and inference engine."""
+    def __init__(self, ltm_clusters: list[LTMCluster], semantic_ranker=None) -> None:
+        """Initialize the recall bridge with store, forgetting policy, and inference engine.
+
+        semantic_ranker (M-09): optional callable (query, clusters) -> [(cluster_id, cosine)] best first, used by
+        recall(semantic=True) in place of embed_index.EmbedIndex.rank (tests pass a stub).  None = the real index,
+        imported lazily on the first semantic recall.
+        """
         self._clusters: list[LTMCluster] = ltm_clusters
+        self._semantic_ranker = semantic_ranker
         self._by_id: dict[str, LTMCluster] = {c.id: c for c in ltm_clusters}
         self._evidence_for_targets: dict[str, list[str]] = {}
         # GAP-2 (t-2026-11-10-wmtm-graph-recall): reverse PromotesFrom index, so spreading activation follows that
@@ -214,6 +223,8 @@ class RecallBridge:
         request_id: Optional[str] = None,
         fallback_pct: float = 0.0,
         add_pct: float = 0.0,
+        semantic: bool = False,
+        semantic_min_sim: float = 0.6,
     ) -> list[RecallCandidate]:
         """Recall items from LTM matching query_context, or linked to the active set (design s3.3, s8.1).
 
@@ -235,6 +246,15 @@ class RecallBridge:
         fallback_pct / add_pct (flags recall_spread_fallback_pct / recall_spread_add_pct,
         t-2026-11-13-wmtm-spread-seed-sweep): with spread_seeds="turn" only, see spread_seed_ids.  0 = off (the
         argument default; api.py passes the flags, whose add_pct default is 10).
+
+        semantic / semantic_min_sim (flags recall_semantic, default off, and recall_semantic_min_sim; M-09, design
+        s3.3 step 1 "keyword/semantic match", s8.1a): with semantic=True the keyword ranking below is fused with a
+        sentence-embedding ranking (EmbedIndex.rank) by reciprocal rank fusion (embed_index.rrf), so a cluster that
+        shares meaning but no token with the query can be recalled.  A cluster only the embedding ranking finds must
+        have cosine > semantic_min_sim and > floor; its score is that cosine.  If the model is not available
+        (sentence-transformers not installed, or the pinned model not cached), recall is keyword-only and this is
+        logged once.  semantic=False (the default) never imports embed_index, sentence-transformers or torch and
+        returns exactly the keyword result.
         """
         query_terms: set[str] = self._tokenize(query_context)
         active_ids: set[str] = {item.id for item in store.get_active_set()}
@@ -261,7 +281,37 @@ class RecallBridge:
             ))
 
         candidates.sort(key=lambda c: c.score, reverse=True)
+        if semantic:
+            fused = self._semantic_fuse(query_context, candidates, active_ids, floor, top_k, semantic_min_sim)
+            if fused is not None:
+                return fused
         return candidates[:top_k]
+
+    def _semantic_fuse(self, query, keyword, active_ids, floor, top_k, min_sim):
+        """M-09: rrf(keyword ranking, embedding ranking); None = keyword-only (no model or ranker failure)."""
+        ranker = self._semantic_ranker if self._semantic_ranker is not None else _default_semantic_ranker()
+        if ranker is None:
+            return None
+        from .embed_index import rrf     # lazy: only with the flag on
+        pool = [c for c in self._clusters if c.id not in active_ids]
+        try:
+            sem = [(cid, float(sim)) for cid, sim in ranker(query, pool)]
+        except Exception as e:  # noqa: BLE001 - any model failure degrades to keyword-only
+            _log_semantic_fallback(f"semantic ranker failed ({type(e).__name__}); keyword-only recall")
+            return None
+        by_kw = {c.cluster_id: c for c in keyword}
+        sem = [(cid, sim) for cid, sim in sem
+               if cid in self._by_id and cid not in active_ids and (cid in by_kw or (sim > min_sim and sim > floor))]
+        sims = dict(sem)
+        out: list[RecallCandidate] = []
+        for cid in rrf([c.cluster_id for c in keyword], [cid for cid, _ in sem], top=max(top_k, 0)):
+            c = by_kw.get(cid)
+            if c is None:
+                cl = self._by_id[cid]
+                c = RecallCandidate(cluster_id=cid, content=cl.event_note or cl.text, score=sims[cid],
+                                    source_cluster=cid, about_tags=cl.about_tags)
+            out.append(c)
+        return out
 
     def spread_seed_ids(
         self,
@@ -630,3 +680,34 @@ class RecallBridge:
                     if len(part) >= 2 and part not in _STOPWORDS:
                         tokens.add(part)
         return tokens
+
+
+# -- M-09: semantic recall (flag recall_semantic) ----------------------------------------------------------------
+_semantic_index = None
+_semantic_fallback_logged = False
+
+
+def _log_semantic_fallback(msg: str) -> None:
+    """Log the keyword-only fallback once per process."""
+    global _semantic_fallback_logged
+    if not _semantic_fallback_logged:
+        _semantic_fallback_logged = True
+        logger.warning("recall_semantic: %s", msg)
+
+
+def _default_semantic_ranker():
+    """EmbedIndex.rank on the pinned, locally cached model, or None (logged once) when it is not available.
+
+    embed_index (and through it sentence-transformers/torch) is imported here only, i.e. only with the flag on.
+    The model is loaded with local_files_only, so a missing cache means keyword-only, never a download.
+    """
+    global _semantic_index
+    from . import embed_index
+    if not embed_index.available():
+        _log_semantic_fallback("sentence-transformers or the pinned model %s@%s is not available locally; "
+                               "keyword-only recall (see scripts/cache_embed_model.py)"
+                               % (embed_index.MODEL_NAME, embed_index.MODEL_REVISION))
+        return None
+    if _semantic_index is None:
+        _semantic_index = embed_index.EmbedIndex()
+    return _semantic_index.rank
