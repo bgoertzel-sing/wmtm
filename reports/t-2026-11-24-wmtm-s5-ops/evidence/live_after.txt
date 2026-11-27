@@ -1,0 +1,10 @@
+2026-11-27T05:33:58Z
+f9e59f7428f059f0565794ee1fb256d576d0a1e0c9bceac4f2f8f5f012216785  /home/openclaw/research-agent/projects/omegaclaw/protocosmo2/iter-port/repos/memory/_wmtm_flags.json
+7acf09f1a2c648059f21a70c8a3ae6056572186da67d19cbb3e87aff5b50fbee  /home/openclaw/research-agent/projects/omegaclaw/protocosmo2/iter-port/repos/_wmtm_pin.py
+vendor/<WMTM_VENDOR> at the front of sys.path, imports wmtm and FAILS
+change WMTM_VENDOR / EXPECTED_* here (one file), then canary.
+WMTM_VENDOR = "wmtm-d506783"
+EXPECTED_COMMIT = "d5067832a3627c42d26fd936d968e47d036785ba"
+VENDOR_DIR = ROOT / "vendor" / WMTM_VENDOR
+    if meta.get("version") != EXPECTED_VERSION or meta.get("commit") != EXPECTED_COMMIT:
+                          f"pin expects {EXPECTED_VERSION}@{EXPECTED_COMMIT}")

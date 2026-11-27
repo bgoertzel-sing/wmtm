@@ -1,0 +1,8 @@
+clerk-ab-scratch/armpilot/state/engine-token
+clerk-ab-scratch/bbackoff/run/state/engine-token
+clerk-ab-scratch/bfixed/pilot/state/engine-token
+clerk-ab-scratch/bfixed/run/state/engine-token
+clerk-ab-scratch/bfrozen/run/state/engine-token
+clerk-ab-scratch/gw.key
+clerk-ab-scratch/pilothome/state/engine-token
+clerk-ab-scratch/smokehome/state/engine-token

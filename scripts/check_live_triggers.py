@@ -16,6 +16,8 @@ DEFAULT_REPOS = os.environ.get("WMTM_LIVE_REPOS",
 DESIGNED = {"busy", "nothing_pending", "budget_zero", "share_full", "cap_full", "rate_limited"}
 XR_NI = re.compile(r"^(xr_|nimpl:)")
 HTTP_KEYS = ("http_status", "status_code", "http_code")
+# same pattern as wmtm/semparse_sentence.py:46 (live rate-limit detection on the error text)
+LIMIT = re.compile(r"429|rate.?limit|usage.?limit|quota|too many requests|insufficient|credit", re.I)
 
 
 def rows(path):
@@ -106,11 +108,20 @@ def replay(repos, t0, t1, log=None, max_admit=None):
     T["T5_admission_quality"] = len(over) + rest
     D["admit_rows"] = len(al); D["admit_cap"] = cap
     D["admit_full_cap_rows_not_trigger"] = sum(1 for r in al if r.get("admitted") == cap)
-    # T6: integer HTTP status field == 429, >= 3 within one rolling hour (never a substring match)
-    hits = sorted(ts(r) for r in pl for k in HTTP_KEYS if isinstance(r.get(k), int) and not isinstance(r.get(k), bool) and r[k] == 429)
+    # T6: rate-limit failures, >= 3 within one rolling hour. A row counts if it has an integer HTTP status
+    # field == 429, OR (the shape the live code actually writes, wmtm/semparse_sentence.py LIMIT + _log_call)
+    # its string status is not "ok" and its "error" text matches the live LIMIT regex. Only the error text
+    # of failed rows is searched: hashes, token counts and ids never count (no substring match on them).
+    def _limited(r):
+        if any(isinstance(r.get(k), int) and not isinstance(r.get(k), bool) and r[k] == 429 for k in HTTP_KEYS):
+            return True
+        err = r.get("error")
+        return str(r.get("status") or "") != "ok" and isinstance(err, str) and bool(LIMIT.search(err))
+    hits = sorted(ts(r) for r in pl if _limited(r))
     T["T6_http_429"] = sum(1 for i, t in enumerate(hits) if sum(1 for u in hits[:i + 1] if t - u < 3600) >= 3)
     D["http_429_rows"] = len(hits); D["parse_log_rows"] = len(pl)
     D["parse_log_has_http_field"] = any(k in r for r in pl for k in HTTP_KEYS)
+    D["parse_log_rows_with_error_text"] = sum(1 for r in pl if isinstance(r.get("error"), str) and r.get("error"))
     # T7: human-confirmed W among admitted xr/ni conclusions: needs a verdict file; none exists pre-switch
     T["T7_wrong_conclusion"] = 0
     D["T7_note"] = "needs human verdicts on admitted xr/ni conclusions; pre-switch there are no xr/ni rules"

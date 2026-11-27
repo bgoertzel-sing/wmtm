@@ -66,3 +66,21 @@ def test_real_faults_fire(tmp_path):
     tr = T.replay(R, t - 10, time.time())["triggers"]
     assert tr["T2_shadow_failure"] == 1 and tr["T3_canary"] == 1 and tr["T4_timeouts_budget"] == 1
     assert tr["T5_admission_quality"] == 1 and tr["T6_http_429"] == 1
+
+
+def test_t6_fires_on_live_parse_log_shape(tmp_path):
+    # the live code writes string status + truncated error text, no integer http field
+    t = time.time() - 3600
+    R = _repos(tmp_path, [_ok(t)], admit=[],
+               parse=[{"ts": t + i, "status": "err", "error": "Error code: 429 - rate_limit_error"} for i in range(3)])
+    out = T.replay(R, t - 10, time.time())
+    assert out["triggers"]["T6_http_429"] == 1 and out["detail"]["http_429_rows"] == 3
+
+
+def test_t6_ignores_ok_rows_and_non_limit_errors(tmp_path):
+    t = time.time() - 20000   # the t + 9000 row must fall inside the replay window
+    pl = [{"ts": t, "status": "ok", "error": "429"}, {"ts": t + 1, "status": "err", "error": "timeout"},
+          {"ts": t + 2, "status": "err", "error": "Error 429"}, {"ts": t + 9000, "status": "err", "error": "quota exceeded"}]
+    R = _repos(tmp_path, [_ok(t)], admit=[], parse=pl)
+    out = T.replay(R, t - 10, time.time())
+    assert out["triggers"]["T6_http_429"] == 0 and out["detail"]["http_429_rows"] == 2
