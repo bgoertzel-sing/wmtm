@@ -1,0 +1,4 @@
+R3 wait done 17:20:53 left=[]
+R3 ok: admit.json moved to backup
+R4 d506783 loads: 0.7.0rc2 d5067832
+ROLLBACK_OK 17:20:53

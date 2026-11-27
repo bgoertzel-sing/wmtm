@@ -1,0 +1,8 @@
+ANSWER-3 (cos, 2026-11-26 12:34 PT): stay on fd48815. Row c20473 (19:27Z trigger) = exception (host-load stall), evidence trigger1_timeouts_1927Z.txt.
+Rollback rules for rest of 24h watch (until 2026-11-27T17:36:25Z):
+- 2nd row with timeouts>0, OR any timeouts>0 row while 1-min load < 4
+- add_fail >=3 in a row, or >3 add_fail>0 rows in 24h (currently 3 -> one more = trigger)
+- any pred_fail, build_error, canary not ok; other plan triggers
+- record 1-min load + warm_s per later row
+- no heavy scans on this host during watch
+Step2 flags held; propose shadow_budget_s only; add_fail cause -> s5-ops.
