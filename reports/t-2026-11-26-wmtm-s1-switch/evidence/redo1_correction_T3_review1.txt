@@ -1,0 +1,5 @@
+Correction (review 1, 2026-11-27): rollback2.txt line 1 says T3 fired at 5 add_fail>0 rows. That is wrong.
+Rule (ANSWER-3): more than 3 add_fail>0 rows in 24h. The 4th row was c20779 (start 02:02:00Z). The watcher first flagged
+'T3 count>3' at 2026-11-27T02:02:34Z (watch.log: rows 62 add_fail>0 4). The rollback began at 02:11:48Z, 9 min 14 s later,
+after one more row (c20792, 02:07:14Z). Under the order the rollback should have begun at 02:02:34Z. The outcome is the same.
+rollback2.txt is left unchanged as the original record.

@@ -1,0 +1,5 @@
+package=wmtm
+version=0.7.0rc2
+commit=d5067832a3627c42d26fd936d968e47d036785ba
+tree=ded187141c508b5e7e3758c83c61495d5641e6e1
+source=wmtm-module (git archive d5067832a3627c42d26fd936d968e47d036785ba wmtm upstream pyproject.toml README.md PETTA_PIN.md docs/RUNTIME.md docs/GOALS_V2.md; main via PR 41 merge 24b0442, same tree)

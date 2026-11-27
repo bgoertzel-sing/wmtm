@@ -1,0 +1,1 @@
+rows 15 add_fail_gt0 3 add_fail_max 2 pred_fail_gt0 0 timeouts_gt0 0 build_error 0 canary_notok 0 prequery_median 13.13 max 21.614 ge12 12

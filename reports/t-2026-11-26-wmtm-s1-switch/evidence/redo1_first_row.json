@@ -1,0 +1,1 @@
+{"start_ts": 1795714830.4869432, "status": "ok", "add_fail": 2, "pred_fail": 0, "timeouts": 0, "skipped_budget": 0, "total_s": 21.843, "prequery_s": 15.653, "goals_n": 159, "build_error": null, "canary_ok": true}
