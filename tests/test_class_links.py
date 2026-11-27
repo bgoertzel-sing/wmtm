@@ -99,3 +99,20 @@ def test_r4_no_chaining_and_deterministic():
     got = {x["atom"].split(" (STV")[0].split(" ", 2)[2] for x in rules(derive(st, identity=True), "identity_member")}
     assert got == {"(Member sk_b_1 doctor)"}
     assert derive(st, identity=True) == derive(list(st), identity=True)
+
+
+def test_r4_not_from_pronoun_mention():
+    for pro in ("sk_it_1", "sk_he_1", "sk_they_2", "sk_this_1"):
+        st = ["(: s1_c1_c (Member sk_bob_1 doctor) (STV 1.0 0.9))", "(: s1_i1_i (Same %s sk_bob_1) (STV 1.0 0.9))" % pro]
+        assert not rules(derive(st, identity=True), "identity_member"), pro
+
+
+def test_r4_not_across_notes_and_only_sk_individuals():
+    a = "sk_bob_1__i_ep_note_20261101T000000Z"; b = "sk_robert_1__i_ep_note_20261102T000000Z"
+    st = ["(: s1_c1_c (Member %s doctor) (STV 1.0 0.9))" % a, "(: s1_i1_i (Same %s %s) (STV 1.0 0.9))" % (b, a)]
+    assert not rules(derive(st, identity=True), "identity_member")
+    same_note = b.replace("20261102", "20261101")
+    st2 = ["(: s1_c1_c (Member %s doctor) (STV 1.0 0.9))" % a, "(: s1_i1_i (Same %s %s) (STV 1.0 0.9))" % (same_note, a)]
+    assert len(rules(derive(st2, identity=True), "identity_member")) == 1
+    st3 = ["(: s1_c1_c (Member sk_bob_1 doctor) (STV 1.0 0.9))", "(: s1_i1_i (Same robert sk_bob_1) (STV 1.0 0.9))"]
+    assert not rules(derive(st3, identity=True), "identity_member")

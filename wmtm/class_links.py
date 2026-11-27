@@ -19,6 +19,7 @@ Rules (each fires only on what the parse states; no world knowledge, no guessed 
   R4 identity_member (p01a, only with identity=True / WMTM_CLASS_LINKS_IDENTITY) (Same x y) stated between two
                    individuals and (Member y C) stated, (Member x C) not stated: (Member x C); both directions.
                    Never from variables, never chained, no coreference beyond the parse's own Same atoms.
+                   Both sides must be sk_ individuals; never a pronoun mention; never across two note suffixes.
 """
 from __future__ import annotations
 import hashlib, re
@@ -26,6 +27,27 @@ import hashlib, re
 TRUTH_DEF = (1.0, 0.99)
 _TOK = re.compile(r'\(|\)|"[^"]*"|[^\s()]+')
 _UNIT = re.compile(r"^(s\d+_[a-z]+\d+)")
+
+
+# R4 guards (p01a review 1, findings 3 and 6): both sides must be sk_ individuals, neither may be a pronoun
+# mention (sk_it_1, sk_he_1, ...: a pronoun's referent is coreference, which R4 never guesses), and two symbols
+# carrying different note suffixes (__i_ep_note_<ts>) are never linked (no cross-note identity).
+_PRONOUNS = frozenset("i me my mine you your yours he him his she her hers it its we us our ours they them their "
+                      "theirs this that these those one someone something who whom which what".split())
+_SK = re.compile(r"^sk_(.+?)_\d+(?:__(.*))?$")
+_NOTE_SFX_R4 = re.compile(r"ep_note_\d{8}T\d{6}Z")
+
+
+def _r4_pair_ok(x, y):
+    if x == y:
+        return False
+    mx, my = _SK.match(x), _SK.match(y)
+    if not (mx and my):
+        return False
+    if mx.group(1) in _PRONOUNS or my.group(1) in _PRONOUNS:
+        return False
+    nx, ny = _NOTE_SFX_R4.findall(x), _NOTE_SFX_R4.findall(y)
+    return not (nx and ny and set(nx) != set(ny))
 
 
 def _parse(s):
@@ -81,7 +103,7 @@ def derive(statements, identity=False):
             inh.setdefault((term[1], term[2]), name)
         elif h == "NarrowBy" and len(term) == 3 and isinstance(term[1], str):
             nb.setdefault(term[1], {})[_show(term[2])] = name
-        elif h == "Same" and len(term) == 3 and all(isinstance(x, str) and not x.startswith("$") for x in term[1:]) and term[1] != term[2]:
+        elif h == "Same" and len(term) == 3 and all(isinstance(x, str) for x in term[1:]) and _r4_pair_ok(term[1], term[2]):
             same.setdefault((term[1], term[2]), name)
         elif h == "Implication" and len(term) == 3:
             gen.append((name, term, tv))
