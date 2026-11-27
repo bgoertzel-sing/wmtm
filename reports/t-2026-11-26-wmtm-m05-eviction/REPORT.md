@@ -2,11 +2,11 @@
 
 ## Summary
 
-The order asked for capacity eviction to rank items by the design's composite score (STI*0.4 + utility*0.4 + LTI*0.2, with derived items divided by 1.5), through one code path, behind a flag that is off by default. Flag-off behaviour had to stay exactly as it is today. That is done, on base wmtm main 915bc8c. With `composite_eviction` on, admit overflow and the forgetting policy now pick their victim with the same function. The §7.1b age review is also on with the flag: at max_age an item is kept and its age reset if its utility is above min_utility, and evicted otherwise. The strict GAP-3 xfail test now passes with the flag on. The 9 new tests pass. The full suite gives 1639 passed and 1 failed. The failure is `test_feed_watch::test_running_young_worker_is_ok`, a timing flake that also fails in 2 of 6 runs on unmodified 915bc8c.
+The order asked for capacity eviction to rank items by the design's composite score (STI*0.4 + utility*0.4 + LTI*0.2, with derived items divided by 1.5), through one code path, behind a flag that is off by default. Flag-off behaviour had to stay exactly as it is today. That is done, on base wmtm main 915bc8c. With `composite_eviction` on, admit overflow and the forgetting policy now pick their victim with the same function. The §7.1b age review is also on with the flag: at max_age an item is kept and its age reset if its utility is above min_utility, and evicted otherwise. The strict GAP-3 xfail test now passes with the flag on. The 9 new tests pass. The full suite gives 1639 passed and 1 failed. The failure is `test_feed_watch::test_running_young_worker_is_ok`, a start-up race in that test which the diff does not touch (see §2 for run counts).
 
 Flag-off identity was not checked against a pop-os frozen run. The block answer (cos, 2026-11-26) took that check out of this task's acceptance. In its place I ran a local flag-off differential: 200 seeded admit/forget sequences, base 915bc8c against the branch. Eviction traces and forget logs are byte-identical (sha256 in §3). I also added `tools/m05_replay.py`, which takes a frozen-run path and the flag value and writes the eviction order plus the STI/utility/LTI of every evicted and surviving item. It writes ids and sha256 content hashes only, never note text. **The pop-os replay on a frozen run is still pending.** It is a follow-up for a pop-os worker after this task closes, using that script.
 
-The STI-vs-utility ranges in §4 come from the synthetic fixture and from that fixture replayed through the tool. The normalisation in §4 is a proposal, marked *to be confirmed on a frozen run*. It is not decided. `test_feed_watch::test_running_young_worker_is_ok` is a pre-existing flake and not part of this change: it fails 2 of 6 runs on unmodified 915bc8c.
+The STI-vs-utility ranges in §4 come from the synthetic fixture and from that fixture replayed through the tool. The normalisation in §4 is a proposal, marked *to be confirmed on a frozen run*. It is not decided. `test_feed_watch::test_running_young_worker_is_ok` is a pre-existing flake and not part of this change: it failed 2 of 6 runs on unmodified 915bc8c in my runs; review 1 saw 0 of 9 on base and 3 of 5 on the branch. By mechanism (it reads /proc/<pid>/cmdline of a Popen child that may not have exec'd yet) it is a pre-existing race; the diff does not touch tools/feed_watch.py, the workers or that test.
 
 Code: see the result header (impl c88abb2; branch hive/t-2026-11-26-wmtm-m05-eviction), base 915bc8caeb32186a093e3227f3c1ec2db38c8210. Local only, not pushed.
 
@@ -30,7 +30,7 @@ Code: see the result header (impl c88abb2; branch hive/t-2026-11-26-wmtm-m05-evi
   - the §7.1b age review with the flag on and off;
   - the orchestrator syncs the flag from the env.
 - `tests/test_design_s12_gapcheck.py::test_s7_1c_...composite_penalty`: I removed the strict xfail marker. The test now sets the flag on and passes.
-- Full suite: 1639 passed, 71 skipped, 4 xfailed, 1 failed. The failure is the feed_watch timing flake, which also fails 2 of 6 runs on base 915bc8c.
+- Full suite on b500dd7: 1642 passed, 71 skipped, 4 xfailed, 1 deselected (`test_feed_watch::test_running_young_worker_is_ok`). On 1e7b77e: 1639 passed, 1 failed (that test). It is a start-up race (reads /proc/<pid>/cmdline of a just-spawned Popen child) that the diff does not touch. My base count was 2 of 6 runs; review 1 could not reproduce it on base (0 of 9) but saw it on the branch 3 of 5, so the base rate is uncertain.
 
 ## 3. Flag-off identity
 
@@ -41,6 +41,8 @@ Code: see the result header (impl c88abb2; branch hive/t-2026-11-26-wmtm-m05-evi
 **Pending (not part of this task's acceptance): the pop-os replay on a frozen run.** For a pop-os worker: run `tools/m05_replay.py <run> 0` on 915bc8c and on this branch, compare byte for byte, and put SHA256SUMS under /srv/hive-evidence/<task>/.
 
 ## 4. STI-vs-utility scale: to be confirmed on a frozen run
+
+Quantile method: sorted values v (n items), median = v[n//2] (upper median), p90 = v[int(0.9*n)] (no interpolation, numpy method "higher"). With linear interpolation the synthetic STI median is 5.59 and utility p90 is 18.2.
 
 Synthetic state (tests/fixtures/synthetic/wmtm_state.json, n=20, as stored):
 
