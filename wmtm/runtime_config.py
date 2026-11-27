@@ -225,6 +225,8 @@ SPEC = {
     "worker_mem_mb":       ("WMTM_WORKER_MEM_MB", int, 3072, None),
     "jsonl_max_bytes":     ("WMTM_JSONL_MAX_BYTES", int, 10_000_000, None),
     "cache_max_bytes":     ("WMTM_SEMPARSE_CACHE_MAX_BYTES", int, 20_000_000, None),
+    # M-07: forgetting-log window (records); keys pruned from it stay forgotten (forgetting_log._PrunedKeys)
+    "forgetting_log_max":  ("WMTM_FORGETTING_LOG_MAX", int, 500, None),
 }
 
 

@@ -241,6 +241,7 @@ Not flags: `goal_requests` and `goal_notes` are filled in internally by the goal
 | `worker_mem_mb` | `WMTM_WORKER_MEM_MB` | int | `3072` | Address-space cap (RLIMIT_AS) in MB for worker processes and their children, e.g. PeTTa. 0 means no cap. | `wmtm/workers/semparse_feed.py:33` `wmtm/workers/pc_shadow.py:36` |
 | `jsonl_max_bytes` | `WMTM_JSONL_MAX_BYTES` | int | `10000000` | JSONL logs (parse log, `worker_runs.jsonl`, ...) are rotated to `.1` when larger than this. 0 means no rotation. | `wmtm/parse_cache.py:52` `wmtm/workers/semparse_feed.py:47` |
 | `cache_max_bytes` | `WMTM_SEMPARSE_CACHE_MAX_BYTES` | int | `20000000` | `cache.jsonl` is compacted when larger than this: the newest entry per hash is kept, then the oldest entries are dropped. 0 means no cap. | `wmtm/parse_cache.py:53` |
+| `forgetting_log_max` | `WMTM_FORGETTING_LOG_MAX` | int | `500` | Forgetting-log window (records), applied on load too. Derivations pruned from the window stay forgotten (fixed-size pruned-key filter), so they are re-admitted only through `should_re_admit`'s STI test (M-07). | `wmtm/orchestrator.py` (`_forget_log_cap`) `wmtm/forgetting_log.py` |
 
 ### Live flags file audit (2026-10-28)
 

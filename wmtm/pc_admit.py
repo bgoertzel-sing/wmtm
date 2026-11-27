@@ -307,19 +307,18 @@ def admit_on_snapshot(snapshot, cfg, now=None):
     st = snapshot.get("pc_admit") or {}
     items = (snapshot.get("store") or {}).get("items") or {}
     present = {str(v.get("content", "")).lower().strip() for v in items.values()}
-    recs = (snapshot.get("forgetting_log") or {}).get("records") or []
-    forgotten = set()
-    if recs:   # F1 §4: derivation keys (conclusion + sorted sources), old records computed from content_hash
-        from .forgetting_log import deriv_hash
-        forgotten = {deriv_hash("", r.get("derived_from") or [], r.get("content_hash")) for r in recs}
+    fl_d = snapshot.get("forgetting_log") or {}
+    flog = None
+    if fl_d.get("records") or fl_d.get("pruned"):   # F1 §4 derivation keys; M-07: plus keys pruned from the window
+        from .forgetting_log import ForgettingLog
+        flog = ForgettingLog.from_dict(fl_d)
 
     def known(text, srcs=()):
         t = text.lower().strip()
         if t in present:
             return True
-        if forgotten:
-            from .forgetting_log import deriv_hash
-            return deriv_hash(t, list(srcs)) in forgotten     # = ForgettingLog.is_forgotten(text, srcs)
+        if flog is not None:
+            return flog.is_forgotten(t, list(srcs))           # same test as orchestrator._is_skipworthy
         return False
     cands, info = load_candidates(cfg, None, now, consumed=st.get("consumed_run"), live_ids=items.keys(), known=known,
                                   context_rel=snapshot.get("context_rel"))
