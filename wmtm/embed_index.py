@@ -12,6 +12,10 @@ import os
 from pathlib import Path
 
 MODEL_NAME = os.environ.get("WMTM_EMBED_MODEL", "BAAI/bge-small-en-v1.5")
+# M-09 pin: Hugging Face commit of BAAI/bge-small-en-v1.5 (2024-02-22).  The model is loaded with
+# local_files_only=True, so it must be cached first (scripts/cache_embed_model.py); nothing is downloaded at run time.
+PINNED_REVISION = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"
+MODEL_REVISION = os.environ.get("WMTM_EMBED_MODEL_REVISION", PINNED_REVISION)
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 _DEFAULT_CACHE = Path(__file__).resolve().parent.parent / "memory" / "_wmtm_embed_cache.npz"
 
@@ -25,7 +29,7 @@ def _get_model():
         return _model
     try:
         from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer(MODEL_NAME, device="cpu")
+        _model = SentenceTransformer(MODEL_NAME, device="cpu", revision=MODEL_REVISION, local_files_only=True)
     except Exception:
         _model_failed = True
         _model = None

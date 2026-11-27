@@ -63,6 +63,26 @@ def _recall_floor(cfg):
         return 0.1
 
 
+def _recall_semantic_kw(cfg):
+    """M-09 flags recall_semantic (default off) / recall_semantic_min_sim -> recall() kwargs; {} when off, so the
+    flag-off call is exactly the pre-M-09 one.  Never raises (invalid = off / the SPEC default 0.6)."""
+    try:
+        on = _ctx.setting(cfg, "recall_semantic")
+        if isinstance(on, str):
+            on = on.strip().lower() in ("1", "true", "yes", "on")
+        if on is not True:
+            return {}
+    except Exception:
+        return {}
+    try:
+        ms = float(_ctx.setting(cfg, "recall_semantic_min_sim"))
+        if ms != ms:
+            raise ValueError
+    except Exception:
+        ms = 0.6
+    return {"semantic": True, "semantic_min_sim": ms}
+
+
 def drain_pending_derives(pending_path):
     """Read + clear the pending-derives file under the same flock that
     derive() uses, so an append landing between read and clear is never
@@ -274,6 +294,7 @@ class WMTM:
                         v = _ctx.recall_spread_pct(pcfg, f)
                         if v > 0:
                             skw[k] = v
+                skw.update(_recall_semantic_kw(pcfg))     # M-09: {} with recall_semantic off (the default)
                 candidates = rb.recall(user_msg, store, top_k=top_k, floor=_recall_floor(pcfg), **skw) if top_k > 0 else []
                 admitted_snippets = []
                 for c in candidates:

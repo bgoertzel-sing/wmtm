@@ -12,7 +12,10 @@ authors = [{ name = "Benjamin Goertzel", email = "ben@singularitynet.io" }]
 dependencies = ["numpy"]
 
 [project.optional-dependencies]
-embed = ["sentence-transformers"]
+# M-09: optional extra for recall_semantic (off by default).  Pinned; the model revision is pinned in
+# wmtm/embed_index.py (PINNED_REVISION) and cached by scripts/cache_embed_model.py.  Install CPU-only torch first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu && pip install -e .[embed]
+embed = ["sentence-transformers==6.3.0"]
 test = ["pytest"]
 
 [tool.setuptools.packages.find]

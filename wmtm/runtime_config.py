@@ -197,6 +197,12 @@ SPEC = {
     # ADD_PCT=0 gives the fallback rule.
     "recall_spread_fallback_pct": ("WMTM_RECALL_SPREAD_FALLBACK_PCT", float, 0.0, None),
     "recall_spread_add_pct": ("WMTM_RECALL_SPREAD_ADD_PCT", float, 10.0, None),
+    # M-09 (t-2026-11-27-wmtm-m09-semantic-recall; design s3.3 step 1, s8.1a): fuse keyword recall with a sentence-
+    # embedding ranking (embed_index.rank + rrf).  Off by default until a shadow run shows it helps; with it off
+    # sentence-transformers/torch are never imported.  On without the optional extra or the cached pinned model =
+    # keyword-only (logged once), never a download.  min_sim: cosine a cluster found only by embedding must exceed.
+    "recall_semantic":     ("WMTM_RECALL_SEMANTIC", bool, False, None),
+    "recall_semantic_min_sim": ("WMTM_RECALL_SEMANTIC_MIN_SIM", float, 0.6, None),
     "cleanup_protect_recent": ("WMTM_CLEANUP_PROTECT_RECENT", bool, True, None),  # stale cleanup spares fresh recalls
     "cleanup_grace_turns": ("WMTM_CLEANUP_GRACE_TURNS", int, 10, None),   # ... recalled/relevant within N cycles
     "cleanup_grace_s":     ("WMTM_CLEANUP_GRACE_S", float, 1800.0, None), # ... or within N seconds
