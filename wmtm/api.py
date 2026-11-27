@@ -250,6 +250,7 @@ class WMTM:
 
             store = orch.store
             pcfg = self._flags()                          # Track P switches (cheap JSON read; {} -> SPEC defaults)
+            orch._sync_eviction_cfg(pcfg)                 # M-05: recall/request/derive admissions below may overflow
             recall_scores, stim_scores, recalled_now = {}, {}, False
             protect = _ctx.protect_settings(pcfg)
 

@@ -618,7 +618,7 @@ def fast_path_automated(state_file, run_hooks=True, default_reasoner="pettachain
         if one_rule:
             # F1 §9: the same eviction/forgetting rule as a user turn's cycle (orchestrator.forget_phase): STI floor,
             # derived thresholds, utility, policy; every eviction in the forgetting log.  ~15 ms engine import.
-            items_dict = _one_rule_step(snapshot, items_dict, cycle, lambda o: o.forget_phase())
+            items_dict = _one_rule_step(snapshot, items_dict, cycle, lambda o: o.forget_phase(cfg=cfg))
         if not one_rule:
             # Minimal state update: decay STI, increment cycle, cleanup stale items
             # F23: Wall-clock cleanup in fast path. Without this, stale items

@@ -37,6 +37,9 @@ class WMTMStore:
         self._items: dict[str, WMTMItem] = {}
         self._pending_evicted: list[WMTMItem] = []
         self._tick = tick
+        # M-05: eviction.eviction_cfg() output when the composite_eviction flag is on (set per cycle by the
+        # orchestrator); None = pre-M-05 behaviour (capacity overflow evicts the lowest STI).  Not serialized.
+        self.eviction_cfg: Optional[dict] = None
 
     # -- core operations ------------------------------------------------
 
@@ -137,11 +140,23 @@ class WMTMStore:
         read it.  Explicit evictions and the forgetting policy are unchanged."""
         if not self._items:
             return None
-        pool = [it for it in self._items.values() if it.source_type != "user"] or list(self._items.values())
-        lowest = min(pool, key=lambda it: it.attention.sti)
+        if self.eviction_cfg is not None:
+            lowest = self.composite_victim()                       # M-05: s7.1c composite (flag on)
+        else:
+            pool = [it for it in self._items.values() if it.source_type != "user"] or list(self._items.values())
+            lowest = min(pool, key=lambda it: it.attention.sti)
         evicted = self._items.pop(lowest.id)
         self._pending_evicted.append(evicted)
         return evicted
+
+    def composite_victim(self) -> Optional[WMTMItem]:
+        """M-05: the one capacity-eviction ranking (flag on), shared by admit overflow and ForgettingPolicy:
+        lowest s7.1c composite (derived penalty included); rc4: the user request item goes last.  Not removed."""
+        if not self._items:
+            return None
+        from .eviction import lowest as _composite_lowest
+        pool = [it for it in self._items.values() if it.source_type != "user"] or list(self._items.values())
+        return _composite_lowest(pool, self.eviction_cfg)
 
     # -- dunder helpers -------------------------------------------------
 

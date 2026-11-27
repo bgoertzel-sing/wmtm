@@ -457,6 +457,7 @@ class WMTMOrchestrator:
         Returns CycleResult summary.
         """
         result = CycleResult(cycle=self._cycle)
+        self._sync_eviction_cfg()       # M-05: before recall, whose admissions can overflow capacity
 
         # 1. Recall from LTM
         self._recall_from_ltm(recall_fn)
@@ -518,11 +519,25 @@ class WMTMOrchestrator:
         return result
 
 
-    def forget_phase(self) -> list:
+    def _sync_eviction_cfg(self, cfg=None) -> None:
+        """M-05: hand the composite_eviction settings to the current store (None when the flag is off).
+        cfg: an already resolved runtime config; None -> resolve(runtime_state_dir).  Never raises."""
+        try:
+            from .eviction import eviction_cfg
+            if cfg is None:
+                from . import runtime_config as _rc
+                cfg = _rc.resolve(self.runtime_state_dir)
+            self.store.eviction_cfg = eviction_cfg(cfg)
+        except Exception:
+            self.store.eviction_cfg = None
+
+    def forget_phase(self, cfg=None) -> list:
         """F1 §9: the one eviction/forgetting rule of a turn, shared by cycle() and the automated fast path.
 
         Tick (decay + age, STI floor), utility tick, reinforce used items, forgetting policy.  Every eviction is
-        recorded in the forgetting log (and its utility record dropped).  -> evicted items."""
+        recorded in the forgetting log (and its utility record dropped).  -> evicted items.
+        cfg (M-05): resolved runtime config for the composite_eviction flag; None -> resolved here."""
+        self._sync_eviction_cfg(cfg)
         evicted = []
         for ev in self.store.tick():
             self.forget_log.record(ev, self._cycle)
